@@ -1,10 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - Группа Клеопатра</title>
 </head>
 <body>
-$END$
+<h1>Регистрация в группе Клеопатра</h1>
+
+<!-- Сообщения об ошибках -->
+<div th:if="${errorMessage}" style="color: red; border: 1px solid red; padding: 10px; margin: 10px 0;">
+    <strong>Ошибка:</strong> <span th:text="${errorMessage}"></span>
+</div>
+
+<!-- Форма регистрации -->
+<form th:action="@{/register}" th:object="${registerDto}" method="post">
+
+    <div>
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" th:field="*{email}" required>
+        <div th:if="${#fields.hasErrors('email')}" style="color: red;">
+            <span th:errors="*{email}"></span>
+        </div>
+    </div>
+    <br>
+
+    <div>
+        <label for="password">Пароль:</label><br>
+        <input type="password" id="password" th:field="*{password}" required>
+        <div th:if="${#fields.hasErrors('password')}" style="color: red;">
+            <span th:errors="*{password}"></span>
+        </div>
+    </div>
+    <br>
+
+    <div>
+        <label for="confirmPassword">Подтвердите пароль:</label><br>
+        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" required>
+        <div th:if="${#fields.hasErrors('confirmPassword')}" style="color: red;">
+            <span th:errors="*{confirmPassword}"></span>
+        </div>
+    </div>
+    <br>
+
+    <div>
+        <label for="gender">Пол:</label><br>
+        <select id="gender" th:field="*{gender}" required>
+            <option value="">-- Выберите пол --</option>
+            <option th:each="gender : ${genders}"
+                    th:value="${gender}"
+                    th:text="${gender.displayName}"></option>
+        </select>
+        <div th:if="${#fields.hasErrors('gender')}" style="color: red;">
+            <span th:errors="*{gender}"></span>
+        </div>
+    </div>
+    <br>
+
+    <button type="submit">Зарегистрироваться</button>
+</form>
+
+<hr>
+<p>
+    Уже есть аккаунт? <a th:href="@{/login}">Войти</a>
+</p>
+
+<p>
+    <a th:href="@{/}">На главную</a>
+</p>
 </body>
 </html>

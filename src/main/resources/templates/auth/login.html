@@ -1,10 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - Группа Клеопатра</title>
 </head>
 <body>
-$END$
+<h1>Вход в систему</h1>
+
+<!-- Сообщение об успешной регистрации -->
+<div th:if="${successMessage}" style="color: green; border: 1px solid green; padding: 10px; margin: 10px 0;">
+    <span th:text="${successMessage}"></span>
+</div>
+
+<!-- Сообщение об ошибке входа -->
+<div th:if="${param.error}" style="color: red; border: 1px solid red; padding: 10px; margin: 10px 0;">
+    <strong>Ошибка:</strong> Неверный email или пароль
+</div>
+
+<!-- Сообщение о выходе -->
+<div th:if="${param.logout}" style="color: blue; border: 1px solid blue; padding: 10px; margin: 10px 0;">
+    Вы успешно вышли из системы
+</div>
+
+<!-- Форма входа -->
+<form th:action="@{/login}" method="post">
+
+    <div>
+        <label for="username">Email:</label><br>
+        <input type="email" id="username" name="username" required>
+    </div>
+    <br>
+
+    <div>
+        <label for="password">Пароль:</label><br>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <br>
+
+    <div>
+        <input type="checkbox" id="remember-me" name="remember-me">
+        <label for="remember-me">Запомнить меня</label>
+    </div>
+    <br>
+
+    <button type="submit">Войти</button>
+</form>
+
+<hr>
+<p>
+    Нет аккаунта? <a th:href="@{/register}">Зарегистрируйтесь</a>
+</p>
+
+<p>
+    <a th:href="@{/}">На главную</a>
+</p>
 </body>
 </html>

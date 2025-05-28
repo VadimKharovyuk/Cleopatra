@@ -1,10 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>$Title$</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Группа Клеопатра</title>
 </head>
 <body>
-$END$
+<h1>Добро пожаловать в группу Клеопатра!</h1>
+
+<p>Танцевальная команда, где работают цирковые артисты, трюкачи и танцоры</p>
+
+<div>
+  <h2>Вход в систему</h2>
+  <p>
+    <a th:href="@{/login}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+      Войти
+    </a>
+  </p>
+
+  <p>
+    <a th:href="@{/register}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">
+      Регистрация
+    </a>
+  </p>
+</div>
+
+<hr>
+
+<div>
+  <h3>О нашей группе</h3>
+  <ul>
+    <li>🕺 Профессиональные танцоры</li>
+    <li>🎪 Опытные цирковые артисты</li>
+    <li>🤸 Мастера трюков и акробатики</li>
+  </ul>
+</div>
 </body>
 </html>
