@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход по QR-коду</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .qr-container {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+        }
+        #qrcode {
+            margin: 20px 0;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.waiting {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        .status.success {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+        }
+        .status.error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .refresh-btn {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .refresh-btn:hover {
+            background-color: #1976d2;
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+        .instructions {
+            color: #666;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+        .manual-link {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .manual-link a {
+            color: #2196f3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Вход по QR-коду</h1>
+
+    <div class="qr-container">
+        <div id="qrcode"></div>
+        <div class="loading" id="loading">Генерация QR-кода...</div>
+    </div>
+
+    <div class="status waiting" id="status">
+        Генерируем QR-код...
+    </div>
+
+    <div id="manualLink" class="manual-link" style="display: none;">
+        <p>Или перейдите по ссылке с мобильного:</p>
+        <a id="mobileLink" href="#" target="_blank">Открыть на мобильном</a>
+    </div>
+
+    <button class="refresh-btn" onclick="generateNewQR()">
+        Обновить QR-код
+    </button>
+
+    <div class="instructions">
+        <p><strong>Инструкция:</strong></p>
+        <p>1. Откройте камеру на телефоне</p>
+        <p>2. Отсканируйте QR-код</p>
+        <p>3. Войдите в аккаунт на телефоне</p>
+        <p>4. Вы автоматически войдете на этом устройстве</p>
+    </div>
+</div>
+
+<script>
+    let currentToken = null;
+    let pollingInterval = null;
+
+    // Генерируем QR-код при загрузке страницы
+    window.onload = function() {
+        generateQR();
+    };
+
+    async function generateQR() {
+        console.log('Starting QR generation...');
+
+        try {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('qrcode').innerHTML = '';
+            document.getElementById('manualLink').style.display = 'none';
+
+            console.log('Fetching QR data from server...');
+            const response = await fetch('/auth/qr/generate');
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('QR data received:', data);
+
+            currentToken = data.token;
+
+            // Используем Google Charts API для генерации QR-кода
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.qrUrl)}`;
+
+            console.log('QR API URL:', qrUrl);
+
+            // Создаем изображение QR-кода
+            const img = document.createElement('img');
+            img.src = qrUrl;
+            img.alt = 'QR Code';
+            img.style.maxWidth = '200px';
+            img.style.height = 'auto';
+
+            img.onload = function() {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('qrcode').innerHTML = '';
+                document.getElementById('qrcode').appendChild(img);
+
+                // Показываем ссылку для ручного перехода
+                document.getElementById('mobileLink').href = data.qrUrl;
+                document.getElementById('manualLink').style.display = 'block';
+
+                console.log('QR code generated successfully');
+                showStatus('Отсканируйте QR-код с помощью мобильного устройства', 'waiting');
+                startPolling();
+            };
+
+            img.onerror = function() {
+                document.getElementById('loading').style.display = 'none';
+                console.error('Failed to load QR image');
+                showStatus('Ошибка загрузки QR-кода', 'error');
+
+                // Показываем только ссылку
+                document.getElementById('qrcode').innerHTML = '<p>QR-код недоступен</p>';
+                document.getElementById('mobileLink').href = data.qrUrl;
+                document.getElementById('manualLink').style.display = 'block';
+            };
+
+        } catch (error) {
+            document.getElementById('loading').style.display = 'none';
+            console.error('Error generating QR:', error);
+            showStatus('Ошибка: ' + error.message, 'error');
+        }
+    }
+
+    function generateNewQR() {
+        stopPolling();
+        generateQR();
+    }
+
+    function startPolling() {
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+        }
+
+        pollingInterval = setInterval(async () => {
+            if (!currentToken) return;
+
+            try {
+                const response = await fetch(`/auth/qr/status/${currentToken}`);
+                const data = await response.json();
+
+                console.log('Polling status:', data);
+
+                if (data.status === 'CONFIRMED') {
+                    showStatus('Успешный вход! Перенаправление...', 'success');
+                    stopPolling();
+
+                    // Перенаправляем на эндпоинт завершения авторизации
+                    setTimeout(() => {
+                        window.location.href = `/auth/qr/complete/${currentToken}`;
+                    }, 2000);
+
+                } else if (data.status === 'EXPIRED') {
+                    showStatus('QR-код истек. Нажмите "Обновить QR-код"', 'error');
+                    stopPolling();
+                }
+
+            } catch (error) {
+                console.error('Polling error:', error);
+            }
+        }, 3000); // Проверяем каждые 3 секунды
+    }
+
+    function stopPolling() {
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+        }
+    }
+
+    function showStatus(message, type) {
+        const statusEl = document.getElementById('status');
+        statusEl.textContent = message;
+        statusEl.className = `status ${type}`;
+    }
+
+    // Останавливаем polling при закрытии страницы
+    window.onbeforeunload = function() {
+        stopPolling();
+    };
+</script>
+</body>
+</html>

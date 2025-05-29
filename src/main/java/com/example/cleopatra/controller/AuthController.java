@@ -2,6 +2,7 @@ package com.example.cleopatra.controller;
 import com.example.cleopatra.dto.user.RegisterDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.enums.Gender;
+import com.example.cleopatra.service.AuthenticationService;
 import com.example.cleopatra.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
@@ -21,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AuthController {
 
     private final UserService userService;
+    private final AuthenticationService authenticationService ;
 
 
     @GetMapping("/register")
@@ -63,13 +66,22 @@ public class AuthController {
     }
 
 
-    /**
-     * Отображение формы входа
-     */
     @GetMapping("/login")
-    public String showLoginForm(Model model) {
+    public String showLoginForm(Model model, @RequestParam(required = false) String token) {
+        model.addAttribute("token", token); // Передаем токен если есть
         return "auth/login";
     }
+
+//    /**
+//     * Отображение формы входа
+//     */
+//    @GetMapping("/login")
+//    public String showLoginForm(Model model) {
+//
+//
+//        return "auth/login";
+//    }
+
 
 
 

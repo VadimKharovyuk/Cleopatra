@@ -35,7 +35,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         // Публичные эндпоинты
                         .requestMatchers("/", "/", "/register", "/login","/funny-login",
-                                "/funny-login1").permitAll()
+                                "/funny-login1",
+                                "/qr-login",
+                        "/auth/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
                         // Эндпоинты только для админов

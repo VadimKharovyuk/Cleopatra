@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -36,6 +38,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Gender gender ;
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<TrustedDevice> trustedDevices = new ArrayList<>();
 
 
     // Системные поля

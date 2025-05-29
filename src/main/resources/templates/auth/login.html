@@ -1,31 +1,159 @@
 <!--<!DOCTYPE html>-->
-<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<html lang="ru">-->
 <!--<head>-->
 <!--    <meta charset="UTF-8">-->
 <!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>Вход - Группа Клеопатра</title>-->
+<!--    <title>Вход в аккаунт</title>-->
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: Arial, sans-serif;-->
+<!--            margin: 0;-->
+<!--            padding: 20px;-->
+<!--            background-color: #f5f5f5;-->
+<!--            min-height: 100vh;-->
+<!--        }-->
+<!--        .container {-->
+<!--            max-width: 400px;-->
+<!--            margin: 50px auto;-->
+<!--            background: white;-->
+<!--            padding: 30px;-->
+<!--            border-radius: 10px;-->
+<!--            box-shadow: 0 2px 10px rgba(0,0,0,0.1);-->
+<!--        }-->
+<!--        h1 {-->
+<!--            text-align: center;-->
+<!--            color: #333;-->
+<!--            margin-bottom: 30px;-->
+<!--        }-->
+<!--        .form-group {-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+<!--        label {-->
+<!--            display: block;-->
+<!--            margin-bottom: 5px;-->
+<!--            color: #555;-->
+<!--            font-weight: bold;-->
+<!--        }-->
+<!--        input[type="email"], input[type="password"] {-->
+<!--            width: 100%;-->
+<!--            padding: 12px;-->
+<!--            border: 1px solid #ddd;-->
+<!--            border-radius: 5px;-->
+<!--            font-size: 16px;-->
+<!--            box-sizing: border-box;-->
+<!--        }-->
+<!--        input[type="email"]:focus, input[type="password"]:focus {-->
+<!--            outline: none;-->
+<!--            border-color: #2196f3;-->
+<!--        }-->
+<!--        .checkbox-group {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+<!--        input[type="checkbox"] {-->
+<!--            margin-right: 10px;-->
+<!--            transform: scale(1.2);-->
+<!--        }-->
+<!--        .submit-btn {-->
+<!--            width: 100%;-->
+<!--            background-color: #2196f3;-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            padding: 15px;-->
+<!--            border-radius: 5px;-->
+<!--            font-size: 16px;-->
+<!--            cursor: pointer;-->
+<!--            font-weight: bold;-->
+<!--        }-->
+<!--        .submit-btn:hover {-->
+<!--            background-color: #1976d2;-->
+<!--        }-->
+<!--        .submit-btn:disabled {-->
+<!--            background-color: #ccc;-->
+<!--            cursor: not-allowed;-->
+<!--        }-->
+<!--        .message {-->
+<!--            margin-top: 15px;-->
+<!--            padding: 10px;-->
+<!--            border-radius: 5px;-->
+<!--            text-align: center;-->
+<!--            font-weight: bold;-->
+<!--        }-->
+<!--        .message.error {-->
+<!--            background-color: #ffebee;-->
+<!--            color: #c62828;-->
+<!--            border: 1px solid #ffcdd2;-->
+<!--        }-->
+<!--        .message.success {-->
+<!--            background-color: #e8f5e8;-->
+<!--            color: #2e7d32;-->
+<!--            border: 1px solid #c8e6c9;-->
+<!--        }-->
+<!--        .info {-->
+<!--            background-color: #e3f2fd;-->
+<!--            color: #1976d2;-->
+<!--            padding: 15px;-->
+<!--            border-radius: 5px;-->
+<!--            margin-bottom: 20px;-->
+<!--            text-align: center;-->
+<!--        }-->
+<!--        .loading {-->
+<!--            display: none;-->
+<!--            text-align: center;-->
+<!--            margin-top: 15px;-->
+<!--        }-->
+<!--        .trust-info {-->
+<!--            font-size: 14px;-->
+<!--            color: #666;-->
+<!--            margin-top: 5px;-->
+<!--        }-->
+<!--    </style>-->
 <!--</head>-->
 <!--<body>-->
-<!--<h1>Вход в систему</h1>-->
+<!--<div class="container">-->
+<!--    <h1>Вход в аккаунт</h1>-->
 
-<!--&lt;!&ndash; Сообщение об успешной регистрации &ndash;&gt;-->
-<!--<div th:if="${successMessage}" style="color: green; border: 1px solid green; padding: 10px; margin: 10px 0;">-->
-<!--    <span th:text="${successMessage}"></span>-->
+<!--    <div class="info">-->
+<!--        📱 Вы сканировали QR-код с компьютера.<br>-->
+<!--        Войдите в свой аккаунт для подтверждения.-->
+<!--    </div>-->
+
+<!--    <form id="loginForm">-->
+<!--        <input type="hidden" id="token" th:value="${token}">-->
+
+<!--        <div class="form-group">-->
+<!--            <label for="email">Email:</label>-->
+<!--            <input type="email" id="email" name="email" required>-->
+<!--        </div>-->
+
+<!--        <div class="form-group">-->
+<!--            <label for="password">Пароль:</label>-->
+<!--            <input type="password" id="password" name="password" required>-->
+<!--        </div>-->
+
+<!--        <div class="checkbox-group">-->
+<!--            <input type="checkbox" id="trustDevice" name="trustDevice">-->
+<!--            <label for="trustDevice">Запомнить это устройство</label>-->
+<!--        </div>-->
+<!--        <div class="trust-info">-->
+<!--            При следующем сканировании QR-кода с этого устройства вход будет автоматическим-->
+<!--        </div>-->
+
+<!--        <button type="submit" class="submit-btn" id="submitBtn">-->
+<!--            Войти-->
+<!--        </button>-->
+
+<!--        <div class="loading" id="loading">-->
+<!--            Выполняется вход...-->
+<!--        </div>-->
+
+<!--        <div id="message"></div>-->
+<!--    </form>-->
 <!--</div>-->
 
-<!--&lt;!&ndash; Сообщение об ошибке входа &ndash;&gt;-->
-<!--<div th:if="${param.error}" style="color: red; border: 1px solid red; padding: 10px; margin: 10px 0;">-->
-<!--    <strong>Ошибка:</strong> Неверный email или пароль-->
-<!--</div>-->
-
-<!--&lt;!&ndash; Сообщение о выходе &ndash;&gt;-->
-<!--<div th:if="${param.logout}" style="color: blue; border: 1px solid blue; padding: 10px; margin: 10px 0;">-->
-<!--    Вы успешно вышли из системы-->
-<!--</div>-->
-
-<!--&lt;!&ndash; Форма входа &ndash;&gt;-->
+<!--&lt;!&ndash; Обычная форма с Thymeleaf отправкой &ndash;&gt;-->
 <!--<form th:action="@{/login}" method="post">-->
-
 <!--    <div>-->
 <!--        <label for="username">Email:</label><br>-->
 <!--        <input type="email" id="username" name="username" required>-->
@@ -44,89 +172,363 @@
 <!--    </div>-->
 <!--    <br>-->
 
-<!--    <button type="submit">Войти</button>-->
+<!--    <div style="display: flex; justify-content: center; gap: 10px;">-->
+<!--        <button type="submit">Войти</button>-->
+<!--        <a th:href="@{/qr-login}" style="-->
+<!--            display: inline-block;-->
+<!--            padding: 6px 12px;-->
+<!--            background-color: buttonface;-->
+<!--            border: 1px solid gray;-->
+<!--            border-radius: 2px;-->
+<!--            text-decoration: none;-->
+<!--            color: black;-->
+<!--        ">Войти по QR</a>-->
+<!--    </div>-->
 <!--</form>-->
-<!--<br>-->
-<!--<a th:href="@{/funny-login}">Войти</a>-->
 
+<!--<script>-->
+<!--    document.getElementById('loginForm').addEventListener('submit', async function(e) {-->
+<!--        e.preventDefault();-->
 
+<!--        console.log('Form submitted!');-->
 
+<!--        const submitBtn = document.getElementById('submitBtn');-->
+<!--        const loading = document.getElementById('loading');-->
+<!--        const messageDiv = document.getElementById('message');-->
 
+<!--        // Показываем загрузку-->
+<!--        submitBtn.disabled = true;-->
+<!--        loading.style.display = 'block';-->
+<!--        messageDiv.innerHTML = '';-->
 
-<!--<hr>-->
-<!--<p>-->
-<!--    Нет аккаунта? <a th:href="@{/register}">Зарегистрируйтесь</a>-->
-<!--</p>-->
+<!--        try {-->
+<!--            const formData = {-->
+<!--                token: document.getElementById('token').value,-->
+<!--                email: document.getElementById('email').value,-->
+<!--                password: document.getElementById('password').value,-->
+<!--                trustDevice: document.getElementById('trustDevice').checked-->
+<!--            };-->
 
-<!--<p>-->
-<!--    <a th:href="@{/}">На главную</a>-->
-<!--</p>-->
+<!--            console.log('Sending form data:', formData);-->
+
+<!--            const response = await fetch('/auth/qr/confirm', {-->
+<!--                method: 'POST',-->
+<!--                headers: {-->
+<!--                    'Content-Type': 'application/json',-->
+<!--                },-->
+<!--                body: JSON.stringify(formData)-->
+<!--            });-->
+
+<!--            console.log('Response status:', response.status);-->
+<!--            console.log('Response ok:', response.ok);-->
+
+<!--            const result = await response.json();-->
+<!--            console.log('Response data:', result);-->
+
+<!--            if (result.success) {-->
+<!--                showMessage('Вход выполнен успешно! ✅<br>Теперь вы можете закрыть эту страницу.', 'success');-->
+
+<!--                // Очищаем форму-->
+<!--                document.getElementById('loginForm').reset();-->
+
+<!--            } else {-->
+<!--                showMessage(result.message || 'Произошла ошибка', 'error');-->
+<!--            }-->
+
+<!--        } catch (error) {-->
+<!--            console.error('Login error:', error);-->
+<!--            showMessage('Ошибка подключения к серверу: ' + error.message, 'error');-->
+<!--        } finally {-->
+<!--            // Скрываем загрузку-->
+<!--            submitBtn.disabled = false;-->
+<!--            loading.style.display = 'none';-->
+<!--        }-->
+<!--    });-->
+
+<!--    function showMessage(text, type) {-->
+<!--        const messageDiv = document.getElementById('message');-->
+<!--        messageDiv.innerHTML = text;-->
+<!--        messageDiv.className = `message ${type}`;-->
+<!--    }-->
+
+<!--    // Автофокус на поле email-->
+<!--    document.getElementById('email').focus();-->
+<!--</script>-->
 <!--</body>-->
 <!--</html>-->
 
+
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход - Группа Клеопатра</title>
+    <title>Вход в аккаунт</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input[type="email"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        .submit-btn {
+            width: 100%;
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .submit-btn:hover {
+            background-color: #1976d2;
+        }
+        .submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        .message.success {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .info {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .trust-info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .form-divider {
+            margin: 30px 0;
+            text-align: center;
+            color: #666;
+            position: relative;
+        }
+        .form-divider:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+        }
+        .form-divider span {
+            background: white;
+            padding: 0 15px;
+        }
+    </style>
 </head>
-<body style="margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #f0f0f0;">
+<body>
+<div class="container">
+    <h1>Вход в аккаунт</h1>
 
-<div style="text-align: center; background: white; padding: 20px; border: 1px solid lightgray; border-radius: 8px;">
+    <!-- QR форма (показывается только если есть токен) -->
+    <div th:if="${token}" class="qr-form">
+        <div class="info">
+            📱 Вы сканировали QR-код с компьютера.<br>
+            Войдите в свой аккаунт для подтверждения.
+        </div>
 
-    <h1>Вход в систему</h1>
+        <form id="qrLoginForm">
+            <input type="hidden" id="qr-token" th:value="${token}">
 
-    <!-- Сообщения -->
-    <div th:if="${successMessage}" style="color: green; margin: 10px 0;">
-        <span th:text="${successMessage}"></span>
+            <div class="form-group">
+                <label for="qr-email">Email:</label>
+                <input type="email" id="qr-email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="qr-password">Пароль:</label>
+                <input type="password" id="qr-password" name="password" required>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="trustDevice" name="trustDevice">
+                <label for="trustDevice">Запомнить это устройство</label>
+            </div>
+            <div class="trust-info">
+                При следующем сканировании QR-кода с этого устройства вход будет автоматическим
+            </div>
+
+            <button type="submit" class="submit-btn" id="qrSubmitBtn">
+                Подтвердить QR-вход
+            </button>
+
+            <div class="loading" id="qrLoading">
+                Выполняется вход...
+            </div>
+
+            <div id="qrMessage"></div>
+        </form>
+
+        <div class="form-divider">
+            <span>или</span>
+        </div>
     </div>
-    <div th:if="${param.error}" style="color: red; margin: 10px 0;">
-        <strong>Ошибка:</strong> Неверный email или пароль
-    </div>
-    <div th:if="${param.logout}" style="color: blue; margin: 10px 0;">
-        Вы успешно вышли из системы
-    </div>
 
-    <!-- Форма -->
+    <!-- Обычная форма входа -->
     <form th:action="@{/login}" method="post">
-        <div>
-            <label for="username">Email:</label><br>
+        <input type="hidden" th:value="${token}" name="token" th:if="${token}">
+
+        <div class="form-group">
+            <label for="username">Email:</label>
             <input type="email" id="username" name="username" required>
         </div>
-        <br>
 
-        <div>
-            <label for="password">Пароль:</label><br>
-            <input type="password" id="password" name="password" required>
+        <div class="form-group">
+            <label for="regular-password">Пароль:</label>
+            <input type="password" id="regular-password" name="password" required>
         </div>
-        <br>
 
-        <div>
+        <div class="checkbox-group">
             <input type="checkbox" id="remember-me" name="remember-me">
             <label for="remember-me">Запомнить меня</label>
         </div>
-        <br>
 
-        <div style="display: flex; justify-content: center; gap: 10px;">
-            <button type="submit">Войти</button>
-            <a th:href="@{/funny-login}" style="
-                display: inline-block;
-                padding: 6px 12px;
-                background-color: buttonface;
-                border: 1px solid gray;
-                border-radius: 2px;
-                text-decoration: none;
-                color: black;
-            ">Войти</a>
+        <button type="submit" class="submit-btn">
+            <span th:if="${token}">Обычный вход</span>
+            <span th:unless="${token}">Войти</span>
+        </button>
+
+        <div style="text-align: center; margin-top: 15px;" th:unless="${token}">
+            <a th:href="@{/qr-login}" style="color: #2196f3; text-decoration: none;">
+                Войти по QR-коду
+            </a>
         </div>
     </form>
-
-    <hr>
-
-    <p>Нет аккаунта? <a th:href="@{/register}">Зарегистрируйтесь</a></p>
-    <p><a th:href="@{/}">На главную</a></p>
-
 </div>
+
+<script th:if="${token}">
+    document.getElementById('qrLoginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        console.log('QR Form submitted!');
+
+        const submitBtn = document.getElementById('qrSubmitBtn');
+        const loading = document.getElementById('qrLoading');
+        const messageDiv = document.getElementById('qrMessage');
+
+        submitBtn.disabled = true;
+        loading.style.display = 'block';
+        messageDiv.innerHTML = '';
+
+        try {
+            const formData = {
+                token: document.getElementById('qr-token').value,
+                email: document.getElementById('qr-email').value,
+                password: document.getElementById('qr-password').value,
+                trustDevice: document.getElementById('trustDevice').checked
+            };
+
+            console.log('Sending QR form data:', formData);
+
+            const response = await fetch('/auth/qr/confirm', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+            console.log('QR Response:', result);
+
+            if (result.success) {
+                showMessage('Вход выполнен успешно! ✅<br>Теперь вы можете закрыть эту страницу.', 'success');
+                document.getElementById('qrLoginForm').reset();
+            } else {
+                showMessage(result.message || 'Произошла ошибка', 'error');
+            }
+
+        } catch (error) {
+            console.error('QR Login error:', error);
+            showMessage('Ошибка подключения к серверу: ' + error.message, 'error');
+        } finally {
+            submitBtn.disabled = false;
+            loading.style.display = 'none';
+        }
+    });
+
+    function showMessage(text, type) {
+        const messageDiv = document.getElementById('qrMessage');
+        messageDiv.innerHTML = text;
+        messageDiv.className = `message ${type}`;
+    }
+
+    // Автофокус на поле email
+    document.getElementById('qr-email').focus();
+</script>
 </body>
 </html>

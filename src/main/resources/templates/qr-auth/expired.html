@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR-код истек</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 400px;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .back-btn {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .back-btn:hover {
+            background-color: #1976d2;
+        }
+        .info-box {
+            background-color: #fff3e0;
+            border: 1px solid #ffcc02;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .info-box strong {
+            color: #f57c00;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="icon">⏰</div>
+
+    <h1>QR-код истек</h1>
+
+    <div class="info-box">
+        <strong>Что произошло?</strong><br>
+        QR-код действует только 5 минут для безопасности.
+    </div>
+
+    <p>
+        Время действия этого QR-кода истекло.<br>
+        Вернитесь на компьютер и создайте новый QR-код для входа.
+    </p>
+
+    <p>
+        <strong>Что делать:</strong><br>
+        1. Вернитесь к компьютеру<br>
+        2. Нажмите "Обновить QR-код"<br>
+        3. Отсканируйте новый код
+    </p>
+
+    <button class="back-btn" onclick="window.close()">
+        Закрыть страницу
+    </button>
+</div>
+
+<script>
+    // Автоматически закрываем страницу через 30 секунд
+    setTimeout(function() {
+        window.close();
+    }, 30000);
+</script>
+</body>
+</html>
