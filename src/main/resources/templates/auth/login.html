@@ -1,3 +1,69 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Вход - Группа Клеопатра</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>Вход в систему</h1>-->
+
+<!--&lt;!&ndash; Сообщение об успешной регистрации &ndash;&gt;-->
+<!--<div th:if="${successMessage}" style="color: green; border: 1px solid green; padding: 10px; margin: 10px 0;">-->
+<!--    <span th:text="${successMessage}"></span>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Сообщение об ошибке входа &ndash;&gt;-->
+<!--<div th:if="${param.error}" style="color: red; border: 1px solid red; padding: 10px; margin: 10px 0;">-->
+<!--    <strong>Ошибка:</strong> Неверный email или пароль-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Сообщение о выходе &ndash;&gt;-->
+<!--<div th:if="${param.logout}" style="color: blue; border: 1px solid blue; padding: 10px; margin: 10px 0;">-->
+<!--    Вы успешно вышли из системы-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Форма входа &ndash;&gt;-->
+<!--<form th:action="@{/login}" method="post">-->
+
+<!--    <div>-->
+<!--        <label for="username">Email:</label><br>-->
+<!--        <input type="email" id="username" name="username" required>-->
+<!--    </div>-->
+<!--    <br>-->
+
+<!--    <div>-->
+<!--        <label for="password">Пароль:</label><br>-->
+<!--        <input type="password" id="password" name="password" required>-->
+<!--    </div>-->
+<!--    <br>-->
+
+<!--    <div>-->
+<!--        <input type="checkbox" id="remember-me" name="remember-me">-->
+<!--        <label for="remember-me">Запомнить меня</label>-->
+<!--    </div>-->
+<!--    <br>-->
+
+<!--    <button type="submit">Войти</button>-->
+<!--</form>-->
+<!--<br>-->
+<!--<a th:href="@{/funny-login}">Войти</a>-->
+
+
+
+
+
+<!--<hr>-->
+<!--<p>-->
+<!--    Нет аккаунта? <a th:href="@{/register}">Зарегистрируйтесь</a>-->
+<!--</p>-->
+
+<!--<p>-->
+<!--    <a th:href="@{/}">На главную</a>-->
+<!--</p>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -5,55 +71,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход - Группа Клеопатра</title>
 </head>
-<body>
-<h1>Вход в систему</h1>
+<body style="margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #f0f0f0;">
 
-<!-- Сообщение об успешной регистрации -->
-<div th:if="${successMessage}" style="color: green; border: 1px solid green; padding: 10px; margin: 10px 0;">
-    <span th:text="${successMessage}"></span>
-</div>
+<div style="text-align: center; background: white; padding: 20px; border: 1px solid lightgray; border-radius: 8px;">
 
-<!-- Сообщение об ошибке входа -->
-<div th:if="${param.error}" style="color: red; border: 1px solid red; padding: 10px; margin: 10px 0;">
-    <strong>Ошибка:</strong> Неверный email или пароль
-</div>
+    <h1>Вход в систему</h1>
 
-<!-- Сообщение о выходе -->
-<div th:if="${param.logout}" style="color: blue; border: 1px solid blue; padding: 10px; margin: 10px 0;">
-    Вы успешно вышли из системы
-</div>
-
-<!-- Форма входа -->
-<form th:action="@{/login}" method="post">
-
-    <div>
-        <label for="username">Email:</label><br>
-        <input type="email" id="username" name="username" required>
+    <!-- Сообщения -->
+    <div th:if="${successMessage}" style="color: green; margin: 10px 0;">
+        <span th:text="${successMessage}"></span>
     </div>
-    <br>
-
-    <div>
-        <label for="password">Пароль:</label><br>
-        <input type="password" id="password" name="password" required>
+    <div th:if="${param.error}" style="color: red; margin: 10px 0;">
+        <strong>Ошибка:</strong> Неверный email или пароль
     </div>
-    <br>
-
-    <div>
-        <input type="checkbox" id="remember-me" name="remember-me">
-        <label for="remember-me">Запомнить меня</label>
+    <div th:if="${param.logout}" style="color: blue; margin: 10px 0;">
+        Вы успешно вышли из системы
     </div>
-    <br>
 
-    <button type="submit">Войти</button>
-</form>
+    <!-- Форма -->
+    <form th:action="@{/login}" method="post">
+        <div>
+            <label for="username">Email:</label><br>
+            <input type="email" id="username" name="username" required>
+        </div>
+        <br>
 
-<hr>
-<p>
-    Нет аккаунта? <a th:href="@{/register}">Зарегистрируйтесь</a>
-</p>
+        <div>
+            <label for="password">Пароль:</label><br>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <br>
 
-<p>
-    <a th:href="@{/}">На главную</a>
-</p>
+        <div>
+            <input type="checkbox" id="remember-me" name="remember-me">
+            <label for="remember-me">Запомнить меня</label>
+        </div>
+        <br>
+
+        <div style="display: flex; justify-content: center; gap: 10px;">
+            <button type="submit">Войти</button>
+            <a th:href="@{/funny-login}" style="
+                display: inline-block;
+                padding: 6px 12px;
+                background-color: buttonface;
+                border: 1px solid gray;
+                border-radius: 2px;
+                text-decoration: none;
+                color: black;
+            ">Войти</a>
+        </div>
+    </form>
+
+    <hr>
+
+    <p>Нет аккаунта? <a th:href="@{/register}">Зарегистрируйтесь</a></p>
+    <p><a th:href="@{/}">На главную</a></p>
+
+</div>
 </body>
 </html>
