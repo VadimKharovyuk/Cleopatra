@@ -11,17 +11,6 @@ import java.util.Optional;
 @Repository
 public interface TrustedDeviceRepository extends JpaRepository<TrustedDevice, Long> {
 
-    // Найти устройство по deviceId и пользователю
-    Optional<TrustedDevice> findByDeviceIdAndUserIdAndIsActive(
-            String deviceId, Long userId, Boolean isActive
-    );
-
-    // Все активные устройства пользователя
-    List<TrustedDevice> findByUserIdAndIsActive(Long userId, Boolean isActive);
-
-    // Подсчет активных устройств пользователя (для лимита)
-    int countByUserIdAndIsActive(Long userId, Boolean isActive);
-
 
     // Проверить существование активного устройства
     @Query("SELECT CASE WHEN COUNT(td) > 0 THEN true ELSE false END " +
@@ -32,7 +21,6 @@ public interface TrustedDeviceRepository extends JpaRepository<TrustedDevice, Lo
             @Param("userId") Long userId
     );
 
-// Добавьте эти методы в ваш TrustedDeviceRepository
 
 
     /**
