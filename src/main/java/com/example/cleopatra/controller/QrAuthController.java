@@ -242,3 +242,5 @@ public class QrAuthController {
         public void setTrustDevice(boolean trustDevice) { this.trustDevice = trustDevice; }
     }
 }
+
+
