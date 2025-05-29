@@ -14,6 +14,7 @@ import com.example.cleopatra.service.UserService;
 import com.example.cleopatra.util.DeviceFingerprintUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -227,6 +228,7 @@ public class QrAuthController {
 
     // DTO для запроса подтверждения
     @Getter
+    @Setter
     public static class QrLoginRequest {
         // Getters и Setters
         private String token;
@@ -234,21 +236,6 @@ public class QrAuthController {
         private String password;
         private boolean trustDevice;
 
-        public void setToken(String token) {
-            this.token = token;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        public void setTrustDevice(boolean trustDevice) {
-            this.trustDevice = trustDevice;
-        }
     }
 }
 

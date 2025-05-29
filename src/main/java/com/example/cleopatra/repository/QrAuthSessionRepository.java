@@ -54,5 +54,4 @@ public interface QrAuthSessionRepository extends JpaRepository<QrAuthSession, Lo
     Optional<QrAuthStatus> findStatusByToken(@Param("token") String token);
 
 
-
 }

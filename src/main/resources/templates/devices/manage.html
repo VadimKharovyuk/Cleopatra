@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доверенные устройства</title>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Управление доверенными устройствами</h1>
+        <p>Здесь вы можете управлять устройствами, которым доверяете для входа без пароля</p>
+    </header>
+
+    <!-- Сообщения об ошибках -->
+    <div th:if="${error}" class="error-message">
+        <p th:text="${error}">Ошибка</p>
+    </div>
+
+    <!-- Информация о текущем устройстве -->
+    <section id="current-device-section">
+        <h2>Текущее устройство</h2>
+        <div id="current-device-info">
+            <p>Загрузка информации о текущем устройстве...</p>
+        </div>
+        <button id="trust-current-btn" onclick="trustCurrentDevice()" style="display: none;">
+            Добавить это устройство в доверенные
+        </button>
+        <button id="revoke-current-btn" onclick="revokeCurrentDevice()" style="display: none;">
+            Удалить это устройство из доверенных
+        </button>
+    </section>
+
+    <!-- Список доверенных устройств -->
+    <section>
+        <h2>Ваши доверенные устройства</h2>
+        <p>Количество устройств: <span th:text="${devicesCount}">0</span></p>
+
+        <div id="devices-list">
+            <!-- Устройства будут загружены через JavaScript -->
+            <p>Загрузка списка устройств...</p>
+        </div>
+
+        <button onclick="refreshDevicesList()">Обновить список</button>
+    </section>
+
+    <!-- Статистика -->
+    <section>
+        <h2>Статистика</h2>
+        <div id="device-stats">
+            <p>Загрузка статистики...</p>
+        </div>
+        <button onclick="loadDeviceStats()">Обновить статистику</button>
+    </section>
+
+    <!-- Форма добавления устройства с пользовательским именем -->
+    <section>
+        <h2>Добавить устройство</h2>
+        <form id="trust-device-form">
+            <label for="device-name">Название устройства (необязательно):</label>
+            <input type="text" id="device-name" name="deviceName" placeholder="Например: Мой рабочий компьютер">
+            <button type="submit">Добавить в доверенные</button>
+        </form>
+    </section>
+
+    <!-- Навигация -->
+    <nav>
+        <p>
+            <a href="/dashboard">← Вернуться на главную</a> |
+            <a href="/profile">Профиль</a> |
+            <a href="/logout">Выйти</a>
+        </p>
+    </nav>
+</div>
+
+<script>
+    // Загружаем информацию при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCurrentDeviceInfo();
+        loadDevicesList();
+        loadDeviceStats();
+    });
+
+    // Загрузка информации о текущем устройстве
+    async function loadCurrentDeviceInfo() {
+        try {
+            const response = await fetch('/devices/api/current');
+            const data = await response.json();
+
+            const infoDiv = document.getElementById('current-device-info');
+            const trustBtn = document.getElementById('trust-current-btn');
+            const revokeBtn = document.getElementById('revoke-current-btn');
+
+            if (data.success) {
+                if (data.trusted) {
+                    infoDiv.innerHTML = `
+                            <p><strong>Устройство:</strong> ${data.deviceName}</p>
+                            <p><strong>ID:</strong> ${data.deviceId}</p>
+                            <p><strong>Статус:</strong> Доверенное ✓</p>
+                            <p><strong>Последнее использование:</strong> ${new Date(data.lastUsed).toLocaleString()}</p>
+                            <p><strong>Добавлено:</strong> ${new Date(data.created).toLocaleString()}</p>
+                        `;
+                    revokeBtn.style.display = 'inline-block';
+                    trustBtn.style.display = 'none';
+                } else {
+                    infoDiv.innerHTML = `
+                            <p><strong>Устройство:</strong> ${data.deviceInfo ? data.deviceInfo.deviceName : 'Неизвестное'}</p>
+                            <p><strong>ID:</strong> ${data.deviceId || 'Не установлен'}</p>
+                            <p><strong>Статус:</strong> Не доверенное</p>
+                            <p><em>${data.message}</em></p>
+                        `;
+                    trustBtn.style.display = 'inline-block';
+                    revokeBtn.style.display = 'none';
+                }
+            } else {
+                infoDiv.innerHTML = `<p>Ошибка: ${data.message}</p>`;
+            }
+        } catch (error) {
+            console.error('Error loading current device info:', error);
+            document.getElementById('current-device-info').innerHTML =
+                '<p>Ошибка при загрузке информации об устройстве</p>';
+        }
+    }
+
+    // Загрузка списка устройств
+    async function loadDevicesList() {
+        try {
+            const response = await fetch('/devices/api/list');
+            const data = await response.json();
+
+            const listDiv = document.getElementById('devices-list');
+
+            if (data.success && data.devices.length > 0) {
+                let html = '<table border="1"><tr><th>Название</th><th>Последнее использование</th><th>Добавлено</th><th>Действия</th></tr>';
+
+                data.devices.forEach(device => {
+                    html += `
+                            <tr>
+                                <td>${device.deviceName}</td>
+                                <td>${device.lastUsedAt ? new Date(device.lastUsedAt).toLocaleString() : 'Никогда'}</td>
+                                <td>${new Date(device.createdAt).toLocaleString()}</td>
+                                <td>
+                                    <button onclick="revokeDevice(${device.id})">Удалить</button>
+                                </td>
+                            </tr>
+                        `;
+                });
+                html += '</table>';
+                listDiv.innerHTML = html;
+            } else if (data.success) {
+                listDiv.innerHTML = '<p>У вас нет доверенных устройств</p>';
+            } else {
+                listDiv.innerHTML = `<p>Ошибка: ${data.message}</p>`;
+            }
+        } catch (error) {
+            console.error('Error loading devices list:', error);
+            document.getElementById('devices-list').innerHTML =
+                '<p>Ошибка при загрузке списка устройств</p>';
+        }
+    }
+
+    // Загрузка статистики
+    async function loadDeviceStats() {
+        try {
+            const response = await fetch('/devices/api/stats');
+            const data = await response.json();
+
+            const statsDiv = document.getElementById('device-stats');
+
+            if (data.success) {
+                let html = `
+                        <p><strong>Всего устройств:</strong> ${data.totalDevices}</p>
+                        <p><strong>По типам:</strong></p>
+                        <ul>
+                    `;
+
+                Object.entries(data.deviceTypes).forEach(([type, count]) => {
+                    html += `<li>${type}: ${count}</li>`;
+                });
+
+                html += '</ul>';
+
+                if (data.recentActivity && data.recentActivity.length > 0) {
+                    html += '<p><strong>Недавняя активность:</strong></p><ul>';
+                    data.recentActivity.forEach(device => {
+                        html += `<li>${device.deviceName} - ${new Date(device.lastUsedAt).toLocaleString()}</li>`;
+                    });
+                    html += '</ul>';
+                }
+
+                statsDiv.innerHTML = html;
+            } else {
+                statsDiv.innerHTML = `<p>Ошибка: ${data.message}</p>`;
+            }
+        } catch (error) {
+            console.error('Error loading device stats:', error);
+            document.getElementById('device-stats').innerHTML =
+                '<p>Ошибка при загрузке статистики</p>';
+        }
+    }
+
+    // Добавление текущего устройства в доверенные
+    async function trustCurrentDevice() {
+        try {
+            const response = await fetch('/devices/api/trust', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({})
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Устройство добавлено в доверенные!');
+                loadCurrentDeviceInfo();
+                loadDevicesList();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error trusting device:', error);
+            alert('Ошибка при добавлении устройства');
+        }
+    }
+
+    // Удаление текущего устройства из доверенных
+    async function revokeCurrentDevice() {
+        if (!confirm('Вы уверены, что хотите удалить это устройство из доверенных?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/devices/api/revoke-current', {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Устройство удалено из доверенных!');
+                loadCurrentDeviceInfo();
+                loadDevicesList();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error revoking current device:', error);
+            alert('Ошибка при удалении устройства');
+        }
+    }
+
+    // Удаление устройства по ID
+    async function revokeDevice(deviceId) {
+        if (!confirm('Вы уверены, что хотите удалить это устройство из доверенных?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/devices/api/${deviceId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Устройство удалено!');
+                loadDevicesList();
+                loadDeviceStats();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error revoking device:', error);
+            alert('Ошибка при удалении устройства');
+        }
+    }
+
+    // Обновление списка устройств
+    function refreshDevicesList() {
+        loadDevicesList();
+        loadDeviceStats();
+    }
+
+    // Обработка формы добавления устройства
+    document.getElementById('trust-device-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const deviceName = document.getElementById('device-name').value;
+
+        try {
+            const response = await fetch('/devices/api/trust', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    deviceName: deviceName || null
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Устройство добавлено в доверенные!');
+                document.getElementById('device-name').value = '';
+                loadCurrentDeviceInfo();
+                loadDevicesList();
+                loadDeviceStats();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error trusting device:', error);
+            alert('Ошибка при добавлении устройства');
+        }
+    });
+</script>
+</body>
+</html>

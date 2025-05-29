@@ -27,8 +27,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
                         // Публичные эндпоинты
-                        .requestMatchers("/", "/register", "/login", "/funny-login",
-                                "/funny-login1", "/qr-login", "/auth/**").permitAll()
+                        .requestMatchers("/",
+                                "/register",
+                                "/login",
+                                "/funny-login",
+                                "/funny-login1",
+                                "/qr-login",
+                                "/auth/**"
+                        ,"/devices/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
                         // Эндпоинты только для админов

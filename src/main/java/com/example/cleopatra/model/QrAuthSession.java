@@ -39,4 +39,7 @@ public class QrAuthSession {
         createdAt = LocalDateTime.now();
         expiresAt = createdAt.plusMinutes(15);
     }
+
+
+
 }

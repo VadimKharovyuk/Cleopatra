@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тест API доверенных устройств</title>
+</head>
+<body>
+<h1>Тест API доверенных устройств</h1>
+
+<section>
+  <h2>Тестирование API endpoints</h2>
+
+  <div>
+    <h3>1. Получить информацию о текущем устройстве</h3>
+    <button onclick="testCurrentDevice()">GET /devices/api/current</button>
+    <pre id="current-device-result"></pre>
+  </div>
+
+  <div>
+    <h3>2. Получить список доверенных устройств</h3>
+    <button onclick="testDevicesList()">GET /devices/api/list</button>
+    <pre id="devices-list-result"></pre>
+  </div>
+
+  <div>
+    <h3>3. Получить статистику устройств</h3>
+    <button onclick="testDeviceStats()">GET /devices/api/stats</button>
+    <pre id="device-stats-result"></pre>
+  </div>
+
+  <div>
+    <h3>4. Добавить текущее устройство в доверенные</h3>
+    <input type="text" id="trust-device-name" placeholder="Название устройства (необязательно)">
+    <button onclick="testTrustDevice()">POST /devices/api/trust</button>
+    <pre id="trust-device-result"></pre>
+  </div>
+
+  <div>
+    <h3>5. Удалить текущее устройство из доверенных</h3>
+    <button onclick="testRevokeCurrentDevice()">POST /devices/api/revoke-current</button>
+    <pre id="revoke-current-result"></pre>
+  </div>
+
+  <div>
+    <h3>6. Удалить устройство по ID</h3>
+    <input type="number" id="revoke-device-id" placeholder="ID устройства">
+    <button onclick="testRevokeDevice()">DELETE /devices/api/{id}</button>
+    <pre id="revoke-device-result"></pre>
+  </div>
+</section>
+
+<section>
+  <h2>Информация о браузере</h2>
+  <div id="browser-info">
+    <p><strong>User-Agent:</strong> <span id="user-agent"></span></p>
+    <p><strong>Cookies:</strong> <span id="cookies-info"></span></p>
+    <p><strong>Определенный тип устройства:</strong> <span id="device-type"></span></p>
+  </div>
+</section>
+
+<p><a href="/devices">← Вернуться к управлению устройствами</a></p>
+
+<script>
+  // Отображаем информацию о браузере при загрузке
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('user-agent').textContent = navigator.userAgent;
+    document.getElementById('cookies-info').textContent = document.cookie || 'Нет cookies';
+    document.getElementById('device-type').textContent = detectDeviceType();
+  });
+
+  function detectDeviceType() {
+    const ua = navigator.userAgent;
+    if (ua.includes('Mobile')) {
+      if (ua.includes('iPhone')) return 'iPhone';
+      if (ua.includes('iPad')) return 'iPad';
+      if (ua.includes('Android')) return 'Android устройство';
+      return 'Мобильное устройство';
+    }
+    if (ua.includes('Windows')) return 'Windows компьютер';
+    if (ua.includes('Macintosh')) return 'Mac компьютер';
+    if (ua.includes('Linux')) return 'Linux компьютер';
+    return 'Браузер';
+  }
+
+  async function testCurrentDevice() {
+    try {
+      const response = await fetch('/devices/api/current');
+      const data = await response.json();
+      document.getElementById('current-device-result').textContent =
+              JSON.stringify(data, null, 2);
+    } catch (error) {
+      document.getElementById('current-device-result').textContent =
+              'Ошибка: ' + error.message;
+    }
+  }
+
+  async function testDevicesList() {
+    try {
+      const response = await fetch('/devices/api/list');
+      const data = await response.json();
+      document.getElementById('devices-list-result').textContent =
+              JSON.stringify(data, null, 2);
+    } catch (error) {
+      document.getElementById('devices-list-result').textContent =
+              'Ошибка: ' + error.message;
+    }
+  }
+
+  async function testDeviceStats() {
+    try {
+      const response = await fetch('/devices/api/stats');
+      const data = await response.json();
+      document.getElementById('device-stats-result').textContent =
+              JSON.stringify(data, null, 2);
+    } catch (error) {
+      document.getElementById('device-stats-result').textContent =
+              'Ошибка: ' + error.message;
+    }
+  }
+
+  async function testTrustDevice() {
+    try {
+      const deviceName = document.getElementById('trust-device-name').value;
+      const response = await fetch('/devices/api/trust', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          deviceName: deviceName || null
+        })
+      });
+      const data = await response.json();
+      document.getElementById('trust-device-result').textContent =
+              JSON.stringify(data, null, 2);
+    } catch (error) {
+      document.getElementById('trust-device-result').textContent =
+              'Ошибка: ' + error.message;
+    }
+  }
+
+  async function testRevokeCurrentDevice() {
+    try {
+      const response = await fetch('/devices/api/revoke-current', {
+        method: 'POST'
+      });
+      const data = await response.json();
+      document.getElementById('revoke-current-result').textContent =
+              JSON.stringify(data, null, 2);
+    } catch (error) {
+      document.getElementById('revoke-current-result').textContent =
+              'Ошибка: ' + error.message;
+    }
+  }
+
+  async function testRevokeDevice() {
+    try {
+      const deviceId = document.getElementById('revoke-device-id').value;
+      if (!deviceId) {
+        alert('Введите ID устройства');
+        return;
+      }
+
+      const response = await fetch(`/devices/api/${deviceId}`, {
+        method: 'DELETE'
+      });
+      const data = await response.json();
+      document.getElementById('revoke-device-result').textContent =
+              JSON.stringify(data, null, 2);
+    } catch (error) {
+      document.getElementById('revoke-device-result').textContent =
+              'Ошибка: ' + error.message;
+    }
+  }
+</script>
+</body>
+</html>

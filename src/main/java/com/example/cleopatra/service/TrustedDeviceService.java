@@ -3,6 +3,7 @@ import com.example.cleopatra.model.TrustedDevice;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.repository.TrustedDeviceRepository;
 import com.example.cleopatra.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -194,6 +195,106 @@ public class TrustedDeviceService {
             log.error("Error finding user by trusted device: {}", deviceId, e);
             return Optional.empty();
         }
+    }
+    // Добавьте этот метод в ваш TrustedDeviceService
+
+    /**
+     * Добавляет новое доверенное устройство для пользователя
+     * @param userId ID пользователя
+     * @param deviceId UUID устройства (из cookie или генерируем новый)
+     * @param deviceName название устройства
+     * @param request HTTP запрос для получения данных устройства
+     * @return true если устройство успешно добавлено
+     */
+    @Transactional
+    public boolean addTrustedDevice(Long userId, String deviceId, String deviceName, HttpServletRequest request) {
+        try {
+            // Проверяем лимит устройств
+            int currentCount = trustedDeviceRepository.countByUserIdAndIsActive(userId, true);
+            if (currentCount >= maxTrustedDevicesPerUser) {
+                log.warn("User {} exceeded trusted devices limit: {}", userId, maxTrustedDevicesPerUser);
+                return false;
+            }
+
+            // Проверяем существование пользователя
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty()) {
+                log.error("User not found: {}", userId);
+                return false;
+            }
+
+            // Проверяем, не добавлено ли уже это устройство
+            Optional<TrustedDevice> existingDevice = trustedDeviceRepository.findByDeviceIdAndUserId(deviceId, userId);
+            if (existingDevice.isPresent()) {
+                TrustedDevice device = existingDevice.get();
+                if (device.getIsActive()) {
+                    log.info("Device {} already trusted for user {}", deviceId, userId);
+                    return true; // Уже доверенное
+                } else {
+                    // Реактивируем устройство
+                    device.setIsActive(true);
+                    device.setLastUsedAt(LocalDateTime.now());
+                    trustedDeviceRepository.save(device);
+                    log.info("Reactivated trusted device {} for user {}", deviceId, userId);
+                    return true;
+                }
+            }
+
+            User user = userOpt.get();
+            String deviceFingerprint = generateDeviceFingerprint(request);
+
+            // Создаем новое доверенное устройство
+            TrustedDevice device = TrustedDevice.builder()
+                    .deviceId(deviceId)
+                    .deviceName(deviceName)
+                    .deviceFingerprint(deviceFingerprint)
+                    .user(user)
+                    .isActive(true)
+                    .lastUsedAt(LocalDateTime.now())
+                    .build();
+
+            trustedDeviceRepository.save(device);
+
+            log.info("Added trusted device for user {}: {} ({})", userId, deviceName, deviceId);
+            return true;
+
+        } catch (Exception e) {
+            log.error("Error adding trusted device for user {}: {}", userId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Генерирует отпечаток устройства на основе HTTP запроса
+     */
+    private String generateDeviceFingerprint(HttpServletRequest request) {
+        StringBuilder fingerprint = new StringBuilder();
+
+        // User-Agent
+        String userAgent = request.getHeader("User-Agent");
+        if (userAgent != null) {
+            fingerprint.append("UA:").append(userAgent).append(";");
+        }
+
+        // Accept-Language
+        String acceptLanguage = request.getHeader("Accept-Language");
+        if (acceptLanguage != null) {
+            fingerprint.append("LANG:").append(acceptLanguage).append(";");
+        }
+
+        // Accept-Encoding
+        String acceptEncoding = request.getHeader("Accept-Encoding");
+        if (acceptEncoding != null) {
+            fingerprint.append("ENC:").append(acceptEncoding).append(";");
+        }
+
+        // X-Forwarded-For (если есть)
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null) {
+            fingerprint.append("XFF:").append(xForwardedFor).append(";");
+        }
+
+        return fingerprint.toString();
     }
 
     /**
