@@ -38,7 +38,7 @@ public class QrAuthService {
                 .token(token)
                 .status(QrAuthStatus.PENDING)
                 .createdAt(now)
-                .expiresAt(now.plusMinutes(15)) // 15 минут вместо 5
+                .expiresAt(now.plusMinutes(5)) // минут вместо 5
                 .build();
 
         qrAuthSessionRepository.save(session);
