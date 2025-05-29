@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -128,19 +129,41 @@ public class QrAuthService {
     @Scheduled(fixedRate = 600000) // 10 минут
     @Transactional
     public void cleanupExpiredSessions() {
+        long startTime = System.currentTimeMillis();
         LocalDateTime now = LocalDateTime.now();
 
-        // Сначала помечаем просроченные как EXPIRED
-        qrAuthSessionRepository.markExpiredSessions(now);
+        try {
+            // Сначала помечаем просроченные как EXPIRED
+            int markedExpired = qrAuthSessionRepository.markExpiredSessions(now);
 
-        // Затем удаляем старые записи (старше 1 часа)
-        qrAuthSessionRepository.deleteExpiredSessions(now.minusHours(1));
+            // Затем удаляем старые записи (старше 1 часа)
+            int deleted = qrAuthSessionRepository.deleteExpiredSessions(now.minusHours(1));
 
-        log.debug("Cleaned up expired QR auth sessions");
+            long executionTime = System.currentTimeMillis() - startTime;
+
+            if (markedExpired > 0 || deleted > 0) {
+                log.info("QR session cleanup completed: marked {} as expired, deleted {} old sessions in {}ms",
+                        markedExpired, deleted, executionTime);
+            } else {
+                log.debug("QR session cleanup completed: no sessions to clean in {}ms", executionTime);
+            }
+
+            // Дополнительная статистика (опционально)
+            if (log.isDebugEnabled()) {
+                int totalActive = qrAuthSessionRepository.countByStatus(QrAuthStatus.PENDING);
+                int totalConfirmed = qrAuthSessionRepository.countByStatus(QrAuthStatus.CONFIRMED);
+                log.debug("Current QR sessions: {} pending, {} confirmed", totalActive, totalConfirmed);
+            }
+
+        } catch (Exception e) {
+            log.error("Error during QR session cleanup: {}", e.getMessage(), e);
+            // Не пробрасываем исключение, чтобы не сломать планировщик
+        }
     }
 
     // DTO классы для возврата данных
 
+    @Getter
     public static class QrSessionData {
         private final String token;
         private final String qrUrl;
@@ -150,8 +173,6 @@ public class QrAuthService {
             this.qrUrl = qrUrl;
         }
 
-        public String getToken() { return token; }
-        public String getQrUrl() { return qrUrl; }
     }
 
     @Getter

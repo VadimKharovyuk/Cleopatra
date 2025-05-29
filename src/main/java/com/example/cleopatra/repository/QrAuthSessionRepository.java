@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -30,14 +31,17 @@ public interface QrAuthSessionRepository extends JpaRepository<QrAuthSession, Lo
     @Transactional
     @Query("DELETE FROM QrAuthSession q WHERE q.expiresAt < :now " +
             "OR q.status = 'EXPIRED'")
-    void deleteExpiredSessions(@Param("now") LocalDateTime now);
+    int deleteExpiredSessions(@Param("now") LocalDateTime now);
 
+    // Добавьте в QrAuthSessionRepository
+    @Query("SELECT COUNT(q) FROM QrAuthSession q WHERE q.status = :status")
+    int countByStatus(@Param("status") QrAuthStatus status);
     // Пометить просроченные сессии как EXPIRED
     @Modifying
     @Transactional
     @Query("UPDATE QrAuthSession q SET q.status = 'EXPIRED' " +
             "WHERE q.expiresAt < :now AND q.status = 'PENDING'")
-    void markExpiredSessions(@Param("now") LocalDateTime now);
+    int markExpiredSessions(@Param("now") LocalDateTime now);
 
     // Подтвердить сессию
     @Modifying
@@ -48,4 +52,7 @@ public interface QrAuthSessionRepository extends JpaRepository<QrAuthSession, Lo
     // Проверить статус сессии
     @Query("SELECT q.status FROM QrAuthSession q WHERE q.token = :token")
     Optional<QrAuthStatus> findStatusByToken(@Param("token") String token);
+
+
+
 }

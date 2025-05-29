@@ -29,6 +29,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -40,8 +41,8 @@ public class QrAuthController {
 
     private final QrAuthService qrAuthService;
     private final TrustedDeviceService trustedDeviceService;
- private final AuthenticationService authenticationService ;
- private final UserRepository userRepository;
+    private final AuthenticationService authenticationService;
+    private final UserRepository userRepository;
 
 
     /**
@@ -233,13 +234,21 @@ public class QrAuthController {
         private String password;
         private boolean trustDevice;
 
-        public void setToken(String token) { this.token = token; }
+        public void setToken(String token) {
+            this.token = token;
+        }
 
-        public void setEmail(String email) { this.email = email; }
+        public void setEmail(String email) {
+            this.email = email;
+        }
 
-        public void setPassword(String password) { this.password = password; }
+        public void setPassword(String password) {
+            this.password = password;
+        }
 
-        public void setTrustDevice(boolean trustDevice) { this.trustDevice = trustDevice; }
+        public void setTrustDevice(boolean trustDevice) {
+            this.trustDevice = trustDevice;
+        }
     }
 }
 

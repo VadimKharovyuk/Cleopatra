@@ -3,6 +3,7 @@ import com.example.cleopatra.model.TrustedDevice;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.repository.TrustedDeviceRepository;
 import com.example.cleopatra.repository.UserRepository;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -206,7 +207,9 @@ public class TrustedDeviceService {
     }
 
     // DTO для передачи данных об устройствах
+    @Getter
     public static class TrustedDeviceDto {
+        // Getters
         private final Long id;
         private final String deviceId;
         private final String deviceName;
@@ -222,11 +225,5 @@ public class TrustedDeviceService {
             this.createdAt = createdAt;
         }
 
-        // Getters
-        public Long getId() { return id; }
-        public String getDeviceId() { return deviceId; }
-        public String getDeviceName() { return deviceName; }
-        public LocalDateTime getLastUsedAt() { return lastUsedAt; }
-        public LocalDateTime getCreatedAt() { return createdAt; }
     }
 }
