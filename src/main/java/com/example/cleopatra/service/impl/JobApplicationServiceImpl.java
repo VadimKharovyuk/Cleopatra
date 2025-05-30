@@ -53,7 +53,6 @@ public class JobApplicationServiceImpl implements JobApplicationService {
 
     @Override
     public JobApplicationListDto getAllApplications(Pageable pageable) {
-
         Page<JobApplication> jobApplications = jobApplicationRepository.findAll(pageable);
 
         List<JobApplicationCardDto> applicationCards = jobApplications.getContent()
@@ -61,12 +60,19 @@ public class JobApplicationServiceImpl implements JobApplicationService {
                 .map(jobApplicationMapper::toCardDto)
                 .toList();
 
+        int currentPage = jobApplications.getNumber();
+        int totalPages = jobApplications.getTotalPages();
+
         return JobApplicationListDto.builder()
                 .applications(applicationCards)
-                .totalPages(jobApplications.getTotalPages())
-                .currentPage(jobApplications.getNumber())
-                .totalItems(jobApplications.getTotalElements())
+                .currentPage(currentPage)
                 .itemsPerPage(jobApplications.getSize())
+                .totalPages(totalPages)
+                .totalItems(jobApplications.getTotalElements())
+                .hasNext(jobApplications.hasNext())
+                .hasPrevious(jobApplications.hasPrevious())
+                .nextPage(jobApplications.hasNext() ? currentPage + 1 : null)
+                .previousPage(currentPage > 0 ? currentPage - 1 : null)
                 .build();
     }
 

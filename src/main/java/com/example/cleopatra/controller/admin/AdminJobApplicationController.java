@@ -40,15 +40,11 @@ public class AdminJobApplicationController {
         log.debug("Запрос списка заявок: page={}, size={}, sortBy={}, sortDir={}",
                 page, size, sortBy, sortDir);
 
-        // Создаем Pageable с сортировкой
         Sort sort = sortDir.equalsIgnoreCase("desc") ?
                 Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        // Получаем данные через сервис
         JobApplicationListDto applicationsDto;
-
-        // Если есть фильтры, используем комплексный поиск
         if (status != null || profile != null || country != null || search != null) {
             applicationsDto = jobApplicationListService.getApplicationsWithFilters(
                     status, profile, country, search, pageable);
@@ -56,10 +52,10 @@ public class AdminJobApplicationController {
             applicationsDto = jobApplicationListService.getAllApplications(pageable);
         }
 
-        // Добавляем данные в модель
+        // Основные данные (пагинация теперь в DTO)
         model.addAttribute("applicationsDto", applicationsDto);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("currentSize", size);
+
+        // Параметры для формы (нужны для сохранения состояния фильтров/сортировки)
         model.addAttribute("currentSortBy", sortBy);
         model.addAttribute("currentSortDir", sortDir);
 

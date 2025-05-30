@@ -15,8 +15,16 @@ import java.util.List;
 @AllArgsConstructor
 public class JobApplicationListDto {
     private List<JobApplicationCardDto> applications;
-    private int totalPages;
     private int currentPage;
-    private long totalItems;
     private int itemsPerPage;
+
+    // Для Page
+    private Integer totalPages;
+    private Long totalItems;
+
+    // Для Slice и общего удобства
+    private Boolean hasNext;
+    private Boolean hasPrevious;
+    private Integer nextPage;
+    private Integer previousPage;
 }

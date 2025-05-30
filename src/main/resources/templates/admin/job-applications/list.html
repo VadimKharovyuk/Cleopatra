@@ -63,12 +63,13 @@
         </div>
 
         <!-- Размер страницы -->
+        <!-- Заменить currentSize на applicationsDto.itemsPerPage -->
         <div>
           <label for="size">На странице:</label><br>
           <select id="size" name="size">
-            <option value="10" th:selected="${currentSize == 10}">10</option>
-            <option value="25" th:selected="${currentSize == 25}">25</option>
-            <option value="50" th:selected="${currentSize == 50}">50</option>
+            <option value="10" th:selected="${applicationsDto.itemsPerPage == 10}">10</option>
+            <option value="25" th:selected="${applicationsDto.itemsPerPage == 25}">25</option>
+            <option value="50" th:selected="${applicationsDto.itemsPerPage == 50}">50</option>
           </select>
         </div>
 
@@ -185,30 +186,31 @@
   </section>
 
   <!-- Пагинация -->
+  <!-- Пагинация -->
   <section th:if="${applicationsDto.totalPages > 1}" style="margin: 20px 0; text-align: center;">
 
     <!-- Предыдущая страница -->
-    <a th:if="${applicationsDto.currentPage > 0}"
-       th:href="@{/admin/job-applications(page=${applicationsDto.currentPage - 1}, size=${currentSize}, sortBy=${currentSortBy}, sortDir=${currentSortDir}, status=${selectedStatus}, profile=${selectedProfile}, country=${selectedCountry}, search=${searchQuery})}"
+    <a th:if="${applicationsDto.hasPrevious}"
+       th:href="@{/admin/job-applications(page=${applicationsDto.previousPage}, size=${applicationsDto.itemsPerPage}, sortBy=${currentSortBy}, sortDir=${currentSortDir}, status=${selectedStatus}, profile=${selectedProfile}, country=${selectedCountry}, search=${searchQuery})}"
        style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;">
       « Предыдущая
     </a>
 
-    <!-- Номера страниц -->
+    <!-- Номера страниц (оставить как есть) -->
     <span th:each="pageNum : ${#numbers.sequence(0, applicationsDto.totalPages - 1)}">
-                <span th:if="${pageNum == applicationsDto.currentPage}"
-                      style="padding: 8px 12px; margin: 0 2px; background-color: #2196f3; color: white; border-radius: 4px;"
-                      th:text="${pageNum + 1}">1</span>
+    <span th:if="${pageNum == applicationsDto.currentPage}"
+          style="padding: 8px 12px; margin: 0 2px; background-color: #2196f3; color: white; border-radius: 4px;"
+          th:text="${pageNum + 1}">1</span>
 
-                <a th:unless="${pageNum == applicationsDto.currentPage}"
-                   th:href="@{/admin/job-applications(page=${pageNum}, size=${currentSize}, sortBy=${currentSortBy}, sortDir=${currentSortDir}, status=${selectedStatus}, profile=${selectedProfile}, country=${selectedCountry}, search=${searchQuery})}"
-                   style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;"
-                   th:text="${pageNum + 1}">2</a>
-            </span>
+    <a th:unless="${pageNum == applicationsDto.currentPage}"
+       th:href="@{/admin/job-applications(page=${pageNum}, size=${applicationsDto.itemsPerPage}, sortBy=${currentSortBy}, sortDir=${currentSortDir}, status=${selectedStatus}, profile=${selectedProfile}, country=${selectedCountry}, search=${searchQuery})}"
+       style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;"
+       th:text="${pageNum + 1}">2</a>
+  </span>
 
     <!-- Следующая страница -->
-    <a th:if="${applicationsDto.currentPage < applicationsDto.totalPages - 1}"
-       th:href="@{/admin/job-applications(page=${applicationsDto.currentPage + 1}, size=${currentSize}, sortBy=${currentSortBy}, sortDir=${currentSortDir}, status=${selectedStatus}, profile=${selectedProfile}, country=${selectedCountry}, search=${searchQuery})}"
+    <a th:if="${applicationsDto.hasNext}"
+       th:href="@{/admin/job-applications(page=${applicationsDto.nextPage}, size=${applicationsDto.itemsPerPage}, sortBy=${currentSortBy}, sortDir=${currentSortDir}, status=${selectedStatus}, profile=${selectedProfile}, country=${selectedCountry}, search=${searchQuery})}"
        style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;">
       Следующая »
     </a>
