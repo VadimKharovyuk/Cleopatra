@@ -1,10 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр заявки - Админ панель</title>
 </head>
 <body>
+<div>
 
+
+    <header>
+        <h1>Просмотр заявки на работу</h1>
+        <nav>
+            <a href="/admin">Админ панель</a> |
+            <a href="/admin/job-applications">Все заявки</a> |
+            <a th:href="@{/admin/job-applications/edit(id=${applicationId})}">Редактировать</a>
+        </nav>
+    </header>
+
+    <!-- Основная информация -->
+    <section>
+        <h2>Основная информация</h2>
+        <table border="1">
+            <tr>
+                <th>ID заявки:</th>
+                <td th:text="${applicationId}">1</td>
+            </tr>
+            <tr>
+                <th>Имя:</th>
+                <td th:text="${job.name}">Иван Иванов</td>
+            </tr>
+            <tr>
+                <th>Полное имя:</th>
+                <td th:text="${job.fullName}">Иван Петрович Иванов</td>
+            </tr>
+            <tr>
+                <th>О себе:</th>
+                <td th:text="${job.bio}">Описание</td>
+            </tr>
+        </table>
+    </section>
+
+    <!-- Профессиональная информация -->
+    <section>
+        <h2>Профессиональная информация</h2>
+        <table border="1">
+            <tr>
+                <th>Профиль:</th>
+                <td th:text="${job.profile != null ? job.profile.name() : 'Не указано'}">Backend Developer</td>
+            </tr>
+            <tr>
+                <th>Опыт работы (лет):</th>
+                <td th:text="${job.workExperience}">5</td>
+            </tr>
+            <tr>
+                <th>Дополнительные навыки:</th>
+                <td th:text="${job.additionalSkills}">Java, Spring, SQL</td>
+            </tr>
+        </table>
+    </section>
+
+    <!-- Зарплатные ожидания -->
+    <section>
+        <h2>Зарплатные ожидания</h2>
+        <table border="1">
+            <tr>
+                <th>Минимальная зарплата:</th>
+                <td>
+                    <span th:if="${job.minSalary != null}">
+                        <span th:text="${job.minSalary}">1000</span>
+                        <span th:text="${job.currency ?: 'USD'}">USD</span>
+                    </span>
+                    <span th:unless="${job.minSalary != null}">Не указано</span>
+                </td>
+            </tr>
+            <tr>
+                <th>Максимальная зарплата:</th>
+                <td>
+                    <span th:if="${job.maxSalary != null}">
+                        <span th:text="${job.maxSalary}">2000</span>
+                        <span th:text="${job.currency ?: 'USD'}">USD</span>
+                    </span>
+                    <span th:unless="${job.maxSalary != null}">Не указано</span>
+                </td>
+            </tr>
+        </table>
+    </section>
+
+    <!-- Контактная информация -->
+    <section>
+        <h2>Контактная информация</h2>
+        <table border="1">
+            <tr>
+                <th>Email:</th>
+                <td th:text="${job.email}">example@email.com</td>
+            </tr>
+            <tr>
+                <th>Телефон:</th>
+                <td th:text="${job.phone}">+1234567890</td>
+            </tr>
+            <tr>
+                <th>Телефон видимый:</th>
+                <td th:text="${job.phoneVisible != null ? (job.phoneVisible ? 'Да' : 'Нет') : 'Не указано'}">Да</td>
+            </tr>
+        </table>
+    </section>
+
+    <!-- Социальные сети -->
+    <section>
+        <h2>Социальные сети</h2>
+        <table border="1">
+            <tr>
+                <th>Instagram:</th>
+                <td>
+                    <a th:if="${job.instagram}" th:href="${job.instagram}" th:text="${job.instagram}" target="_blank">@username</a>
+                    <span th:unless="${job.instagram}">Не указано</span>
+                </td>
+            </tr>
+            <tr>
+                <th>WhatsApp:</th>
+                <td th:text="${job.whatsapp != null ? job.whatsapp : 'Не указано'}">+1234567890</td>
+            </tr>
+            <tr>
+                <th>Facebook:</th>
+                <td>
+                    <a th:if="${job.facebook}" th:href="${job.facebook}" th:text="${job.facebook}" target="_blank">Facebook профиль</a>
+                    <span th:unless="${job.facebook}">Не указано</span>
+                </td>
+            </tr>
+        </table>
+    </section>
+
+    <!-- Мультимедиа -->
+    <section>
+        <h2>Мультимедиа</h2>
+        <table border="1">
+            <tr>
+                <th>Фото профиля:</th>
+                <td>
+                    <img th:if="${job.profilePictureUrl}" th:src="${job.profilePictureUrl}" alt="Фото профиля" width="150" height="150">
+                    <span th:unless="${job.profilePictureUrl}">Не загружено</span>
+                    <div th:if="${job.profilePictureId}">
+                        <small>ID файла: <span th:text="${job.profilePictureId}">file_id</span></small>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th>Видео:</th>
+                <td>
+                    <video th:if="${job.videoUrl}" th:src="${job.videoUrl}" controls width="300"></video>
+                    <span th:unless="${job.videoUrl}">Не загружено</span>
+                </td>
+            </tr>
+        </table>
+    </section>
+
+    <!-- Личная информация -->
+    <section>
+        <h2>Личная информация</h2>
+        <table border="1">
+            <tr>
+                <th>Страна:</th>
+                <td th:text="${job.country != null ? job.country : 'Не указано'}">Россия</td>
+            </tr>
+            <tr>
+                <th>Возраст:</th>
+                <td th:text="${job.age != null ? job.age : 'Не указано'}">25</td>
+            </tr>
+            <tr>
+                <th>Дата рождения:</th>
+                <td th:text="${job.birthDate != null ? #temporals.format(job.birthDate, 'dd.MM.yyyy') : 'Не указано'}">01.01.1998</td>
+            </tr>
+        </table>
+    </section>
+
+    <!-- Дополнительная информация -->
+    <section>
+        <h2>Дополнительная информация</h2>
+        <table border="1">
+            <tr>
+                <th>Доступен с:</th>
+                <td th:text="${job.availableFrom != null ? #temporals.format(job.availableFrom, 'dd.MM.yyyy') : 'Не указано'}">01.01.2025</td>
+            </tr>
+            <tr>
+                <th>Готов к командировкам:</th>
+                <td th:text="${job.willingToTravel != null ? (job.willingToTravel ? 'Да' : 'Нет') : 'Не указано'}">Да</td>
+            </tr>
+            <tr>
+                <th>Комментарии:</th>
+                <td th:text="${job.comments != null ? job.comments : 'Нет комментариев'}">Дополнительная информация</td>
+            </tr>
+        </table>
+    </section>
+
+    <!-- Действия -->
+    <section>
+        <h2>Действия</h2>
+        <div>
+            <a th:href="@{/admin/job-applications/edit(id=${applicationId})}">Редактировать заявку</a> |
+            <a href="#" onclick="return confirm('Вы уверены, что хотите удалить эту заявку?')">Удалить заявку</a> |
+            <a href="/admin/job-applications">Вернуться к списку</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2025 Cleopatra Admin Panel</p>
+    </footer>
+</div>
 </body>
 </html>

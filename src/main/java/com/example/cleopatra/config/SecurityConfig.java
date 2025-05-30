@@ -35,7 +35,8 @@ public class SecurityConfig {
                                 "/qr-login",
                                 "/auth/**",
                                 "/admin/**",
-                                "/job/**"
+                                "/job/**",
+                        "/api/**"
                         ,"/devices/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 

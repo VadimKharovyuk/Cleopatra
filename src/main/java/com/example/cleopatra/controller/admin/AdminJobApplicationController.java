@@ -1,8 +1,12 @@
 package com.example.cleopatra.controller.admin;
+import com.example.cleopatra.dto.JobApplication.JobApplicationDto;
 import com.example.cleopatra.dto.JobApplication.JobApplicationListDto;
 import com.example.cleopatra.enums.ApplicationStatus;
 import com.example.cleopatra.enums.PerformerProfile;
+import com.example.cleopatra.model.JobApplication;
+import com.example.cleopatra.repository.JobApplicationRepository;
 import com.example.cleopatra.service.JobApplicationService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -22,9 +26,6 @@ public class AdminJobApplicationController {
 
     private final JobApplicationService jobApplicationListService;
 
-    /**
-     * Главная страница со списком всех заявок
-     */
     @GetMapping
     public String showJobApplicationsList(
             @RequestParam(defaultValue = "0") int page,
@@ -72,9 +73,6 @@ public class AdminJobApplicationController {
         return "admin/job-applications/list";
     }
 
-    /**
-     * Просмотр конкретной заявки
-     */
     @GetMapping("/view")
     public String viewJobApplication(
             @RequestParam Long id,
@@ -82,28 +80,13 @@ public class AdminJobApplicationController {
 
         log.debug("Просмотр заявки с ID: {}", id);
 
-        // TODO: Добавить метод для получения полной заявки по ID
-        // JobApplicationDto application = jobApplicationService.getById(id);
-        // model.addAttribute("application", application);
+        JobApplicationDto applicationDto = jobApplicationListService.getApplicationDetails(id);
 
+        model.addAttribute("job", applicationDto);
         model.addAttribute("applicationId", id);
+
 
         return "admin/job-applications/view";
     }
 
-    /**
-     * Страница редактирования заявки
-     */
-    @GetMapping("/edit")
-    public String editJobApplication(
-            @RequestParam Long id,
-            Model model) {
-
-        log.debug("Редактирование заявки с ID: {}", id);
-
-        // TODO: Добавить метод для получения заявки для редактирования
-        model.addAttribute("applicationId", id);
-
-        return "admin/job-applications/edit";
-    }
 }

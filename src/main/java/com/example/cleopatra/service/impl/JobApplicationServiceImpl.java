@@ -1,5 +1,4 @@
 package com.example.cleopatra.service.impl;
-
 import com.example.cleopatra.ExistsException.ImageUploadException;
 import com.example.cleopatra.ExistsException.JobApplicationSaveException;
 import com.example.cleopatra.dto.JobApplication.CreateJobApplicationDto;
@@ -14,6 +13,7 @@ import com.example.cleopatra.repository.JobApplicationRepository;
 import com.example.cleopatra.service.ImageValidator;
 import com.example.cleopatra.service.JobApplicationService;
 import com.example.cleopatra.service.StorageService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -76,6 +76,25 @@ public class JobApplicationServiceImpl implements JobApplicationService {
                 .build();
     }
 
+
+//    private JobApplicationListDto getApplicationsSlice(Pageable pageable) {
+//        Slice<JobApplication> jobApplications = jobApplicationRepository.findAll(pageable);
+//
+//        int currentPage = jobApplications.getNumber();
+//
+//        return JobApplicationListDto.builder()
+//                .applications(jobApplications.getContent()
+//                        .stream()
+//                        .map(jobApplicationMapper::toCardDto)
+//                        .toList())
+//                .currentPage(currentPage)
+//                .itemsPerPage(jobApplications.getSize())
+//                .hasNext(jobApplications.hasNext())
+//                .nextPage(jobApplications.hasNext() ? currentPage + 1 : null)
+//                .previousPage(currentPage > 0 ? currentPage - 1 : null)
+//                .build();
+//    }
+
     @Override
     public JobApplicationListDto getApplicationsWithFilters(
             ApplicationStatus status,
@@ -91,6 +110,18 @@ public class JobApplicationServiceImpl implements JobApplicationService {
                 status, profile, country, searchQuery, pageable);
         return buildListDto(page);
     }
+
+    @Override
+    public JobApplicationDto getApplicationDetails(Long id) {
+        JobApplication jobApplication = jobApplicationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Заявка не найдена"));
+        JobApplicationDto dto = jobApplicationMapper.toDto(jobApplication);
+        return dto;
+    }
+
+
+
+
     /**
      * Преобразует Page<JobApplication> в JobApplicationListDto
      */
@@ -120,7 +151,6 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         }
 
         try {
-            // ИСПРАВЛЕНО: сохраняем и URL и ID изображения
             StorageService.StorageResult result = uploadProfilePicture(profilePicture);
             jobApplication.setProfilePictureUrl(result.getUrl());
             jobApplication.setProfilePictureId(result.getImageId());
@@ -141,15 +171,12 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         }
     }
 
-    // ИСПРАВЛЕНО: возвращаем StorageResult вместо String
     private StorageService.StorageResult uploadProfilePicture(MultipartFile file) {
         try {
             log.debug("Загрузка изображения профиля. Размер файла: {} bytes", file.getSize());
 
-            // Валидация файла через отдельный валидатор
             imageValidator.validateImage(file);
 
-            // Загрузка через StorageService
             StorageService.StorageResult result = storageService.uploadImage(file);
 
             log.debug("Изображение успешно загружено. URL: {}, ID: {}",

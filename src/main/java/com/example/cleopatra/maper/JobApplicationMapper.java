@@ -1,12 +1,10 @@
 package com.example.cleopatra.maper;
-
 import com.example.cleopatra.dto.JobApplication.CreateJobApplicationDto;
 import com.example.cleopatra.dto.JobApplication.JobApplicationCardDto;
 import com.example.cleopatra.dto.JobApplication.JobApplicationDto;
 import com.example.cleopatra.model.JobApplication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,10 +60,6 @@ public class JobApplicationMapper {
 
                 .build();
     }
-
-    /**
-     * Конвертация Entity в DTO для отображения
-     */
     public JobApplicationDto toDto(JobApplication jobApplication) {
         if (jobApplication == null) {
             return null;
@@ -97,7 +91,7 @@ public class JobApplicationMapper {
         dto.setWhatsapp(jobApplication.getWhatsapp());
         dto.setFacebook(jobApplication.getFacebook());
 
-        // Медиа - ИСПРАВЛЕНО: правильные названия полей
+        // Медиа
         dto.setProfilePictureUrl(jobApplication.getProfilePictureUrl());
         dto.setProfilePictureId(jobApplication.getProfilePictureId());
         dto.setVideoUrl(jobApplication.getVideoUrl());
@@ -105,11 +99,11 @@ public class JobApplicationMapper {
         // Личная информация
         dto.setCountry(jobApplication.getCountry());
         dto.setAge(jobApplication.getAge());
-        dto.setBirthDate(jobApplication.getBirthDate()); // ИСПРАВЛЕНО: добавлено маппинг birthDate
+        dto.setBirthDate(jobApplication.getBirthDate());
 
         // Дополнительная информация
         dto.setAdditionalSkills(jobApplication.getAdditionalSkills());
-        dto.setAvailableFrom(jobApplication.getAvailableFrom()); // ИСПРАВЛЕНО: добавлено маппинг availableFrom
+        dto.setAvailableFrom(jobApplication.getAvailableFrom());
         dto.setWillingToTravel(jobApplication.getWillingToTravel());
         dto.setComments(jobApplication.getComments());
 
