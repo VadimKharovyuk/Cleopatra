@@ -7,6 +7,7 @@ import com.example.cleopatra.dto.JobApplication.JobApplicationCardDto;
 import com.example.cleopatra.dto.JobApplication.JobApplicationDto;
 import com.example.cleopatra.dto.JobApplication.JobApplicationListDto;
 import com.example.cleopatra.enums.ApplicationStatus;
+import com.example.cleopatra.enums.PerformerProfile;
 import com.example.cleopatra.maper.JobApplicationMapper;
 import com.example.cleopatra.model.JobApplication;
 import com.example.cleopatra.repository.JobApplicationRepository;
@@ -52,22 +53,50 @@ public class JobApplicationServiceImpl implements JobApplicationService {
 
     @Override
     public JobApplicationListDto getAllApplications(Pageable pageable) {
-        // Сначала достаем Page из репозитория
+
         Page<JobApplication> jobApplications = jobApplicationRepository.findAll(pageable);
 
-        // Потом проходим стримом и мапим в DTO
         List<JobApplicationCardDto> applicationCards = jobApplications.getContent()
                 .stream()
                 .map(jobApplicationMapper::toCardDto)
                 .toList();
 
-        // Собираем итоговый DTO с метаданными пагинации
         return JobApplicationListDto.builder()
                 .applications(applicationCards)
                 .totalPages(jobApplications.getTotalPages())
                 .currentPage(jobApplications.getNumber())
                 .totalItems(jobApplications.getTotalElements())
                 .itemsPerPage(jobApplications.getSize())
+                .build();
+    }
+
+    @Override
+    public JobApplicationListDto getApplicationsWithFilters(
+            ApplicationStatus status,
+            PerformerProfile profile,
+            String country,
+            String searchQuery,
+            Pageable pageable) {
+
+        log.debug("Получение заявок с фильтрами: status={}, profile={}, country={}, query={}, page={}, size={}",
+                status, profile, country, searchQuery, pageable.getPageNumber(), pageable.getPageSize());
+
+        Page<JobApplication> page = jobApplicationRepository.findWithFilters(
+                status, profile, country, searchQuery, pageable);
+        return buildListDto(page);
+    }
+    /**
+     * Преобразует Page<JobApplication> в JobApplicationListDto
+     */
+    private JobApplicationListDto buildListDto(Page<JobApplication> page) {
+        List<JobApplicationCardDto> cards = jobApplicationMapper.toCardDtoList(page.getContent());
+
+        return JobApplicationListDto.builder()
+                .applications(cards)
+                .totalPages(page.getTotalPages())
+                .currentPage(page.getNumber())
+                .totalItems(page.getTotalElements())
+                .itemsPerPage(page.getSize())
                 .build();
     }
 

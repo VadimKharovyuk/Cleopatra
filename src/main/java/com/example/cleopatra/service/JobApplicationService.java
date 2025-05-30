@@ -10,39 +10,8 @@ import org.springframework.data.domain.Pageable;
 public interface JobApplicationService {
     JobApplicationDto createJobApplication( CreateJobApplicationDto jobApplicationDto);
 
-    /**
-     * Получить список всех заявок с пагинацией
-     */
     JobApplicationListDto getAllApplications(Pageable pageable);
 
-//    /**
-//     * Получить список заявок с фильтрацией по статусу
-//     */
-//    JobApplicationListDto getApplicationsByStatus(ApplicationStatus status, Pageable pageable);
-//
-//    /**
-//     * Получить список заявок с фильтрацией по профилю
-//     */
-//    JobApplicationListDto getApplicationsByProfile(PerformerProfile profile, Pageable pageable);
-//
-//    /**
-//     * Получить список заявок с фильтрацией по стране
-//     */
-//    JobApplicationListDto getApplicationsByCountry(String country, Pageable pageable);
-//
-//    /**
-//     * Поиск заявок по имени или email
-//     */
-//    JobApplicationListDto searchApplications(String searchQuery, Pageable pageable);
-//
-//    /**
-//     * Получить список заявок с комплексной фильтрацией
-//     */
-//    JobApplicationListDto getApplicationsWithFilters(
-//            ApplicationStatus status,
-//            PerformerProfile profile,
-//            String country,
-//            String searchQuery,
-//            Pageable pageable
-//    );
+
+    JobApplicationListDto getApplicationsWithFilters(ApplicationStatus status, PerformerProfile profile, String country, String search, Pageable pageable);
 }

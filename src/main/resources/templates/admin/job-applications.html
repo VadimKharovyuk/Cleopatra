@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Управление заявками - Админ панель</title>
+</head>
+<body>
+<div>
+  <header>
+    <h1>Управление заявками на работу</h1>
+    <nav>
+      <a href="/admin">Админ панель</a> |
+      <a href="/job/create">Новая заявка</a> |
+      <a href="/admin/job-applications">Все заявки</a>
+    </nav>
+  </header>
+
+  <!-- Фильтры и поиск -->
+  <section>
+    <h3>Фильтры и поиск</h3>
+    <form method="get" action="/admin/job-applications">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: end;">
+
+        <!-- Поиск -->
+        <div>
+          <label for="search">Поиск:</label><br>
+          <input type="text" id="search" name="search"
+                 th:value="${searchQuery}"
+                 placeholder="Имя или email">
+        </div>
+
+        <!-- Статус -->
+        <div>
+          <label for="status">Статус:</label><br>
+          <select id="status" name="status">
+            <option value="">Все статусы</option>
+            <option th:each="status : ${allStatuses}"
+                    th:value="${status}"
+                    th:text="${status.name()}"
+                    th:selected="${status == selectedStatus}"></option>
+          </select>
+        </div>
+
+        <!-- Профиль -->
+        <div>
+          <label for="profile">Профиль:</label><br>
+          <select id="profile" name="profile">
+            <option value="">Все профили</option>
+            <option th:each="profile : ${allProfiles}"
+                    th:value="${profile}"
+                    th:text="${profile.name()}"
+                    th:selected="${profile == selectedProfile}"></option>
+          </select>
+        </div>
+
+        <!-- Страна -->
+        <div>
+          <label for="country">Страна:</label><br>
+          <input type="text" id="country" name="country"
+                 th:value="${selectedCountry}"
+                 placeholder="Название страны">
+        </div>
+
+        <!-- Размер страницы -->
+        <div>
+          <label for="size">На странице:</label><br>
+          <select id="size" name="size">
+            <option value="10" th:selected="${currentSize == 10}">10</option>
+            <option value="25" th:selected="${currentSize == 25}">25</option>
+            <option value="50" th:selected="${currentSize == 50}">50</option>
+          </select>
+        </div>
+
+        <!-- Сортировка -->
+        <div>
+          <label for="sortBy">Сортировка:</label><br>
+          <select id="sortBy" name="sortBy">
+            <option value="createdAt" th:selected="${currentSortBy == 'createdAt'}">Дата создания</option>
+            <option value="name" th:selected="${currentSortBy == 'name'}">Имя</option>
+            <option value="age" th:selected="${currentSortBy == 'age'}">Возраст</option>
+            <option value="workExperience" th:selected="${currentSortBy == 'workExperience'}">Опыт</option>
+            <option value="minSalary" th:selected="${currentSortBy == 'minSalary'}">Зарплата</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="sortDir">Направление:</label><br>
+          <select id="sortDir" name="sortDir">
+            <option value="asc" th:selected="${currentSortDir == 'asc'}">По возрастанию</option>
+            <option value="desc" th:selected="${currentSortDir == 'desc'}">По убыванию</option>
+          </select>
+        </div>
+
+        <!-- Кнопки -->
+        <div>
+          <button type="submit">Применить фильтры</button>
+          <a href="/admin/job-applications" style="margin-left: 10px;">Сбросить</a>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- Информация о результатах -->
+  <section style="margin: 20px 0;">
+    <p>
+      <strong>Найдено:</strong> <span th:text="${applicationsDto.totalItems}">0</span> заявок |
+      <strong>Страница:</strong> <span th:text="${applicationsDto.currentPage + 1}">1</span>
+      из <span th:text="${applicationsDto.totalPages}">1</span> |
+      <strong>На странице:</strong> <span th:text="${applicationsDto.itemsPerPage}">10</span>
+    </p>
+  </section>
+
+  <!-- Таблица заявок -->
+  <section>
+    <div style="overflow-x: auto;">
+      <table border="1" style="width: 100%; border-collapse: collapse;">
+        <thead style="background-color: #f0f0f0;">
+        <tr>
+          <th style="padding: 10px; text-align: left;">ID</th>
+          <th style="padding: 10px; text-align: left;">Имя</th>
+          <th style="padding: 10px; text-align: left;">Профиль</th>
+          <th style="padding: 10px; text-align: left;">Опыт (лет)</th>
+          <th style="padding: 10px; text-align: left;">Мин. зарплата</th>
+          <th style="padding: 10px; text-align: left;">Возраст</th>
+          <th style="padding: 10px; text-align: left;">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Строки заявок -->
+        <tr th:each="application, iterStat : ${applicationsDto.applications}"
+            th:style="${iterStat.even} ? 'background-color: #fafafa;' : ''">
+
+          <td style="padding: 8px;" th:text="${application.id}">1</td>
+
+          <td style="padding: 8px;">
+            <strong th:text="${application.name}">Имя</strong>
+          </td>
+
+          <td style="padding: 8px;">
+                                <span th:if="${application.profile != null}"
+                                      th:text="${application.profile.name()}"
+                                      style="background-color: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-size: 12px;">
+                                    Профиль
+                                </span>
+            <span th:unless="${application.profile != null}">-</span>
+          </td>
+
+          <td style="padding: 8px;" th:text="${application.workExperience ?: '-'}">5</td>
+
+          <td style="padding: 8px;">
+                                <span th:if="${application.minSalary != null}"
+                                      th:text="${application.minSalary}">1000</span>
+            <span th:unless="${application.minSalary != null}">-</span>
+          </td>
+
+          <td style="padding: 8px;" th:text="${application.age ?: '-'}">25</td>
+
+          <td style="padding: 8px;">
+            <a th:href="@{/admin/job-applications/view(id=${application.id})}"
+               style="color: #2196f3; text-decoration: none; margin-right: 5px;">
+              👁 Просмотр
+            </a>
+            <a th:href="@{/admin/job-applications/edit(id=${application.id})}"
+               style="color: #ff9800; text-decoration: none; margin-right: 5px;">
+              ✏ Редактировать
+            </a>
+            <a href="#"
+               style="color: #f44336; text-decoration: none;"
+               onclick="return confirm('Вы уверены, что хотите удалить эту заявку?')">
+              🗑 Удалить
+            </a>
+          </td>
+        </tr>
+
+        <!-- Если нет заявок -->
+        <tr th:if="${applicationsDto.applications.empty}">
+          <td colspan="7" style="padding: 20px; text-align: center; color: #666;">
+            Заявки не найдены
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Пагинация -->
+  <section th:if="${applicationsDto.totalPages > 1}" style="margin: 20px 0; text-align: center;">
+
+    <!-- Предыдущая страница -->
+    <a th:if="${applicationsDto.currentPage > 0}"
+       th:href="@{/admin/job-applications(page=${applicationsDto.currentPage - 1}, size=${currentSize}, sortBy=${currentSortBy}, sortDir=${currentSortDir}, status=${selectedStatus}, profile=${selectedProfile}, country=${selectedCountry}, search=${searchQuery})}"
+       style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;">
+      « Предыдущая
+    </a>
+
+    <!-- Номера страниц -->
+    <span th:each="pageNum : ${#numbers.sequence(0, applicationsDto.totalPages - 1)}">
+                <span th:if="${pageNum == applicationsDto.currentPage}"
+                      style="padding: 8px 12px; margin: 0 2px; background-color: #2196f3; color: white; border-radius: 4px;"
+                      th:text="${pageNum + 1}">1</span>
+
+                <a th:unless="${pageNum == applicationsDto.currentPage}"
+                   th:href="@{/admin/job-applications(page=${pageNum}, size=${currentSize}, sortBy=${currentSortBy}, sortDir=${currentSortDir}, status=${selectedStatus}, profile=${selectedProfile}, country=${selectedCountry}, search=${searchQuery})}"
+                   style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;"
+                   th:text="${pageNum + 1}">2</a>
+            </span>
+
+    <!-- Следующая страница -->
+    <a th:if="${applicationsDto.currentPage < applicationsDto.totalPages - 1}"
+       th:href="@{/admin/job-applications(page=${applicationsDto.currentPage + 1}, size=${currentSize}, sortBy=${currentSortBy}, sortDir=${currentSortDir}, status=${selectedStatus}, profile=${selectedProfile}, country=${selectedCountry}, search=${searchQuery})}"
+       style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;">
+      Следующая »
+    </a>
+  </section>
+
+  <footer style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px;">
+    <p style="text-align: center; color: #666;">
+      © 2025 Cleopatra Admin Panel
+    </p>
+  </footer>
+</div>
+</body>
+</html>
