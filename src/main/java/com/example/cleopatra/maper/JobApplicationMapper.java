@@ -1,177 +1,114 @@
-package com.example.cleopatra.maper;
+package com.example.cleopatra.mapper;
 
+import com.example.cleopatra.dto.JobApplication.CreateJobApplicationDto;
 import com.example.cleopatra.dto.JobApplication.JobApplicationDto;
-import com.example.cleopatra.enums.ApplicationStatus;
 import com.example.cleopatra.model.JobApplication;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-
+import org.springframework.util.StringUtils;
 
 @Component
 public class JobApplicationMapper {
 
     /**
-     * Преобразует DTO в Entity для создания новой заявки
+     * Конвертация CreateDTO в Entity для создания
      */
-    public JobApplication toEntity(JobApplicationDto dto) {
-        if (dto == null) {
+    public JobApplication fromCreateDto(CreateJobApplicationDto createDto) {
+        if (createDto == null) {
             return null;
         }
 
         return JobApplication.builder()
                 // Основная информация
-                .name(dto.getName())
-                .fullName(dto.getFullName())
-                .bio(dto.getBio())
+                .name(createDto.getName())
+                .fullName(createDto.getFullName())
+                .bio(createDto.getBio())
 
                 // Профессиональная информация
-                .profile(dto.getProfile())
-                .workExperience(dto.getWorkExperience())
+                .profile(createDto.getProfile())
+                .workExperience(createDto.getWorkExperience())
 
                 // Зарплатные ожидания
-                .minSalary(dto.getMinSalary())
-                .maxSalary(dto.getMaxSalary())
-                .currency(dto.getCurrency())
+                .minSalary(createDto.getMinSalary())
+                .maxSalary(createDto.getMaxSalary())
+                .currency(StringUtils.hasText(createDto.getCurrency()) ? createDto.getCurrency() : "USD")
 
                 // Контактная информация
-                .email(dto.getEmail())
-                .phone(dto.getPhone())
-                .phoneVisible(dto.getPhoneVisible())
+                .email(createDto.getEmail())
+                .phone(createDto.getPhone())
+                .phoneVisible(createDto.getPhoneVisible() != null ? createDto.getPhoneVisible() : true)
 
                 // Социальные сети
-                .instagram(dto.getInstagram())
-                .whatsapp(dto.getWhatsapp())
-                .facebook(dto.getFacebook())
+                .instagram(createDto.getInstagram())
+                .whatsapp(createDto.getWhatsapp())
+                .facebook(createDto.getFacebook())
 
-                // Медиа
-                .profilePictureUrl(dto.getProfilePictureUrl())
-                .videoUrl(dto.getVideoUrl())
+                // Медиа - НЕ мапим файл, только videoUrl
+                .videoUrl(createDto.getVideoUrl())
 
                 // Личная информация
-                .country(dto.getCountry())
-                .age(dto.getAge())
-                .birthDate(dto.getBirthDate())
+                .country(createDto.getCountry())
+                .age(createDto.getAge())
+                .birthDate(createDto.getBirthDate()) // ИСПРАВЛЕНО: добавлено маппинг birthDate
 
                 // Дополнительная информация
-                .additionalSkills(dto.getAdditionalSkills())
-                .availableFrom(dto.getAvailableFrom())
-                .willingToTravel(dto.getWillingToTravel())
-                .comments(dto.getComments())
+                .additionalSkills(createDto.getAdditionalSkills())
+                .availableFrom(createDto.getAvailableFrom()) // ИСПРАВЛЕНО: добавлено маппинг availableFrom
+                .willingToTravel(createDto.getWillingToTravel() != null ? createDto.getWillingToTravel() : true)
+                .comments(createDto.getComments())
 
-                // Системные поля устанавливаются автоматически
-                .status(ApplicationStatus.PENDING)
-                .createdAt(LocalDateTime.now())
                 .build();
     }
 
     /**
-     * Преобразует Entity в DTO для редактирования
+     * Конвертация Entity в DTO для отображения
      */
-    public JobApplicationDto toDto(JobApplication entity) {
-        if (entity == null) {
+    public JobApplicationDto toDto(JobApplication jobApplication) {
+        if (jobApplication == null) {
             return null;
         }
 
         JobApplicationDto dto = new JobApplicationDto();
 
         // Основная информация
-        dto.setName(entity.getName());
-        dto.setFullName(entity.getFullName());
-        dto.setBio(entity.getBio());
+        dto.setName(jobApplication.getName());
+        dto.setFullName(jobApplication.getFullName());
+        dto.setBio(jobApplication.getBio());
 
         // Профессиональная информация
-        dto.setProfile(entity.getProfile());
-        dto.setWorkExperience(entity.getWorkExperience());
+        dto.setProfile(jobApplication.getProfile());
+        dto.setWorkExperience(jobApplication.getWorkExperience());
 
         // Зарплатные ожидания
-        dto.setMinSalary(entity.getMinSalary());
-        dto.setMaxSalary(entity.getMaxSalary());
-        dto.setCurrency(entity.getCurrency());
+        dto.setMinSalary(jobApplication.getMinSalary());
+        dto.setMaxSalary(jobApplication.getMaxSalary());
+        dto.setCurrency(jobApplication.getCurrency());
 
         // Контактная информация
-        dto.setEmail(entity.getEmail());
-        dto.setPhone(entity.getPhone());
-        dto.setPhoneVisible(entity.getPhoneVisible());
+        dto.setEmail(jobApplication.getEmail());
+        dto.setPhone(jobApplication.getPhone());
+        dto.setPhoneVisible(jobApplication.getPhoneVisible());
 
         // Социальные сети
-        dto.setInstagram(entity.getInstagram());
-        dto.setWhatsapp(entity.getWhatsapp());
-        dto.setFacebook(entity.getFacebook());
+        dto.setInstagram(jobApplication.getInstagram());
+        dto.setWhatsapp(jobApplication.getWhatsapp());
+        dto.setFacebook(jobApplication.getFacebook());
 
-        // Медиа
-        dto.setProfilePictureUrl(entity.getProfilePictureUrl());
-        dto.setVideoUrl(entity.getVideoUrl());
+        // Медиа - ИСПРАВЛЕНО: правильные названия полей
+        dto.setProfilePictureUrl(jobApplication.getProfilePictureUrl());
+        dto.setProfilePictureId(jobApplication.getProfilePictureId());
+        dto.setVideoUrl(jobApplication.getVideoUrl());
 
         // Личная информация
-        dto.setCountry(entity.getCountry());
-        dto.setAge(entity.getAge());
-        dto.setBirthDate(entity.getBirthDate());
+        dto.setCountry(jobApplication.getCountry());
+        dto.setAge(jobApplication.getAge());
+        dto.setBirthDate(jobApplication.getBirthDate()); // ИСПРАВЛЕНО: добавлено маппинг birthDate
 
         // Дополнительная информация
-        dto.setAdditionalSkills(entity.getAdditionalSkills());
-        dto.setAvailableFrom(entity.getAvailableFrom());
-        dto.setWillingToTravel(entity.getWillingToTravel());
-        dto.setComments(entity.getComments());
-
-        // Поля согласия не заполняем при редактировании
-        dto.setAgreeToDataProcessing(true);
-        dto.setConfirmDataAccuracy(true);
+        dto.setAdditionalSkills(jobApplication.getAdditionalSkills());
+        dto.setAvailableFrom(jobApplication.getAvailableFrom()); // ИСПРАВЛЕНО: добавлено маппинг availableFrom
+        dto.setWillingToTravel(jobApplication.getWillingToTravel());
+        dto.setComments(jobApplication.getComments());
 
         return dto;
     }
-
-    /**
-     * Обновляет существующую Entity данными из DTO
-     */
-    public void updateEntity(JobApplication entity, JobApplicationDto dto) {
-        if (entity == null || dto == null) {
-            return;
-        }
-
-        // Основная информация
-        entity.setName(dto.getName());
-        entity.setFullName(dto.getFullName());
-        entity.setBio(dto.getBio());
-
-        // Профессиональная информация
-        entity.setProfile(dto.getProfile());
-        entity.setWorkExperience(dto.getWorkExperience());
-
-        // Зарплатные ожидания
-        entity.setMinSalary(dto.getMinSalary());
-        entity.setMaxSalary(dto.getMaxSalary());
-        entity.setCurrency(dto.getCurrency());
-
-        // Контактная информация
-        entity.setEmail(dto.getEmail());
-        entity.setPhone(dto.getPhone());
-        entity.setPhoneVisible(dto.getPhoneVisible());
-
-        // Социальные сети
-        entity.setInstagram(dto.getInstagram());
-        entity.setWhatsapp(dto.getWhatsapp());
-        entity.setFacebook(dto.getFacebook());
-
-        // Медиа
-        entity.setProfilePictureUrl(dto.getProfilePictureUrl());
-        entity.setVideoUrl(dto.getVideoUrl());
-
-        // Личная информация
-        entity.setCountry(dto.getCountry());
-        entity.setAge(dto.getAge());
-        entity.setBirthDate(dto.getBirthDate());
-
-        // Дополнительная информация
-        entity.setAdditionalSkills(dto.getAdditionalSkills());
-        entity.setAvailableFrom(dto.getAvailableFrom());
-        entity.setWillingToTravel(dto.getWillingToTravel());
-        entity.setComments(dto.getComments());
-
-        // Системные поля обновляются автоматически через @UpdateTimestamp
-    }
-
-
-
-
 }

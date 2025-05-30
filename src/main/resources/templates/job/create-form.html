@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подача заявки на работу - Cleopatra</title>
+</head>
+<body>
+<div>
+    <header>
+        <h1>Подача заявки на работу</h1>
+        <p>Заполните форму ниже, чтобы подать заявку на работу в нашей компании</p>
+    </header>
+
+    <!-- Сообщения об ошибках -->
+    <div th:if="${errorMessage}" style="background-color: #ffebee; border: 1px solid #f44336; padding: 10px; margin: 10px 0; border-radius: 4px;">
+        <p style="color: #d32f2f; margin: 0;" th:text="${errorMessage}"></p>
+    </div>
+
+    <!-- Форма заявки -->
+    <form th:action="@{/job/send}" th:object="${jobApplication}" method="post" enctype="multipart/form-data">
+
+        <!-- Основная информация -->
+        <fieldset>
+            <legend>Основная информация</legend>
+
+            <div>
+                <label for="name">Имя *:</label>
+                <input type="text" id="name" th:field="*{name}" required>
+                <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="fullName">Полное имя *:</label>
+                <input type="text" id="fullName" th:field="*{fullName}" required>
+                <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="bio">Биография:</label>
+                <textarea id="bio" th:field="*{bio}" rows="4" placeholder="Расскажите о себе..."></textarea>
+                <span th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}" style="color: red;"></span>
+            </div>
+        </fieldset>
+
+        <!-- Профессиональная информация -->
+        <fieldset>
+            <legend>Профессиональная информация</legend>
+
+            <div>
+                <label for="profile">Профиль артиста *:</label>
+                <select id="profile" th:field="*{profile}" required>
+                    <option value="">Выберите профиль</option>
+                    <option th:each="profile : ${performerProfiles}"
+                            th:value="${profile}"
+                            th:text="${profile.displayName}"></option>
+                </select>
+                <span th:if="${#fields.hasErrors('profile')}" th:errors="*{profile}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="workExperience">Опыт работы (лет) *:</label>
+                <input type="number" id="workExperience" th:field="*{workExperience}" min="0" max="50" required>
+                <span th:if="${#fields.hasErrors('workExperience')}" th:errors="*{workExperience}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="additionalSkills">Дополнительные навыки:</label>
+                <textarea id="additionalSkills" th:field="*{additionalSkills}" rows="3" placeholder="Укажите дополнительные навыки..."></textarea>
+                <span th:if="${#fields.hasErrors('additionalSkills')}" th:errors="*{additionalSkills}" style="color: red;"></span>
+            </div>
+        </fieldset>
+
+        <!-- Зарплатные ожидания -->
+        <fieldset>
+            <legend>Зарплатные ожидания</legend>
+
+            <div>
+                <label for="minSalary">Минимальная зарплата:</label>
+                <input type="number" id="minSalary" th:field="*{minSalary}" step="0.01" min="0">
+                <span th:if="${#fields.hasErrors('minSalary')}" th:errors="*{minSalary}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="maxSalary">Максимальная зарплата:</label>
+                <input type="number" id="maxSalary" th:field="*{maxSalary}" step="0.01" min="0">
+                <span th:if="${#fields.hasErrors('maxSalary')}" th:errors="*{maxSalary}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="currency">Валюта:</label>
+                <select id="currency" th:field="*{currency}">
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="RUB">RUB</option>
+                </select>
+            </div>
+        </fieldset>
+
+        <!-- Контактная информация -->
+        <fieldset>
+            <legend>Контактная информация</legend>
+
+            <div>
+                <label for="email">Email *:</label>
+                <input type="email" id="email" th:field="*{email}" required>
+                <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="phone">Телефон:</label>
+                <input type="tel" id="phone" th:field="*{phone}" placeholder="+1234567890">
+                <span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label>
+                    <input type="checkbox" th:field="*{phoneVisible}">
+                    Показывать телефон в профиле
+                </label>
+            </div>
+        </fieldset>
+
+        <!-- Социальные сети -->
+        <fieldset>
+            <legend>Социальные сети</legend>
+
+            <div>
+                <label for="instagram">Instagram:</label>
+                <input type="text" id="instagram" th:field="*{instagram}" placeholder="@username">
+                <span th:if="${#fields.hasErrors('instagram')}" th:errors="*{instagram}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="whatsapp">WhatsApp:</label>
+                <input type="tel" id="whatsapp" th:field="*{whatsapp}" placeholder="+1234567890">
+                <span th:if="${#fields.hasErrors('whatsapp')}" th:errors="*{whatsapp}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="facebook">Facebook:</label>
+                <input type="text" id="facebook" th:field="*{facebook}" placeholder="facebook.com/username">
+                <span th:if="${#fields.hasErrors('facebook')}" th:errors="*{facebook}" style="color: red;"></span>
+            </div>
+        </fieldset>
+
+        <!-- Медиа файлы -->
+        <fieldset>
+            <legend>Медиа файлы</legend>
+
+            <div>
+                <label for="profilePicture">Фото профиля:</label>
+                <input type="file" id="profilePicture" th:field="*{profilePicture}" accept="image/*">
+                <small>Максимальный размер: 5MB. Форматы: JPG, PNG</small>
+                <span th:if="${#fields.hasErrors('profilePicture')}" th:errors="*{profilePicture}" style="color: red;"></span>
+                <span th:if="${fieldError_profilePicture}" th:text="${fieldError_profilePicture}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="videoUrl">Ссылка на видео (YouTube):</label>
+                <input type="url" id="videoUrl" th:field="*{videoUrl}" placeholder="https://youtube.com/watch?v=...">
+                <span th:if="${#fields.hasErrors('videoUrl')}" th:errors="*{videoUrl}" style="color: red;"></span>
+            </div>
+        </fieldset>
+
+        <!-- Личная информация -->
+        <fieldset>
+            <legend>Личная информация</legend>
+
+            <div>
+                <label for="country">Страна *:</label>
+                <input type="text" id="country" th:field="*{country}" required>
+                <span th:if="${#fields.hasErrors('country')}" th:errors="*{country}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="age">Возраст *:</label>
+                <input type="number" id="age" th:field="*{age}" min="16" max="80" required>
+                <span th:if="${#fields.hasErrors('age')}" th:errors="*{age}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label for="birthDate">Дата рождения:</label>
+                <input type="date" id="birthDate" th:field="*{birthDate}">
+                <span th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}" style="color: red;"></span>
+            </div>
+        </fieldset>
+
+        <!-- Дополнительная информация -->
+        <fieldset>
+            <legend>Дополнительная информация</legend>
+
+            <div>
+                <label for="availableFrom">Доступен с:</label>
+                <input type="date" id="availableFrom" th:field="*{availableFrom}">
+            </div>
+
+            <div>
+                <label>
+                    <input type="checkbox" th:field="*{willingToTravel}">
+                    Готов к командировкам
+                </label>
+            </div>
+
+            <div>
+                <label for="comments">Комментарии:</label>
+                <textarea id="comments" th:field="*{comments}" rows="3" placeholder="Дополнительная информация..."></textarea>
+                <span th:if="${#fields.hasErrors('comments')}" th:errors="*{comments}" style="color: red;"></span>
+            </div>
+        </fieldset>
+
+        <!-- Согласие на обработку данных -->
+        <fieldset>
+            <legend>Согласие на обработку данных</legend>
+
+            <div>
+                <label>
+                    <input type="checkbox" th:field="*{agreeToDataProcessing}" required>
+                    Я согласен на обработку персональных данных *
+                </label>
+                <span th:if="${#fields.hasErrors('agreeToDataProcessing')}" th:errors="*{agreeToDataProcessing}" style="color: red;"></span>
+            </div>
+
+            <div>
+                <label>
+                    <input type="checkbox" th:field="*{confirmDataAccuracy}" required>
+                    Я подтверждаю достоверность предоставленной информации *
+                </label>
+                <span th:if="${#fields.hasErrors('confirmDataAccuracy')}" th:errors="*{confirmDataAccuracy}" style="color: red;"></span>
+            </div>
+        </fieldset>
+
+        <!-- Кнопки -->
+        <div>
+            <button type="submit">Отправить заявку</button>
+            <button type="reset">Очистить форму</button>
+            <a href="/job">Отмена</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

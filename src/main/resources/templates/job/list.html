@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список заявок - Cleopatra</title>
+</head>
+<body>
+<div>
+    <header>
+        <h1>Заявки на работу</h1>
+        <p>Управление заявками соискателей</p>
+    </header>
+
+    <!-- Панель действий -->
+    <div style="margin: 20px 0; padding: 10px; background-color: #f5f5f5; border-radius: 4px;">
+        <a href="/job/create" style="background-color: #4caf50; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">
+            ➕ Новая заявка
+        </a>
+
+        <!-- Фильтры (для будущей реализации) -->
+        <span style="margin-left: 20px;">
+                <label for="statusFilter">Статус:</label>
+                <select id="statusFilter">
+                    <option value="">Все</option>
+                    <option value="PENDING">На рассмотрении</option>
+                    <option value="APPROVED">Одобрено</option>
+                    <option value="REJECTED">Отклонено</option>
+                </select>
+            </span>
+
+        <span style="margin-left: 10px;">
+                <label for="profileFilter">Профиль:</label>
+                <select id="profileFilter">
+                    <option value="">Все профили</option>
+                    <!-- Здесь будут добавлены профили через контроллер -->
+                </select>
+            </span>
+    </div>
+
+    <!-- Таблица заявок -->
+    <div style="overflow-x: auto;">
+        <table border="1" style="width: 100%; border-collapse: collapse;">
+            <thead style="background-color: #f0f0f0;">
+            <tr>
+                <th style="padding: 10px; text-align: left;">ID</th>
+                <th style="padding: 10px; text-align: left;">Имя</th>
+                <th style="padding: 10px; text-align: left;">Email</th>
+                <th style="padding: 10px; text-align: left;">Профиль</th>
+                <th style="padding: 10px; text-align: left;">Страна</th>
+                <th style="padding: 10px; text-align: left;">Опыт</th>
+                <th style="padding: 10px; text-align: left;">Статус</th>
+                <th style="padding: 10px; text-align: left;">Дата подачи</th>
+                <th style="padding: 10px; text-align: left;">Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Пример строки заявки (для демонстрации) -->
+            <!-- th:each="application : ${applications}" когда будет реализован метод получения заявок -->
+            <tr>
+                <td style="padding: 8px;">#001</td>
+                <td style="padding: 8px;">
+                    <strong>Анна Петрова</strong><br>
+                    <small>anna.petrova@email.com</small>
+                </td>
+                <td style="padding: 8px;">anna.petrova@email.com</td>
+                <td style="padding: 8px;">
+                            <span style="background-color: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-size: 12px;">
+                                Танцовщица
+                            </span>
+                </td>
+                <td style="padding: 8px;">Россия</td>
+                <td style="padding: 8px;">5 лет</td>
+                <td style="padding: 8px;">
+                            <span style="background-color: #fff3e0; color: #e65100; padding: 2px 6px; border-radius: 3px; font-size: 12px;">
+                                На рассмотрении
+                            </span>
+                </td>
+                <td style="padding: 8px;">2025-01-15</td>
+                <td style="padding: 8px;">
+                    <a href="/job/view/1" style="color: #2196f3; text-decoration: none; margin-right: 5px;">👁 Просмотр</a>
+                    <a href="/job/edit/1" style="color: #ff9800; text-decoration: none; margin-right: 5px;">✏ Редактировать</a>
+                    <a href="/job/delete/1" style="color: #f44336; text-decoration: none;"
+                       onclick="return confirm('Вы уверены, что хотите удалить эту заявку?')">🗑 Удалить</a>
+                </td>
+            </tr>
+
+            <!-- Еще один пример -->
+            <tr style="background-color: #fafafa;">
+                <td style="padding: 8px;">#002</td>
+                <td style="padding: 8px;">
+                    <strong>Михаил Иванов</strong><br>
+                    <small>m.ivanov@email.com</small>
+                </td>
+                <td style="padding: 8px;">m.ivanov@email.com</td>
+                <td style="padding: 8px;">
+                            <span style="background-color: #f3e5f5; padding: 2px 6px; border-radius: 3px; font-size: 12px;">
+                                Певец
+                            </span>
+                </td>
+                <td style="padding: 8px;">Украина</td>
+                <td style="padding: 8px;">8 лет</td>
+                <td style="padding: 8px;">
+                            <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 6px; border-radius: 3px; font-size: 12px;">
+                                Одобрено
+                            </span>
+                </td>
+                <td style="padding: 8px;">2025-01-12</td>
+                <td style="padding: 8px;">
+                    <a href="/job/view/2" style="color: #2196f3; text-decoration: none; margin-right: 5px;">👁 Просмотр</a>
+                    <a href="/job/edit/2" style="color: #ff9800; text-decoration: none; margin-right: 5px;">✏ Редактировать</a>
+                    <a href="/job/delete/2" style="color: #f44336; text-decoration: none;"
+                       onclick="return confirm('Вы уверены, что хотите удалить эту заявку?')">🗑 Удалить</a>
+                </td>
+            </tr>
+
+            <!-- Если нет заявок -->
+            <!--
+            <tr th:if="${#lists.isEmpty(applications)}">
+                <td colspan="9" style="padding: 20px; text-align: center; color: #666;">
+                    Заявки отсутствуют
+                </td>
+            </tr>
+            -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Пагинация (для будущей реализации) -->
+    <div style="margin: 20px 0; text-align: center;">
+        <a href="#" style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;">« Предыдущая</a>
+        <span style="padding: 8px 12px; margin: 0 2px; background-color: #2196f3; color: white; border-radius: 4px;">1</span>
+        <a href="#" style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;">2</a>
+        <a href="#" style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;">3</a>
+        <a href="#" style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;">Следующая »</a>
+    </div>
+
+    <!-- Статистика -->
+    <div style="margin: 30px 0; background-color: #f9f9f9; padding: 20px; border-radius: 4px;">
+        <h3>Статистика</h3>
+        <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+            <div style="text-align: center; margin: 10px;">
+                <div style="font-size: 24px; font-weight: bold; color: #2196f3;">12</div>
+                <div style="color: #666;">Всего заявок</div>
+            </div>
+            <div style="text-align: center; margin: 10px;">
+                <div style="font-size: 24px; font-weight: bold; color: #ff9800;">8</div>
+                <div style="color: #666;">На рассмотрении</div>
+            </div>
+            <div style="text-align: center; margin: 10px;">
+                <div style="font-size: 24px; font-weight: bold; color: #4caf50;">3</div>
+                <div style="color: #666;">Одобрено</div>
+            </div>
+            <div style="text-align: center; margin: 10px;">
+                <div style="font-size: 24px; font-weight: bold; color: #f44336;">1</div>
+                <div style="color: #666;">Отклонено</div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px;">
+        <p style="text-align: center; color: #666;">
+            © 2025 Cleopatra. Все права защищены.
+        </p>
+    </footer>
+</div>
+</body>
+</html>

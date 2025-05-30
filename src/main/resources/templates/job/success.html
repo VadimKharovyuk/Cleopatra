@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Заявка отправлена - Cleopatra</title>
+</head>
+<body>
+<div>
+  <header>
+    <h1>Заявка успешно отправлена!</h1>
+  </header>
+
+  <main>
+    <!-- Сообщение об успехе -->
+    <div th:if="${successMessage}" style="background-color: #e8f5e8; border: 1px solid #4caf50; padding: 20px; margin: 20px 0; border-radius: 4px;">
+      <h2 style="color: #2e7d32; margin-top: 0;">✓ Успешно!</h2>
+      <p style="color: #2e7d32; margin: 0;" th:text="${successMessage}"></p>
+    </div>
+
+    <!-- Информация о заявке -->
+    <div th:if="${applicationId}">
+      <h3>Детали заявки:</h3>
+      <p><strong>ID заявки:</strong> <span th:text="${applicationId}"></span></p>
+      <p><strong>Дата подачи:</strong> <span th:text="${#temporals.format(#temporals.createNow(), 'dd.MM.yyyy HH:mm')}"></span></p>
+    </div>
+
+    <!-- Что дальше -->
+    <div style="background-color: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 4px;">
+      <h3>Что происходит дальше?</h3>
+      <ol>
+        <li>Наша команда рассмотрит вашу заявку в течение 3-5 рабочих дней</li>
+        <li>Мы свяжемся с вами по указанному email или телефону</li>
+        <li>При положительном решении вас пригласят на собеседование</li>
+        <li>После собеседования мы обсудим условия сотрудничества</li>
+      </ol>
+    </div>
+
+    <!-- Контактная информация -->
+    <div style="background-color: #fff3e0; padding: 20px; margin: 20px 0; border-radius: 4px;">
+      <h3>Контактная информация</h3>
+      <p>Если у вас есть вопросы, вы можете связаться с нами:</p>
+      <ul>
+        <li><strong>Email:</strong> hr@cleopatra.com</li>
+        <li><strong>Телефон:</strong> +1 (555) 123-4567</li>
+        <li><strong>Рабочие часы:</strong> Пн-Пт, 9:00-18:00</li>
+      </ul>
+    </div>
+
+    <!-- Дополнительные действия -->
+    <div>
+      <h3>Дополнительные действия:</h3>
+      <p>
+        <a href="/job/create">Подать еще одну заявку</a> |
+        <a href="/job">Посмотреть все заявки</a> |
+        <a href="/">Вернуться на главную</a>
+      </p>
+    </div>
+
+    <!-- Социальные сети -->
+    <div style="margin-top: 30px;">
+      <h4>Следите за нами в социальных сетях:</h4>
+      <p>
+        <a href="#" target="_blank">Facebook</a> |
+        <a href="#" target="_blank">Instagram</a> |
+        <a href="#" target="_blank">LinkedIn</a> |
+        <a href="#" target="_blank">YouTube</a>
+      </p>
+    </div>
+  </main>
+
+  <footer style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px;">
+    <p style="text-align: center; color: #666;">
+      © 2025 Cleopatra. Все права защищены.
+    </p>
+  </footer>
+</div>
+</body>
+</html>

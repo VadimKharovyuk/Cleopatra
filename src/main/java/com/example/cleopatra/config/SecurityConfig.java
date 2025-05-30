@@ -33,7 +33,8 @@ public class SecurityConfig {
                                 "/funny-login",
                                 "/funny-login1",
                                 "/qr-login",
-                                "/auth/**"
+                                "/auth/**",
+                                "/job/**"
                         ,"/devices/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
