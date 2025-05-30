@@ -1,10 +1,14 @@
-package com.example.cleopatra.mapper;
+package com.example.cleopatra.maper;
 
 import com.example.cleopatra.dto.JobApplication.CreateJobApplicationDto;
+import com.example.cleopatra.dto.JobApplication.JobApplicationCardDto;
 import com.example.cleopatra.dto.JobApplication.JobApplicationDto;
 import com.example.cleopatra.model.JobApplication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JobApplicationMapper {
@@ -111,4 +115,35 @@ public class JobApplicationMapper {
 
         return dto;
     }
+    /**
+     * Преобразует List<JobApplication> в List<JobApplicationCardDto>
+     */
+    public List<JobApplicationCardDto> toCardDtoList(List<JobApplication> applications) {
+        if (applications == null) {
+            return List.of();
+        }
+
+        return applications.stream()
+                .map(this::toCardDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Преобразует JobApplication в JobApplicationCardDto
+     */
+    public JobApplicationCardDto toCardDto(JobApplication jobApplication) {
+        if (jobApplication == null) {
+            return null;
+        }
+
+        return JobApplicationCardDto.builder()
+                .id(jobApplication.getId())
+                .name(jobApplication.getName())
+                .profile(jobApplication.getProfile())
+                .workExperience(jobApplication.getWorkExperience())
+                .minSalary(jobApplication.getMinSalary())
+                .age(jobApplication.getAge())
+                .build();
+    }
+
 }

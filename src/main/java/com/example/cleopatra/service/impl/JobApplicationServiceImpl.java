@@ -3,8 +3,11 @@ package com.example.cleopatra.service.impl;
 import com.example.cleopatra.ExistsException.ImageUploadException;
 import com.example.cleopatra.ExistsException.JobApplicationSaveException;
 import com.example.cleopatra.dto.JobApplication.CreateJobApplicationDto;
+import com.example.cleopatra.dto.JobApplication.JobApplicationCardDto;
 import com.example.cleopatra.dto.JobApplication.JobApplicationDto;
+import com.example.cleopatra.dto.JobApplication.JobApplicationListDto;
 import com.example.cleopatra.enums.ApplicationStatus;
+import com.example.cleopatra.maper.JobApplicationMapper;
 import com.example.cleopatra.model.JobApplication;
 import com.example.cleopatra.repository.JobApplicationRepository;
 import com.example.cleopatra.service.ImageValidator;
@@ -12,11 +15,14 @@ import com.example.cleopatra.service.JobApplicationService;
 import com.example.cleopatra.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +31,9 @@ public class JobApplicationServiceImpl implements JobApplicationService {
 
     private final StorageService storageService;
     private final JobApplicationRepository jobApplicationRepository;
-    private final com.example.cleopatra.mapper.JobApplicationMapper jobApplicationMapper;
+    private final JobApplicationMapper jobApplicationMapper;
     private final ImageValidator imageValidator;
+
 
     @Override
     @Transactional
@@ -41,6 +48,27 @@ public class JobApplicationServiceImpl implements JobApplicationService {
                 savedApplication.getId(), createDto.getEmail());
 
         return jobApplicationMapper.toDto(savedApplication);
+    }
+
+    @Override
+    public JobApplicationListDto getAllApplications(Pageable pageable) {
+        // Сначала достаем Page из репозитория
+        Page<JobApplication> jobApplications = jobApplicationRepository.findAll(pageable);
+
+        // Потом проходим стримом и мапим в DTO
+        List<JobApplicationCardDto> applicationCards = jobApplications.getContent()
+                .stream()
+                .map(jobApplicationMapper::toCardDto)
+                .toList();
+
+        // Собираем итоговый DTO с метаданными пагинации
+        return JobApplicationListDto.builder()
+                .applications(applicationCards)
+                .totalPages(jobApplications.getTotalPages())
+                .currentPage(jobApplications.getNumber())
+                .totalItems(jobApplications.getTotalElements())
+                .itemsPerPage(jobApplications.getSize())
+                .build();
     }
 
     private JobApplication prepareJobApplication(CreateJobApplicationDto createDto) {
