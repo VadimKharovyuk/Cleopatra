@@ -36,7 +36,7 @@ public class JobApplicationDto {
     private String whatsapp;
     private String facebook;
 
-    // Медиа - ИСПРАВЛЕНО: правильные названия полей
+
     private String profilePictureUrl;
     private String profilePictureId;
     private String videoUrl;
