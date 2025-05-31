@@ -95,4 +95,24 @@ public class GlobalControllerAdvice {
         }
         return null;
     }
+
+
+    /**
+     * Возвращает роль текущего пользователя
+     */
+    @ModelAttribute("userRole")
+    public String getUserRole() {
+        UserResponse user = getCurrentUser();
+        return user != null && user.getRole() != null ? user.getRole().name() : null;
+    }
+
+    /**
+     * Проверяет, является ли пользователь администратором
+     */
+    @ModelAttribute("isAdmin")
+    public boolean isAdmin() {
+        UserResponse user = getCurrentUser();
+        return user != null && user.getRole() != null &&
+                "ADMIN".equals(user.getRole().name());
+    }
 }

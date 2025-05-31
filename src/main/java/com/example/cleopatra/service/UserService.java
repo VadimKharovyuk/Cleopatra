@@ -5,7 +5,6 @@ import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import org.springframework.web.multipart.MultipartFile;
 
-
 public interface UserService {
 
     UserResponse createUser(RegisterDto  registerDto);
@@ -26,7 +25,7 @@ public interface UserService {
     boolean userExists(Long userId);
 
 
-    void deleteAvatar(Long userId);
+    UserResponse deleteAvatar(Long userId);
 
     UserResponse uploadBackgroundImage(Long userId, MultipartFile file);
     UserResponse deleteBackgroundImage(Long userId);

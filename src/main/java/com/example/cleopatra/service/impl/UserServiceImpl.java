@@ -117,9 +117,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteAvatar(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Пользователь с ID " + userId + " не найден"));
-        storageService.deleteImage(user.getImgId());
+    public UserResponse deleteAvatar(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Пользователь с ID " + userId + " не найден"));
+
+        if (user.getImgId() != null && !user.getImgId().isEmpty()) {
+            storageService.deleteImage(user.getImgId());
+            user.setImageUrl(null);
+            user.setImgId(null);
+            User savedUser = userRepository.save(user);
+            return userMapper.toResponse(savedUser);
+        }
+
+        return userMapper.toResponse(user);
     }
     @Override
     public UserResponse uploadBackgroundImage(Long userId, MultipartFile file) {
@@ -181,6 +191,7 @@ public class UserServiceImpl implements UserService {
             log.debug("У пользователя с ID {} нет фонового изображения для удаления", userId);
             return userMapper.toResponse(user);
         }
+
     }
 
     @Override
