@@ -8,6 +8,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "job_vacancies")
@@ -183,6 +185,10 @@ public class JobVacancy {
     @Column(name = "applications_count")
     @Builder.Default
     private Integer applicationsCount = 0;
+
+
+    @OneToMany(mappedBy = "vacancy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<JobApplication> applications = new ArrayList<>();
 
 
 }

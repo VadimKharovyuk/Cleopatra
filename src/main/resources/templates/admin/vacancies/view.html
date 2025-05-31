@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Просмотр вакансии - Админ панель</title>
+</head>
+<body>
+<div>
+  <header>
+    <h1>Просмотр вакансии</h1>
+    <nav>
+      <a href="/admin">Админ панель</a> |
+      <a href="/admin/vacancies">Все вакансии</a> |
+      <a th:href="@{/admin/vacancies/edit(id=${vacancyId})}">Редактировать</a>
+    </nav>
+  </header>
+
+  <!-- Основная информация -->
+  <section>
+    <h2>Основная информация</h2>
+    <table border="1">
+      <tr>
+        <th>ID вакансии:</th>
+        <td th:text="${vacancyId}">1</td>
+      </tr>
+      <tr>
+        <th>Название:</th>
+        <td th:text="${vacancy.title}">Название вакансии</td>
+      </tr>
+      <tr>
+        <th>Описание:</th>
+        <td th:text="${vacancy.description}">Описание вакансии</td>
+      </tr>
+      <tr>
+        <th>Требуемый профиль:</th>
+        <td th:text="${vacancy.requiredProfile != null ? vacancy.requiredProfile.name() : 'Не указано'}">AERIAL_ARTIST</td>
+      </tr>
+      <tr>
+        <th>Минимальный опыт (лет):</th>
+        <td th:text="${vacancy.minWorkExperience}">2</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Зарплатные условия -->
+  <section>
+    <h2>Зарплатные условия</h2>
+    <table border="1">
+      <tr>
+        <th>Минимальная зарплата:</th>
+        <td>
+                    <span th:if="${vacancy.minSalary != null}">
+                        <span th:text="${vacancy.minSalary}">1000</span>
+                        <span th:text="${vacancy.currency}">USD</span>
+                    </span>
+          <span th:unless="${vacancy.minSalary != null}">Не указано</span>
+        </td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Информация о компании -->
+  <section>
+    <h2>Информация о компании</h2>
+    <table border="1">
+      <tr>
+        <th>Название компании:</th>
+        <td th:text="${vacancy.companyName}">Название компании</td>
+      </tr>
+      <tr>
+        <th>Контактный email:</th>
+        <td th:text="${vacancy.contactEmail}">contact@company.com</td>
+      </tr>
+      <tr>
+        <th>Контактный телефон:</th>
+        <td th:text="${vacancy.contactPhone}">+1234567890</td>
+      </tr>
+      <tr>
+        <th>Веб-сайт:</th>
+        <td>
+          <a th:if="${vacancy.companyWebsite}" th:href="${vacancy.companyWebsite}" th:text="${vacancy.companyWebsite}" target="_blank">website.com</a>
+          <span th:unless="${vacancy.companyWebsite}">Не указан</span>
+        </td>
+      </tr>
+      <tr>
+        <th>Instagram:</th>
+        <td th:text="${vacancy.companyInstagram}">@company</td>
+      </tr>
+      <tr>
+        <th>Facebook:</th>
+        <td th:text="${vacancy.companyFacebook}">facebook.com/company</td>
+      </tr>
+      <tr>
+        <th>Логотип компании:</th>
+        <td>
+          <img th:if="${vacancy.companyLogoUrl}" th:src="${vacancy.companyLogoUrl}" alt="Логотип" width="150" height="150">
+          <span th:unless="${vacancy.companyLogoUrl}">Не загружен</span>
+          <div th:if="${vacancy.companyLogoId}">
+            <small>ID файла: <span th:text="${vacancy.companyLogoId}">file_id</span></small>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Локация -->
+  <section>
+    <h2>Локация и условия работы</h2>
+    <table border="1">
+      <tr>
+        <th>Страна:</th>
+        <td th:text="${vacancy.country}">Россия</td>
+      </tr>
+      <tr>
+        <th>Город:</th>
+        <td th:text="${vacancy.city}">Москва</td>
+      </tr>
+      <tr>
+        <th>Адрес:</th>
+        <td th:text="${vacancy.address}">ул. Примерная, 123</td>
+      </tr>
+      <tr>
+        <th>Минимальный возраст:</th>
+        <td th:text="${vacancy.minAge}">18</td>
+      </tr>
+      <tr>
+        <th>Максимальный возраст:</th>
+        <td th:text="${vacancy.maxAge}">35</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Требования и навыки -->
+  <section>
+    <h2>Требования и навыки</h2>
+    <table border="1">
+      <tr>
+        <th>Требуемые навыки:</th>
+        <td th:text="${vacancy.requiredSkills}">Танцы, акробатика</td>
+      </tr>
+      <tr>
+        <th>Дополнительные требования:</th>
+        <td th:text="${vacancy.additionalRequirements}">Медсправка, опыт работы</td>
+      </tr>
+      <tr>
+        <th>Условия работы:</th>
+        <td th:text="${vacancy.workConditions}">График 2/2</td>
+      </tr>
+      <tr>
+        <th>Дополнительные льготы:</th>
+        <td th:text="${vacancy.benefits}">Питание, проживание</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Временные параметры -->
+  <section>
+    <h2>Временные параметры</h2>
+    <table border="1">
+      <tr>
+        <th>Дата начала работы:</th>
+        <td th:text="${vacancy.startDate != null ? #temporals.format(vacancy.startDate, 'dd.MM.yyyy') : 'Не указано'}">01.01.2025</td>
+      </tr>
+      <tr>
+        <th>Дата окончания:</th>
+        <td th:text="${vacancy.endDate != null ? #temporals.format(vacancy.endDate, 'dd.MM.yyyy') : 'Не указано'}">31.12.2025</td>
+      </tr>
+      <tr>
+        <th>Крайний срок подачи заявок:</th>
+        <td th:text="${vacancy.applicationDeadline != null ? #temporals.format(vacancy.applicationDeadline, 'dd.MM.yyyy') : 'Не указано'}">15.01.2025</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Условия работы -->
+  <section>
+    <h2>Условия работы</h2>
+    <table border="1">
+      <tr>
+        <th>Требуются командировки:</th>
+        <td th:text="${vacancy.requiresTravel != null ? (vacancy.requiresTravel ? 'Да' : 'Нет') : 'Не указано'}">Да</td>
+      </tr>
+      <tr>
+        <th>Предоставляется жилье:</th>
+        <td th:text="${vacancy.accommodationProvided != null ? (vacancy.accommodationProvided ? 'Да' : 'Нет') : 'Не указано'}">Да</td>
+      </tr>
+      <tr>
+        <th>Предоставляется питание:</th>
+        <td th:text="${vacancy.mealsProvided != null ? (vacancy.mealsProvided ? 'Да' : 'Нет') : 'Не указано'}">Да</td>
+      </tr>
+      <tr>
+        <th>Предоставляется транспорт:</th>
+        <td th:text="${vacancy.transportProvided != null ? (vacancy.transportProvided ? 'Да' : 'Нет') : 'Не указано'}">Нет</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Дополнительная информация -->
+  <section>
+    <h2>Дополнительная информация</h2>
+    <table border="1">
+      <tr>
+        <th>Дополнительные комментарии:</th>
+        <td th:text="${vacancy.additionalComments}">Примечания к вакансии</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Настройки публикации -->
+  <section>
+    <h2>Настройки публикации</h2>
+    <table border="1">
+      <tr>
+        <th>Активна:</th>
+        <td th:text="${vacancy.isActive != null ? (vacancy.isActive ? 'Да' : 'Нет') : 'Не указано'}">Да</td>
+      </tr>
+      <tr>
+        <th>Срочная:</th>
+        <td th:text="${vacancy.isUrgent != null ? (vacancy.isUrgent ? 'Да' : 'Нет') : 'Не указано'}">Нет</td>
+      </tr>
+      <tr>
+        <th>Рекомендуемая:</th>
+        <td th:text="${vacancy.isFeatured != null ? (vacancy.isFeatured ? 'Да' : 'Нет') : 'Не указано'}">Нет</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Статистика -->
+  <section>
+    <h2>Статистика</h2>
+    <table border="1">
+      <tr>
+        <th>Количество просмотров:</th>
+        <td th:text="${vacancy.viewsCount}">0</td>
+      </tr>
+      <tr>
+        <th>Количество заявок:</th>
+        <td th:text="${vacancy.applicationsCount}">0</td>
+      </tr>
+      <tr>
+        <th>Дата создания:</th>
+        <td th:text="${vacancy.createdAt != null ? #temporals.format(vacancy.createdAt, 'dd.MM.yyyy HH:mm') : 'Не указано'}">01.01.2025 12:00</td>
+      </tr>
+      <tr>
+        <th>Последнее обновление:</th>
+        <td th:text="${vacancy.updatedAt != null ? #temporals.format(vacancy.updatedAt, 'dd.MM.yyyy HH:mm') : 'Не указано'}">01.01.2025 12:00</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Действия -->
+  <section>
+    <h2>Действия</h2>
+    <div>
+      <a th:href="@{/admin/vacancies/edit(id=${vacancyId})}">Редактировать вакансию</a> |
+      <form method="post" th:action="@{/admin/vacancies/delete}" style="display: inline;">
+        <input type="hidden" name="id" th:value="${vacancyId}">
+        <button type="submit" onclick="return confirm('Вы уверены, что хотите удалить эту вакансию?')">Удалить вакансию</button>
+      </form> |
+      <a href="/admin/vacancies">Вернуться к списку</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 Cleopatra Admin Panel</p>
+  </footer>
+</div>
+</body>
+</html>

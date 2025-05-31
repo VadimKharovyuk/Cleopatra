@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Управление вакансиями - Админ панель</title>
+</head>
+<body>
+<div>
+  <header>
+    <h1>Управление вакансиями</h1>
+    <nav>
+      <a href="/admin">Админ панель</a> |
+      <a href="/admin/vacancies">Все вакансии</a> |
+      <a href="/admin/vacancies/create">Создать вакансию</a> |
+      <a href="/admin/job-applications">Заявки</a>
+    </nav>
+  </header>
+
+  <!-- Сообщения -->
+  <div th:if="${successMessage}">
+    <p style="color: green;" th:text="${successMessage}">Успех</p>
+  </div>
+  <div th:if="${errorMessage}">
+    <p style="color: red;" th:text="${errorMessage}">Ошибка</p>
+  </div>
+
+  <!-- Фильтры и сортировка -->
+  <section>
+    <h3>Фильтры и сортировка</h3>
+    <form method="get" action="/admin/vacancies">
+      <div>
+        <label for="size">На странице:</label>
+        <select id="size" name="size">
+          <option value="10" th:selected="${vacanciesDto.itemsPerPage == 10}">10</option>
+          <option value="25" th:selected="${vacanciesDto.itemsPerPage == 25}">25</option>
+          <option value="50" th:selected="${vacanciesDto.itemsPerPage == 50}">50</option>
+        </select>
+
+        <label for="sortBy">Сортировка:</label>
+        <select id="sortBy" name="sortBy">
+          <option value="createdAt" th:selected="${currentSortBy == 'createdAt'}">Дата создания</option>
+          <option value="title" th:selected="${currentSortBy == 'title'}">Название</option>
+          <option value="minSalary" th:selected="${currentSortBy == 'minSalary'}">Зарплата</option>
+          <option value="companyName" th:selected="${currentSortBy == 'companyName'}">Компания</option>
+        </select>
+
+        <label for="sortDir">Направление:</label>
+        <select id="sortDir" name="sortDir">
+          <option value="asc" th:selected="${currentSortDir == 'asc'}">По возрастанию</option>
+          <option value="desc" th:selected="${currentSortDir == 'desc'}">По убыванию</option>
+        </select>
+
+        <button type="submit">Применить</button>
+        <a href="/admin/vacancies">Сбросить</a>
+      </div>
+    </form>
+  </section>
+
+  <!-- Информация о результатах -->
+  <section>
+    <p>
+      <strong>Страница:</strong> <span th:text="${vacanciesDto.currentPage + 1}">1</span>
+      | <strong>На странице:</strong> <span th:text="${vacanciesDto.itemsPerPage}">10</span>
+      <span th:if="${vacanciesDto.totalItems != null}">
+                | <strong>Всего:</strong> <span th:text="${vacanciesDto.totalItems}">0</span> вакансий
+            </span>
+    </p>
+  </section>
+
+  <!-- Таблица вакансий -->
+  <section>
+    <div>
+      <table border="1">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Название</th>
+          <th>Компания</th>
+          <th>Профиль</th>
+          <th>Зарплата</th>
+          <th>Заявок</th>
+          <th>Статус</th>
+          <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Строки вакансий -->
+        <tr th:each="vacancy : ${vacanciesDto.vacancies}">
+          <td th:text="${vacancy.id}">1</td>
+
+          <td>
+            <strong th:text="${vacancy.title}">Название вакансии</strong>
+            <span th:if="${vacancy.isUrgent}" style="color: red;">🔥 СРОЧНО</span>
+            <span th:if="${vacancy.isFeatured}" style="color: gold;">⭐ ТОП</span>
+          </td>
+
+          <td>
+            <img th:if="${vacancy.companyLogoUrl}" th:src="${vacancy.companyLogoUrl}" alt="Логотип" width="30" height="30">
+          </td>
+
+          <td>
+                        <span th:if="${vacancy.requiredProfile != null}"
+                              th:text="${vacancy.requiredProfile.name()}"
+                              style="background-color: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-size: 12px;">
+                            Профиль
+                        </span>
+          </td>
+
+          <td>
+                        <span th:if="${vacancy.minSalary != null}">
+                            от <span th:text="${vacancy.minSalary}">1000</span>
+                            <span th:text="${vacancy.currency}">USD</span>
+                        </span>
+            <span th:unless="${vacancy.minSalary != null}">Не указано</span>
+          </td>
+
+          <td>
+            <span th:text="${vacancy.applicationsCount ?: 0}">0</span>
+          </td>
+
+          <td>
+            <span th:text="${vacancy.country}">Страна</span>
+            <span th:if="${vacancy.city}" th:text="${', ' + vacancy.city}"></span>
+          </td>
+
+          <td>
+            <a th:href="@{/admin/vacancies/view(id=${vacancy.id})}">👁 Просмотр</a> |
+            <a th:href="@{/admin/vacancies/edit(id=${vacancy.id})}">✏ Редактировать</a> |
+            <form method="post" th:action="@{/admin/vacancies/delete}" style="display: inline;">
+              <input type="hidden" name="id" th:value="${vacancy.id}">
+              <button type="submit" onclick="return confirm('Вы уверены, что хотите удалить эту вакансию?')"
+                      style="background: none; border: none; color: #f44336; cursor: pointer;">
+                🗑 Удалить
+              </button>
+            </form>
+          </td>
+        </tr>
+
+        <!-- Если нет вакансий -->
+        <tr th:if="${vacanciesDto.vacancies.empty}">
+          <td colspan="8" style="text-align: center; padding: 20px; color: #666;">
+            Вакансии не найдены
+            <br><br>
+            <a href="/admin/vacancies/create">Создать первую вакансию</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Пагинация -->
+  <section style="text-align: center; margin: 20px 0;">
+    <!-- Предыдущая страница -->
+    <a th:if="${vacanciesDto.hasPrevious}"
+       th:href="@{/admin/vacancies(page=${vacanciesDto.previousPage}, size=${vacanciesDto.itemsPerPage}, sortBy=${currentSortBy}, sortDir=${currentSortDir})}"
+       style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;">
+      « Предыдущая
+    </a>
+
+    <!-- Текущая страница -->
+    <span style="padding: 8px 12px; margin: 0 2px; background-color: #2196f3; color: white; border-radius: 4px;">
+            Страница <span th:text="${vacanciesDto.currentPage + 1}">1</span>
+        </span>
+
+    <!-- Следующая страница -->
+    <a th:if="${vacanciesDto.hasNext}"
+       th:href="@{/admin/vacancies(page=${vacanciesDto.nextPage}, size=${vacanciesDto.itemsPerPage}, sortBy=${currentSortBy}, sortDir=${currentSortDir})}"
+       style="padding: 8px 12px; margin: 0 2px; background-color: #f5f5f5; text-decoration: none; border-radius: 4px;">
+      Следующая »
+    </a>
+  </section>
+
+  <footer>
+    <p>© 2025 Cleopatra Admin Panel</p>
+  </footer>
+</div>
+</body>
+</html>

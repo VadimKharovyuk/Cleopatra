@@ -51,4 +51,8 @@ public class JobApplicationDto {
     private String comments;
 
 
+    private Long vacancyId;
+    private String vacancyTitle;
+
+
 }

@@ -118,4 +118,9 @@ public class JobApplication {
 
     @Column(name = "reviewed_by")
     private Long reviewedBy;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vacancy_id")
+    private JobVacancy vacancy;
 }

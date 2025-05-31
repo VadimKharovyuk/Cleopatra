@@ -78,14 +78,10 @@ public class AdminJobApplicationController {
             @RequestParam Long id,
             Model model) {
 
-        log.debug("Просмотр заявки с ID: {}", id);
-
         JobApplicationDto applicationDto = jobApplicationListService.getApplicationDetails(id);
 
         model.addAttribute("job", applicationDto);
         model.addAttribute("applicationId", id);
-
-
         return "admin/job-applications/view";
     }
 

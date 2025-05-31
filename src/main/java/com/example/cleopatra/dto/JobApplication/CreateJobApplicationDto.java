@@ -66,7 +66,7 @@ public class CreateJobApplicationDto {
     @Size(max = 100, message = "Facebook не должен превышать 100 символов")
     private String facebook;
 
-    // ИСПРАВЛЕНО: правильное название поля
+
     private MultipartFile profilePicture;
 
     @Pattern(regexp = "^(https?://)?(www\\.)?(youtube\\.com/watch\\?v=|youtu\\.be/)[a-zA-Z0-9_-]+.*$",

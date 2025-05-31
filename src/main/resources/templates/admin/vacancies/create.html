@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Создание вакансии</title>
+</head>
+<body>
+<h1>Создание новой вакансии</h1>
+
+<!-- Сообщения об ошибках -->
+<div th:if="${errorMessage}" style="color: red; margin-bottom: 20px;">
+  <p th:text="${errorMessage}"></p>
+</div>
+
+<!-- Сообщения об успехе -->
+<div th:if="${successMessage}" style="color: green; margin-bottom: 20px;">
+  <p th:text="${successMessage}"></p>
+</div>
+
+<form th:action="@{/admin/vacancies/create}" th:object="${vacancy}" method="post" enctype="multipart/form-data">
+
+  <!-- Основная информация -->
+  <fieldset>
+    <legend>Основная информация</legend>
+
+    <div>
+      <label for="title">Название вакансии *</label>
+      <input type="text" id="title" th:field="*{title}" required maxlength="255">
+    </div>
+
+    <div>
+      <label for="description">Описание вакансии *</label>
+      <textarea id="description" th:field="*{description}" rows="5" cols="50" required></textarea>
+    </div>
+
+    <div>
+      <label for="requiredProfile">Требуемый профиль *</label>
+      <select id="requiredProfile" th:field="*{requiredProfile}" required>
+        <option value="">Выберите профиль</option>
+        <option th:each="profile : ${T(com.example.cleopatra.enums.PerformerProfile).values()}"
+                th:value="${profile}"
+                th:text="${profile}">
+        </option>
+      </select>
+    </div>
+
+    <div>
+      <label for="minSalary">Минимальная зарплата</label>
+      <input type="number" id="minSalary" th:field="*{minSalary}" step="0.01" min="0">
+    </div>
+
+    <div>
+      <label for="minWorkExperience">Минимальный опыт работы (лет) *</label>
+      <input type="number" id="minWorkExperience" th:field="*{minWorkExperience}" min="0" required>
+    </div>
+
+    <div>
+      <label for="minAge">Минимальный возраст *</label>
+      <input type="number" id="minAge" th:field="*{minAge}" min="16" max="100" required>
+    </div>
+  </fieldset>
+
+  <!-- Контактная информация -->
+  <fieldset>
+    <legend>Контактная информация</legend>
+
+    <div>
+      <label for="contactEmail">Email для связи *</label>
+      <input type="email" id="contactEmail" th:field="*{contactEmail}" required>
+    </div>
+
+    <div>
+      <label for="contactPhone">Телефон для связи</label>
+      <input type="tel" id="contactPhone" th:field="*{contactPhone}">
+    </div>
+
+    <div>
+      <label for="companyName">Название компании *</label>
+      <input type="text" id="companyName" th:field="*{companyName}" required maxlength="255">
+    </div>
+
+    <div>
+      <label for="companyWebsite">Сайт компании</label>
+      <input type="url" id="companyWebsite" th:field="*{companyWebsite}">
+    </div>
+
+    <div>
+      <label for="companyLogo">Логотип компании</label>
+      <input type="file" id="companyLogo" th:field="*{companyLogo}" accept="image/*">
+    </div>
+  </fieldset>
+
+  <!-- Местоположение -->
+  <fieldset>
+    <legend>Местоположение</legend>
+
+    <div>
+      <label for="country">Страна *</label>
+      <input type="text" id="country" th:field="*{country}" required maxlength="100">
+    </div>
+
+    <div>
+      <label for="city">Город *</label>
+      <input type="text" id="city" th:field="*{city}" required maxlength="100">
+    </div>
+  </fieldset>
+
+  <!-- Требования и условия -->
+  <fieldset>
+    <legend>Требования и условия</legend>
+
+    <div>
+      <label for="requiredSkills">Требуемые навыки</label>
+      <textarea id="requiredSkills" th:field="*{requiredSkills}" rows="3" cols="50"></textarea>
+    </div>
+
+    <div>
+      <label for="additionalRequirements">Дополнительные требования</label>
+      <textarea id="additionalRequirements" th:field="*{additionalRequirements}" rows="3" cols="50"></textarea>
+    </div>
+
+    <div>
+      <label for="workConditions">Условия работы</label>
+      <textarea id="workConditions" th:field="*{workConditions}" rows="3" cols="50"></textarea>
+    </div>
+
+    <div>
+      <label for="benefits">Преимущества</label>
+      <textarea id="benefits" th:field="*{benefits}" rows="3" cols="50"></textarea>
+    </div>
+  </fieldset>
+
+  <!-- Даты -->
+  <fieldset>
+    <legend>Важные даты</legend>
+
+    <div>
+      <label for="startDate">Дата начала работы</label>
+      <input type="date" id="startDate" th:field="*{startDate}">
+    </div>
+
+    <div>
+      <label for="endDate">Дата окончания работы</label>
+      <input type="date" id="endDate" th:field="*{endDate}">
+    </div>
+
+    <div>
+      <label for="applicationDeadline">Крайний срок подачи заявок</label>
+      <input type="date" id="applicationDeadline" th:field="*{applicationDeadline}">
+    </div>
+  </fieldset>
+
+  <!-- Дополнительные услуги -->
+  <fieldset>
+    <legend>Дополнительные услуги</legend>
+
+    <div>
+      <label>
+        <input type="checkbox" th:field="*{accommodationProvided}">
+        Предоставляется жилье
+      </label>
+    </div>
+
+    <div>
+      <label>
+        <input type="checkbox" th:field="*{mealsProvided}">
+        Предоставляется питание
+      </label>
+    </div>
+
+    <div>
+      <label>
+        <input type="checkbox" th:field="*{transportProvided}">
+        Предоставляется транспорт
+      </label>
+    </div>
+
+    <div>
+      <label for="additionalComments">Дополнительные комментарии</label>
+      <textarea id="additionalComments" th:field="*{additionalComments}" rows="3" cols="50"></textarea>
+    </div>
+  </fieldset>
+
+  <!-- Статус вакансии -->
+  <fieldset>
+    <legend>Статус вакансии</legend>
+
+    <div>
+      <label>
+        <input type="checkbox" th:field="*{isActive}" checked>
+        Активная вакансия
+      </label>
+    </div>
+
+    <div>
+      <label>
+        <input type="checkbox" th:field="*{isUrgent}">
+        Срочная вакансия
+      </label>
+    </div>
+
+    <div>
+      <label>
+        <input type="checkbox" th:field="*{isFeatured}">
+        Рекомендуемая вакансия
+      </label>
+    </div>
+  </fieldset>
+
+  <!-- Кнопки управления -->
+  <div style="margin-top: 20px;">
+    <button type="submit">Создать вакансию</button>
+    <button type="reset">Очистить форму</button>
+    <a href="/admin/vacancies">Отмена</a>
+  </div>
+</form>
+</body>
+</html>
