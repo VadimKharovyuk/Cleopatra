@@ -39,6 +39,18 @@ public class User {
     @Column(nullable = false)
     private Gender gender ;
 
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(name = "img_id")
+    private String imgId;
+
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<TrustedDevice> trustedDevices = new ArrayList<>();

@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование профиля - Cleopatra</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --twitter-blue: #1d9bf0;
+            --twitter-dark-blue: #1a8cd8;
+            --bg-color: #000000;
+            --surface-color: #16181c;
+            --border-color: #2f3336;
+            --text-primary: #e7e9ea;
+            --text-secondary: #71767b;
+            --hover-color: #1c1f23;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 275px;
+            background-color: var(--bg-color);
+            border-right: 1px solid var(--border-color);
+            padding: 0 12px;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 12px 16px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 50px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: background-color 0.2s;
+            margin-bottom: 2px;
+        }
+
+        .nav-item:hover {
+            background-color: var(--hover-color);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            font-weight: 700;
+        }
+
+        .nav-icon {
+            width: 26px;
+            margin-right: 20px;
+            font-size: 24px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 275px;
+            min-height: 100vh;
+            max-width: 600px;
+        }
+
+        /* Header */
+        .edit-header {
+            position: sticky;
+            top: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            margin-right: 30px;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .back-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .save-btn {
+            background-color: var(--twitter-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 15px;
+            transition: background-color 0.2s;
+        }
+
+        .save-btn:hover {
+            background-color: var(--twitter-dark-blue);
+        }
+
+        .save-btn:disabled {
+            background-color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        /* Cover Photo Section */
+        .cover-section {
+            position: relative;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cover-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .cover-btn {
+            background-color: rgba(0, 0, 0, 0.75);
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            transition: background-color 0.2s;
+        }
+
+        .cover-btn:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        /* Avatar Section */
+        .avatar-section {
+            padding: 0 16px;
+            position: relative;
+        }
+
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+            margin-top: -68px;
+        }
+
+        .profile-avatar {
+            width: 134px;
+            height: 134px;
+            border: 4px solid var(--bg-color);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .default-avatar {
+            width: 100%;
+            height: 100%;
+            background-color: var(--surface-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .avatar-container:hover .avatar-overlay {
+            opacity: 1;
+        }
+
+        .avatar-btn {
+            background-color: rgba(0, 0, 0, 0.75);
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            margin: 0 4px;
+        }
+
+        /* Form Sections */
+        .form-section {
+            padding: 20px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 400;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 17px;
+            padding: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            background-color: transparent;
+            border-color: var(--twitter-blue);
+            box-shadow: 0 0 0 1px var(--twitter-blue);
+            color: var(--text-primary);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .character-count {
+            text-align: right;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Upload Areas */
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: border-color 0.2s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--twitter-blue);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--twitter-blue);
+            background-color: rgba(29, 155, 240, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Alerts */
+        .alert {
+            margin: 16px;
+            border-radius: 8px;
+            border: none;
+        }
+
+        .alert-success {
+            background-color: #1d4e1f;
+            color: #4caf50;
+            border: 1px solid #2e7d32;
+        }
+
+        .alert-danger {
+            background-color: #5d1a1a;
+            color: #f44336;
+            border: 1px solid #d32f2f;
+        }
+
+        /* Modal */
+        .modal-content {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--hover-color);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background-color: #f91880;
+            border-color: #f91880;
+        }
+
+        .btn-danger:hover {
+            background-color: #e91970;
+            border-color: #e91970;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 68px;
+            }
+            .nav-text {
+                display: none;
+            }
+            .main-content {
+                margin-left: 68px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Left Sidebar Navigation -->
+<nav class="sidebar">
+    <div class="logo">
+        <i class="fas fa-crown text-warning"></i>
+    </div>
+
+    <a href="/home" class="nav-item">
+        <i class="fas fa-home nav-icon"></i>
+        <span class="nav-text">Главная</span>
+    </a>
+
+    <a href="/explore" class="nav-item">
+        <i class="fas fa-hashtag nav-icon"></i>
+        <span class="nav-text">Обзор</span>
+    </a>
+
+    <a href="/notifications" class="nav-item">
+        <i class="fas fa-bell nav-icon"></i>
+        <span class="nav-text">Уведомления</span>
+    </a>
+
+    <a href="/messages" class="nav-item">
+        <i class="fas fa-envelope nav-icon"></i>
+        <span class="nav-text">Сообщения</span>
+    </a>
+
+    <a href="/bookmarks" class="nav-item">
+        <i class="fas fa-bookmark nav-icon"></i>
+        <span class="nav-text">Закладки</span>
+    </a>
+
+    <a th:href="@{/profile/{userId}(userId=${user.id})}" class="nav-item active">
+        <i class="fas fa-user nav-icon"></i>
+        <span class="nav-text">Профиль</span>
+    </a>
+
+    <a href="/settings" class="nav-item">
+        <i class="fas fa-cog nav-icon"></i>
+        <span class="nav-text">Настройки</span>
+    </a>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Header -->
+    <header class="edit-header">
+        <div class="header-content">
+            <div class="header-left">
+                <button class="back-btn" onclick="history.back()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h1 class="h5 mb-0">Редактировать профиль</h1>
+            </div>
+            <button type="submit" form="profileForm" class="save-btn">
+                Сохранить
+            </button>
+        </div>
+    </header>
+
+    <!-- Error Messages -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Cover Photo Section -->
+    <div class="cover-section" id="coverSection">
+        <div class="cover-overlay">
+            <button type="button" class="cover-btn" onclick="document.getElementById('coverInput').click()">
+                <i class="fas fa-camera"></i>
+            </button>
+            <button type="button" class="cover-btn" onclick="removeCover()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Avatar Section -->
+    <div class="avatar-section">
+        <div class="avatar-container">
+            <div class="profile-avatar">
+                <img th:if="${user.imageUrl}"
+                     th:src="${user.imageUrl}"
+                     alt="Аватар"
+                     class="avatar-image"
+                     id="avatarImage">
+                <div th:unless="${user.imageUrl}" class="default-avatar" id="defaultAvatar">
+                    <i class="fas fa-user fa-3x"></i>
+                </div>
+            </div>
+            <div class="avatar-overlay">
+                <button type="button" class="avatar-btn" onclick="document.getElementById('avatarInput').click()">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <button th:if="${user.imageUrl}"
+                        type="button"
+                        class="avatar-btn"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteAvatarModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Form -->
+    <form id="profileForm"
+          th:action="@{/profile/{userId}/update(userId=${user.id})}"
+          method="post"
+          th:object="${updateProfileDto}">
+
+        <!-- Basic Info Section -->
+        <div class="form-section">
+            <h3 class="section-title">Основная информация</h3>
+
+            <div class="form-group">
+                <label for="firstName" class="form-label">Имя</label>
+                <input type="text"
+                       class="form-control"
+                       id="firstName"
+                       th:field="*{firstName}"
+                       th:class="${#fields.hasErrors('firstName')} ? 'form-control is-invalid' : 'form-control'"
+                       placeholder="Введите ваше имя"
+                       maxlength="50">
+                <div class="character-count">
+                    <span id="firstNameCount">0</span>/50
+                </div>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName" class="form-label">Фамилия</label>
+                <input type="text"
+                       class="form-control"
+                       id="lastName"
+                       th:field="*{lastName}"
+                       th:class="${#fields.hasErrors('lastName')} ? 'form-control is-invalid' : 'form-control'"
+                       placeholder="Введите вашу фамилию"
+                       maxlength="50">
+                <div class="character-count">
+                    <span id="lastNameCount">0</span>/50
+                </div>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Upload Forms -->
+    <form th:action="@{/profile/{userId}/avatar/upload(userId=${user.id})}"
+          method="post"
+          enctype="multipart/form-data"
+          id="avatarForm">
+        <input type="file"
+               id="avatarInput"
+               name="avatarFile"
+               class="file-input"
+               accept="image/jpeg,image/jpg,image/png"
+               onchange="handleAvatarUpload(this)">
+    </form>
+
+    <form th:action="@{/profile/{userId}/cover/upload(userId=${user.id})}"
+          method="post"
+          enctype="multipart/form-data"
+          id="coverForm">
+        <input type="file"
+               id="coverInput"
+               name="coverFile"
+               class="file-input"
+               accept="image/jpeg,image/jpg,image/png"
+               onchange="handleCoverUpload(this)">
+    </form>
+</main>
+
+<!-- Delete Avatar Modal -->
+<div class="modal fade" id="deleteAvatarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Удаление аватара</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить свой аватар? Это действие нельзя отменить.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form th:action="@{/profile/{userId}/avatar/delete(userId=${user.id})}"
+                      method="post"
+                      style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        Удалить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Character counting
+    function updateCharacterCount(inputId, countId) {
+        const input = document.getElementById(inputId);
+        const counter = document.getElementById(countId);
+
+        function updateCount() {
+            counter.textContent = input.value.length;
+        }
+
+        input.addEventListener('input', updateCount);
+        updateCount();
+    }
+
+    // Initialize character counters
+    updateCharacterCount('firstName', 'firstNameCount');
+    updateCharacterCount('lastName', 'lastNameCount');
+
+    // Avatar upload handling
+    function handleAvatarUpload(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+
+            // Validate file
+            if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
+                alert('Пожалуйста, выберите файл формата JPG, JPEG или PNG');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Размер файла не должен превышать 5MB');
+                return;
+            }
+
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const avatarImage = document.getElementById('avatarImage');
+                const defaultAvatar = document.getElementById('defaultAvatar');
+
+                if (avatarImage) {
+                    avatarImage.src = e.target.result;
+                } else {
+                    // Create new image element
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'avatar-image';
+                    img.id = 'avatarImage';
+
+                    const avatarContainer = document.querySelector('.profile-avatar');
+                    if (defaultAvatar) {
+                        defaultAvatar.remove();
+                    }
+                    avatarContainer.appendChild(img);
+                }
+            };
+            reader.readAsDataURL(file);
+
+            // Auto-submit form
+            document.getElementById('avatarForm').submit();
+        }
+    }
+
+    // Cover upload handling
+    function handleCoverUpload(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+
+            // Validate file
+            if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
+                alert('Пожалуйста, выберите файл формата JPG, JPEG или PNG');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Размер файла не должен превышать 5MB');
+                return;
+            }
+
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const coverSection = document.getElementById('coverSection');
+                coverSection.style.backgroundImage = `url(${e.target.result})`;
+            };
+            reader.readAsDataURL(file);
+
+            // Auto-submit form
+            document.getElementById('coverForm').submit();
+        }
+    }
+
+    // Remove cover
+    function removeCover() {
+        if (confirm('Удалить фоновое изображение?')) {
+            const coverSection = document.getElementById('coverSection');
+            coverSection.style.backgroundImage = '';
+            // Here you would make an AJAX call to remove the cover from server
+        }
+    }
+
+    // Save button state management
+    const form = document.getElementById('profileForm');
+    const saveBtn = document.querySelector('.save-btn');
+    const inputs = form.querySelectorAll('input');
+
+    let hasChanges = false;
+
+    inputs.forEach(input => {
+        const initialValue = input.value;
+        input.addEventListener('input', function() {
+            hasChanges = this.value !== initialValue;
+            saveBtn.disabled = !hasChanges;
+        });
+    });
+
+    // Initial state
+    saveBtn.disabled = true;
+</script>
+</body>
+</html>

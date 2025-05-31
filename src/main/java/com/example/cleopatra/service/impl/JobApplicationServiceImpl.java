@@ -54,6 +54,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     @Override
     public JobApplicationListDto getAllApplications(Pageable pageable) {
         Page<JobApplication> jobApplications = jobApplicationRepository.findAll(pageable);
+        System.out.println("my point");
 
         List<JobApplicationCardDto> applicationCards = jobApplications.getContent()
                 .stream()

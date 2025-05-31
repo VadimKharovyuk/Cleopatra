@@ -29,7 +29,7 @@ public class AdminJobApplicationController {
     @GetMapping
     public String showJobApplicationsList(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "2") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir,
             @RequestParam(required = false) ApplicationStatus status,

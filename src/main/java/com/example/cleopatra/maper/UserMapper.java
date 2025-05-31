@@ -1,6 +1,7 @@
 package com.example.cleopatra.maper;
 
 import com.example.cleopatra.dto.user.RegisterDto;
+import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.enums.Role;
 import com.example.cleopatra.model.User;
@@ -23,8 +24,26 @@ public class UserMapper {
         response.setEmail(user.getEmail());
         response.setRole(user.getRole());
         response.setGender(user.getGender());
+
+        // Добавляем новые поля профиля
+        response.setFirstName(user.getFirstName());
+        response.setLastName(user.getLastName());
+        response.setImageUrl(user.getImageUrl());
+        response.setImgId(user.getImgId());
+
         response.setCreatedAt(user.getCreatedAt());
         return response;
+    }
+
+    public void updateUserFromDto(User user, UpdateProfileDto dto) {
+        if (dto.getFirstName() != null) {
+            user.setFirstName(dto.getFirstName().trim());
+        }
+
+        if (dto.getLastName() != null) {
+            user.setLastName(dto.getLastName().trim());
+        }
+
     }
 
 }
