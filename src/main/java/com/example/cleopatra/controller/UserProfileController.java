@@ -58,9 +58,7 @@ public class UserProfileController {
         }
     }
 
-    /**
-     * Обрабатывает обновление профиля
-     */
+
     @PostMapping("/{userId}/update")
     public String updateProfile(
             @PathVariable Long userId,
@@ -131,6 +129,50 @@ public class UserProfileController {
         } catch (RuntimeException e) {
             log.error("Ошибка при удалении аватара для пользователя {}: {}", userId, e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при удалении аватара: " + e.getMessage());
+        }
+
+        return "redirect:/profile/" + userId;
+    }
+
+    /**
+     * Обрабатывает загрузку фонового изображения
+     */
+    @PostMapping("/{userId}/background/upload")
+    public String uploadBackgroundImage(
+            @PathVariable Long userId,
+            @RequestParam("backgroundFile") MultipartFile file,
+            RedirectAttributes redirectAttributes) {
+
+        if (file.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Пожалуйста, выберите файл для загрузки");
+            return "redirect:/profile/" + userId + "/edit";
+        }
+
+        try {
+            userService.uploadBackgroundImage(userId, file);
+            redirectAttributes.addFlashAttribute("successMessage", "Фоновое изображение успешно загружено!");
+        } catch (RuntimeException e) {
+            log.error("Ошибка при загрузке фонового изображения для пользователя {}: {}", userId, e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при загрузке фонового изображения: " + e.getMessage());
+        }
+
+        return "redirect:/profile/" + userId;
+    }
+
+    /**
+     * Удаляет фоновое изображение пользователя
+     */
+    @PostMapping("/{userId}/background/delete")
+    public String deleteBackgroundImage(
+            @PathVariable Long userId,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            userService.deleteBackgroundImage(userId);
+            redirectAttributes.addFlashAttribute("successMessage", "Фоновое изображение успешно удалено!");
+        } catch (RuntimeException e) {
+            log.error("Ошибка при удалении фонового изображения для пользователя {}: {}", userId, e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при удалении фонового изображения: " + e.getMessage());
         }
 
         return "redirect:/profile/" + userId;

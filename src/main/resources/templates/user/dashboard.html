@@ -3,37 +3,804 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Группа Клеопатра</title>
+  <title>Главная - Cleopatra</title>
+
+  <!-- External CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Стили sidebar -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+  <style>
+    /* Основные стили страницы */
+    body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Layout Grid */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 0;
+      min-height: 100vh;
+      margin-left: 280px; /* Отступ для sidebar */
+    }
+
+    /* Main Content Area */
+    .content-area {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0;
+      border-left: 1px solid var(--border-primary);
+      border-right: 1px solid var(--border-primary);
+      background: var(--bg-secondary);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .content-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-secondary);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--text-primary);
+    }
+
+    /* Create Post Section */
+    .create-post {
+      padding: 1.5rem;
+      border-bottom: 8px solid var(--border-secondary);
+      background: var(--bg-secondary);
+    }
+
+    .post-composer {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .composer-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .composer-content {
+      flex: 1;
+    }
+
+    .post-textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 1.25rem;
+      color: var(--text-primary);
+      resize: none;
+      min-height: 120px;
+      font-family: inherit;
+      line-height: 1.5;
+    }
+
+    .post-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .composer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-secondary);
+    }
+
+    .composer-tools {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .tool-btn {
+      background: none;
+      border: none;
+      color: var(--accent-primary);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+      font-size: 1.125rem;
+    }
+
+    .tool-btn:hover {
+      background: rgba(37, 99, 235, 0.1);
+      transform: scale(1.05);
+    }
+
+    .post-btn {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.01em;
+    }
+
+    .post-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .post-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Feed Section */
+    .feed {
+      background: var(--bg-secondary);
+    }
+
+    .post-item {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-secondary);
+      transition: background-color 0.2s;
+      cursor: pointer;
+    }
+
+    .post-item:hover {
+      background: var(--bg-accent);
+    }
+
+    .post-header {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .post-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--bg-accent), #f1f5f9);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .post-meta {
+      flex: 1;
+    }
+
+    .post-author {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-right: 0.5rem;
+    }
+
+    .post-handle {
+      color: var(--text-muted);
+      font-size: 0.9375rem;
+    }
+
+    .post-time {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-left: 0.5rem;
+    }
+
+    .post-content {
+      margin-left: 3rem;
+      color: var(--text-primary);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .post-actions {
+      margin-left: 3rem;
+      display: flex;
+      gap: 2rem;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+      font-size: 0.875rem;
+    }
+
+    .action-btn:hover {
+      color: var(--accent-primary);
+      background: rgba(37, 99, 235, 0.1);
+    }
+
+    .action-btn.liked {
+      color: #ef4444;
+    }
+
+    .action-btn.retweeted {
+      color: #10b981;
+    }
+
+    /* Right Sidebar */
+    .right-sidebar {
+      padding: 1rem;
+      background: var(--bg-primary);
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+
+    /* Widget Styles */
+    .widget {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-secondary);
+    }
+
+    .widget-header {
+      padding: 1.25rem 1.5rem 1rem;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+
+    .widget-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .widget-content {
+      padding: 1rem 1.5rem 1.5rem;
+    }
+
+    /* Trending Widget */
+    .trending-item {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border-secondary);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .trending-item:last-child {
+      border-bottom: none;
+    }
+
+    .trending-item:hover {
+      background: var(--bg-accent);
+      margin: 0 -1.5rem;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    .trending-topic {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 0.25rem 0;
+      font-size: 0.9375rem;
+    }
+
+    .trending-count {
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      margin: 0;
+    }
+
+    /* Suggestions Widget */
+    .suggestion-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border-secondary);
+      transition: all 0.2s;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+      background: var(--bg-accent);
+      margin: 0 -1.5rem;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    .suggestion-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--bg-accent), #f1f5f9);
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .suggestion-info {
+      flex: 1;
+    }
+
+    .suggestion-name {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      color: var(--text-primary);
+      margin: 0 0 0.25rem;
+    }
+
+    .suggestion-handle {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .follow-btn {
+      background: var(--accent-primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .follow-btn:hover {
+      background: var(--accent-secondary);
+      transform: translateY(-1px);
+    }
+
+    /* Empty State */
+    .empty-feed {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .main-layout {
+        grid-template-columns: 1fr 300px;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        margin-left: 80px;
+        grid-template-columns: 1fr 280px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+        margin-left: 0;
+        margin-top: 60px;
+      }
+
+      .content-area {
+        border-left: none;
+        border-right: none;
+      }
+
+      .right-sidebar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .post-composer {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .composer-avatar {
+        align-self: flex-start;
+      }
+
+      .post-content,
+      .post-actions {
+        margin-left: 0;
+      }
+
+      .post-actions {
+        justify-content: space-around;
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>Добро пожаловать в группу Клеопатра!</h1>
+<!-- Mobile Header -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
 
-<p>Танцевальная команда, где работают цирковые артисты, трюкачи и танцоры</p>
+<!-- Left Sidebar (Fixed position from fragment) -->
+<th:block th:replace="~{fragments/sidebar :: sidebar('home')}"></th:block>
 
-<div>
-  <h2>Вход в систему</h2>
-  <p>
-    <a th:href="@{/login}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-      Войти
-    </a>
-  </p>
+<div class="main-layout">
+  <!-- Main Content Area -->
+  <main class="content-area">
+    <!-- Header -->
+    <div class="content-header">
+      <h1 class="header-title">Главная</h1>
+    </div>
 
-  <p>
-    <a th:href="@{/register}" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">
-      Регистрация
-    </a>
-  </p>
+    <!-- Create Post Section -->
+    <div class="create-post">
+      <div class="post-composer">
+        <div class="composer-avatar">
+          <i class="fas fa-user" th:if="${user?.imageUrl == null}"></i>
+          <img th:if="${user?.imageUrl}" th:src="${user.imageUrl}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+        </div>
+        <div class="composer-content">
+                        <textarea
+                                class="post-textarea"
+                                placeholder="Что происходит?"
+                                maxlength="280"
+                                id="postContent"></textarea>
+
+          <div class="composer-actions">
+            <div class="composer-tools">
+              <button class="tool-btn" title="Добавить изображение">
+                <i class="fas fa-image"></i>
+              </button>
+              <button class="tool-btn" title="Добавить GIF">
+                <i class="fas fa-photo-video"></i>
+              </button>
+              <button class="tool-btn" title="Создать опрос">
+                <i class="fas fa-poll"></i>
+              </button>
+              <button class="tool-btn" title="Добавить эмодзи">
+                <i class="fas fa-smile"></i>
+              </button>
+            </div>
+            <button class="post-btn" id="postButton" disabled>
+              Опубликовать
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feed -->
+    <div class="feed" id="feed">
+      <!-- Sample Posts -->
+      <div class="post-item">
+        <div class="post-header">
+          <div class="post-avatar"></div>
+          <div class="post-meta">
+            <span class="post-author">Анна Смирнова</span>
+            <span class="post-handle">@anna_design</span>
+            <span class="post-time">· 2ч</span>
+          </div>
+        </div>
+        <div class="post-content">
+          Работаю над новым дизайн-проектом и вдохновляюсь минималистичными решениями. Иногда простота — это самое сложное 🎨
+        </div>
+        <div class="post-actions">
+          <button class="action-btn">
+            <i class="fas fa-comment"></i>
+            <span>12</span>
+          </button>
+          <button class="action-btn">
+            <i class="fas fa-retweet"></i>
+            <span>5</span>
+          </button>
+          <button class="action-btn">
+            <i class="fas fa-heart"></i>
+            <span>24</span>
+          </button>
+          <button class="action-btn">
+            <i class="fas fa-share"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="post-item">
+        <div class="post-header">
+          <div class="post-avatar"></div>
+          <div class="post-meta">
+            <span class="post-author">Михаил Петров</span>
+            <span class="post-handle">@mikhail_dev</span>
+            <span class="post-time">· 4ч</span>
+          </div>
+        </div>
+        <div class="post-content">
+          Запустил новую фичу в продакшн! 🚀 Код-ревью, тесты, деплой — все прошло гладко. Команда работает как часы!
+        </div>
+        <div class="post-actions">
+          <button class="action-btn">
+            <i class="fas fa-comment"></i>
+            <span>8</span>
+          </button>
+          <button class="action-btn retweeted">
+            <i class="fas fa-retweet"></i>
+            <span>3</span>
+          </button>
+          <button class="action-btn liked">
+            <i class="fas fa-heart"></i>
+            <span>15</span>
+          </button>
+          <button class="action-btn">
+            <i class="fas fa-share"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="post-item">
+        <div class="post-header">
+          <div class="post-avatar"></div>
+          <div class="post-meta">
+            <span class="post-author">Елена Волкова</span>
+            <span class="post-handle">@elena_art</span>
+            <span class="post-time">· 6ч</span>
+          </div>
+        </div>
+        <div class="post-content">
+          Прекрасное утро для творчества! Начинаю новую серию картин, вдохновленную природой. Первые штрихи уже на холсте ✨
+        </div>
+        <div class="post-actions">
+          <button class="action-btn">
+            <i class="fas fa-comment"></i>
+            <span>6</span>
+          </button>
+          <button class="action-btn">
+            <i class="fas fa-retweet"></i>
+            <span>2</span>
+          </button>
+          <button class="action-btn">
+            <i class="fas fa-heart"></i>
+            <span>18</span>
+          </button>
+          <button class="action-btn">
+            <i class="fas fa-share"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Right Sidebar -->
+  <aside class="right-sidebar">
+    <!-- Trending Topics -->
+    <div class="widget">
+      <div class="widget-header">
+        <h3 class="widget-title">Актуальные темы</h3>
+      </div>
+      <div class="widget-content">
+        <div class="trending-item">
+          <p class="trending-topic">#ТехнологииБудущего</p>
+          <p class="trending-count">12.5K обсуждений</p>
+        </div>
+        <div class="trending-item">
+          <p class="trending-topic">#ДизайнТренды2025</p>
+          <p class="trending-count">8.3K обсуждений</p>
+        </div>
+        <div class="trending-item">
+          <p class="trending-topic">#ИскусственныйИнтеллект</p>
+          <p class="trending-count">15.7K обсуждений</p>
+        </div>
+        <div class="trending-item">
+          <p class="trending-topic">#WebДевелопмент</p>
+          <p class="trending-count">6.2K обсуждений</p>
+        </div>
+        <div class="trending-item">
+          <p class="trending-topic">#УдаленнаяРабота</p>
+          <p class="trending-count">9.1K обсуждений</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Who to Follow -->
+    <div class="widget">
+      <div class="widget-header">
+        <h3 class="widget-title">Кого читать</h3>
+      </div>
+      <div class="widget-content">
+        <div class="suggestion-item">
+          <div class="suggestion-avatar"></div>
+          <div class="suggestion-info">
+            <p class="suggestion-name">Дмитрий Козлов</p>
+            <p class="suggestion-handle">@dmitry_tech</p>
+          </div>
+          <button class="follow-btn">Читать</button>
+        </div>
+        <div class="suggestion-item">
+          <div class="suggestion-avatar"></div>
+          <div class="suggestion-info">
+            <p class="suggestion-name">Ольга Иванова</p>
+            <p class="suggestion-handle">@olga_ux</p>
+          </div>
+          <button class="follow-btn">Читать</button>
+        </div>
+        <div class="suggestion-item">
+          <div class="suggestion-avatar"></div>
+          <div class="suggestion-info">
+            <p class="suggestion-name">Алексей Морозов</p>
+            <p class="suggestion-handle">@alex_startup</p>
+          </div>
+          <button class="follow-btn">Читать</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="widget">
+      <div class="widget-header">
+        <h3 class="widget-title">Ваша активность</h3>
+      </div>
+      <div class="widget-content">
+        <div class="trending-item">
+          <p class="trending-topic">Просмотры профиля</p>
+          <p class="trending-count">47 за эту неделю</p>
+        </div>
+        <div class="trending-item">
+          <p class="trending-topic">Упоминания</p>
+          <p class="trending-count">12 новых</p>
+        </div>
+        <div class="trending-item">
+          <p class="trending-topic">Подписчики</p>
+          <p class="trending-count">+5 за день</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Links -->
+    <div style="padding: 1rem 0; font-size: 0.8125rem; color: var(--text-muted); line-height: 1.4;">
+      <a href="/terms" style="color: inherit; text-decoration: none; margin-right: 1rem;">Условия</a>
+      <a href="/privacy" style="color: inherit; text-decoration: none; margin-right: 1rem;">Конфиденциальность</a>
+      <a href="/help" style="color: inherit; text-decoration: none;">Помощь</a>
+      <p style="margin-top: 0.5rem; margin-bottom: 0;">© 2025 Cleopatra</p>
+    </div>
+  </aside>
 </div>
 
-<hr>
+<!-- JS в конце страницы -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
 
-<div>
-  <h3>О нашей группе</h3>
-  <ul>
-    <li>🕺 Профессиональные танцоры</li>
-    <li>🎪 Опытные цирковые артисты</li>
-    <li>🤸 Мастера трюков и акробатики</li>
-  </ul>
-</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const postContent = document.getElementById('postContent');
+    const postButton = document.getElementById('postButton');
+
+    // Character counter and post button state
+    function updatePostButton() {
+      const content = postContent.value.trim();
+      postButton.disabled = content.length === 0 || content.length > 280;
+
+      // Update button text with character count
+      const remaining = 280 - content.length;
+      if (content.length > 0) {
+        postButton.textContent = remaining >= 0 ? `Опубликовать (${remaining})` : `Слишком длинно (${Math.abs(remaining)})`;
+      } else {
+        postButton.textContent = 'Опубликовать';
+      }
+    }
+
+    postContent.addEventListener('input', updatePostButton);
+
+    // Auto-resize textarea
+    postContent.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 300) + 'px';
+    });
+
+    // Post button click
+    postButton.addEventListener('click', function() {
+      if (!this.disabled) {
+        const content = postContent.value.trim();
+        if (content) {
+          // Here you would send the post to the server
+          console.log('Posting:', content);
+
+          // Reset form
+          postContent.value = '';
+          postContent.style.height = '120px';
+          updatePostButton();
+
+          // Show success feedback
+          this.textContent = 'Опубликовано!';
+          this.style.background = 'var(--accent-success)';
+
+          setTimeout(() => {
+            this.textContent = 'Опубликовать';
+            this.style.background = '';
+          }, 2000);
+        }
+      }
+    });
+
+    // Action buttons
+    document.querySelectorAll('.action-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+
+        const icon = this.querySelector('i');
+        const count = this.querySelector('span');
+
+        if (icon.classList.contains('fa-heart')) {
+          // Like button
+          this.classList.toggle('liked');
+          const currentCount = parseInt(count.textContent);
+          count.textContent = this.classList.contains('liked') ? currentCount + 1 : currentCount - 1;
+        } else if (icon.classList.contains('fa-retweet')) {
+          // Retweet button
+          this.classList.toggle('retweeted');
+          const currentCount = parseInt(count.textContent);
+          count.textContent = this.classList.contains('retweeted') ? currentCount + 1 : currentCount - 1;
+        }
+      });
+    });
+
+    // Follow buttons
+    document.querySelectorAll('.follow-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (this.textContent === 'Читать') {
+          this.textContent = 'Читаем';
+          this.style.background = 'var(--accent-success)';
+        } else {
+          this.textContent = 'Читать';
+          this.style.background = '';
+        }
+      });
+    });
+
+    // Tool buttons
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Add visual feedback
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          this.style.transform = '';
+        }, 150);
+      });
+    });
+
+    console.log('🐦 Twitter-style feed initialized');
+    console.log('📝 Post composer ready');
+    console.log('👥 Social features active');
+  });
+</script>
 </body>
 </html>

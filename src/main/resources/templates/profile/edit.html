@@ -4,193 +4,122 @@
 <!--    <meta charset="UTF-8">-->
 <!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
 <!--    <title>Редактирование профиля - Cleopatra</title>-->
+
+<!--    &lt;!&ndash; External CSS &ndash;&gt;-->
 <!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">-->
 <!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+
+<!--    &lt;!&ndash; Стили sidebar &ndash;&gt;-->
+<!--    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>-->
+
 <!--    <style>-->
-<!--        :root {-->
-<!--            &#45;&#45;twitter-blue: #1d9bf0;-->
-<!--            &#45;&#45;twitter-dark-blue: #1a8cd8;-->
-<!--            &#45;&#45;bg-color: #000000;-->
-<!--            &#45;&#45;surface-color: #16181c;-->
-<!--            &#45;&#45;border-color: #2f3336;-->
-<!--            &#45;&#45;text-primary: #e7e9ea;-->
-<!--            &#45;&#45;text-secondary: #71767b;-->
-<!--            &#45;&#45;hover-color: #1c1f23;-->
-<!--        }-->
-
+<!--        /* Основные стили страницы */-->
 <!--        body {-->
-<!--            background-color: var(&#45;&#45;bg-color);-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;bg-primary) 0%, var(&#45;&#45;bg-accent) 100%);-->
 <!--            color: var(&#45;&#45;text-primary);-->
-<!--            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;-->
-<!--        }-->
-
-<!--        /* Sidebar Navigation */-->
-<!--        .sidebar {-->
-<!--            position: fixed;-->
-<!--            top: 0;-->
-<!--            left: 0;-->
-<!--            height: 100vh;-->
-<!--            width: 275px;-->
-<!--            background-color: var(&#45;&#45;bg-color);-->
-<!--            border-right: 1px solid var(&#45;&#45;border-color);-->
-<!--            padding: 0 12px;-->
-<!--            overflow-y: auto;-->
-<!--        }-->
-
-<!--        .logo {-->
-<!--            padding: 12px 16px;-->
-<!--            font-size: 30px;-->
-<!--            font-weight: bold;-->
-<!--        }-->
-
-<!--        .nav-item {-->
-<!--            display: flex;-->
-<!--            align-items: center;-->
-<!--            padding: 12px 16px;-->
-<!--            border-radius: 50px;-->
-<!--            text-decoration: none;-->
-<!--            color: var(&#45;&#45;text-primary);-->
-<!--            transition: background-color 0.2s;-->
-<!--            margin-bottom: 2px;-->
-<!--        }-->
-
-<!--        .nav-item:hover {-->
-<!--            background-color: var(&#45;&#45;hover-color);-->
-<!--            color: var(&#45;&#45;text-primary);-->
-<!--        }-->
-
-<!--        .nav-item.active {-->
-<!--            font-weight: 700;-->
-<!--        }-->
-
-<!--        .nav-icon {-->
-<!--            width: 26px;-->
-<!--            margin-right: 20px;-->
-<!--            font-size: 24px;-->
+<!--            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;-->
+<!--            font-weight: 400;-->
+<!--            line-height: 1.6;-->
+<!--            min-height: 100vh;-->
 <!--        }-->
 
 <!--        /* Main Content */-->
 <!--        .main-content {-->
-<!--            margin-left: 275px;-->
+<!--            margin-left: 280px;-->
 <!--            min-height: 100vh;-->
-<!--            max-width: 600px;-->
+<!--            padding: 2rem;-->
 <!--        }-->
 
-<!--        /* Header */-->
-<!--        .edit-header {-->
-<!--            position: sticky;-->
-<!--            top: 0;-->
-<!--            background-color: rgba(0, 0, 0, 0.8);-->
-<!--            backdrop-filter: blur(12px);-->
-<!--            border-bottom: 1px solid var(&#45;&#45;border-color);-->
-<!--            z-index: 1000;-->
+<!--        /* Page Header */-->
+<!--        .page-header {-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            border-radius: var(&#45;&#45;radius-xl);-->
+<!--            padding: 2rem 2.5rem;-->
+<!--            margin-bottom: 2rem;-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            border: 1px solid var(&#45;&#45;border-primary);-->
 <!--        }-->
 
-<!--        .header-content {-->
-<!--            display: flex;-->
-<!--            align-items: center;-->
-<!--            justify-content: space-between;-->
-<!--            padding: 12px 16px;-->
-<!--        }-->
-
-<!--        .header-left {-->
-<!--            display: flex;-->
-<!--            align-items: center;-->
-<!--        }-->
-
-<!--        .back-btn {-->
-<!--            background: none;-->
-<!--            border: none;-->
+<!--        .page-title {-->
+<!--            font-family: 'Playfair Display', serif;-->
+<!--            font-size: 2.25rem;-->
+<!--            font-weight: 600;-->
 <!--            color: var(&#45;&#45;text-primary);-->
-<!--            margin-right: 30px;-->
-<!--            padding: 8px;-->
-<!--            border-radius: 50%;-->
-<!--            transition: background-color 0.2s;-->
+<!--            margin: 0 0 0.5rem 0;-->
+<!--            letter-spacing: -0.02em;-->
 <!--        }-->
 
-<!--        .back-btn:hover {-->
-<!--            background-color: var(&#45;&#45;hover-color);-->
+<!--        .page-subtitle {-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            font-size: 1.125rem;-->
+<!--            margin: 0;-->
 <!--        }-->
 
-<!--        .save-btn {-->
-<!--            background-color: var(&#45;&#45;twitter-blue);-->
-<!--            color: white;-->
-<!--            border: none;-->
-<!--            padding: 8px 16px;-->
-<!--            border-radius: 20px;-->
-<!--            font-weight: 700;-->
-<!--            font-size: 15px;-->
-<!--            transition: background-color 0.2s;-->
-<!--        }-->
-
-<!--        .save-btn:hover {-->
-<!--            background-color: var(&#45;&#45;twitter-dark-blue);-->
-<!--        }-->
-
-<!--        .save-btn:disabled {-->
-<!--            background-color: var(&#45;&#45;text-secondary);-->
-<!--            cursor: not-allowed;-->
-<!--        }-->
-
-<!--        /* Cover Photo Section */-->
-<!--        .cover-section {-->
-<!--            position: relative;-->
-<!--            height: 200px;-->
-<!--            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);-->
-<!--            background-size: cover;-->
-<!--            background-position: center;-->
-<!--            display: flex;-->
-<!--            align-items: center;-->
-<!--            justify-content: center;-->
-<!--        }-->
-
-<!--        .cover-overlay {-->
-<!--            position: absolute;-->
-<!--            top: 0;-->
-<!--            left: 0;-->
-<!--            right: 0;-->
-<!--            bottom: 0;-->
-<!--            background-color: rgba(0, 0, 0, 0.6);-->
-<!--            display: flex;-->
-<!--            align-items: center;-->
-<!--            justify-content: center;-->
-<!--            gap: 16px;-->
-<!--        }-->
-
-<!--        .cover-btn {-->
-<!--            background-color: rgba(0, 0, 0, 0.75);-->
-<!--            border: none;-->
-<!--            color: white;-->
-<!--            padding: 8px;-->
-<!--            border-radius: 50%;-->
-<!--            width: 44px;-->
-<!--            height: 44px;-->
-<!--            transition: background-color 0.2s;-->
-<!--        }-->
-
-<!--        .cover-btn:hover {-->
-<!--            background-color: rgba(0, 0, 0, 0.9);-->
-<!--        }-->
-
-<!--        /* Avatar Section */-->
-<!--        .avatar-section {-->
-<!--            padding: 0 16px;-->
-<!--            position: relative;-->
-<!--        }-->
-
-<!--        .avatar-container {-->
-<!--            position: relative;-->
-<!--            display: inline-block;-->
-<!--            margin-top: -68px;-->
-<!--        }-->
-
-<!--        .profile-avatar {-->
-<!--            width: 134px;-->
-<!--            height: 134px;-->
-<!--            border: 4px solid var(&#45;&#45;bg-color);-->
-<!--            border-radius: 50%;-->
-<!--            position: relative;-->
+<!--        /* Form Container */-->
+<!--        .form-container {-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            border-radius: var(&#45;&#45;radius-xl);-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            border: 1px solid var(&#45;&#45;border-primary);-->
 <!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        /* Form Sections */-->
+<!--        .form-section {-->
+<!--            padding: 2.5rem;-->
+<!--            border-bottom: 1px solid var(&#45;&#45;border-secondary);-->
+<!--        }-->
+
+<!--        .form-section:last-child {-->
+<!--            border-bottom: none;-->
+<!--        }-->
+
+<!--        .section-title {-->
+<!--            font-family: 'Playfair Display', serif;-->
+<!--            font-size: 1.5rem;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            margin: 0 0 1.5rem 0;-->
+<!--            letter-spacing: -0.01em;-->
+<!--        }-->
+
+<!--        .section-description {-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            font-size: 0.9375rem;-->
+<!--            margin-bottom: 2rem;-->
+<!--            line-height: 1.6;-->
+<!--        }-->
+
+<!--        /* Profile Photo Section */-->
+<!--        .photo-section {-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;bg-accent), #f8fafc);-->
+<!--        }-->
+
+<!--        .photo-upload-area {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 2rem;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--        }-->
+
+<!--        .current-avatar {-->
+<!--            position: relative;-->
+<!--        }-->
+
+<!--        .avatar-preview {-->
+<!--            width: 120px;-->
+<!--            height: 120px;-->
+<!--            border-radius: 50%;-->
+<!--            border: 4px solid var(&#45;&#45;bg-secondary);-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--            overflow: hidden;-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;bg-accent), #f1f5f9);-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            font-size: 2.5rem;-->
 <!--        }-->
 
 <!--        .avatar-image {-->
@@ -199,538 +128,601 @@
 <!--            object-fit: cover;-->
 <!--        }-->
 
-<!--        .default-avatar {-->
+<!--        .photo-controls {-->
+<!--            flex: 1;-->
+<!--        }-->
+
+<!--        .upload-info {-->
+<!--            margin-bottom: 1rem;-->
+<!--        }-->
+
+<!--        .upload-hint {-->
+<!--            font-size: 0.875rem;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            margin: 0;-->
+<!--        }-->
+
+<!--        /* Background Photo Section */-->
+<!--        .background-preview {-->
+<!--            width: 100%;-->
+<!--            height: 200px;-->
+<!--            border-radius: var(&#45;&#45;radius-lg);-->
+<!--            border: 2px dashed var(&#45;&#45;border-primary);-->
+<!--            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--            overflow: hidden;-->
+<!--            position: relative;-->
+<!--        }-->
+
+<!--        .background-image {-->
 <!--            width: 100%;-->
 <!--            height: 100%;-->
-<!--            background-color: var(&#45;&#45;surface-color);-->
-<!--            display: flex;-->
-<!--            align-items: center;-->
-<!--            justify-content: center;-->
-<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            object-fit: cover;-->
 <!--        }-->
 
-<!--        .avatar-overlay {-->
-<!--            position: absolute;-->
-<!--            top: 0;-->
-<!--            left: 0;-->
-<!--            right: 0;-->
-<!--            bottom: 0;-->
-<!--            background-color: rgba(0, 0, 0, 0.6);-->
-<!--            display: flex;-->
-<!--            align-items: center;-->
-<!--            justify-content: center;-->
-<!--            opacity: 0;-->
-<!--            transition: opacity 0.2s;-->
+<!--        .background-placeholder {-->
+<!--            text-align: center;-->
+<!--            color: rgba(255, 255, 255, 0.8);-->
 <!--        }-->
 
-<!--        .avatar-container:hover .avatar-overlay {-->
-<!--            opacity: 1;-->
+<!--        .background-placeholder i {-->
+<!--            font-size: 2.5rem;-->
+<!--            margin-bottom: 0.5rem;-->
 <!--        }-->
 
-<!--        .avatar-btn {-->
-<!--            background-color: rgba(0, 0, 0, 0.75);-->
-<!--            border: none;-->
-<!--            color: white;-->
-<!--            padding: 8px;-->
-<!--            border-radius: 50%;-->
-<!--            width: 44px;-->
-<!--            height: 44px;-->
-<!--            margin: 0 4px;-->
-<!--        }-->
-
-<!--        /* Form Sections */-->
-<!--        .form-section {-->
-<!--            padding: 20px 16px;-->
-<!--            border-bottom: 1px solid var(&#45;&#45;border-color);-->
-<!--        }-->
-
-<!--        .form-section:last-child {-->
-<!--            border-bottom: none;-->
-<!--        }-->
-
-<!--        .section-title {-->
-<!--            font-size: 20px;-->
-<!--            font-weight: 800;-->
-<!--            margin-bottom: 20px;-->
-<!--        }-->
-
+<!--        /* Form Controls */-->
 <!--        .form-group {-->
-<!--            margin-bottom: 20px;-->
+<!--            margin-bottom: 1.5rem;-->
 <!--        }-->
 
 <!--        .form-label {-->
-<!--            color: var(&#45;&#45;text-secondary);-->
-<!--            font-size: 13px;-->
-<!--            font-weight: 400;-->
-<!--            margin-bottom: 8px;-->
-<!--            display: block;-->
-<!--        }-->
-
-<!--        .form-control {-->
-<!--            background-color: transparent;-->
-<!--            border: 1px solid var(&#45;&#45;border-color);-->
-<!--            border-radius: 4px;-->
+<!--            font-weight: 600;-->
 <!--            color: var(&#45;&#45;text-primary);-->
-<!--            font-size: 17px;-->
-<!--            padding: 12px;-->
-<!--            transition: border-color 0.2s;-->
+<!--            margin-bottom: 0.5rem;-->
+<!--            font-size: 0.9375rem;-->
+<!--            letter-spacing: 0.01em;-->
 <!--        }-->
 
-<!--        .form-control:focus {-->
-<!--            background-color: transparent;-->
-<!--            border-color: var(&#45;&#45;twitter-blue);-->
-<!--            box-shadow: 0 0 0 1px var(&#45;&#45;twitter-blue);-->
+<!--        .form-control-luxury {-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--            border: 1px solid var(&#45;&#45;border-secondary);-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            padding: 0.875rem 1.125rem;-->
+<!--            font-size: 0.9375rem;-->
 <!--            color: var(&#45;&#45;text-primary);-->
+<!--            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--            width: 100%;-->
+<!--            font-family: inherit;-->
 <!--        }-->
 
-<!--        .form-control::placeholder {-->
-<!--            color: var(&#45;&#45;text-secondary);-->
+<!--        .form-control-luxury:focus {-->
+<!--            outline: none;-->
+<!--            border-color: var(&#45;&#45;accent-primary);-->
+<!--            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
 <!--        }-->
 
-<!--        .character-count {-->
-<!--            text-align: right;-->
-<!--            font-size: 13px;-->
-<!--            color: var(&#45;&#45;text-secondary);-->
-<!--            margin-top: 4px;-->
+<!--        .form-control-luxury::placeholder {-->
+<!--            color: var(&#45;&#45;text-muted);-->
 <!--        }-->
 
-<!--        /* Upload Areas */-->
-<!--        .upload-area {-->
-<!--            border: 2px dashed var(&#45;&#45;border-color);-->
-<!--            border-radius: 8px;-->
-<!--            padding: 20px;-->
-<!--            text-align: center;-->
-<!--            transition: border-color 0.2s;-->
-<!--            cursor: pointer;-->
+<!--        /* File Upload */-->
+<!--        .file-upload {-->
+<!--            position: relative;-->
+<!--            overflow: hidden;-->
+<!--            display: inline-block;-->
 <!--        }-->
 
-<!--        .upload-area:hover {-->
-<!--            border-color: var(&#45;&#45;twitter-blue);-->
+<!--        .file-upload input[type=file] {-->
+<!--            position: absolute;-->
+<!--            left: -9999px;-->
 <!--        }-->
 
-<!--        .upload-area.dragover {-->
-<!--            border-color: var(&#45;&#45;twitter-blue);-->
-<!--            background-color: rgba(29, 155, 240, 0.1);-->
-<!--        }-->
-
-<!--        .upload-icon {-->
-<!--            font-size: 48px;-->
-<!--            color: var(&#45;&#45;text-secondary);-->
-<!--            margin-bottom: 16px;-->
-<!--        }-->
-
-<!--        .upload-text {-->
-<!--            font-size: 15px;-->
-<!--            color: var(&#45;&#45;text-secondary);-->
-<!--        }-->
-
-<!--        .file-input {-->
-<!--            display: none;-->
-<!--        }-->
-
-<!--        /* Alerts */-->
-<!--        .alert {-->
-<!--            margin: 16px;-->
-<!--            border-radius: 8px;-->
+<!--        .upload-btn {-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--            color: white;-->
 <!--            border: none;-->
+<!--            padding: 0.75rem 1.5rem;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            font-weight: 500;-->
+<!--            font-size: 0.875rem;-->
+<!--            cursor: pointer;-->
+<!--            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--            display: inline-flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--            letter-spacing: 0.01em;-->
 <!--        }-->
 
-<!--        .alert-success {-->
-<!--            background-color: #1d4e1f;-->
-<!--            color: #4caf50;-->
-<!--            border: 1px solid #2e7d32;-->
+<!--        .upload-btn:hover {-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
 <!--        }-->
 
-<!--        .alert-danger {-->
-<!--            background-color: #5d1a1a;-->
-<!--            color: #f44336;-->
-<!--            border: 1px solid #d32f2f;-->
+<!--        .remove-btn {-->
+<!--            background: linear-gradient(135deg, #dc2626, #b91c1c);-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            padding: 0.75rem 1.5rem;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            font-weight: 500;-->
+<!--            font-size: 0.875rem;-->
+<!--            cursor: pointer;-->
+<!--            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--            display: inline-flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--            margin-left: 0.75rem;-->
 <!--        }-->
 
-<!--        /* Modal */-->
-<!--        .modal-content {-->
-<!--            background-color: var(&#45;&#45;surface-color);-->
-<!--            border: 1px solid var(&#45;&#45;border-color);-->
+<!--        .remove-btn:hover {-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--        }-->
+
+<!--        /* Action Buttons */-->
+<!--        .form-actions {-->
+<!--            display: flex;-->
+<!--            gap: 1rem;-->
+<!--            justify-content: flex-end;-->
+<!--            align-items: center;-->
+<!--        }-->
+
+<!--        .btn-luxury {-->
+<!--            padding: 0.875rem 2rem;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            font-weight: 600;-->
+<!--            font-size: 0.9375rem;-->
+<!--            letter-spacing: 0.01em;-->
+<!--            text-decoration: none;-->
+<!--            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--            border: 1px solid var(&#45;&#45;border-primary);-->
+<!--            display: inline-flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--            cursor: pointer;-->
+<!--            position: relative;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        .btn-luxury::before {-->
+<!--            content: '';-->
+<!--            position: absolute;-->
+<!--            top: 0;-->
+<!--            left: -100%;-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);-->
+<!--            transition: left 0.5s;-->
+<!--        }-->
+
+<!--        .btn-luxury:hover::before {-->
+<!--            left: 100%;-->
+<!--        }-->
+
+<!--        .btn-primary-luxury {-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--            color: white;-->
+<!--            border-color: transparent;-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--        }-->
+
+<!--        .btn-primary-luxury:hover {-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .btn-secondary-luxury {-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
 <!--            color: var(&#45;&#45;text-primary);-->
+<!--            border-color: var(&#45;&#45;border-secondary);-->
 <!--        }-->
 
-<!--        .modal-header {-->
-<!--            border-bottom: 1px solid var(&#45;&#45;border-color);-->
-<!--        }-->
-
-<!--        .modal-footer {-->
-<!--            border-top: 1px solid var(&#45;&#45;border-color);-->
-<!--        }-->
-
-<!--        .btn-secondary {-->
-<!--            background-color: transparent;-->
-<!--            border-color: var(&#45;&#45;border-color);-->
+<!--        .btn-secondary-luxury:hover {-->
+<!--            background: var(&#45;&#45;bg-accent);-->
 <!--            color: var(&#45;&#45;text-primary);-->
+<!--            transform: translateY(-1px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--            text-decoration: none;-->
 <!--        }-->
 
-<!--        .btn-secondary:hover {-->
-<!--            background-color: var(&#45;&#45;hover-color);-->
-<!--            border-color: var(&#45;&#45;border-color);-->
-<!--            color: var(&#45;&#45;text-primary);-->
+<!--        /* Error Messages */-->
+<!--        .error-message {-->
+<!--            color: #dc2626;-->
+<!--            font-size: 0.8125rem;-->
+<!--            margin-top: 0.5rem;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.375rem;-->
 <!--        }-->
 
-<!--        .btn-danger {-->
-<!--            background-color: #f91880;-->
-<!--            border-color: #f91880;-->
+<!--        .error-message i {-->
+<!--            font-size: 0.75rem;-->
 <!--        }-->
 
-<!--        .btn-danger:hover {-->
-<!--            background-color: #e91970;-->
-<!--            border-color: #e91970;-->
+<!--        /* Success/Error Alerts */-->
+<!--        .alert-luxury {-->
+<!--            border: none;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            margin-bottom: 2rem;-->
+<!--            padding: 1rem 1.5rem;-->
+<!--            box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.75rem;-->
 <!--        }-->
 
-<!--        /* Responsive */-->
+<!--        .alert-success-luxury {-->
+<!--            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.1));-->
+<!--            color: var(&#45;&#45;accent-success);-->
+<!--            border-left: 4px solid var(&#45;&#45;accent-success);-->
+<!--        }-->
+
+<!--        .alert-danger-luxury {-->
+<!--            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(248, 113, 113, 0.1));-->
+<!--            color: #dc2626;-->
+<!--            border-left: 4px solid #dc2626;-->
+<!--        }-->
+
+<!--        /* Responsive Design */-->
 <!--        @media (max-width: 1024px) {-->
-<!--            .sidebar {-->
-<!--                width: 68px;-->
-<!--            }-->
-<!--            .nav-text {-->
-<!--                display: none;-->
-<!--            }-->
 <!--            .main-content {-->
-<!--                margin-left: 68px;-->
+<!--                margin-left: 80px;-->
 <!--            }-->
 <!--        }-->
 
 <!--        @media (max-width: 768px) {-->
-<!--            .sidebar {-->
-<!--                display: none;-->
-<!--            }-->
 <!--            .main-content {-->
 <!--                margin-left: 0;-->
+<!--                margin-top: 60px;-->
+<!--                padding: 1rem;-->
+<!--            }-->
+
+<!--            .page-header,-->
+<!--            .form-section {-->
+<!--                padding: 1.5rem;-->
+<!--            }-->
+
+<!--            .page-title {-->
+<!--                font-size: 1.875rem;-->
+<!--            }-->
+
+<!--            .photo-upload-area {-->
+<!--                flex-direction: column;-->
+<!--                text-align: center;-->
+<!--                gap: 1.5rem;-->
+<!--            }-->
+
+<!--            .form-actions {-->
+<!--                flex-direction: column-reverse;-->
+<!--                gap: 0.75rem;-->
+<!--            }-->
+
+<!--            .btn-luxury {-->
+<!--                width: 100%;-->
+<!--                justify-content: center;-->
+<!--            }-->
+<!--        }-->
+
+<!--        @media (max-width: 480px) {-->
+<!--            .avatar-preview {-->
+<!--                width: 100px;-->
+<!--                height: 100px;-->
+<!--            }-->
+
+<!--            .background-preview {-->
+<!--                height: 150px;-->
 <!--            }-->
 <!--        }-->
 <!--    </style>-->
 <!--</head>-->
 <!--<body>-->
+<!--&lt;!&ndash; Mobile Header &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>-->
 
-<!--&lt;!&ndash; Left Sidebar Navigation &ndash;&gt;-->
-<!--<nav class="sidebar">-->
-<!--    <div class="logo">-->
-<!--        <i class="fas fa-crown text-warning"></i>-->
-<!--    </div>-->
-
-<!--    <a href="/home" class="nav-item">-->
-<!--        <i class="fas fa-home nav-icon"></i>-->
-<!--        <span class="nav-text">Главная</span>-->
-<!--    </a>-->
-
-<!--    <a href="/explore" class="nav-item">-->
-<!--        <i class="fas fa-hashtag nav-icon"></i>-->
-<!--        <span class="nav-text">Обзор</span>-->
-<!--    </a>-->
-
-<!--    <a href="/notifications" class="nav-item">-->
-<!--        <i class="fas fa-bell nav-icon"></i>-->
-<!--        <span class="nav-text">Уведомления</span>-->
-<!--    </a>-->
-
-<!--    <a href="/messages" class="nav-item">-->
-<!--        <i class="fas fa-envelope nav-icon"></i>-->
-<!--        <span class="nav-text">Сообщения</span>-->
-<!--    </a>-->
-
-<!--    <a href="/bookmarks" class="nav-item">-->
-<!--        <i class="fas fa-bookmark nav-icon"></i>-->
-<!--        <span class="nav-text">Закладки</span>-->
-<!--    </a>-->
-
-<!--    <a th:href="@{/profile/{userId}(userId=${user.id})}" class="nav-item active">-->
-<!--        <i class="fas fa-user nav-icon"></i>-->
-<!--        <span class="nav-text">Профиль</span>-->
-<!--    </a>-->
-
-<!--    <a href="/settings" class="nav-item">-->
-<!--        <i class="fas fa-cog nav-icon"></i>-->
-<!--        <span class="nav-text">Настройки</span>-->
-<!--    </a>-->
-<!--</nav>-->
+<!--&lt;!&ndash; Sidebar с активной секцией &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar('profile')}"></th:block>-->
 
 <!--&lt;!&ndash; Main Content &ndash;&gt;-->
 <!--<main class="main-content">-->
-<!--    &lt;!&ndash; Header &ndash;&gt;-->
-<!--    <header class="edit-header">-->
-<!--        <div class="header-content">-->
-<!--            <div class="header-left">-->
-<!--                <button class="back-btn" onclick="history.back()">-->
-<!--                    <i class="fas fa-times"></i>-->
-<!--                </button>-->
-<!--                <h1 class="h5 mb-0">Редактировать профиль</h1>-->
-<!--            </div>-->
-<!--            <button type="submit" form="profileForm" class="save-btn">-->
-<!--                Сохранить-->
-<!--            </button>-->
-<!--        </div>-->
-<!--    </header>-->
+<!--    &lt;!&ndash; Success/Error Messages &ndash;&gt;-->
+<!--    <div th:if="${successMessage}" class="alert-luxury alert-success-luxury">-->
+<!--        <i class="fas fa-check-circle"></i>-->
+<!--        <span th:text="${successMessage}"></span>-->
+<!--    </div>-->
 
-<!--    &lt;!&ndash; Error Messages &ndash;&gt;-->
-<!--    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">-->
-<!--        <i class="fas fa-exclamation-circle me-2"></i>-->
+<!--    <div th:if="${errorMessage}" class="alert-luxury alert-danger-luxury">-->
+<!--        <i class="fas fa-exclamation-circle"></i>-->
 <!--        <span th:text="${errorMessage}"></span>-->
-<!--        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
 <!--    </div>-->
 
-<!--    &lt;!&ndash; Cover Photo Section &ndash;&gt;-->
-<!--    <div class="cover-section" id="coverSection">-->
-<!--        <div class="cover-overlay">-->
-<!--            <button type="button" class="cover-btn" onclick="document.getElementById('coverInput').click()">-->
-<!--                <i class="fas fa-camera"></i>-->
-<!--            </button>-->
-<!--            <button type="button" class="cover-btn" onclick="removeCover()">-->
-<!--                <i class="fas fa-times"></i>-->
-<!--            </button>-->
-<!--        </div>-->
+<!--    &lt;!&ndash; Page Header &ndash;&gt;-->
+<!--    <div class="page-header">-->
+<!--        <h1 class="page-title">Редактирование профиля</h1>-->
+<!--        <p class="page-subtitle">Персонализируйте свой профиль и настройте отображение</p>-->
 <!--    </div>-->
 
-<!--    &lt;!&ndash; Avatar Section &ndash;&gt;-->
-<!--    <div class="avatar-section">-->
-<!--        <div class="avatar-container">-->
-<!--            <div class="profile-avatar">-->
-<!--                <img th:if="${user.imageUrl}"-->
-<!--                     th:src="${user.imageUrl}"-->
-<!--                     alt="Аватар"-->
-<!--                     class="avatar-image"-->
-<!--                     id="avatarImage">-->
-<!--                <div th:unless="${user.imageUrl}" class="default-avatar" id="defaultAvatar">-->
-<!--                    <i class="fas fa-user fa-3x"></i>-->
+<!--    &lt;!&ndash; Form Container &ndash;&gt;-->
+<!--    <div class="form-container">-->
+<!--        <form                   th:action="@{/profile/{userId}/update(userId=${user.id})}"-->
+<!--                                th:object="${updateProfileDto}"-->
+<!--                                method="post"-->
+<!--                                enctype="multipart/form-data">-->
+
+<!--            &lt;!&ndash; Personal Information Section &ndash;&gt;-->
+<!--            <div class="form-section">-->
+<!--                <h2 class="section-title">Личная информация</h2>-->
+<!--                <p class="section-description">-->
+<!--                    Обновите ваше имя и фамилию. Эта информация будет отображаться в вашем профиле и видна другим пользователям.-->
+<!--                </p>-->
+
+<!--                <div class="row">-->
+<!--                    <div class="col-md-6">-->
+<!--                        <div class="form-group">-->
+<!--                            <label for="firstName" class="form-label">Имя</label>-->
+<!--                            <input type="text"-->
+<!--                                   id="firstName"-->
+<!--                                   th:field="*{firstName}"-->
+<!--                                   class="form-control-luxury"-->
+<!--                                   placeholder="Введите ваше имя"-->
+<!--                                   maxlength="50">-->
+<!--                            <div th:if="${#fields.hasErrors('firstName')}" class="error-message">-->
+<!--                                <i class="fas fa-exclamation-triangle"></i>-->
+<!--                                <span th:errors="*{firstName}"></span>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="col-md-6">-->
+<!--                        <div class="form-group">-->
+<!--                            <label for="lastName" class="form-label">Фамилия</label>-->
+<!--                            <input type="text"-->
+<!--                                   id="lastName"-->
+<!--                                   th:field="*{lastName}"-->
+<!--                                   class="form-control-luxury"-->
+<!--                                   placeholder="Введите вашу фамилию"-->
+<!--                                   maxlength="50">-->
+<!--                            <div th:if="${#fields.hasErrors('lastName')}" class="error-message">-->
+<!--                                <i class="fas fa-exclamation-triangle"></i>-->
+<!--                                <span th:errors="*{lastName}"></span>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
 <!--                </div>-->
 <!--            </div>-->
-<!--            <div class="avatar-overlay">-->
-<!--                <button type="button" class="avatar-btn" onclick="document.getElementById('avatarInput').click()">-->
-<!--                    <i class="fas fa-camera"></i>-->
-<!--                </button>-->
-<!--                <button th:if="${user.imageUrl}"-->
-<!--                        type="button"-->
-<!--                        class="avatar-btn"-->
-<!--                        data-bs-toggle="modal"-->
-<!--                        data-bs-target="#deleteAvatarModal">-->
-<!--                    <i class="fas fa-times"></i>-->
-<!--                </button>-->
+
+<!--            &lt;!&ndash; Profile Photo Section &ndash;&gt;-->
+<!--            <div class="form-section photo-section">-->
+<!--                <h2 class="section-title">Фотография профиля</h2>-->
+<!--                <p class="section-description">-->
+<!--                    Загрузите фотографию для вашего профиля. Рекомендуемый размер: 400x400 пикселей или больше.-->
+<!--                </p>-->
+
+<!--                <div class="photo-upload-area">-->
+<!--                    <div class="current-avatar">-->
+<!--                        <div class="avatar-preview">-->
+<!--                            <img th:if="${user.imageUrl}"-->
+<!--                                 th:src="${user.imageUrl}"-->
+<!--                                 alt="Текущий аватар"-->
+<!--                                 class="avatar-image"-->
+<!--                                 id="avatarPreview">-->
+<!--                            <div th:unless="${user.imageUrl}" id="avatarPlaceholder">-->
+<!--                                <i class="fas fa-user"></i>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="photo-controls">-->
+<!--                        <div class="upload-info">-->
+<!--                            <p class="upload-hint">-->
+<!--                                <i class="fas fa-info-circle me-1"></i>-->
+<!--                                Поддерживаемые форматы: JPG, PNG, GIF. Максимальный размер: 5 МБ-->
+<!--                            </p>-->
+<!--                        </div>-->
+<!--                        <div class="file-upload">-->
+<!--                            <input type="file"-->
+<!--                                   id="profileImage"-->
+<!--                                   name="profileImage"-->
+<!--                                   accept="image/*"-->
+<!--                                   onchange="previewImage(this, 'avatarPreview', 'avatarPlaceholder')">-->
+<!--                            <label for="profileImage" class="upload-btn">-->
+<!--                                <i class="fas fa-upload"></i>-->
+<!--                                <span>Загрузить фото</span>-->
+<!--                            </label>-->
+<!--                        </div>-->
+<!--                        <button type="button"-->
+<!--                                class="remove-btn"-->
+<!--                                onclick="removeImage('profileImage', 'avatarPreview', 'avatarPlaceholder')"-->
+<!--                                th:if="${user.imageUrl}">-->
+<!--                            <i class="fas fa-trash"></i>-->
+<!--                            <span>Удалить</span>-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--                </div>-->
 <!--            </div>-->
-<!--        </div>-->
+
+<!--            &lt;!&ndash; Background Photo Section &ndash;&gt;-->
+<!--            <div class="form-section">-->
+<!--                <h2 class="section-title">Фон профиля</h2>-->
+<!--                <p class="section-description">-->
+<!--                    Добавьте фоновое изображение для вашего профиля. Рекомендуемый размер: 1500x500 пикселей.-->
+<!--                </p>-->
+
+<!--                <div class="background-preview" id="backgroundPreview">-->
+<!--                    <img th:if="${user.imgBackground}"-->
+<!--                         th:src="${user.imgBackground}"-->
+<!--                         alt="Фон профиля"-->
+<!--                         class="background-image"-->
+<!--                         id="backgroundImage">-->
+<!--                    <div th:unless="${user.imgBackground}" class="background-placeholder" id="backgroundPlaceholder">-->
+<!--                        <i class="fas fa-image"></i>-->
+<!--                        <p>Фоновое изображение не установлено</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div style="margin-top: 1.5rem;">-->
+<!--                    <div class="upload-info" style="margin-bottom: 1rem;">-->
+<!--                        <p class="upload-hint">-->
+<!--                            <i class="fas fa-info-circle me-1"></i>-->
+<!--                            Поддерживаемые форматы: JPG, PNG. Максимальный размер: 10 МБ-->
+<!--                        </p>-->
+<!--                    </div>-->
+<!--                    <div class="file-upload">-->
+<!--                        <input type="file"-->
+<!--                               id="backgroundImage"-->
+<!--                               name="backgroundImage"-->
+<!--                               accept="image/*"-->
+<!--                               onchange="previewBackgroundImage(this)">-->
+<!--                        <label for="backgroundImage" class="upload-btn">-->
+<!--                            <i class="fas fa-upload"></i>-->
+<!--                            <span>Загрузить фон</span>-->
+<!--                        </label>-->
+<!--                    </div>-->
+<!--                    <button type="button"-->
+<!--                            class="remove-btn"-->
+<!--                            onclick="removeBackgroundImage()"-->
+<!--                            th:if="${user.imgBackground}">-->
+<!--                        <i class="fas fa-trash"></i>-->
+<!--                        <span>Удалить фон</span>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Form Actions &ndash;&gt;-->
+<!--            <div class="form-section">-->
+<!--                <div class="form-actions">-->
+<!--                    <a th:href="@{/profile/{userId}(userId=${user.id})}"-->
+<!--                       class="btn-luxury btn-secondary-luxury">-->
+<!--                        <i class="fas fa-times"></i>-->
+<!--                        <span>Отмена</span>-->
+<!--                    </a>-->
+<!--                    <button type="submit" class="btn-luxury btn-primary-luxury">-->
+<!--                        <i class="fas fa-save"></i>-->
+<!--                        <span>Сохранить изменения</span>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </form>-->
 <!--    </div>-->
-
-<!--    &lt;!&ndash; Profile Form &ndash;&gt;-->
-<!--    <form id="profileForm"-->
-<!--          th:action="@{/profile/{userId}/update(userId=${user.id})}"-->
-<!--          method="post"-->
-<!--          th:object="${updateProfileDto}">-->
-
-<!--        &lt;!&ndash; Basic Info Section &ndash;&gt;-->
-<!--        <div class="form-section">-->
-<!--            <h3 class="section-title">Основная информация</h3>-->
-
-<!--            <div class="form-group">-->
-<!--                <label for="firstName" class="form-label">Имя</label>-->
-<!--                <input type="text"-->
-<!--                       class="form-control"-->
-<!--                       id="firstName"-->
-<!--                       th:field="*{firstName}"-->
-<!--                       th:class="${#fields.hasErrors('firstName')} ? 'form-control is-invalid' : 'form-control'"-->
-<!--                       placeholder="Введите ваше имя"-->
-<!--                       maxlength="50">-->
-<!--                <div class="character-count">-->
-<!--                    <span id="firstNameCount">0</span>/50-->
-<!--                </div>-->
-<!--                <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>-->
-<!--            </div>-->
-
-<!--            <div class="form-group">-->
-<!--                <label for="lastName" class="form-label">Фамилия</label>-->
-<!--                <input type="text"-->
-<!--                       class="form-control"-->
-<!--                       id="lastName"-->
-<!--                       th:field="*{lastName}"-->
-<!--                       th:class="${#fields.hasErrors('lastName')} ? 'form-control is-invalid' : 'form-control'"-->
-<!--                       placeholder="Введите вашу фамилию"-->
-<!--                       maxlength="50">-->
-<!--                <div class="character-count">-->
-<!--                    <span id="lastNameCount">0</span>/50-->
-<!--                </div>-->
-<!--                <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </form>-->
-
-<!--    &lt;!&ndash; Upload Forms &ndash;&gt;-->
-<!--    <form th:action="@{/profile/{userId}/avatar/upload(userId=${user.id})}"-->
-<!--          method="post"-->
-<!--          enctype="multipart/form-data"-->
-<!--          id="avatarForm">-->
-<!--        <input type="file"-->
-<!--               id="avatarInput"-->
-<!--               name="avatarFile"-->
-<!--               class="file-input"-->
-<!--               accept="image/jpeg,image/jpg,image/png"-->
-<!--               onchange="handleAvatarUpload(this)">-->
-<!--    </form>-->
-
-<!--    <form th:action="@{/profile/{userId}/cover/upload(userId=${user.id})}"-->
-<!--          method="post"-->
-<!--          enctype="multipart/form-data"-->
-<!--          id="coverForm">-->
-<!--        <input type="file"-->
-<!--               id="coverInput"-->
-<!--               name="coverFile"-->
-<!--               class="file-input"-->
-<!--               accept="image/jpeg,image/jpg,image/png"-->
-<!--               onchange="handleCoverUpload(this)">-->
-<!--    </form>-->
 <!--</main>-->
 
-<!--&lt;!&ndash; Delete Avatar Modal &ndash;&gt;-->
-<!--<div class="modal fade" id="deleteAvatarModal" tabindex="-1">-->
-<!--    <div class="modal-dialog">-->
-<!--        <div class="modal-content">-->
-<!--            <div class="modal-header">-->
-<!--                <h5 class="modal-title">Удаление аватара</h5>-->
-<!--                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>-->
-<!--            </div>-->
-<!--            <div class="modal-body">-->
-<!--                Вы уверены, что хотите удалить свой аватар? Это действие нельзя отменить.-->
-<!--            </div>-->
-<!--            <div class="modal-footer">-->
-<!--                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>-->
-<!--                <form th:action="@{/profile/{userId}/avatar/delete(userId=${user.id})}"-->
-<!--                      method="post"-->
-<!--                      style="display: inline;">-->
-<!--                    <button type="submit" class="btn btn-danger">-->
-<!--                        Удалить-->
-<!--                    </button>-->
-<!--                </form>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
+<!--&lt;!&ndash; JS в конце страницы &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>-->
 
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>-->
 <!--<script>-->
-<!--    // Character counting-->
-<!--    function updateCharacterCount(inputId, countId) {-->
-<!--        const input = document.getElementById(inputId);-->
-<!--        const counter = document.getElementById(countId);-->
+<!--    // Image preview functionality-->
+<!--    function previewImage(input, previewId, placeholderId) {-->
+<!--        const preview = document.getElementById(previewId);-->
+<!--        const placeholder = document.getElementById(placeholderId);-->
 
-<!--        function updateCount() {-->
-<!--            counter.textContent = input.value.length;-->
-<!--        }-->
-
-<!--        input.addEventListener('input', updateCount);-->
-<!--        updateCount();-->
-<!--    }-->
-
-<!--    // Initialize character counters-->
-<!--    updateCharacterCount('firstName', 'firstNameCount');-->
-<!--    updateCharacterCount('lastName', 'lastNameCount');-->
-
-<!--    // Avatar upload handling-->
-<!--    function handleAvatarUpload(input) {-->
 <!--        if (input.files && input.files[0]) {-->
-<!--            const file = input.files[0];-->
-
-<!--            // Validate file-->
-<!--            if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {-->
-<!--                alert('Пожалуйста, выберите файл формата JPG, JPEG или PNG');-->
-<!--                return;-->
-<!--            }-->
-
-<!--            if (file.size > 5 * 1024 * 1024) {-->
-<!--                alert('Размер файла не должен превышать 5MB');-->
-<!--                return;-->
-<!--            }-->
-
-<!--            // Preview image-->
 <!--            const reader = new FileReader();-->
+
 <!--            reader.onload = function(e) {-->
-<!--                const avatarImage = document.getElementById('avatarImage');-->
-<!--                const defaultAvatar = document.getElementById('defaultAvatar');-->
-
-<!--                if (avatarImage) {-->
-<!--                    avatarImage.src = e.target.result;-->
-<!--                } else {-->
-<!--                    // Create new image element-->
-<!--                    const img = document.createElement('img');-->
-<!--                    img.src = e.target.result;-->
-<!--                    img.className = 'avatar-image';-->
-<!--                    img.id = 'avatarImage';-->
-
-<!--                    const avatarContainer = document.querySelector('.profile-avatar');-->
-<!--                    if (defaultAvatar) {-->
-<!--                        defaultAvatar.remove();-->
-<!--                    }-->
-<!--                    avatarContainer.appendChild(img);-->
+<!--                if (preview) {-->
+<!--                    preview.src = e.target.result;-->
+<!--                    preview.style.display = 'block';-->
+<!--                }-->
+<!--                if (placeholder) {-->
+<!--                    placeholder.style.display = 'none';-->
 <!--                }-->
 <!--            };-->
-<!--            reader.readAsDataURL(file);-->
 
-<!--            // Auto-submit form-->
-<!--            document.getElementById('avatarForm').submit();-->
+<!--            reader.readAsDataURL(input.files[0]);-->
 <!--        }-->
 <!--    }-->
 
-<!--    // Cover upload handling-->
-<!--    function handleCoverUpload(input) {-->
+<!--    // Background image preview-->
+<!--    function previewBackgroundImage(input) {-->
+<!--        const preview = document.getElementById('backgroundImage');-->
+<!--        const placeholder = document.getElementById('backgroundPlaceholder');-->
+
 <!--        if (input.files && input.files[0]) {-->
-<!--            const file = input.files[0];-->
-
-<!--            // Validate file-->
-<!--            if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {-->
-<!--                alert('Пожалуйста, выберите файл формата JPG, JPEG или PNG');-->
-<!--                return;-->
-<!--            }-->
-
-<!--            if (file.size > 5 * 1024 * 1024) {-->
-<!--                alert('Размер файла не должен превышать 5MB');-->
-<!--                return;-->
-<!--            }-->
-
-<!--            // Preview image-->
 <!--            const reader = new FileReader();-->
+
 <!--            reader.onload = function(e) {-->
-<!--                const coverSection = document.getElementById('coverSection');-->
-<!--                coverSection.style.backgroundImage = `url(${e.target.result})`;-->
+<!--                if (preview) {-->
+<!--                    preview.src = e.target.result;-->
+<!--                    preview.style.display = 'block';-->
+<!--                }-->
+<!--                if (placeholder) {-->
+<!--                    placeholder.style.display = 'none';-->
+<!--                }-->
 <!--            };-->
-<!--            reader.readAsDataURL(file);-->
 
-<!--            // Auto-submit form-->
-<!--            document.getElementById('coverForm').submit();-->
+<!--            reader.readAsDataURL(input.files[0]);-->
 <!--        }-->
 <!--    }-->
 
-<!--    // Remove cover-->
-<!--    function removeCover() {-->
-<!--        if (confirm('Удалить фоновое изображение?')) {-->
-<!--            const coverSection = document.getElementById('coverSection');-->
-<!--            coverSection.style.backgroundImage = '';-->
-<!--            // Here you would make an AJAX call to remove the cover from server-->
-<!--        }-->
+<!--    // Remove image functionality-->
+<!--    function removeImage(inputId, previewId, placeholderId) {-->
+<!--        const input = document.getElementById(inputId);-->
+<!--        const preview = document.getElementById(previewId);-->
+<!--        const placeholder = document.getElementById(placeholderId);-->
+
+<!--        if (input) input.value = '';-->
+<!--        if (preview) preview.style.display = 'none';-->
+<!--        if (placeholder) placeholder.style.display = 'flex';-->
 <!--    }-->
 
-<!--    // Save button state management-->
-<!--    const form = document.getElementById('profileForm');-->
-<!--    const saveBtn = document.querySelector('.save-btn');-->
-<!--    const inputs = form.querySelectorAll('input');-->
+<!--    // Remove background image-->
+<!--    function removeBackgroundImage() {-->
+<!--        const input = document.getElementById('backgroundImage');-->
+<!--        const preview = document.getElementById('backgroundImage');-->
+<!--        const placeholder = document.getElementById('backgroundPlaceholder');-->
 
-<!--    let hasChanges = false;-->
+<!--        if (input) input.value = '';-->
+<!--        if (preview) preview.style.display = 'none';-->
+<!--        if (placeholder) placeholder.style.display = 'flex';-->
+<!--    }-->
 
-<!--    inputs.forEach(input => {-->
-<!--        const initialValue = input.value;-->
-<!--        input.addEventListener('input', function() {-->
-<!--            hasChanges = this.value !== initialValue;-->
-<!--            saveBtn.disabled = !hasChanges;-->
+<!--    // Form validation and enhancement-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        // Add loading state to submit button-->
+<!--        const form = document.querySelector('form');-->
+<!--        const submitBtn = document.querySelector('.btn-primary-luxury');-->
+
+<!--        if (form && submitBtn) {-->
+<!--            form.addEventListener('submit', function() {-->
+<!--                submitBtn.disabled = true;-->
+<!--                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Сохранение...</span>';-->
+<!--            });-->
+<!--        }-->
+
+<!--        // Character counter for text inputs-->
+<!--        const textInputs = document.querySelectorAll('input[maxlength]');-->
+<!--        textInputs.forEach(input => {-->
+<!--            const maxLength = input.getAttribute('maxlength');-->
+<!--            const counterDiv = document.createElement('div');-->
+<!--            counterDiv.className = 'character-counter';-->
+<!--            counterDiv.style.fontSize = '0.75rem';-->
+<!--            counterDiv.style.color = 'var(&#45;&#45;text-muted)';-->
+<!--            counterDiv.style.textAlign = 'right';-->
+<!--            counterDiv.style.marginTop = '0.25rem';-->
+
+<!--            function updateCounter() {-->
+<!--                const currentLength = input.value.length;-->
+<!--                counterDiv.textContent = `${currentLength}/${maxLength}`;-->
+
+<!--                if (currentLength > maxLength * 0.9) {-->
+<!--                    counterDiv.style.color = '#d97706';-->
+<!--                } else {-->
+<!--                    counterDiv.style.color = 'var(&#45;&#45;text-muted)';-->
+<!--                }-->
+<!--            }-->
+
+<!--            input.addEventListener('input', updateCounter);-->
+<!--            input.parentNode.appendChild(counterDiv);-->
+<!--            updateCounter();-->
 <!--        });-->
-<!--    });-->
 
-<!--    // Initial state-->
-<!--    saveBtn.disabled = true;-->
+<!--        console.log('📝 Profile edit page initialized');-->
+<!--    });-->
 <!--</script>-->
 <!--</body>-->
 <!--</html>-->
-
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>

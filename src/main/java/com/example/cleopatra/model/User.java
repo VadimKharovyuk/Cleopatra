@@ -51,6 +51,10 @@ public class User {
     @Column(name = "img_id")
     private String imgId;
 
+    private String imgBackground ;
+
+    private String imgBackgroundID;
+
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<TrustedDevice> trustedDevices = new ArrayList<>();

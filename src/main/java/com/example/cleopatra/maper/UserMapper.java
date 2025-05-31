@@ -28,8 +28,14 @@ public class UserMapper {
         // Добавляем новые поля профиля
         response.setFirstName(user.getFirstName());
         response.setLastName(user.getLastName());
+
+        ///аватар
         response.setImageUrl(user.getImageUrl());
         response.setImgId(user.getImgId());
+
+        ///фон
+        response.setImgBackground(user.getImgBackground());
+        response.setImgBackgroundID(user.getImgBackgroundID());
 
         response.setCreatedAt(user.getCreatedAt());
         return response;
@@ -43,6 +49,7 @@ public class UserMapper {
         if (dto.getLastName() != null) {
             user.setLastName(dto.getLastName().trim());
         }
+
 
     }
 

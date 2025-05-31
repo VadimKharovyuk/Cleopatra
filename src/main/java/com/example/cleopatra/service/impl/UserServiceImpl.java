@@ -104,11 +104,11 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
-        @Override
-        public void validateUserExists(Long userId) {
-            if (!userRepository.existsById(userId)) {
-                throw new RuntimeException("Пользователь с ID " + userId + " не найден");
-            }
+    @Override
+    public void validateUserExists(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("Пользователь с ID " + userId + " не найден");
+        }
     }
 
     @Override
@@ -118,7 +118,75 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteAvatar(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Пользователь с ID "+ userId + " не найден"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Пользователь с ID " + userId + " не найден"));
         storageService.deleteImage(user.getImgId());
+    }
+    @Override
+    public UserResponse uploadBackgroundImage(Long userId, MultipartFile file) {
+        log.info("Начинаем загрузку фонового изображения для пользователя с ID: {}", userId);
+
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Пользователь с ID " + userId + " не найден"));
+
+            imageValidator.validateImage(file);
+
+            if (user.getImgBackgroundID() != null && !user.getImgBackgroundID().isEmpty()) {
+                log.debug("Удаляем старое фоновое изображение с ID: {}", user.getImgBackgroundID());
+                storageService.deleteImage(user.getImgBackgroundID());
+            }
+
+            StorageService.StorageResult uploadResult = storageService.uploadImage(file);
+
+            user.setImgBackground(uploadResult.getUrl());
+            user.setImgBackgroundID(uploadResult.getImageId());
+
+            User savedUser = userRepository.save(user);
+
+            log.info("Фоновое изображение успешно загружено для пользователя с ID: {}. URL: {}",
+                    userId, uploadResult.getUrl());
+
+            return userMapper.toResponse(savedUser);
+
+        } catch (IOException e) {
+
+            log.error("Ошибка при загрузке фонового изображения для пользователя с ID {}: {}", userId, e.getMessage());
+            throw new RuntimeException("Ошибка при загрузке фонового изображения: " + e.getMessage(), e);
+        }
+    }
+    @Override
+    public UserResponse deleteBackgroundImage(Long userId) {
+        log.info("Удаляем фоновое изображение для пользователя с ID: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Пользователь с ID " + userId + " не найден"));
+
+        if (user.getImgBackgroundID() != null && !user.getImgBackgroundID().isEmpty()) {
+            try {
+                storageService.deleteImage(user.getImgBackgroundID());
+
+                user.setImgBackground(null);
+                user.setImgBackgroundID(null);
+
+                User savedUser = userRepository.save(user);
+
+                log.info("Фоновое изображение успешно удалено для пользователя с ID: {}", userId);
+                return userMapper.toResponse(savedUser);
+
+            } catch (Exception e) {
+                log.error("Ошибка при удалении фонового изображения для пользователя с ID {}: {}", userId, e.getMessage());
+                throw new RuntimeException("Ошибка при удалении фонового изображения: " + e.getMessage(), e);
+            }
+        } else {
+            log.debug("У пользователя с ID {} нет фонового изображения для удаления", userId);
+            return userMapper.toResponse(user);
+        }
+    }
+
+    @Override
+    public UserResponse getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        return userMapper.toResponse(user);
     }
 }
