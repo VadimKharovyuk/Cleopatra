@@ -19,6 +19,7 @@ import com.example.cleopatra.model.JobVacancy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -78,9 +79,18 @@ public class JobVacancyServiceImpl implements JobVacancyService {
     }
 
     @Override
+    @Transactional
     public JobVacancyDto getVacancy(Long id) {
         JobVacancy jobVacancy = jobVacancyRepository.findById(id).orElse(null);
+        if (jobVacancy != null) {
+            incrementViewsCount(jobVacancy);
+        }
         return jobVacancyMapper.toDto(jobVacancy);
+    }
+
+    private void incrementViewsCount(JobVacancy vacancy) {
+        vacancy.setViewsCount(vacancy.getViewsCount() + 1);
+
     }
 
     @Override
