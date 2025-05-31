@@ -178,4 +178,29 @@ public class UserProfileController {
 
         return "redirect:/profile/" + userId;
     }
+
+
+
+
+//    // Для AJAX запросов
+//    @PostMapping("/api/users/{userId}/follow")
+//    @ResponseBody
+//    public Map<String, Object> followUser(@PathVariable Long userId) {
+//        // Логика подписки
+//        return Map.of("success", true, "message", "Вы подписались на пользователя");
+//    }
+//
+//    @PostMapping("/api/users/{userId}/unfollow")
+//    @ResponseBody
+//    public Map<String, Object> unfollowUser(@PathVariable Long userId) {
+//        // Логика отписки
+//        return Map.of("success", true, "message", "Вы отписались от пользователя");
+//    }
+//
+//    @PostMapping("/api/users/{userId}/block")
+//    @ResponseBody
+//    public Map<String, Object> blockUser(@PathVariable Long userId) {
+//        // Логика блокировки
+//        return Map.of("success", true, "message", "Пользователь заблокирован");
+//    }
 }

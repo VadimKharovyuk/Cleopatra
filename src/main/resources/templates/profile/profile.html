@@ -863,10 +863,11 @@
             <i class="fas fa-bookmark nav-icon"></i>
             <span class="nav-text">Закладки</span>
         </a>
-        <a th:href="@{/profile/{userId}(userId=${user.id})}" class="nav-item active">
+        <a th:href="@{/profile/{userId}(userId=${currentUserId})}"  class="nav-item active">
             <i class="fas fa-user nav-icon"></i>
             <span class="nav-text">Профиль</span>
         </a>
+
     </div>
 
     <div class="nav-section">
@@ -931,25 +932,381 @@
             </h1>
             <p class="profile-username" th:text="'@' + ${user.email.split('@')[0]}"></p>
 
-            <!-- Action Buttons - теперь расположены в profile-info под именем -->
+
+
+
+
+
+
+
+
+
+
+            <!-- Action Buttons с исправленной логикой видимости -->
             <div class="profile-actions">
-                <a href="#" class="btn-luxury btn-secondary-luxury">
-                    <i class="fas fa-envelope"></i>
-                    <span>Сообщение</span>
-                </a>
-                <a href="#" class="btn-luxury btn-primary-luxury">
-                    <i class="fas fa-user-plus"></i>
-                    <span>Подписаться</span>
-                </a>
-                <a href="#" class="btn-luxury btn-danger-luxury">
-                    <i class="fas fa-ban"></i>
-                    <span>Заблокировать</span>
-                </a>
-                <a th:href="@{/profile/{userId}/edit(userId=${user.id})}" class="btn-luxury btn-secondary-luxury">
-                    <i class="fas fa-edit"></i>
-                    <span>Редактировать</span>
-                </a>
+                <!-- Кнопки для ЧУЖОГО профиля (когда currentUserId != user.id) -->
+                <th:block th:if="${currentUserId != null and currentUserId != user.id}">
+                    <!-- Сообщение - показываем только для других пользователей -->
+                    <a href="#" class="btn-luxury btn-secondary-luxury" onclick="sendMessage()">
+                        <i class="fas fa-envelope"></i>
+                        <span>Сообщение</span>
+                    </a>
+
+                    <!-- Подписаться - показываем только для других пользователей -->
+                    <a href="#" class="btn-luxury btn-primary-luxury" onclick="toggleFollow()">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Подписаться</span>
+                    </a>
+
+                    <!-- Поделиться профилем - показываем для чужих профилей -->
+                    <a href="#" class="btn-luxury btn-secondary-luxury" onclick="shareProfile()">
+                        <i class="fas fa-share"></i>
+                        <span>Поделиться</span>
+                    </a>
+
+                    <!-- Заблокировать - показываем только для других пользователей -->
+                    <a href="#" class="btn-luxury btn-danger-luxury" onclick="blockUser()">
+                        <i class="fas fa-ban"></i>
+                        <span>Заблокировать</span>
+                    </a>
+                </th:block>
+
+                <!-- Кнопки для СОБСТВЕННОГО профиля (когда currentUserId == user.id) -->
+                <th:block th:if="${currentUserId != null and currentUserId == user.id}">
+                    <!-- Редактировать - показываем только для своего профиля -->
+                    <a th:href="@{/profile/{userId}/edit(userId=${user.id})}" class="btn-luxury btn-primary-luxury">
+                        <i class="fas fa-edit"></i>
+                        <span>Редактировать профиль</span>
+                    </a>
+
+                    <!-- Настройки - дополнительная кнопка для своего профиля -->
+                    <a href="/settings" class="btn-luxury btn-secondary-luxury">
+                        <i class="fas fa-cog"></i>
+                        <span>Настройки</span>
+                    </a>
+
+                    <!-- Статистика профиля - полезно для владельца -->
+                    <a href="#" class="btn-luxury btn-secondary-luxury" onclick="showProfileStats()">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Статистика</span>
+                    </a>
+                </th:block>
             </div>
+
+            <!-- JavaScript для обработки действий -->
+            <script>
+                // Отправка сообщения
+                function sendMessage() {
+                    const userId = /*[[${user.id}]]*/ 0;
+                    const userName = /*[[${user.firstName ?: 'Пользователь'}]]*/ 'Пользователь';
+
+                    if (confirm(`Отправить сообщение пользователю ${userName}?`)) {
+                        // Перенаправляем на страницу сообщений с предзаполненным получателем
+                        window.location.href = `/messages/new?to=${userId}`;
+                    }
+                }
+
+                // Подписка/отписка
+                function toggleFollow() {
+                    const userId = /*[[${user.id}]]*/ 0;
+                    const userName = /*[[${user.firstName ?: 'пользователя'}]]*/ 'пользователя';
+                    const button = event.target.closest('a');
+
+                    // Определяем текущее состояние по тексту кнопки
+                    const isFollowing = button.querySelector('span').textContent.trim() === 'Отписаться';
+
+                    const action = isFollowing ? 'unfollow' : 'follow';
+                    const confirmText = isFollowing ?
+                        `Отписаться от ${userName}?` :
+                        `Подписаться на ${userName}?`;
+
+                    if (confirm(confirmText)) {
+                        // Отправляем AJAX запрос
+                        fetch(`/api/users/${userId}/${action}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Обновляем кнопку
+                                    const icon = button.querySelector('i');
+                                    const span = button.querySelector('span');
+
+                                    if (isFollowing) {
+                                        // Стали НЕ подписанными
+                                        icon.className = 'fas fa-user-plus';
+                                        span.textContent = 'Подписаться';
+                                        button.className = button.className.replace('btn-danger-luxury', 'btn-primary-luxury');
+                                    } else {
+                                        // Стали подписанными
+                                        icon.className = 'fas fa-user-check';
+                                        span.textContent = 'Отписаться';
+                                        button.className = button.className.replace('btn-primary-luxury', 'btn-danger-luxury');
+                                    }
+
+                                    // Показываем уведомление
+                                    showNotification(data.message || 'Действие выполнено успешно', 'success');
+                                } else {
+                                    showNotification(data.message || 'Произошла ошибка', 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Ошибка при выполнении действия:', error);
+                                showNotification('Произошла ошибка при выполнении действия', 'error');
+                            });
+                    }
+                }
+
+                // Блокировка пользователя
+                function blockUser() {
+                    const userId = /*[[${user.id}]]*/ 0;
+                    const userName = /*[[${user.firstName ?: 'пользователя'}]]*/ 'пользователя';
+
+                    if (confirm(`Заблокировать ${userName}? Вы больше не будете видеть их посты и они не смогут с вами взаимодействовать.`)) {
+                        fetch(`/api/users/${userId}/block`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    showNotification('Пользователь заблокирован', 'success');
+                                    // Перенаправляем на главную или обновляем страницу
+                                    setTimeout(() => {
+                                        window.location.href = '/home';
+                                    }, 2000);
+                                } else {
+                                    showNotification(data.message || 'Не удалось заблокировать пользователя', 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Ошибка при блокировке:', error);
+                                showNotification('Произошла ошибка при блокировке', 'error');
+                            });
+                    }
+                }
+
+                // Поделиться профилем (только для чужих профилей)
+                function shareProfile() {
+                    const profileUrl = window.location.href;
+                    const userName = /*[[${user.firstName ?: 'пользователя'}]]*/ 'пользователя';
+
+                    // Проверяем поддержку Web Share API
+                    if (navigator.share) {
+                        navigator.share({
+                            title: `Профиль ${userName} - Cleopatra`,
+                            text: `Посмотрите профиль ${userName} в Cleopatra`,
+                            url: profileUrl
+                        }).catch(err => console.log('Ошибка при sharing:', err));
+                    } else {
+                        // Fallback - копируем в буфер обмена
+                        navigator.clipboard.writeText(profileUrl).then(() => {
+                            showNotification('Ссылка на профиль скопирована в буфер обмена', 'success');
+                        }).catch(() => {
+                            // Если и это не работает, показываем ссылку
+                            prompt('Скопируйте ссылку на профиль:', profileUrl);
+                        });
+                    }
+                }
+
+                // Показать статистику профиля (только для своего профиля)
+                function showProfileStats() {
+                    const userId = /*[[${user.id}]]*/ 0;
+
+                    // Можно сделать модальное окно или перенаправить на страницу статистики
+                    showNotification('Загружаем статистику профиля...', 'info');
+
+                    // AJAX запрос для получения статистики
+                    fetch(`/api/users/${userId}/stats`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Показываем статистику в модальном окне или отдельной странице
+                                showStatsModal(data.stats);
+                            } else {
+                                showNotification('Не удалось загрузить статистику', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка при загрузке статистики:', error);
+                            // Fallback - перенаправляем на страницу статистики
+                            window.location.href = `/profile/${userId}/stats`;
+                        });
+                }
+
+                // Показать модальное окно со статистикой
+                function showStatsModal(stats) {
+                    const modal = document.createElement('div');
+                    modal.className = 'stats-modal';
+                    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+
+                    modal.innerHTML = `
+        <div style="
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-xl);
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0; font-family: 'Playfair Display', serif;">Статистика профиля</h2>
+                <button onclick="this.closest('.stats-modal').remove()" style="
+                    background: none;
+                    border: none;
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    color: var(--text-muted);
+                ">×</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                <div style="text-align: center; padding: 1rem; background: var(--bg-accent); border-radius: var(--radius-md);">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-primary);">${stats.profileViews || 0}</div>
+                    <div style="color: var(--text-secondary);">Просмотры профиля</div>
+                </div>
+
+                <div style="text-align: center; padding: 1rem; background: var(--bg-accent); border-radius: var(--radius-md);">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-primary);">${stats.postViews || 0}</div>
+                    <div style="color: var(--text-secondary);">Просмотры постов</div>
+                </div>
+
+                <div style="text-align: center; padding: 1rem; background: var(--bg-accent); border-radius: var(--radius-md);">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-success);">${stats.totalLikes || 0}</div>
+                    <div style="color: var(--text-secondary);">Всего лайков</div>
+                </div>
+
+                <div style="text-align: center; padding: 1rem; background: var(--bg-accent); border-radius: var(--radius-md);">
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-warning);">${stats.avgEngagement || 0}%</div>
+                    <div style="color: var(--text-secondary);">Вовлеченность</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <a href="/profile/${/*[[${user.id}]]*/ 0}/stats" style="
+                    color: var(--accent-primary);
+                    text-decoration: none;
+                    font-weight: 500;
+                ">Подробная статистика →</a>
+            </div>
+        </div>
+    `;
+
+                    document.body.appendChild(modal);
+
+                    // Закрываем по клику на overlay
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === modal) {
+                            modal.remove();
+                        }
+                    });
+                }
+
+                // Универсальная функция для показа уведомлений
+                function showNotification(message, type = 'info') {
+                    // Создаем элемент уведомления
+                    const notification = document.createElement('div');
+                    notification.className = `alert-luxury alert-${type === 'success' ? 'success' : 'danger'}-luxury`;
+                    notification.style.position = 'fixed';
+                    notification.style.top = '20px';
+                    notification.style.right = '20px';
+                    notification.style.zIndex = '9999';
+                    notification.style.minWidth = '300px';
+                    notification.style.animation = 'slideInRight 0.3s ease';
+
+                    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'info' ? 'info-circle' : 'exclamation-circle'}"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: auto; cursor: pointer;">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+                    document.body.appendChild(notification);
+
+                    // Автоматически убираем через 5 секунд
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.style.animation = 'slideOutRight 0.3s ease';
+                            setTimeout(() => notification.remove(), 300);
+                        }
+                    }, 5000);
+                }
+
+                // CSS анимации для уведомлений
+                const style = document.createElement('style');
+                style.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+                document.head.appendChild(style);
+
+                // Отладочная информация
+                console.log('👤 Profile Actions initialized');
+                console.log('Current User ID:', /*[[${currentUserId}]]*/ null);
+                console.log('Profile User ID:', /*[[${user.id}]]*/ null);
+                console.log('Is Own Profile:', /*[[${currentUserId == user.id}]]*/ false);
+            </script>
+
+
+<!--            &lt;!&ndash; Action Buttons - теперь расположены в profile-info под именем &ndash;&gt;-->
+<!--            <div class="profile-actions">-->
+<!--                <a href="#" class="btn-luxury btn-secondary-luxury">-->
+<!--                    <i class="fas fa-envelope"></i>-->
+<!--                    <span>Сообщение</span>-->
+<!--                </a>-->
+<!--                <a href="#" class="btn-luxury btn-primary-luxury">-->
+<!--                    <i class="fas fa-user-plus"></i>-->
+<!--                    <span>Подписаться</span>-->
+<!--                </a>-->
+<!--                <a href="#" class="btn-luxury btn-danger-luxury">-->
+<!--                    <i class="fas fa-ban"></i>-->
+<!--                    <span>Заблокировать</span>-->
+<!--                </a>-->
+<!--                <a th:href="@{/profile/{userId}/edit(userId=${user.id})}" class="btn-luxury btn-secondary-luxury">-->
+<!--                    <i class="fas fa-edit"></i>-->
+<!--                    <span>Редактировать</span>-->
+<!--                </a>-->
+<!--            </div>-->
+
+
+
+
+
+
+
+
+
 
             <!-- Meta Information -->
             <div class="profile-meta">
