@@ -230,7 +230,6 @@ public class QrAuthController {
     @Getter
     @Setter
     public static class QrLoginRequest {
-        // Getters и Setters
         private String token;
         private String email;
         private String password;

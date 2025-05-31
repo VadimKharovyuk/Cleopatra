@@ -20,7 +20,6 @@ public class VacancyController {
 
     private final JobVacancyService jobVacancyService;
 
-    // Список вакансий для пользователей
     @GetMapping
     public String listVacancies(
             @RequestParam(defaultValue = "0") int page,

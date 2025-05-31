@@ -1,3 +1,257 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Вход по QR-коду</title>-->
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: Arial, sans-serif;-->
+<!--            max-width: 500px;-->
+<!--            margin: 100px auto;-->
+<!--            padding: 20px;-->
+<!--            text-align: center;-->
+<!--            background-color: #f5f5f5;-->
+<!--        }-->
+<!--        .container {-->
+<!--            background: white;-->
+<!--            padding: 30px;-->
+<!--            border-radius: 10px;-->
+<!--            box-shadow: 0 2px 10px rgba(0,0,0,0.1);-->
+<!--        }-->
+<!--        h1 {-->
+<!--            color: #333;-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+<!--        .qr-container {-->
+<!--            margin: 30px 0;-->
+<!--            padding: 20px;-->
+<!--            border: 2px dashed #ddd;-->
+<!--            border-radius: 10px;-->
+<!--        }-->
+<!--        #qrcode {-->
+<!--            margin: 20px 0;-->
+<!--            min-height: 200px;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--        }-->
+<!--        .status {-->
+<!--            margin: 20px 0;-->
+<!--            padding: 15px;-->
+<!--            border-radius: 5px;-->
+<!--            font-weight: bold;-->
+<!--        }-->
+<!--        .status.waiting {-->
+<!--            background-color: #e3f2fd;-->
+<!--            color: #1976d2;-->
+<!--        }-->
+<!--        .status.success {-->
+<!--            background-color: #e8f5e8;-->
+<!--            color: #2e7d32;-->
+<!--        }-->
+<!--        .status.error {-->
+<!--            background-color: #ffebee;-->
+<!--            color: #c62828;-->
+<!--        }-->
+<!--        .refresh-btn {-->
+<!--            background-color: #2196f3;-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            padding: 10px 20px;-->
+<!--            border-radius: 5px;-->
+<!--            cursor: pointer;-->
+<!--            margin-top: 15px;-->
+<!--        }-->
+<!--        .refresh-btn:hover {-->
+<!--            background-color: #1976d2;-->
+<!--        }-->
+<!--        .loading {-->
+<!--            display: none;-->
+<!--            margin: 20px 0;-->
+<!--        }-->
+<!--        .instructions {-->
+<!--            color: #666;-->
+<!--            margin-top: 20px;-->
+<!--            line-height: 1.5;-->
+<!--        }-->
+<!--        .manual-link {-->
+<!--            margin-top: 15px;-->
+<!--            padding: 10px;-->
+<!--            background-color: #f0f0f0;-->
+<!--            border-radius: 5px;-->
+<!--        }-->
+<!--        .manual-link a {-->
+<!--            color: #2196f3;-->
+<!--            text-decoration: none;-->
+<!--            font-weight: bold;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <h1>Вход по QR-коду</h1>-->
+
+<!--    <div class="qr-container">-->
+<!--        <div id="qrcode"></div>-->
+<!--        <div class="loading" id="loading">Генерация QR-кода...</div>-->
+<!--    </div>-->
+
+<!--    <div class="status waiting" id="status">-->
+<!--        Генерируем QR-код...-->
+<!--    </div>-->
+
+<!--    <div id="manualLink" class="manual-link" style="display: none;">-->
+<!--        <p>Или перейдите по ссылке с мобильного:</p>-->
+<!--        <a id="mobileLink" href="#" target="_blank">Открыть на мобильном</a>-->
+<!--    </div>-->
+
+<!--    <button class="refresh-btn" onclick="generateNewQR()">-->
+<!--        Обновить QR-код-->
+<!--    </button>-->
+
+<!--    <div class="instructions">-->
+<!--        <p><strong>Инструкция:</strong></p>-->
+<!--        <p>1. Откройте камеру на телефоне</p>-->
+<!--        <p>2. Отсканируйте QR-код</p>-->
+<!--        <p>3. Войдите в аккаунт на телефоне</p>-->
+<!--        <p>4. Вы автоматически войдете на этом устройстве</p>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--    let currentToken = null;-->
+<!--    let pollingInterval = null;-->
+
+<!--    // Генерируем QR-код при загрузке страницы-->
+<!--    window.onload = function() {-->
+<!--        generateQR();-->
+<!--    };-->
+
+<!--    async function generateQR() {-->
+<!--        console.log('Starting QR generation...');-->
+
+<!--        try {-->
+<!--            document.getElementById('loading').style.display = 'block';-->
+<!--            document.getElementById('qrcode').innerHTML = '';-->
+<!--            document.getElementById('manualLink').style.display = 'none';-->
+
+<!--            console.log('Fetching QR data from server...');-->
+<!--            const response = await fetch('/auth/qr/generate');-->
+
+<!--            if (!response.ok) {-->
+<!--                throw new Error(`HTTP error! status: ${response.status}`);-->
+<!--            }-->
+
+<!--            const data = await response.json();-->
+<!--            console.log('QR data received:', data);-->
+
+<!--            currentToken = data.token;-->
+
+<!--            // Используем Google Charts API для генерации QR-кода-->
+<!--            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.qrUrl)}`;-->
+
+<!--            console.log('QR API URL:', qrUrl);-->
+
+<!--            // Создаем изображение QR-кода-->
+<!--            const img = document.createElement('img');-->
+<!--            img.src = qrUrl;-->
+<!--            img.alt = 'QR Code';-->
+<!--            img.style.maxWidth = '200px';-->
+<!--            img.style.height = 'auto';-->
+
+<!--            img.onload = function() {-->
+<!--                document.getElementById('loading').style.display = 'none';-->
+<!--                document.getElementById('qrcode').innerHTML = '';-->
+<!--                document.getElementById('qrcode').appendChild(img);-->
+
+<!--                // Показываем ссылку для ручного перехода-->
+<!--                document.getElementById('mobileLink').href = data.qrUrl;-->
+<!--                document.getElementById('manualLink').style.display = 'block';-->
+
+<!--                console.log('QR code generated successfully');-->
+<!--                showStatus('Отсканируйте QR-код с помощью мобильного устройства', 'waiting');-->
+<!--                startPolling();-->
+<!--            };-->
+
+<!--            img.onerror = function() {-->
+<!--                document.getElementById('loading').style.display = 'none';-->
+<!--                console.error('Failed to load QR image');-->
+<!--                showStatus('Ошибка загрузки QR-кода', 'error');-->
+
+<!--                // Показываем только ссылку-->
+<!--                document.getElementById('qrcode').innerHTML = '<p>QR-код недоступен</p>';-->
+<!--                document.getElementById('mobileLink').href = data.qrUrl;-->
+<!--                document.getElementById('manualLink').style.display = 'block';-->
+<!--            };-->
+
+<!--        } catch (error) {-->
+<!--            document.getElementById('loading').style.display = 'none';-->
+<!--            console.error('Error generating QR:', error);-->
+<!--            showStatus('Ошибка: ' + error.message, 'error');-->
+<!--        }-->
+<!--    }-->
+
+<!--    function generateNewQR() {-->
+<!--        stopPolling();-->
+<!--        generateQR();-->
+<!--    }-->
+
+<!--    function startPolling() {-->
+<!--        if (pollingInterval) {-->
+<!--            clearInterval(pollingInterval);-->
+<!--        }-->
+
+<!--        pollingInterval = setInterval(async () => {-->
+<!--            if (!currentToken) return;-->
+
+<!--            try {-->
+<!--                const response = await fetch(`/auth/qr/status/${currentToken}`);-->
+<!--                const data = await response.json();-->
+
+<!--                console.log('Polling status:', data);-->
+
+<!--                if (data.status === 'CONFIRMED') {-->
+<!--                    showStatus('Успешный вход! Перенаправление...', 'success');-->
+<!--                    stopPolling();-->
+
+<!--                    // Перенаправляем на эндпоинт завершения авторизации-->
+<!--                    setTimeout(() => {-->
+<!--                        window.location.href = `/auth/qr/complete/${currentToken}`;-->
+<!--                    }, 2000);-->
+
+<!--                } else if (data.status === 'EXPIRED') {-->
+<!--                    showStatus('QR-код истек. Нажмите "Обновить QR-код"', 'error');-->
+<!--                    stopPolling();-->
+<!--                }-->
+
+<!--            } catch (error) {-->
+<!--                console.error('Polling error:', error);-->
+<!--            }-->
+<!--        }, 3000); // Проверяем каждые 3 секунды-->
+<!--    }-->
+
+<!--    function stopPolling() {-->
+<!--        if (pollingInterval) {-->
+<!--            clearInterval(pollingInterval);-->
+<!--            pollingInterval = null;-->
+<!--        }-->
+<!--    }-->
+
+<!--    function showStatus(message, type) {-->
+<!--        const statusEl = document.getElementById('status');-->
+<!--        statusEl.textContent = message;-->
+<!--        statusEl.className = `status ${type}`;-->
+<!--    }-->
+
+<!--    // Останавливаем polling при закрытии страницы-->
+<!--    window.onbeforeunload = function() {-->
+<!--        stopPolling();-->
+<!--    };-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -5,30 +259,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход по QR-коду</title>
     <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --hover-gold: #B8941F;
+            --deep-black: #000000;
+            --dark-surface: #1C1C1E;
+            --soft-gray: #2C2C2E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A1A1A6;
+            --accent-shadow: rgba(212, 175, 55, 0.25);
+            --dark-overlay: rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 500px;
-            margin: 100px auto;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--deep-black);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
-            text-align: center;
-            background-color: #f5f5f5;
         }
+
         .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: var(--dark-surface);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--soft-gray);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
         }
+
         h1 {
-            color: #333;
-            margin-bottom: 20px;
+            color: var(--primary-gold);
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px var(--accent-shadow);
         }
+
         .qr-container {
             margin: 30px 0;
-            padding: 20px;
-            border: 2px dashed #ddd;
-            border-radius: 10px;
+            padding: 30px;
+            border: 2px dashed var(--soft-gray);
+            border-radius: 12px;
+            background: var(--deep-black);
+            transition: border-color 0.3s ease;
         }
+
+        .qr-container:hover {
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 20px var(--accent-shadow);
+        }
+
         #qrcode {
             margin: 20px 0;
             min-height: 200px;
@@ -36,55 +330,160 @@
             align-items: center;
             justify-content: center;
         }
+
+        #qrcode img {
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
         .status {
             margin: 20px 0;
-            padding: 15px;
-            border-radius: 5px;
-            font-weight: bold;
+            padding: 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
         }
+
         .status.waiting {
-            background-color: #e3f2fd;
-            color: #1976d2;
+            background: linear-gradient(135deg, var(--dark-surface), var(--soft-gray));
+            color: var(--primary-gold);
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 15px var(--accent-shadow);
         }
+
         .status.success {
-            background-color: #e8f5e8;
-            color: #2e7d32;
+            background: linear-gradient(135deg, #1a4d3a, #2d5a3d);
+            color: #4ade80;
+            border-color: #4ade80;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.25);
         }
+
         .status.error {
-            background-color: #ffebee;
-            color: #c62828;
+            background: linear-gradient(135deg, #4d1a1a, #5a2d2d);
+            color: #f87171;
+            border-color: #f87171;
+            box-shadow: 0 0 15px rgba(248, 113, 113, 0.25);
         }
+
         .refresh-btn {
-            background-color: #2196f3;
-            color: white;
+            background: linear-gradient(135deg, var(--primary-gold), var(--hover-gold));
+            color: var(--deep-black);
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 14px 28px;
+            border-radius: 8px;
             cursor: pointer;
-            margin-top: 15px;
+            margin-top: 20px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px var(--accent-shadow);
         }
+
         .refresh-btn:hover {
-            background-color: #1976d2;
+            background: linear-gradient(135deg, var(--hover-gold), #9d7a1a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--accent-shadow);
         }
+
+        .refresh-btn:active {
+            transform: translateY(0);
+        }
+
         .loading {
             display: none;
             margin: 20px 0;
+            color: var(--text-secondary);
+            font-style: italic;
         }
+
         .instructions {
-            color: #666;
-            margin-top: 20px;
-            line-height: 1.5;
+            color: var(--text-secondary);
+            margin-top: 30px;
+            line-height: 1.6;
+            background: var(--soft-gray);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
         }
-        .manual-link {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
+
+        .instructions p:first-child {
+            color: var(--primary-gold);
+            font-weight: 600;
+            margin-bottom: 16px;
         }
-        .manual-link a {
-            color: #2196f3;
-            text-decoration: none;
+
+        .instructions p:not(:first-child) {
+            margin-bottom: 8px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .instructions p:not(:first-child):before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary-gold);
             font-weight: bold;
+        }
+
+        .manual-link {
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--soft-gray);
+            border-radius: 8px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .manual-link p {
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .manual-link a {
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .manual-link a:hover {
+            color: var(--hover-gold);
+            text-shadow: 0 0 8px var(--accent-shadow);
+        }
+
+        /* Анимация загрузки */
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 2px solid var(--soft-gray);
+            border-top: 2px solid var(--primary-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .qr-container {
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -94,7 +493,7 @@
 
     <div class="qr-container">
         <div id="qrcode"></div>
-        <div class="loading" id="loading">Генерация QR-кода...</div>
+        <div class="loading" id="loading">Генерация QR-кода</div>
     </div>
 
     <div class="status waiting" id="status">
@@ -111,11 +510,11 @@
     </button>
 
     <div class="instructions">
-        <p><strong>Инструкция:</strong></p>
-        <p>1. Откройте камеру на телефоне</p>
-        <p>2. Отсканируйте QR-код</p>
-        <p>3. Войдите в аккаунт на телефоне</p>
-        <p>4. Вы автоматически войдете на этом устройстве</p>
+        <p>Инструкция:</p>
+        <p>Откройте камеру на телефоне</p>
+        <p>Отсканируйте QR-код</p>
+        <p>Войдите в аккаунт на телефоне</p>
+        <p>Вы автоматически войдете на этом устройстве</p>
     </div>
 </div>
 
