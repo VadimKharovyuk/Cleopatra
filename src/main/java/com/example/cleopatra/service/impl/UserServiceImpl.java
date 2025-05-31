@@ -69,7 +69,6 @@ public class UserServiceImpl implements UserService {
 
             return userMapper.toResponse(savedUser);
 
-
         } catch (IOException e) {
             log.error("Ошибка при загрузке аватара для пользователя с ID {}: {}", userId, e.getMessage());
             throw new RuntimeException("Ошибка при загрузке изображения: " + e.getMessage(), e);
