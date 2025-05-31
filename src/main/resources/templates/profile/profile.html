@@ -285,12 +285,12 @@
             color: var(--text-muted);
         }
 
+        /* Profile Actions - перенесено в профиль инфо */
         .profile-actions {
-            position: absolute;
-            top: 1.5rem;
-            right: 2.5rem;
             display: flex;
             gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
         }
 
         .btn-luxury {
@@ -347,6 +347,20 @@
         .btn-secondary-luxury:hover {
             background: var(--bg-accent);
             color: var(--text-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Button variants */
+        .btn-danger-luxury {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            border-color: transparent;
+        }
+
+        .btn-danger-luxury:hover {
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
+            color: white;
             transform: translateY(-1px);
             box-shadow: var(--shadow-md);
         }
@@ -621,20 +635,6 @@
             border-left: 4px solid #dc2626;
         }
 
-        /* Button variants */
-        .btn-danger-luxury {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: white;
-            border-color: transparent;
-        }
-
-        .btn-danger-luxury:hover {
-            background: linear-gradient(135deg, #b91c1c, #991b1b);
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-
         /* Mobile Navigation */
         .mobile-header {
             display: none;
@@ -777,50 +777,36 @@
                 left: 1.5rem;
             }
 
+            /* Убираем позиционирование для мобильных устройств */
             .profile-actions {
-                right: 1.5rem;
-                flex-direction: column;
+                justify-content: flex-start;
                 gap: 0.5rem;
             }
 
             .btn-luxury {
                 padding: 0.625rem 1rem;
                 font-size: 0.8125rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .profile-actions {
-                position: static;
-                flex-direction: row;
-                justify-content: center;
-                margin-top: 1rem;
-                flex-wrap: wrap;
-            }
-
-            .btn-luxury {
                 flex: 1;
                 min-width: 100px;
                 text-align: center;
                 justify-content: center;
             }
+        }
+
+        @media (max-width: 480px) {
+            .profile-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .btn-luxury {
+                width: 100%;
+                flex: none;
+            }
 
             .profile-info {
                 padding-top: 5rem;
             }
-        }
-        /* Button variants */
-        .btn-danger-luxury {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: white;
-            border-color: transparent;
-        }
-
-        .btn-danger-luxury:hover {
-            background: linear-gradient(135deg, #b91c1c, #991b1b);
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
         }
     </style>
 </head>
@@ -930,8 +916,22 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Action Buttons -->
+        <!-- Profile Info -->
+        <div class="profile-info">
+            <h1 class="profile-name">
+                <th:block th:if="${!#strings.isEmpty(user.firstName) || !#strings.isEmpty(user.lastName)}">
+                    <span th:text="${user.firstName ?: ''}"></span>
+                    <span th:text="${user.lastName ?: ''}"></span>
+                </th:block>
+                <th:block th:unless="${!#strings.isEmpty(user.firstName) || !#strings.isEmpty(user.lastName)}">
+                    Добро пожаловать
+                </th:block>
+            </h1>
+            <p class="profile-username" th:text="'@' + ${user.email.split('@')[0]}"></p>
+
+            <!-- Action Buttons - теперь расположены в profile-info под именем -->
             <div class="profile-actions">
                 <a href="#" class="btn-luxury btn-secondary-luxury">
                     <i class="fas fa-envelope"></i>
@@ -950,20 +950,6 @@
                     <span>Редактировать</span>
                 </a>
             </div>
-        </div>
-
-        <!-- Profile Info -->
-        <div class="profile-info">
-            <h1 class="profile-name">
-                <th:block th:if="${!#strings.isEmpty(user.firstName) || !#strings.isEmpty(user.lastName)}">
-                    <span th:text="${user.firstName ?: ''}"></span>
-                    <span th:text="${user.lastName ?: ''}"></span>
-                </th:block>
-                <th:block th:unless="${!#strings.isEmpty(user.firstName) || !#strings.isEmpty(user.lastName)}">
-                    Добро пожаловать
-                </th:block>
-            </h1>
-            <p class="profile-username" th:text="'@' + ${user.email.split('@')[0]}"></p>
 
             <!-- Meta Information -->
             <div class="profile-meta">
