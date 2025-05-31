@@ -22,9 +22,7 @@ public class JobApplicationController {
 
     private final JobApplicationService jobApplicationService;
 
-    /**
-     * Отображает форму создания заявки
-     */
+
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         log.debug("Отображение формы создания заявки");

@@ -132,10 +132,9 @@
             <button type="button" onclick="navigator.share ? navigator.share({title: document.title, url: window.location.href}) : alert('Поделиться: ' + window.location.href)">Поделиться</button>
 
             <!-- Если вакансия активна -->
-            <span th:if="${vacancy.isActive}">
-                    <a th:href="@{/vacancies/{id}/apply(id=${vacancyId})}" style="background: green; color: white; padding: 10px; text-decoration: none;">Откликнуться на вакансию</a>
+            <span th:if="${vacancy != null and vacancy.isActive != null and vacancy.isActive}">
+                    <a th:href="@{/job/create(vacancyId=${vacancyId})}" style="background: green; color: white; padding: 10px; text-decoration: none; margin-left: 10px;">Откликнуться на вакансию</a>
                 </span>
-
         </div>
     </section>
 </div>
@@ -148,12 +147,6 @@
 </div>
 
 <!-- Навигация -->
-<footer>
-    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
-        <a href="/vacancies">← Назад к списку вакансий</a> |
-        <a href="/">Главная</a>
-    </div>
-</footer>
 
 </body>
 </html>

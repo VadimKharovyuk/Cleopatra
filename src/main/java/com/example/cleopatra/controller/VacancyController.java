@@ -54,11 +54,4 @@ public class VacancyController {
         return "vacancies/view";
     }
 
-    // Страница подачи заявки на вакансию
-    @GetMapping("/{id}/apply")
-    public String applyForVacancy(@PathVariable Long id, Model model) {
-///toDo
-
-        return "vacancies/apply";
-    }
 }
