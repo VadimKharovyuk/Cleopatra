@@ -22,9 +22,7 @@ public class UserProfileController {
 
     private final UserService userService;
 
-    /**
-     * Отображает страницу профиля пользователя
-     */
+
     @GetMapping("/{userId}")
     public String showProfile(@PathVariable Long userId, Model model) {
         try {
@@ -39,9 +37,7 @@ public class UserProfileController {
         }
     }
 
-    /**
-     * Отображает страницу редактирования профиля
-     */
+
     @GetMapping("/{userId}/edit")
     public String showEditProfile(@PathVariable Long userId, Model model) {
         try {
