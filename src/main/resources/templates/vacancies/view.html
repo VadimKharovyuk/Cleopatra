@@ -1,10 +1,159 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${vacancy != null ? vacancy.title : 'Вакансия не найдена'}">Просмотр вакансии</title>
 </head>
 <body>
+<!-- Если вакансия найдена -->
+<div th:if="${vacancy != null}">
+    <!-- Заголовок и статусы -->
+    <header>
+        <h1 th:text="${vacancy.title}">Название вакансии</h1>
+        <div>
+            <span th:if="${vacancy.isUrgent}" style="color: red; font-weight: bold; border: 1px solid red; padding: 5px;">[СРОЧНАЯ ВАКАНСИЯ]</span>
+            <span th:if="${vacancy.isFeatured}" style="color: blue; font-weight: bold; border: 1px solid blue; padding: 5px;">[РЕКОМЕНДУЕМАЯ]</span>
+            <span th:if="${vacancy.isActive}" style="color: green; font-weight: bold;">[АКТИВНА]</span>
+            <span th:unless="${vacancy.isActive}" style="color: gray; font-weight: bold;">[НЕАКТИВНА]</span>
+        </div>
+    </header>
+
+    <!-- Основная информация -->
+    <section>
+        <h2>Основная информация</h2>
+
+        <!-- Компания -->
+        <div th:if="${(vacancy.companyName != null and vacancy.companyName != '') or (vacancy.companyLogoUrl != null and vacancy.companyLogoUrl != '')}">
+            <h3>Компания</h3>
+            <div th:if="${vacancy.companyLogoUrl != null and vacancy.companyLogoUrl != ''}">
+                <img th:src="${vacancy.companyLogoUrl}" alt="Логотип компании" width="100" height="100">
+            </div>
+            <div th:if="${vacancy.companyName != null and vacancy.companyName != ''}">
+                <strong th:text="${vacancy.companyName}">Название компании</strong>
+            </div>
+        </div>
+
+        <!-- Местоположение -->
+        <div th:if="${(vacancy.country != null and vacancy.country != '') or (vacancy.city != null and vacancy.city != '')}">
+            <h3>Местоположение</h3>
+            <p>
+                    <span th:if="${vacancy.country != null and vacancy.country != ''}">
+                        <strong>Страна:</strong> <span th:text="${vacancy.country}">Страна</span>
+                    </span>
+                <span th:if="${vacancy.city != null and vacancy.city != ''}">
+                        <br><strong>Город:</strong> <span th:text="${vacancy.city}">Город</span>
+                    </span>
+            </p>
+        </div>
+
+        <!-- Зарплата -->
+        <div th:if="${vacancy != null}">
+            <!-- Зарплата -->
+            <div th:if="${vacancy.minSalary != null or vacancy.getMinSalary() != null}">
+                <h3>Зарплата</h3>
+                <p>
+                    <span th:if="${vacancy.currency != null and vacancy.currency != ''}" th:text="${vacancy.currency}">USD</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Требуемый профиль -->
+        <div th:if="${vacancy.requiredProfile != null and vacancy.requiredProfile != ''}">
+            <h3>Требуемый профиль исполнителя</h3>
+            <p th:text="${vacancy.requiredProfile}">Профиль</p>
+        </div>
+
+        <!-- Даты -->
+        <div>
+            <h3>Временная информация</h3>
+            <p th:if="${vacancy.createdAt != null}">
+                <strong>Дата создания:</strong>
+                <span th:text="${#temporals.format(vacancy.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2024 12:00</span>
+            </p>
+            <p th:if="${vacancy.updatedAt != null}">
+                <strong>Последнее обновление:</strong>
+                <span th:text="${#temporals.format(vacancy.updatedAt, 'dd.MM.yyyy HH:mm')}">01.01.2024 12:00</span>
+            </p>
+            <p th:if="${vacancy.deadline != null}">
+                <strong>Срок подачи заявок:</strong>
+                <span th:text="${#temporals.format(vacancy.deadline, 'dd.MM.yyyy')}">31.12.2024</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- Описание вакансии -->
+    <section th:if="${vacancy.description != null and vacancy.description != ''}">
+        <h2>Описание вакансии</h2>
+        <div th:utext="${vacancy.description}">Описание вакансии</div>
+    </section>
+
+    <!-- Требования -->
+    <section th:if="${vacancy.getRequiredSkills() != null and vacancy.getRequiredSkills() != ''}">
+        <h2>Требования</h2>
+        <div th:utext="${vacancy.getRequiredSkills()}">Требования к кандидату</div>
+    </section>
+
+    <!-- Условия работы -->
+    <section th:if="${vacancy.workConditions != null and vacancy.workConditions != ''}">
+        <h2>Условия работы</h2>
+        <div th:utext="${vacancy.workConditions}">Условия работы</div>
+    </section>
+
+    <!-- Статистика -->
+    <section>
+        <h2>Статистика</h2>
+        <p th:if="${vacancy.applicationsCount != null}">
+            <strong>Количество заявок:</strong> <span th:text="${vacancy.applicationsCount}">0</span>
+        </p>
+        <p th:if="${vacancy.viewsCount != null}">
+            <strong>Количество просмотров:</strong> <span th:text="${vacancy.viewsCount}">0</span>
+        </p>
+    </section>
+
+    <!-- Контактная информация -->
+    <section th:if="${(vacancy.contactEmail != null and vacancy.contactEmail != '') or (vacancy.contactPhone != null and vacancy.contactPhone != '')}">
+        <h2>Контактная информация</h2>
+        <p th:if="${vacancy.contactEmail != null and vacancy.contactEmail != ''}">
+            <strong>Email:</strong>
+            <a th:href="'mailto:' + ${vacancy.contactEmail}" th:text="${vacancy.contactEmail}">email@example.com</a>
+        </p>
+        <p th:if="${vacancy.contactPhone != null and vacancy.contactPhone != ''}">
+            <strong>Телефон:</strong>
+            <a th:href="'tel:' + ${vacancy.contactPhone}" th:text="${vacancy.contactPhone}">+1234567890</a>
+        </p>
+    </section>
+
+    <!-- Действия -->
+    <section>
+        <h2>Действия</h2>
+        <div>
+            <button type="button" onclick="window.print()">Распечатать</button>
+            <button type="button" onclick="navigator.share ? navigator.share({title: document.title, url: window.location.href}) : alert('Поделиться: ' + window.location.href)">Поделиться</button>
+
+            <!-- Если вакансия активна -->
+            <span th:if="${vacancy.isActive}">
+                    <a th:href="@{/vacancies/{id}/apply(id=${vacancyId})}" style="background: green; color: white; padding: 10px; text-decoration: none;">Откликнуться на вакансию</a>
+                </span>
+
+        </div>
+    </section>
+</div>
+
+<!-- Если вакансия не найдена -->
+<div th:unless="${vacancy}">
+    <h1>Вакансия не найдена</h1>
+    <p>Запрашиваемая вакансия с ID <span th:text="${vacancyId}">0</span> не существует или была удалена.</p>
+    <a href="/vacancies">Вернуться к списку вакансий</a>
+</div>
+
+<!-- Навигация -->
+<footer>
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
+        <a href="/vacancies">← Назад к списку вакансий</a> |
+        <a href="/">Главная</a>
+    </div>
+</footer>
 
 </body>
 </html>

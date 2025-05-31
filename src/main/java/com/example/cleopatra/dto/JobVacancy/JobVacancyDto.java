@@ -59,4 +59,5 @@ public class JobVacancyDto {
     private Long updatedBy;
     private Integer viewsCount;
     private Integer applicationsCount;
+    private LocalDate deadline ;
 }

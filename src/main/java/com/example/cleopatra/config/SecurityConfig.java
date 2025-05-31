@@ -36,6 +36,7 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/admin/**",
                                 "/job/**",
+                                "/vacancies/**",
                         "/api/**"
                         ,"/devices/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()

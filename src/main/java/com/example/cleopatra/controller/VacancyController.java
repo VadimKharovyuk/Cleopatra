@@ -42,7 +42,7 @@ public class VacancyController {
         return "vacancies/list";
     }
 
-    // Просмотр конкретной вакансии
+
     @GetMapping("/{id}")
     public String viewVacancy(@PathVariable Long id, Model model) {
         log.debug("Просмотр вакансии с ID: {}", id);
@@ -57,9 +57,7 @@ public class VacancyController {
     // Страница подачи заявки на вакансию
     @GetMapping("/{id}/apply")
     public String applyForVacancy(@PathVariable Long id, Model model) {
-        JobVacancyDto vacancy = jobVacancyService.getVacancy(id);
-        model.addAttribute("vacancy", vacancy);
-        model.addAttribute("vacancyId", id);
+///toDo
 
         return "vacancies/apply";
     }

@@ -52,6 +52,7 @@ public class JobVacancyServiceImpl implements JobVacancyService {
         }
     }
 
+
     @Override
     public JobVacancyListDto listVacancies(Pageable pageable) {
         Slice<JobVacancy> vacancySlice = jobVacancyRepository.findAllBy(pageable);

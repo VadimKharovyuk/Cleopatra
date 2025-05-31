@@ -1,10 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список вакансий</title>
 </head>
 <body>
+<h1>Список вакансий</h1>
+
+<!-- Сортировка -->
+<div>
+    <h3>Сортировка:</h3>
+    <form method="get">
+        <label for="sortBy">Сортировать по:</label>
+        <select name="sortBy" id="sortBy">
+            <option value="createdAt" th:selected="${currentSortBy == 'createdAt'}">Дата создания</option>
+            <option value="title" th:selected="${currentSortBy == 'title'}">Название</option>
+            <option value="minSalary" th:selected="${currentSortBy == 'minSalary'}">Зарплата</option>
+        </select>
+
+        <label for="sortDir">Направление:</label>
+        <select name="sortDir" id="sortDir">
+            <option value="desc" th:selected="${currentSortDir == 'desc'}">По убыванию</option>
+            <option value="asc" th:selected="${currentSortDir == 'asc'}">По возрастанию</option>
+        </select>
+
+        <button type="submit">Применить</button>
+    </form>
+</div>
+
+<!-- Список вакансий -->
+<div th:if="${vacanciesDto.vacancies != null and !vacanciesDto.vacancies.isEmpty()}">
+    <div th:each="vacancy : ${vacanciesDto.vacancies}">
+        <div style="border: 1px solid #ccc; margin: 10px 0; padding: 15px;">
+
+            <!-- Заголовок и срочность -->
+            <div>
+                <h2>
+                    <a th:href="@{/vacancies/{id}(id=${vacancy.id})}" th:text="${vacancy.title}">Название вакансии</a>
+                    <span th:if="${vacancy.isUrgent}" style="color: red; font-weight: bold;">[СРОЧНО]</span>
+                    <span th:if="${vacancy.isFeatured}" style="color: blue; font-weight: bold;">[РЕКОМЕНДУЕМАЯ]</span>
+                </h2>
+            </div>
+
+            <!-- Логотип компании -->
+            <div th:if="${vacancy.companyLogoUrl}">
+                <img th:src="${vacancy.companyLogoUrl}" alt="Логотип компании" width="50" height="50">
+            </div>
+
+            <!-- Профиль исполнителя -->
+            <div th:if="${vacancy.requiredProfile}">
+                <strong>Требуемый профиль:</strong>
+                <span th:text="${vacancy.requiredProfile}">Профиль</span>
+            </div>
+
+            <!-- Местоположение -->
+            <div>
+                <strong>Местоположение:</strong>
+                <span th:text="${vacancy.country + (vacancy.city != null and vacancy.city != '' ? ', ' + vacancy.city : '')}">Страна, Город</span>
+            </div>
+
+            <!-- Зарплата -->
+            <div th:if="${vacancy.minSalary}">
+                <strong>Зарплата от:</strong>
+                <span th:text="${vacancy.minSalary + ' ' + (vacancy.currency ?: '')}">0 USD</span>
+            </div>
+
+            <!-- Количество заявок -->
+            <div th:if="${vacancy.applicationsCount}">
+                <strong>Заявок:</strong>
+                <span th:text="${vacancy.applicationsCount}">0</span>
+            </div>
+
+            <!-- Ссылка на вакансию -->
+            <div>
+                <a th:href="@{/vacancies/{id}(id=${vacancy.id})}">Подробнее</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Сообщение если нет вакансий -->
+<div th:if="${vacanciesDto.vacancies == null or vacanciesDto.vacancies.isEmpty()}">
+    <p>Вакансии не найдены.</p>
+</div>
+
+<!-- Пагинация -->
+<div th:if="${vacanciesDto.vacancies != null and !vacanciesDto.vacancies.isEmpty()}">
+    <h3>Страницы:</h3>
+
+    <!-- Предыдущая страница -->
+    <span th:if="${vacanciesDto.hasPrevious}">
+            <a th:href="@{/vacancies(page=${vacanciesDto.previousPage}, sortBy=${currentSortBy}, sortDir=${currentSortDir})}">
+                &laquo; Предыдущая
+            </a>
+        </span>
+
+    <!-- Текущая страница -->
+    <span>
+            Страница <span th:text="${vacanciesDto.currentPage + 1}">1</span>
+        </span>
+
+    <!-- Следующая страница -->
+    <span th:if="${vacanciesDto.hasNext}">
+            <a th:href="@{/vacancies(page=${vacanciesDto.nextPage}, sortBy=${currentSortBy}, sortDir=${currentSortDir})}">
+                Следующая &raquo;
+            </a>
+        </span>
+
+    <!-- Информация о количестве -->
+    <div>
+        <p>Показано <span th:text="${vacanciesDto.itemsPerPage}">12</span> вакансий на странице</p>
+    </div>
+</div>
+
+<!-- Дополнительные действия -->
+<div>
+    <a href="/vacancies/create">Создать вакансию</a> |
+    <a href="/">Главная</a>
+</div>
 
 </body>
 </html>
