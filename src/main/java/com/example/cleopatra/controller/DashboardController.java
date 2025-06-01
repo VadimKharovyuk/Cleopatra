@@ -17,7 +17,7 @@ import java.nio.file.attribute.UserPrincipal;
 @Controller
 @RequestMapping("/dashboard")
 public class DashboardController {
-    private final UserService userService;
+
 
     @GetMapping
     public String dashboard() {
