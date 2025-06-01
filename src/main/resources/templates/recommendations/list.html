@@ -1,3 +1,921 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Рекомендации пользователей - Cleopatra</title>-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">-->
+<!--  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">-->
+
+<!--  &lt;!&ndash; Подключаем стили сайдбара &ndash;&gt;-->
+<!--  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>-->
+
+<!--  <style>-->
+<!--    /* Основные переменные уже определены в sidebar-styles */-->
+
+<!--    /* Main Container */-->
+<!--    .main-container {-->
+<!--      margin-left: 280px;-->
+<!--      min-height: 100vh;-->
+<!--      background: var(&#45;&#45;bg-primary);-->
+<!--      transition: margin-left 0.3s ease;-->
+<!--    }-->
+
+<!--    .content-wrapper {-->
+<!--      padding: 2rem;-->
+<!--      max-width: 1200px;-->
+<!--      margin: 0 auto;-->
+<!--    }-->
+
+<!--    /* Header */-->
+<!--    .page-header {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-xl);-->
+<!--      padding: 2rem;-->
+<!--      margin-bottom: 2rem;-->
+<!--      box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .page-title {-->
+<!--      font-family: 'Playfair Display', serif;-->
+<!--      font-size: 2.5rem;-->
+<!--      font-weight: 700;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: 0.5rem;-->
+<!--    }-->
+
+<!--    .page-subtitle {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 1.1rem;-->
+<!--    }-->
+
+<!--    /* Упрощенная секция поиска */-->
+<!--    .search-section {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-lg);-->
+<!--      padding: 2rem;-->
+<!--      margin-bottom: 2rem;-->
+<!--      box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .search-container {-->
+<!--      position: relative;-->
+<!--      margin-bottom: 1.5rem;-->
+<!--    }-->
+
+<!--    .search-input {-->
+<!--      width: 100%;-->
+<!--      padding: 1rem 1rem 1rem 3rem;-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--      border-radius: var(&#45;&#45;radius-lg);-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      font-size: 1rem;-->
+<!--      transition: all 0.2s ease;-->
+<!--    }-->
+
+<!--    .search-input:focus {-->
+<!--      outline: none;-->
+<!--      border-color: var(&#45;&#45;accent-primary);-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);-->
+<!--    }-->
+
+<!--    .search-icon {-->
+<!--      position: absolute;-->
+<!--      left: 1rem;-->
+<!--      top: 50%;-->
+<!--      transform: translateY(-50%);-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--      font-size: 1.1rem;-->
+<!--    }-->
+
+<!--    .search-actions {-->
+<!--      display: flex;-->
+<!--      gap: 1rem;-->
+<!--      align-items: center;-->
+<!--      flex-wrap: wrap;-->
+<!--    }-->
+
+<!--    .btn-search {-->
+<!--      padding: 0.75rem 1.5rem;-->
+<!--      border: none;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      font-weight: 600;-->
+<!--      cursor: pointer;-->
+<!--      transition: all 0.2s ease;-->
+<!--      font-size: 0.9rem;-->
+<!--    }-->
+
+<!--    .btn-primary {-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    .btn-primary:hover {-->
+<!--      transform: translateY(-1px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-md);-->
+<!--    }-->
+
+<!--    .btn-secondary {-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .btn-secondary:hover {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--    }-->
+
+<!--    .search-info {-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--      font-size: 0.9rem;-->
+<!--      margin-left: auto;-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.5rem;-->
+<!--    }-->
+
+<!--    .search-results-info {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-weight: 500;-->
+<!--    }-->
+
+<!--    /* Users Grid */-->
+<!--    .users-grid {-->
+<!--      display: grid;-->
+<!--      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));-->
+<!--      gap: 1.5rem;-->
+<!--      margin-bottom: 2rem;-->
+<!--    }-->
+
+<!--    .user-card {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-lg);-->
+<!--      padding: 2rem;-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--      transition: all 0.3s ease;-->
+<!--      text-align: center;-->
+<!--      position: relative;-->
+<!--      overflow: hidden;-->
+<!--    }-->
+
+<!--    .user-card:hover {-->
+<!--      transform: translateY(-4px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--      border-color: var(&#45;&#45;accent-primary);-->
+<!--    }-->
+
+<!--    .user-card::before {-->
+<!--      content: '';-->
+<!--      position: absolute;-->
+<!--      top: 0;-->
+<!--      left: 0;-->
+<!--      right: 0;-->
+<!--      height: 4px;-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      opacity: 0;-->
+<!--      transition: opacity 0.3s ease;-->
+<!--    }-->
+
+<!--    .user-card:hover::before {-->
+<!--      opacity: 1;-->
+<!--    }-->
+
+<!--    .user-avatar-container {-->
+<!--      position: relative;-->
+<!--      display: inline-block;-->
+<!--      margin-bottom: 1.5rem;-->
+<!--    }-->
+
+<!--    .user-avatar {-->
+<!--      width: 80px;-->
+<!--      height: 80px;-->
+<!--      border-radius: 50%;-->
+<!--      object-fit: cover;-->
+<!--      border: 3px solid var(&#45;&#45;border-primary);-->
+<!--      transition: all 0.3s ease;-->
+<!--    }-->
+
+<!--    .user-card:hover .user-avatar {-->
+<!--      border-color: var(&#45;&#45;accent-primary);-->
+<!--      transform: scale(1.05);-->
+<!--    }-->
+
+<!--    .user-avatar-link {-->
+<!--      text-decoration: none;-->
+<!--    }-->
+
+<!--    .user-name {-->
+<!--      font-size: 1.25rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: 0.5rem;-->
+<!--      transition: color 0.2s ease;-->
+<!--    }-->
+
+<!--    .user-name-link {-->
+<!--      text-decoration: none;-->
+<!--      color: inherit;-->
+<!--    }-->
+
+<!--    .user-name-link:hover .user-name {-->
+<!--      color: var(&#45;&#45;accent-primary);-->
+<!--    }-->
+
+<!--    .user-handle {-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--      font-size: 0.9rem;-->
+<!--      margin-bottom: 1rem;-->
+<!--    }-->
+
+<!--    .user-stats {-->
+<!--      display: flex;-->
+<!--      justify-content: center;-->
+<!--      gap: 1.5rem;-->
+<!--      margin-bottom: 1.5rem;-->
+<!--    }-->
+
+<!--    .user-stat {-->
+<!--      text-align: center;-->
+<!--    }-->
+
+<!--    .stat-number {-->
+<!--      font-weight: 700;-->
+<!--      font-size: 1.1rem;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      display: block;-->
+<!--    }-->
+
+<!--    .stat-label {-->
+<!--      font-size: 0.8rem;-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--      text-transform: uppercase;-->
+<!--      letter-spacing: 0.5px;-->
+<!--    }-->
+
+<!--    .user-actions {-->
+<!--      display: flex;-->
+<!--      gap: 0.75rem;-->
+<!--      justify-content: center;-->
+<!--    }-->
+
+<!--    .btn-follow {-->
+<!--      padding: 0.75rem 1.5rem;-->
+<!--      border: none;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      font-weight: 600;-->
+<!--      cursor: pointer;-->
+<!--      transition: all 0.2s ease;-->
+<!--      font-size: 0.9rem;-->
+<!--      flex: 1;-->
+<!--      max-width: 120px;-->
+<!--    }-->
+
+<!--    .btn-follow.following {-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .btn-follow.following:hover {-->
+<!--      background: var(&#45;&#45;accent-danger);-->
+<!--      color: white;-->
+<!--      border-color: var(&#45;&#45;accent-danger);-->
+<!--    }-->
+
+<!--    .btn-follow:not(.following) {-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    .btn-follow:not(.following):hover {-->
+<!--      transform: translateY(-1px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-md);-->
+<!--    }-->
+
+<!--    .btn-message {-->
+<!--      padding: 0.75rem;-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      cursor: pointer;-->
+<!--      transition: all 0.2s ease;-->
+<!--      width: 40px;-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--    }-->
+
+<!--    .btn-message:hover {-->
+<!--      background: var(&#45;&#45;accent-primary);-->
+<!--      color: white;-->
+<!--      border-color: var(&#45;&#45;accent-primary);-->
+<!--    }-->
+
+<!--    /* Load More Section */-->
+<!--    .load-more-section {-->
+<!--      text-align: center;-->
+<!--      margin: 3rem 0;-->
+<!--    }-->
+
+<!--    .btn-load-more {-->
+<!--      padding: 1rem 2rem;-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      border-radius: var(&#45;&#45;radius-lg);-->
+<!--      font-weight: 600;-->
+<!--      cursor: pointer;-->
+<!--      transition: all 0.3s ease;-->
+<!--      font-size: 1rem;-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.5rem;-->
+<!--    }-->
+
+<!--    .btn-load-more:hover {-->
+<!--      transform: translateY(-2px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--    }-->
+
+<!--    .loading-spinner {-->
+<!--      display: none;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--      gap: 0.5rem;-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--      font-size: 1rem;-->
+<!--    }-->
+
+<!--    .loading-spinner.active {-->
+<!--      display: flex;-->
+<!--    }-->
+
+<!--    .spinner {-->
+<!--      animation: spin 1s linear infinite;-->
+<!--    }-->
+
+<!--    @keyframes spin {-->
+<!--      from { transform: rotate(0deg); }-->
+<!--      to { transform: rotate(360deg); }-->
+<!--    }-->
+
+<!--    /* Empty State */-->
+<!--    .empty-state {-->
+<!--      text-align: center;-->
+<!--      padding: 4rem 2rem;-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-lg);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--      grid-column: 1 / -1;-->
+<!--    }-->
+
+<!--    .empty-icon {-->
+<!--      font-size: 4rem;-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--      margin-bottom: 1.5rem;-->
+<!--    }-->
+
+<!--    .empty-title {-->
+<!--      font-size: 1.5rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: 0.5rem;-->
+<!--    }-->
+
+<!--    .empty-message {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 1rem;-->
+<!--    }-->
+
+<!--    /* Responsive Design */-->
+<!--    @media (max-width: 1024px) {-->
+<!--      .main-container {-->
+<!--        margin-left: 80px;-->
+<!--      }-->
+<!--    }-->
+
+<!--    @media (max-width: 768px) {-->
+<!--      .main-container {-->
+<!--        margin-left: 0;-->
+<!--        padding-top: 60px;-->
+<!--      }-->
+
+<!--      .content-wrapper {-->
+<!--        padding: 1rem;-->
+<!--      }-->
+
+<!--      .page-title {-->
+<!--        font-size: 2rem;-->
+<!--      }-->
+
+<!--      .users-grid {-->
+<!--        grid-template-columns: 1fr;-->
+<!--        gap: 1rem;-->
+<!--      }-->
+
+<!--      .user-card {-->
+<!--        padding: 1.5rem;-->
+<!--      }-->
+
+<!--      .search-actions {-->
+<!--        flex-direction: column;-->
+<!--        align-items: stretch;-->
+<!--      }-->
+
+<!--      .search-info {-->
+<!--        margin-left: 0;-->
+<!--        justify-content: center;-->
+<!--      }-->
+
+<!--      .user-stats {-->
+<!--        gap: 1rem;-->
+<!--      }-->
+
+<!--      .user-actions {-->
+<!--        flex-direction: column;-->
+<!--      }-->
+
+<!--      .btn-follow {-->
+<!--        max-width: none;-->
+<!--      }-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--&lt;!&ndash; Mobile Header &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>-->
+
+<!--&lt;!&ndash; Sidebar &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar('recommendations')}"></th:block>-->
+
+<!--&lt;!&ndash; Main Content &ndash;&gt;-->
+<!--<main class="main-container">-->
+<!--  <div class="content-wrapper">-->
+<!--    &lt;!&ndash; Page Header &ndash;&gt;-->
+<!--    <div class="page-header">-->
+<!--      <h1 class="page-title">-->
+<!--        <i class="fas fa-users"></i>-->
+<!--        Рекомендации пользователей-->
+<!--      </h1>-->
+<!--      <p class="page-subtitle">-->
+<!--        Найдите интересных людей для подписки и общения. Сортировка по популярности.-->
+<!--      </p>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Упрощенная секция поиска &ndash;&gt;-->
+<!--    <div class="search-section">-->
+<!--      <div class="search-container">-->
+<!--        <i class="fas fa-search search-icon"></i>-->
+<!--        <input type="text"-->
+<!--               class="search-input"-->
+<!--               placeholder="Поиск по имени или фамилии..."-->
+<!--               id="searchInput">-->
+<!--      </div>-->
+
+<!--      <div class="search-actions">-->
+<!--        <button class="btn-search btn-primary" onclick="performSearch()">-->
+<!--          <i class="fas fa-search"></i>-->
+<!--          Найти-->
+<!--        </button>-->
+<!--        <button class="btn-search btn-secondary" onclick="resetSearch()">-->
+<!--          <i class="fas fa-undo"></i>-->
+<!--          Сбросить-->
+<!--        </button>-->
+<!--        <div class="search-info">-->
+<!--          <i class="fas fa-sort-amount-down"></i>-->
+<!--          <span class="search-results-info" id="searchResultsInfo">-->
+<!--            Сортировка: по популярности-->
+<!--          </span>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Users Grid &ndash;&gt;-->
+<!--    <div class="users-grid" id="usersGrid">-->
+<!--      &lt;!&ndash; Проверяем наличие пользователей &ndash;&gt;-->
+<!--      <div th:if="${recommendations?.userRecommendations != null and !recommendations.userRecommendations.empty}">-->
+<!--        <div class="user-card" th:each="user : ${recommendations.userRecommendations}">-->
+<!--          &lt;!&ndash; Avatar &ndash;&gt;-->
+<!--          <div class="user-avatar-container">-->
+<!--            <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-avatar-link">-->
+<!--              <img th:src="${user.imageUrl != null ? user.imageUrl : '/images/default-avatar.png'}"-->
+<!--                   th:alt="${user.firstName + ' ' + user.lastName}"-->
+<!--                   class="user-avatar">-->
+<!--            </a>-->
+<!--          </div>-->
+
+<!--          &lt;!&ndash; User Info &ndash;&gt;-->
+<!--          <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-name-link">-->
+<!--            <h3 class="user-name" th:text="${user.firstName + ' ' + user.lastName}">-->
+<!--              Анна Смирнова-->
+<!--            </h3>-->
+<!--          </a>-->
+
+<!--          <p class="user-handle" th:text="'@user' + ${user.id}">-->
+<!--            @user123-->
+<!--          </p>-->
+
+<!--          &lt;!&ndash; User Stats &ndash;&gt;-->
+<!--          <div class="user-stats">-->
+<!--            <div class="user-stat">-->
+<!--              <span class="stat-number" th:text="${user.followersCount ?: 0}">127</span>-->
+<!--              <span class="stat-label">подписчики</span>-->
+<!--            </div>-->
+<!--            <div class="user-stat">-->
+<!--              <span class="stat-number">24</span>-->
+<!--              <span class="stat-label">посты</span>-->
+<!--            </div>-->
+<!--          </div>-->
+
+<!--          &lt;!&ndash; Actions &ndash;&gt;-->
+<!--          <div class="user-actions">-->
+<!--            <button class="btn-follow"-->
+<!--                    th:data-user-id="${user.id}"-->
+<!--                    th:classappend="${user.isFollowing ? 'following' : ''}"-->
+<!--                    th:text="${user.isFollowing ? 'Читаю' : 'Читать'}">-->
+<!--              Читать-->
+<!--            </button>-->
+<!--            <button class="btn-message"-->
+<!--                    th:data-user-id="${user.id}"-->
+<!--                    title="Написать сообщение">-->
+<!--              <i class="fas fa-envelope"></i>-->
+<!--            </button>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Empty State &ndash;&gt;-->
+<!--      <div th:if="${recommendations?.userRecommendations == null or recommendations.userRecommendations.empty}"-->
+<!--           class="empty-state">-->
+<!--        <i class="fas fa-user-friends empty-icon"></i>-->
+<!--        <h3 class="empty-title">Пользователи не найдены</h3>-->
+<!--        <p class="empty-message">-->
+<!--          Попробуйте изменить поисковый запрос или попробуйте позже-->
+<!--        </p>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Load More Section &ndash;&gt;-->
+<!--    <div class="load-more-section"-->
+<!--         th:if="${recommendations?.hasNext != null and recommendations.hasNext}">-->
+<!--      <button class="btn-load-more"-->
+<!--              id="loadMoreBtn"-->
+<!--              th:data-next-page="${recommendations.nextPage}">-->
+<!--        <i class="fas fa-plus"></i>-->
+<!--        Загрузить еще-->
+<!--      </button>-->
+
+<!--      <div class="loading-spinner" id="loadingSpinner">-->
+<!--        <i class="fas fa-spinner spinner"></i>-->
+<!--        <span>Загружаем пользователей...</span>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</main>-->
+
+<!--&lt;!&ndash; Подключаем скрипты сайдбара &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>-->
+
+<!--&lt;!&ndash; Подключаем скрипт для подписок &ndash;&gt;-->
+<!--<script th:src="@{/js/profile/isFollowing.js}"></script>-->
+
+<!--&lt;!&ndash; Page Scripts &ndash;&gt;-->
+<!--<script>-->
+<!--  // ========================================-->
+<!--  // УПРОЩЕННАЯ ЛОГИКА РЕКОМЕНДАЦИЙ-->
+<!--  // ========================================-->
+
+<!--  let currentSearchQuery = '';-->
+<!--  let isLoading = false;-->
+
+<!--  /**-->
+<!--   * Выполнить поиск-->
+<!--   */-->
+<!--  function performSearch() {-->
+<!--    const searchInput = document.getElementById('searchInput');-->
+<!--    const query = searchInput.value.trim();-->
+
+<!--    console.log('🔍 Searching for:', query);-->
+
+<!--    currentSearchQuery = query;-->
+<!--    loadRecommendations(query, 0, true);-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Сбросить поиск-->
+<!--   */-->
+<!--  function resetSearch() {-->
+<!--    document.getElementById('searchInput').value = '';-->
+<!--    currentSearchQuery = '';-->
+
+<!--    console.log('🔄 Search reset');-->
+
+<!--    // Перезагружаем страницу для показа всех пользователей-->
+<!--    window.location.reload();-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Загрузить рекомендации-->
+<!--   */-->
+<!--  async function loadRecommendations(query = '', page = 0, replace = false) {-->
+<!--    if (isLoading) return;-->
+
+<!--    isLoading = true;-->
+
+<!--    // Показываем индикатор загрузки для дополнительных страниц-->
+<!--    if (page > 0) {-->
+<!--      showLoadingSpinner(true);-->
+<!--    }-->
+
+<!--    try {-->
+<!--      const params = new URLSearchParams({-->
+<!--        query: query,-->
+<!--        page: page.toString()-->
+<!--      });-->
+
+<!--      const response = await fetch(`/recommendations/search?${params}`);-->
+
+<!--      if (!response.ok) {-->
+<!--        throw new Error(`HTTP ${response.status}`);-->
+<!--      }-->
+
+<!--      const data = await response.json();-->
+
+<!--      if (replace || page === 0) {-->
+<!--        // Заменяем содержимое-->
+<!--        replaceUsersGrid(data.userRecommendations);-->
+<!--      } else {-->
+<!--        // Добавляем к существующему-->
+<!--        appendUsersToGrid(data.userRecommendations);-->
+<!--      }-->
+
+<!--      // Обновляем кнопку "Загрузить еще"-->
+<!--      updateLoadMoreButton(data);-->
+
+<!--      // Обновляем информацию о результатах-->
+<!--      updateSearchInfo(query, data.userRecommendations.length, page === 0);-->
+
+<!--    } catch (error) {-->
+<!--      console.error('❌ Error loading recommendations:', error);-->
+
+<!--      if (page === 0) {-->
+<!--        showEmptyState('Ошибка при загрузке рекомендаций');-->
+<!--      } else {-->
+<!--        alert('Ошибка при загрузке дополнительных рекомендаций');-->
+<!--      }-->
+<!--    } finally {-->
+<!--      isLoading = false;-->
+<!--      showLoadingSpinner(false);-->
+<!--    }-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Заменить содержимое сетки пользователей-->
+<!--   */-->
+<!--  function replaceUsersGrid(users) {-->
+<!--    const usersGrid = document.getElementById('usersGrid');-->
+
+<!--    if (users.length === 0) {-->
+<!--      showEmptyState(currentSearchQuery ?-->
+<!--              `По запросу "${currentSearchQuery}" ничего не найдено` :-->
+<!--              'Пользователи не найдены');-->
+<!--      return;-->
+<!--    }-->
+
+<!--    // Очищаем сетку-->
+<!--    usersGrid.innerHTML = '';-->
+
+<!--    // Добавляем новых пользователей-->
+<!--    users.forEach(user => {-->
+<!--      const userCard = createUserCard(user);-->
+<!--      usersGrid.appendChild(userCard);-->
+<!--    });-->
+
+<!--    // Переинициализируем кнопки подписки-->
+<!--    initializeFollowButtons();-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Добавить пользователей к существующей сетке-->
+<!--   */-->
+<!--  function appendUsersToGrid(users) {-->
+<!--    const usersGrid = document.getElementById('usersGrid');-->
+
+<!--    users.forEach(user => {-->
+<!--      const userCard = createUserCard(user);-->
+<!--      usersGrid.appendChild(userCard);-->
+<!--    });-->
+
+<!--    // Переинициализируем кнопки подписки-->
+<!--    initializeFollowButtons();-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Показать пустое состояние-->
+<!--   */-->
+<!--  function showEmptyState(message = 'Пользователи не найдены') {-->
+<!--    const usersGrid = document.getElementById('usersGrid');-->
+
+<!--    usersGrid.innerHTML = `-->
+<!--      <div class="empty-state">-->
+<!--        <i class="fas fa-user-friends empty-icon"></i>-->
+<!--        <h3 class="empty-title">${message}</h3>-->
+<!--        <p class="empty-message">-->
+<!--          ${currentSearchQuery ? 'Попробуйте изменить поисковый запрос' : 'Попробуйте позже'}-->
+<!--        </p>-->
+<!--      </div>-->
+<!--    `;-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Обновить кнопку "Загрузить еще"-->
+<!--   */-->
+<!--  function updateLoadMoreButton(data) {-->
+<!--    const loadMoreBtn = document.getElementById('loadMoreBtn');-->
+<!--    const loadMoreSection = document.querySelector('.load-more-section');-->
+
+<!--    if (!loadMoreSection) return;-->
+
+<!--    if (data.hasNext) {-->
+<!--      loadMoreSection.style.display = 'block';-->
+<!--      if (loadMoreBtn) {-->
+<!--        loadMoreBtn.dataset.nextPage = data.nextPage;-->
+<!--        loadMoreBtn.style.display = 'inline-flex';-->
+<!--      }-->
+<!--    } else {-->
+<!--      loadMoreSection.style.display = 'none';-->
+<!--    }-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Обновить информацию о поиске-->
+<!--   */-->
+<!--  function updateSearchInfo(query, count, isNewSearch) {-->
+<!--    const searchInfo = document.getElementById('searchResultsInfo');-->
+
+<!--    if (query && isNewSearch) {-->
+<!--      searchInfo.innerHTML = `Найдено: <strong>${count}</strong> по запросу "${query}"`;-->
+<!--    } else if (!query) {-->
+<!--      searchInfo.innerHTML = 'Сортировка: по популярности';-->
+<!--    }-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Показать/скрыть индикатор загрузки-->
+<!--   */-->
+<!--  function showLoadingSpinner(show) {-->
+<!--    const loadMoreBtn = document.getElementById('loadMoreBtn');-->
+<!--    const loadingSpinner = document.getElementById('loadingSpinner');-->
+
+<!--    if (loadMoreBtn && loadingSpinner) {-->
+<!--      if (show) {-->
+<!--        loadMoreBtn.style.display = 'none';-->
+<!--        loadingSpinner.classList.add('active');-->
+<!--      } else {-->
+<!--        loadingSpinner.classList.remove('active');-->
+<!--      }-->
+<!--    }-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Загрузить больше пользователей-->
+<!--   */-->
+<!--  async function loadMoreUsers() {-->
+<!--    const loadMoreBtn = document.getElementById('loadMoreBtn');-->
+<!--    if (!loadMoreBtn) return;-->
+
+<!--    const nextPage = parseInt(loadMoreBtn.dataset.nextPage);-->
+<!--    await loadRecommendations(currentSearchQuery, nextPage, false);-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Создать карточку пользователя-->
+<!--   */-->
+<!--  function createUserCard(user) {-->
+<!--    const card = document.createElement('div');-->
+<!--    card.className = 'user-card';-->
+<!--    card.innerHTML = `-->
+<!--      <div class="user-avatar-container">-->
+<!--        <a href="/profile/${user.id}" class="user-avatar-link">-->
+<!--          <img src="${user.imageUrl || '/images/default-avatar.png'}"-->
+<!--               alt="${user.firstName} ${user.lastName}"-->
+<!--               class="user-avatar">-->
+<!--        </a>-->
+<!--      </div>-->
+
+<!--      <a href="/profile/${user.id}" class="user-name-link">-->
+<!--        <h3 class="user-name">${user.firstName} ${user.lastName}</h3>-->
+<!--      </a>-->
+
+<!--      <p class="user-handle">@user${user.id}</p>-->
+
+<!--      <div class="user-stats">-->
+<!--        <div class="user-stat">-->
+<!--          <span class="stat-number">${user.followersCount || 0}</span>-->
+<!--          <span class="stat-label">подписчики</span>-->
+<!--        </div>-->
+<!--        <div class="user-stat">-->
+<!--          <span class="stat-number">24</span>-->
+<!--          <span class="stat-label">посты</span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="user-actions">-->
+<!--        <button class="btn-follow ${user.isFollowing ? 'following' : ''}"-->
+<!--                data-user-id="${user.id}">-->
+<!--          ${user.isFollowing ? 'Читаю' : 'Читать'}-->
+<!--        </button>-->
+<!--        <button class="btn-message"-->
+<!--                data-user-id="${user.id}"-->
+<!--                title="Написать сообщение">-->
+<!--          <i class="fas fa-envelope"></i>-->
+<!--        </button>-->
+<!--      </div>-->
+<!--    `;-->
+<!--    return card;-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Инициализация кнопок подписки-->
+<!--   */-->
+<!--  function initializeFollowButtons() {-->
+<!--    // Это будет обработано в isFollowing.js-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Инициализация кнопок сообщений-->
+<!--   */-->
+<!--  function initializeMessageButtons() {-->
+<!--    document.addEventListener('click', function(e) {-->
+<!--      if (e.target.closest('.btn-message')) {-->
+<!--        const userId = e.target.closest('.btn-message').dataset.userId;-->
+<!--        window.location.href = `/messages/new?to=${userId}`;-->
+<!--      }-->
+<!--    });-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Инициализация поиска-->
+<!--   */-->
+<!--  function initializeSearch() {-->
+<!--    const searchInput = document.getElementById('searchInput');-->
+<!--    let searchTimeout;-->
+
+<!--    // Поиск при вводе (с задержкой)-->
+<!--    searchInput.addEventListener('input', function() {-->
+<!--      clearTimeout(searchTimeout);-->
+<!--      searchTimeout = setTimeout(() => {-->
+<!--        performSearch();-->
+<!--      }, 500); // Задержка 500мс-->
+<!--    });-->
+
+<!--    // Поиск при нажатии Enter-->
+<!--    searchInput.addEventListener('keypress', function(e) {-->
+<!--      if (e.key === 'Enter') {-->
+<!--        e.preventDefault();-->
+<!--        clearTimeout(searchTimeout);-->
+<!--        performSearch();-->
+<!--      }-->
+<!--    });-->
+<!--  }-->
+
+<!--  /**-->
+<!--   * Инициализация страницы-->
+<!--   */-->
+<!--  function initializePage() {-->
+<!--    console.log('📄 Initializing simplified recommendations page');-->
+
+<!--    // Инициализируем поиск-->
+<!--    initializeSearch();-->
+
+<!--    // Инициализируем кнопку "Загрузить еще"-->
+<!--    const loadMoreBtn = document.getElementById('loadMoreBtn');-->
+<!--    if (loadMoreBtn) {-->
+<!--      loadMoreBtn.addEventListener('click', loadMoreUsers);-->
+<!--    }-->
+
+<!--    // Инициализируем кнопки сообщений-->
+<!--    initializeMessageButtons();-->
+
+<!--    console.log('✅ Simplified recommendations page initialized');-->
+<!--  }-->
+
+<!--  // Инициализация при загрузке страницы-->
+<!--  if (document.readyState === 'loading') {-->
+<!--    document.addEventListener('DOMContentLoaded', initializePage);-->
+<!--  } else {-->
+<!--    initializePage();-->
+<!--  }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -9,442 +927,7 @@
 
   <!-- Подключаем стили сайдбара -->
   <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
-
-  <style>
-    /* Основные переменные уже определены в sidebar-styles */
-
-    /* Main Container */
-    .main-container {
-      margin-left: 280px;
-      min-height: 100vh;
-      background: var(--bg-primary);
-      transition: margin-left 0.3s ease;
-    }
-
-    .content-wrapper {
-      padding: 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* Header */
-    .page-header {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-xl);
-      padding: 2rem;
-      margin-bottom: 2rem;
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border-primary);
-    }
-
-    .page-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
-    }
-
-    .page-subtitle {
-      color: var(--text-secondary);
-      font-size: 1.1rem;
-    }
-
-    /* Упрощенная секция поиска */
-    .search-section {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-      padding: 2rem;
-      margin-bottom: 2rem;
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border-primary);
-    }
-
-    .search-container {
-      position: relative;
-      margin-bottom: 1.5rem;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 1rem 1rem 1rem 3rem;
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-lg);
-      background: var(--bg-accent);
-      font-size: 1rem;
-      transition: all 0.2s ease;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: var(--accent-primary);
-      background: var(--bg-secondary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 1.1rem;
-    }
-
-    .search-actions {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .btn-search {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: var(--radius-md);
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 0.9rem;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      color: white;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-secondary {
-      background: var(--bg-accent);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-primary);
-    }
-
-    .btn-secondary:hover {
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-    }
-
-    .search-info {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .search-results-info {
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    /* Users Grid */
-    .users-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .user-card {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-      padding: 2rem;
-      border: 1px solid var(--border-primary);
-      transition: all 0.3s ease;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .user-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-lg);
-      border-color: var(--accent-primary);
-    }
-
-    .user-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .user-card:hover::before {
-      opacity: 1;
-    }
-
-    .user-avatar-container {
-      position: relative;
-      display: inline-block;
-      margin-bottom: 1.5rem;
-    }
-
-    .user-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--border-primary);
-      transition: all 0.3s ease;
-    }
-
-    .user-card:hover .user-avatar {
-      border-color: var(--accent-primary);
-      transform: scale(1.05);
-    }
-
-    .user-avatar-link {
-      text-decoration: none;
-    }
-
-    .user-name {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
-      transition: color 0.2s ease;
-    }
-
-    .user-name-link {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    .user-name-link:hover .user-name {
-      color: var(--accent-primary);
-    }
-
-    .user-handle {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-    }
-
-    .user-stats {
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .user-stat {
-      text-align: center;
-    }
-
-    .stat-number {
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: var(--text-primary);
-      display: block;
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .user-actions {
-      display: flex;
-      gap: 0.75rem;
-      justify-content: center;
-    }
-
-    .btn-follow {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: var(--radius-md);
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 0.9rem;
-      flex: 1;
-      max-width: 120px;
-    }
-
-    .btn-follow.following {
-      background: var(--bg-accent);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-primary);
-    }
-
-    .btn-follow.following:hover {
-      background: var(--accent-danger);
-      color: white;
-      border-color: var(--accent-danger);
-    }
-
-    .btn-follow:not(.following) {
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      color: white;
-    }
-
-    .btn-follow:not(.following):hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-message {
-      padding: 0.75rem;
-      background: var(--bg-accent);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      width: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .btn-message:hover {
-      background: var(--accent-primary);
-      color: white;
-      border-color: var(--accent-primary);
-    }
-
-    /* Load More Section */
-    .load-more-section {
-      text-align: center;
-      margin: 3rem 0;
-    }
-
-    .btn-load-more {
-      padding: 1rem 2rem;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      color: white;
-      border: none;
-      border-radius: var(--radius-lg);
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 1rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn-load-more:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .loading-spinner {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      color: var(--text-muted);
-      font-size: 1rem;
-    }
-
-    .loading-spinner.active {
-      display: flex;
-    }
-
-    .spinner {
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 4rem 2rem;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border-primary);
-      grid-column: 1 / -1;
-    }
-
-    .empty-icon {
-      font-size: 4rem;
-      color: var(--text-muted);
-      margin-bottom: 1.5rem;
-    }
-
-    .empty-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
-    }
-
-    .empty-message {
-      color: var(--text-secondary);
-      font-size: 1rem;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 1024px) {
-      .main-container {
-        margin-left: 80px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .main-container {
-        margin-left: 0;
-        padding-top: 60px;
-      }
-
-      .content-wrapper {
-        padding: 1rem;
-      }
-
-      .page-title {
-        font-size: 2rem;
-      }
-
-      .users-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-      }
-
-      .user-card {
-        padding: 1.5rem;
-      }
-
-      .search-actions {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .search-info {
-        margin-left: 0;
-        justify-content: center;
-      }
-
-      .user-stats {
-        gap: 1rem;
-      }
-
-      .user-actions {
-        flex-direction: column;
-      }
-
-      .btn-follow {
-        max-width: none;
-      }
-    }
-  </style>
+  <link th:href="@{/css/recommendations/list.css}" rel="stylesheet" type="text/css">
 </head>
 <body>
 <!-- Mobile Header -->
@@ -495,57 +978,55 @@
       </div>
     </div>
 
-    <!-- Users Grid -->
+    <!-- ИСПРАВЛЕННАЯ Users Grid - убрали лишнюю обертку div -->
     <div class="users-grid" id="usersGrid">
-      <!-- Проверяем наличие пользователей -->
-      <div th:if="${recommendations?.userRecommendations != null and !recommendations.userRecommendations.empty}">
-        <div class="user-card" th:each="user : ${recommendations.userRecommendations}">
-          <!-- Avatar -->
-          <div class="user-avatar-container">
-            <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-avatar-link">
-              <img th:src="${user.imageUrl != null ? user.imageUrl : '/images/default-avatar.png'}"
-                   th:alt="${user.firstName + ' ' + user.lastName}"
-                   class="user-avatar">
-            </a>
-          </div>
-
-          <!-- User Info -->
-          <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-name-link">
-            <h3 class="user-name" th:text="${user.firstName + ' ' + user.lastName}">
-              Анна Смирнова
-            </h3>
+      <!-- Карточки пользователей напрямую в сетке -->
+      <div class="user-card" th:each="user : ${recommendations?.userRecommendations}" th:if="${recommendations?.userRecommendations != null and !recommendations.userRecommendations.empty}">
+        <!-- Avatar -->
+        <div class="user-avatar-container">
+          <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-avatar-link">
+            <img th:src="${user.imageUrl != null ? user.imageUrl : '/images/default-avatar.png'}"
+                 th:alt="${user.firstName + ' ' + user.lastName}"
+                 class="user-avatar">
           </a>
+        </div>
 
-          <p class="user-handle" th:text="'@user' + ${user.id}">
-            @user123
-          </p>
+        <!-- User Info -->
+        <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-name-link">
+          <h3 class="user-name" th:text="${user.firstName + ' ' + user.lastName}">
+            Анна Смирнова
+          </h3>
+        </a>
 
-          <!-- User Stats -->
-          <div class="user-stats">
-            <div class="user-stat">
-              <span class="stat-number" th:text="${user.followersCount ?: 0}">127</span>
-              <span class="stat-label">подписчики</span>
-            </div>
-            <div class="user-stat">
-              <span class="stat-number">24</span>
-              <span class="stat-label">посты</span>
-            </div>
+        <p class="user-handle" th:text="'@user' + ${user.id}">
+          @user123
+        </p>
+
+        <!-- User Stats -->
+        <div class="user-stats">
+          <div class="user-stat">
+            <span class="stat-number" th:text="${user.followersCount ?: 0}">127</span>
+            <span class="stat-label">подписчики</span>
           </div>
-
-          <!-- Actions -->
-          <div class="user-actions">
-            <button class="btn-follow"
-                    th:data-user-id="${user.id}"
-                    th:classappend="${user.isFollowing ? 'following' : ''}"
-                    th:text="${user.isFollowing ? 'Читаю' : 'Читать'}">
-              Читать
-            </button>
-            <button class="btn-message"
-                    th:data-user-id="${user.id}"
-                    title="Написать сообщение">
-              <i class="fas fa-envelope"></i>
-            </button>
+          <div class="user-stat">
+            <span class="stat-number">24</span>
+            <span class="stat-label">посты</span>
           </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="user-actions">
+          <button class="btn-follow"
+                  th:data-user-id="${user.id}"
+                  th:classappend="${user.isFollowing ? 'following' : ''}"
+                  th:text="${user.isFollowing ? 'Читаю' : 'Читать'}">
+            Читать
+          </button>
+          <button class="btn-message"
+                  th:data-user-id="${user.id}"
+                  title="Написать сообщение">
+            <i class="fas fa-envelope"></i>
+          </button>
         </div>
       </div>
 

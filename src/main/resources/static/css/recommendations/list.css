@@ -1,0 +1,634 @@
+
+    /* Main Container */
+.main-container {
+    margin-left: 280px;
+    min-height: 100vh;
+    background: var(--bg-primary);
+    transition: margin-left 0.3s ease;
+}
+
+.content-wrapper {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header */
+.page-header {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-primary);
+}
+
+.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* Упрощенная секция поиска */
+.search-section {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-primary);
+}
+
+.search-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    background: var(--bg-accent);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: var(--bg-secondary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+.search-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.btn-search {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--bg-accent);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.search-info {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.search-results-info {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* ИСПРАВЛЕННАЯ СЕТКА ПОЛЬЗОВАТЕЛЕЙ */
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Карточки пользователей */
+.user-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    border: 1px solid var(--border-primary);
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.user-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent-primary);
+}
+
+.user-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.user-card:hover::before {
+    opacity: 1;
+}
+
+/* Аватар */
+.user-avatar-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.user-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border-primary);
+    transition: all 0.3s ease;
+}
+
+.user-card:hover .user-avatar {
+    border-color: var(--accent-primary);
+    transform: scale(1.05);
+}
+
+.user-avatar-link {
+    text-decoration: none;
+}
+
+.user-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+    transition: color 0.2s ease;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.user-name-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.user-name-link:hover .user-name {
+    color: var(--accent-primary);
+}
+
+.user-handle {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.user-stat {
+    text-align: center;
+}
+
+.stat-number {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+    display: block;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.25rem;
+}
+
+.user-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: auto;
+    padding-top: 0.5rem;
+}
+
+.btn-follow {
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    flex: 1;
+    max-width: 100px;
+    white-space: nowrap;
+    min-width: 80px;
+}
+
+.btn-follow.following {
+    background: var(--bg-accent);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-primary);
+}
+
+.btn-follow.following:hover {
+    background: var(--accent-danger);
+    color: white;
+    border-color: var(--accent-danger);
+}
+
+.btn-follow:not(.following) {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+}
+
+.btn-follow:not(.following):hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-message {
+    padding: 0.6rem;
+    background: var(--bg-accent);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-message:hover {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+}
+
+/* Load More Section */
+.load-more-section {
+    text-align: center;
+    margin: 3rem 0;
+}
+
+.btn-load-more {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-load-more:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.loading-spinner {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.loading-spinner.active {
+    display: flex;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-primary);
+    grid-column: 1 / -1;
+    margin: 2rem 0;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+}
+
+.empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.empty-message {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+/* Адаптивная сетка */
+@media (min-width: 1200px) {
+    .users-grid {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 1200px;
+        gap: 2rem;
+    }
+
+    .user-card {
+        min-height: 320px;
+        padding: 2rem;
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .user-name {
+        font-size: 1.25rem;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .users-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .user-card {
+        min-height: 300px;
+        padding: 1.5rem;
+    }
+
+    .user-avatar {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .users-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .user-card {
+        min-height: 280px;
+        padding: 1.5rem;
+    }
+
+    .user-avatar {
+        width: 75px;
+        height: 75px;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+    .users-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .user-card {
+        min-height: 260px;
+        padding: 1.25rem;
+    }
+
+    .user-avatar {
+        width: 65px;
+        height: 65px;
+    }
+
+    .user-name {
+        font-size: 1.1rem;
+    }
+
+    .user-stats {
+        gap: 1rem;
+    }
+
+    .stat-number {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 575px) {
+    .users-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .user-card {
+        min-height: auto;
+        padding: 1.5rem;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .user-name {
+        font-size: 1.25rem;
+    }
+
+    .user-stats {
+        gap: 1.5rem;
+    }
+
+    .user-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-follow {
+        max-width: none;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .btn-message {
+        width: 40px;
+        height: 40px;
+        padding: 0.75rem;
+        align-self: center;
+    }
+}
+
+/* Responsive Design для сайдбара */
+@media (max-width: 1024px) {
+    .main-container {
+        margin-left: 80px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        margin-left: 0;
+        padding-top: 60px;
+    }
+
+    .content-wrapper {
+        padding: 1rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .search-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-info {
+        margin-left: 0;
+        justify-content: center;
+    }
+}
+
+/* Улучшения для очень больших экранов */
+@media (min-width: 1400px) {
+    .content-wrapper {
+        max-width: 1400px;
+    }
+
+    .users-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+    }
+
+    .user-card {
+        min-height: 340px;
+        padding: 2rem;
+    }
+}
+
+/* Анимации */
+.user-card {
+    will-change: transform;
+}
+
+.user-card:hover {
+    animation: cardHover 0.3s ease-out;
+}
+
+@keyframes cardHover {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-2px);
+    }
+    100% {
+        transform: translateY(-4px);
+    }
+}
+
+/* Дополнительные hover эффекты */
+.user-avatar-link:hover .user-avatar {
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+}
+
+.user-name-link:hover .user-name {
+    text-shadow: 0 0 8px rgba(37, 99, 235, 0.3);
+}
+
+/* Touch устройства */
+@media (hover: none) and (pointer: coarse) {
+    .user-card:hover {
+        transform: none;
+    }
+
+    .user-card:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+
+    .btn-follow:hover,
+    .btn-message:hover {
+        transform: none;
+    }
+
+    .btn-follow:active,
+    .btn-message:active {
+        transform: scale(0.95);
+    }
+}
