@@ -1,72 +1,578 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Регистрация - Группа Клеопатра</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>Регистрация в группе Клеопатра</h1>-->
+
+<!--&lt;!&ndash; Сообщения об ошибках &ndash;&gt;-->
+<!--<div th:if="${errorMessage}" style="color: red; border: 1px solid red; padding: 10px; margin: 10px 0;">-->
+<!--    <strong>Ошибка:</strong> <span th:text="${errorMessage}"></span>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Форма регистрации &ndash;&gt;-->
+<!--<form th:action="@{/register}" th:object="${registerDto}" method="post">-->
+
+<!--    <div>-->
+<!--        <label for="email">Email:</label><br>-->
+<!--        <input type="email" id="email" th:field="*{email}" required>-->
+<!--        <div th:if="${#fields.hasErrors('email')}" style="color: red;">-->
+<!--            <span th:errors="*{email}"></span>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <br>-->
+
+<!--    <div>-->
+<!--        <label for="password">Пароль:</label><br>-->
+<!--        <input type="password" id="password" th:field="*{password}" required>-->
+<!--        <div th:if="${#fields.hasErrors('password')}" style="color: red;">-->
+<!--            <span th:errors="*{password}"></span>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <br>-->
+
+<!--    <div>-->
+<!--        <label for="confirmPassword">Подтвердите пароль:</label><br>-->
+<!--        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" required>-->
+<!--        <div th:if="${#fields.hasErrors('confirmPassword')}" style="color: red;">-->
+<!--            <span th:errors="*{confirmPassword}"></span>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <br>-->
+
+<!--    <div>-->
+<!--        <label for="gender">Пол:</label><br>-->
+<!--        <select id="gender" th:field="*{gender}" required>-->
+<!--            <option value="">&#45;&#45; Выберите пол &#45;&#45;</option>-->
+<!--            <option th:each="gender : ${genders}"-->
+<!--                    th:value="${gender}"-->
+<!--                    th:text="${gender.displayName}"></option>-->
+<!--        </select>-->
+<!--        <div th:if="${#fields.hasErrors('gender')}" style="color: red;">-->
+<!--            <span th:errors="*{gender}"></span>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <br>-->
+
+<!--    <button type="submit">Зарегистрироваться</button>-->
+<!--</form>-->
+
+<!--<hr>-->
+<!--<p>-->
+<!--    Уже есть аккаунт? <a th:href="@{/login}">Войти</a>-->
+<!--</p>-->
+
+<!--<p>-->
+<!--    <a th:href="@{/}">На главную</a>-->
+<!--</p>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация - Группа Клеопатра</title>
+    <title>Регистрация - Cleopatra</title>
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --hover-gold: #B8941F;
+            --deep-black: #000000;
+            --dark-surface: #1C1C1E;
+            --soft-gray: #2C2C2E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A1A1A6;
+            --accent-shadow: rgba(212, 175, 55, 0.25);
+            --dark-overlay: rgba(0, 0, 0, 0.6);
+            --success-green: #4ade80;
+            --success-shadow: rgba(74, 222, 128, 0.25);
+            --error-red: #f87171;
+            --error-shadow: rgba(248, 113, 113, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--deep-black);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--dark-surface);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--soft-gray);
+            max-width: 500px;
+            width: 100%;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-gold);
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px var(--accent-shadow);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--soft-gray);
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--soft-gray);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px var(--accent-shadow);
+            background: #3a3a3c;
+        }
+
+        input[type="email"]::placeholder,
+        input[type="password"]::placeholder {
+            color: var(--text-secondary);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background: var(--dark-surface);
+            color: var(--text-primary);
+            padding: 10px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-gold), var(--hover-gold));
+            color: var(--deep-black);
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px var(--accent-shadow);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--hover-gold), #9d7a1a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--accent-shadow);
+        }
+
+        .submit-btn:disabled {
+            background: var(--soft-gray);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Сообщения об ошибках */
+        .error-message {
+            background: linear-gradient(135deg, #4d1a1a, #5a2d2d);
+            color: var(--error-red);
+            border: 1px solid var(--error-red);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 0 15px var(--error-shadow);
+        }
+
+        .field-error {
+            color: var(--error-red);
+            font-size: 13px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .form-group.has-error input,
+        .form-group.has-error select {
+            border-color: var(--error-red);
+            box-shadow: 0 0 0 3px var(--error-shadow);
+        }
+
+        /* Навигационные ссылки */
+        .form-links {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--soft-gray);
+        }
+
+        .form-links p {
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+        }
+
+        .form-links a {
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .form-links a:hover {
+            color: var(--hover-gold);
+            text-shadow: 0 0 8px var(--accent-shadow);
+        }
+
+        /* Индикатор силы пароля */
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--soft-gray);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .password-strength.weak .password-strength-bar {
+            width: 33%;
+            background: var(--error-red);
+        }
+
+        .password-strength.medium .password-strength-bar {
+            width: 66%;
+            background: #f59e0b;
+        }
+
+        .password-strength.strong .password-strength-bar {
+            width: 100%;
+            background: var(--success-green);
+        }
+
+        .password-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        /* Дополнительные hover эффекты */
+        .form-group:hover input,
+        .form-group:hover select {
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            input[type="email"],
+            input[type="password"],
+            select {
+                padding: 12px 14px;
+                font-size: 16px; /* Предотвращает зум на iOS */
+            }
+
+            .submit-btn {
+                padding: 14px;
+            }
+        }
+
+        /* Анимация загрузки */
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+            border: 2px solid var(--soft-gray);
+            border-top: 2px solid var(--primary-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Успешная регистрация */
+        .success-message {
+            background: linear-gradient(135deg, #1a4d3a, #2d5a3d);
+            color: var(--success-green);
+            border: 1px solid var(--success-green);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 0 15px var(--success-shadow);
+        }
+    </style>
 </head>
 <body>
-<h1>Регистрация в группе Клеопатра</h1>
+<div class="container">
+    <h1>Регистрация</h1>
 
-<!-- Сообщения об ошибках -->
-<div th:if="${errorMessage}" style="color: red; border: 1px solid red; padding: 10px; margin: 10px 0;">
-    <strong>Ошибка:</strong> <span th:text="${errorMessage}"></span>
+    <!-- Общие сообщения об ошибках -->
+    <div th:if="${errorMessage}" class="error-message">
+        <strong>Ошибка:</strong> <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Форма регистрации -->
+    <form th:action="@{/register}" th:object="${registerDto}" method="post" id="registerForm">
+
+        <div class="form-group" th:classappend="${#fields.hasErrors('email')} ? 'has-error' : ''">
+            <label for="email">Email:</label>
+            <input type="email"
+                   id="email"
+                   th:field="*{email}"
+                   placeholder="Введите ваш email"
+                   required>
+            <span th:if="${#fields.hasErrors('email')}"
+                  th:errors="*{email}"
+                  class="field-error"></span>
+        </div>
+
+        <div class="form-group" th:classappend="${#fields.hasErrors('password')} ? 'has-error' : ''">
+            <label for="password">Пароль:</label>
+            <input type="password"
+                   id="password"
+                   th:field="*{password}"
+                   placeholder="Создайте надежный пароль"
+                   required>
+            <div class="password-strength" id="passwordStrength">
+                <div class="password-strength-bar"></div>
+            </div>
+            <div class="password-hint">
+                Минимум 8 символов, включая буквы и цифры
+            </div>
+            <span th:if="${#fields.hasErrors('password')}"
+                  th:errors="*{password}"
+                  class="field-error"></span>
+        </div>
+
+        <div class="form-group" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'has-error' : ''">
+            <label for="confirmPassword">Подтвердите пароль:</label>
+            <input type="password"
+                   id="confirmPassword"
+                   th:field="*{confirmPassword}"
+                   placeholder="Повторите пароль"
+                   required>
+            <span th:if="${#fields.hasErrors('confirmPassword')}"
+                  th:errors="*{confirmPassword}"
+                  class="field-error"></span>
+        </div>
+
+        <div class="form-group" th:classappend="${#fields.hasErrors('gender')} ? 'has-error' : ''">
+            <label for="gender">Пол:</label>
+            <select id="gender" th:field="*{gender}" required>
+                <option value="">-- Выберите пол --</option>
+                <option th:each="gender : ${genders}"
+                        th:value="${gender}"
+                        th:text="${gender.displayName}"></option>
+            </select>
+            <span th:if="${#fields.hasErrors('gender')}"
+                  th:errors="*{gender}"
+                  class="field-error"></span>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+            Зарегистрироваться
+        </button>
+
+        <div class="loading" id="loading">
+            Создаем ваш аккаунт
+        </div>
+    </form>
+
+    <!-- Навигационные ссылки -->
+    <div class="form-links">
+        <p>
+            Уже есть аккаунт? <a th:href="@{/login}">Войти</a>
+        </p>
+        <p>
+            <a th:href="@{/}">← На главную</a>
+        </p>
+    </div>
 </div>
 
-<!-- Форма регистрации -->
-<form th:action="@{/register}" th:object="${registerDto}" method="post">
+<script>
+    // Проверка силы пароля
+    function checkPasswordStrength(password) {
+        const strengthIndicator = document.getElementById('passwordStrength');
 
-    <div>
-        <label for="email">Email:</label><br>
-        <input type="email" id="email" th:field="*{email}" required>
-        <div th:if="${#fields.hasErrors('email')}" style="color: red;">
-            <span th:errors="*{email}"></span>
-        </div>
-    </div>
-    <br>
+        if (password.length === 0) {
+            strengthIndicator.className = 'password-strength';
+            return;
+        }
 
-    <div>
-        <label for="password">Пароль:</label><br>
-        <input type="password" id="password" th:field="*{password}" required>
-        <div th:if="${#fields.hasErrors('password')}" style="color: red;">
-            <span th:errors="*{password}"></span>
-        </div>
-    </div>
-    <br>
+        let score = 0;
 
-    <div>
-        <label for="confirmPassword">Подтвердите пароль:</label><br>
-        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" required>
-        <div th:if="${#fields.hasErrors('confirmPassword')}" style="color: red;">
-            <span th:errors="*{confirmPassword}"></span>
-        </div>
-    </div>
-    <br>
+        // Длина
+        if (password.length >= 8) score++;
+        if (password.length >= 12) score++;
 
-    <div>
-        <label for="gender">Пол:</label><br>
-        <select id="gender" th:field="*{gender}" required>
-            <option value="">-- Выберите пол --</option>
-            <option th:each="gender : ${genders}"
-                    th:value="${gender}"
-                    th:text="${gender.displayName}"></option>
-        </select>
-        <div th:if="${#fields.hasErrors('gender')}" style="color: red;">
-            <span th:errors="*{gender}"></span>
-        </div>
-    </div>
-    <br>
+        // Содержит буквы и цифры
+        if (/[a-zA-Z]/.test(password) && /[0-9]/.test(password)) score++;
 
-    <button type="submit">Зарегистрироваться</button>
-</form>
+        // Содержит специальные символы
+        if (/[^a-zA-Z0-9]/.test(password)) score++;
 
-<hr>
-<p>
-    Уже есть аккаунт? <a th:href="@{/login}">Войти</a>
-</p>
+        // Содержит заглавные и строчные буквы
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
 
-<p>
-    <a th:href="@{/}">На главную</a>
-</p>
+        if (score <= 2) {
+            strengthIndicator.className = 'password-strength weak';
+        } else if (score <= 3) {
+            strengthIndicator.className = 'password-strength medium';
+        } else {
+            strengthIndicator.className = 'password-strength strong';
+        }
+    }
+
+    // Валидация подтверждения пароля
+    function validatePasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const confirmGroup = document.getElementById('confirmPassword').closest('.form-group');
+
+        if (confirmPassword && password !== confirmPassword) {
+            confirmGroup.classList.add('has-error');
+
+            // Удаляем старое сообщение об ошибке
+            const oldError = confirmGroup.querySelector('.field-error.js-added');
+            if (oldError) oldError.remove();
+
+            // Добавляем новое сообщение
+            const errorSpan = document.createElement('span');
+            errorSpan.className = 'field-error js-added';
+            errorSpan.textContent = 'Пароли не совпадают';
+            confirmGroup.appendChild(errorSpan);
+        } else {
+            confirmGroup.classList.remove('has-error');
+            const jsError = confirmGroup.querySelector('.field-error.js-added');
+            if (jsError) jsError.remove();
+        }
+    }
+
+    // Обработка отправки формы
+    function handleFormSubmit(e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('Пароли не совпадают!');
+            return false;
+        }
+
+        // Показываем загрузку
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+
+        submitBtn.disabled = true;
+        loading.style.display = 'block';
+
+        return true;
+    }
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const form = document.getElementById('registerForm');
+
+        // Проверка силы пароля
+        passwordInput.addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+            if (confirmPasswordInput.value) {
+                validatePasswordMatch();
+            }
+        });
+
+        // Проверка совпадения паролей
+        confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+
+        // Обработка отправки формы
+        form.addEventListener('submit', handleFormSubmit);
+
+        // Автофокус на первое поле
+        document.getElementById('email').focus();
+
+        console.log('✅ Registration page initialized');
+    });
+</script>
 </body>
 </html>
