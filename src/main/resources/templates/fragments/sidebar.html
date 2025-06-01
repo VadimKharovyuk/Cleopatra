@@ -359,12 +359,14 @@
                 <i class="fas fa-bookmark nav-icon"></i>
                 <span class="nav-text">Закладки</span>
             </a>
-            <a th:href="@{/profile/{userId}(userId=${user?.id ?: ''})}"
+
+            <a th:href="@{/profile/{userId}(userId=${currentUserId ?: 1})}"
                class="nav-item"
                th:classappend="${activeSection == 'profile'} ? 'active' : ''">
                 <i class="fas fa-user nav-icon"></i>
                 <span class="nav-text">Профиль</span>
             </a>
+
         </div>
 
         <div class="nav-section">
