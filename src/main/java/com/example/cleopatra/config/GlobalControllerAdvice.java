@@ -85,6 +85,7 @@ public class GlobalControllerAdvice {
             String requestURI = request.getRequestURI();
             String method = request.getMethod();
 
+
             log.debug("🔍 getCurrentUserId() - URI: {}, Method: {}, UserAgent: {}",
                     requestURI, method, userAgent);
 
@@ -137,5 +138,20 @@ public class GlobalControllerAdvice {
         UserResponse user = getCurrentUser();
         return user != null && user.getRole() != null &&
                 "ADMIN".equals(user.getRole().name());
+    }
+
+    @ModelAttribute("activeSection")
+    public String getActiveSection(HttpServletRequest request) {
+        String path = request.getServletPath();
+
+        if (path.startsWith("/dashboard")) return "dashboard";
+        if (path.startsWith("/profile")) return "profile";
+        if (path.startsWith("/messages")) return "messages";
+        if (path.startsWith("/notifications")) return "notifications";
+        if (path.startsWith("/bookmarks")) return "bookmarks";
+        if (path.startsWith("/settings")) return "settings";
+        if (path.startsWith("/recommendations")) return "recommendations";
+
+        return "dashboard";
     }
 }

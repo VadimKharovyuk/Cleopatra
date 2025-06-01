@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Стили sidebar -->
-  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
 
   <style>
     /* Основные стили страницы */
@@ -450,13 +450,16 @@
       }
     }
   </style>
+  <!-- Sidebar Styles -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
 </head>
 <body>
+
 <!-- Mobile Header -->
 <th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
 
-<!-- Left Sidebar (Fixed position from fragment) -->
-<th:block th:replace="~{fragments/sidebar :: sidebar('home')}"></th:block>
+<!-- Sidebar -->
+<th:block th:replace="~{fragments/sidebar :: sidebar(${activeSection})}"></th:block>
 
 <div class="main-layout">
   <!-- Main Content Area -->

@@ -925,16 +925,20 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Подключаем стили сайдбара -->
-  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link th:href="@{/css/recommendations/list.css}" rel="stylesheet" type="text/css">
+  <!-- Sidebar Styles -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
 </head>
 <body>
 <!-- Mobile Header -->
 <th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
 
-<!-- Left Sidebar (Fixed position from fragment) -->
-<th:block th:replace="~{fragments/sidebar :: sidebar('recommendations')}"></th:block>
+<!-- Sidebar -->
+<th:block th:replace="~{fragments/sidebar :: sidebar(${activeSection})}"></th:block>
+
 
 <!-- Main Content -->
 <main class="main-container">

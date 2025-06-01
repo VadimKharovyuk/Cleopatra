@@ -7,40 +7,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- ПОДКЛЮЧЕНИЕ ФРАГМЕНТА СТИЛЕЙ -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
     <style>
-        :root {
-            /* Luxury Minimalism Color Palette */
-            --bg-primary: #fafafa;
-            --bg-secondary: #ffffff;
-            --bg-accent: #f8f9fa;
-            --surface-elevated: rgba(255, 255, 255, 0.95);
-
-            /* Sophisticated Neutrals */
-            --text-primary: #1a1a1a;
-            --text-secondary: #6b7280;
-            --text-muted: #9ca3af;
-            --text-light: #d1d5db;
-
-            /* Premium Accent Colors */
-            --accent-primary: #2563eb;
-            --accent-secondary: #7c3aed;
-            --accent-success: #059669;
-            --accent-warning: #d97706;
-
-            /* Elegant Borders & Shadows */
-            --border-primary: rgba(0, 0, 0, 0.06);
-            --border-secondary: rgba(0, 0, 0, 0.04);
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-            --shadow-xl: 0 20px 64px rgba(0, 0, 0, 0.16);
-
-            /* Spacing & Sizing */
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-        }
+        /* Переменные уже определены в sidebar-styles, поэтому убираем дублирование */
 
         * {
             box-sizing: border-box;
@@ -90,107 +62,7 @@
             letter-spacing: 0.01em;
         }
 
-        /* Sidebar Navigation */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 280px;
-            background: var(--bg-secondary);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid var(--border-primary);
-            padding: 2rem 1.5rem;
-            z-index: 1000;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .logo {
-            margin-bottom: 3rem;
-            text-align: center;
-        }
-
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0 auto 0.75rem;
-            box-shadow: var(--shadow-md);
-        }
-
-        .logo-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            letter-spacing: -0.01em;
-        }
-
-        .nav-section {
-            margin-bottom: 2rem;
-        }
-
-        .nav-section-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-            padding: 0 1rem;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 0.875rem 1rem;
-            border-radius: var(--radius-md);
-            text-decoration: none;
-            color: var(--text-secondary);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-bottom: 0.25rem;
-            position: relative;
-        }
-
-        .nav-item:hover {
-            background: var(--bg-accent);
-            color: var(--text-primary);
-            transform: translateX(2px);
-        }
-
-        .nav-item.active {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));
-            color: var(--accent-primary);
-            font-weight: 500;
-        }
-
-        .nav-item.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 24px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: 0 2px 2px 0;
-        }
-
-        .nav-icon {
-            width: 20px;
-            margin-right: 0.875rem;
-            font-size: 1.125rem;
-            text-align: center;
-        }
-
-        /* Main Content */
+        /* Main Content - адаптируем под фрагмент sidebar */
         .main-content {
             margin-left: 280px;
             margin-right: 380px;
@@ -285,7 +157,7 @@
             color: var(--text-muted);
         }
 
-        /* Profile Actions - перенесено в профиль инфо */
+        /* Profile Actions */
         .profile-actions {
             display: flex;
             gap: 0.75rem;
@@ -351,7 +223,6 @@
             box-shadow: var(--shadow-md);
         }
 
-        /* Button variants */
         .btn-danger-luxury {
             background: linear-gradient(135deg, #dc2626, #b91c1c);
             color: white;
@@ -635,85 +506,7 @@
             border-left: 4px solid #dc2626;
         }
 
-        /* Mobile Navigation */
-        .mobile-header {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-primary);
-            padding: 0 1rem;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 1001;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .mobile-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .mobile-logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1rem;
-        }
-
-        .mobile-logo-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .hamburger-btn {
-            background: none;
-            border: none;
-            padding: 0.5rem;
-            cursor: pointer;
-            color: var(--text-primary);
-            font-size: 1.25rem;
-            border-radius: var(--radius-sm);
-            transition: background-color 0.2s;
-        }
-
-        .hamburger-btn:hover {
-            background: var(--bg-accent);
-        }
-
-        /* Mobile Sidebar Overlay */
-        .mobile-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1002;
-            backdrop-filter: blur(4px);
-        }
-
-        .mobile-overlay.active {
-            display: block;
-        }
-
-        .sidebar.mobile-open {
-            transform: translateX(0);
-        }
-
-        /* Responsive Design */
+        /* Адаптация под мобильные устройства с учетом фрагмента */
         @media (max-width: 1400px) {
             .right-sidebar {
                 display: none;
@@ -724,40 +517,12 @@
         }
 
         @media (max-width: 1024px) {
-            .sidebar {
-                width: 80px;
-            }
-            .nav-text {
-                display: none;
-            }
             .main-content {
                 margin-left: 80px;
-            }
-            .nav-section-title {
-                display: none;
             }
         }
 
         @media (max-width: 768px) {
-            .mobile-header {
-                display: flex;
-            }
-
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                z-index: 1003;
-                width: 280px;
-            }
-
-            .sidebar .nav-text {
-                display: block;
-            }
-
-            .sidebar .nav-section-title {
-                display: block;
-            }
-
             .main-content {
                 margin-left: 0;
                 margin-top: 60px;
@@ -777,7 +542,6 @@
                 left: 1.5rem;
             }
 
-            /* Убираем позиционирование для мобильных устройств */
             .profile-actions {
                 justify-content: flex-start;
                 gap: 0.5rem;
@@ -808,113 +572,178 @@
                 padding-top: 5rem;
             }
         }
-        .logout-btn {
-            color: #e53e3e !important;
-            border-left: 3px solid transparent;
-            transition: all 0.3s ease;
+
+        /* Стили для рекомендаций (из оригинального кода) */
+        .suggestion-avatar-link {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
         }
 
-        .logout-btn:hover {
-            background-color: rgba(229, 62, 62, 0.1) !important;
-            border-left-color: #e53e3e !important;
-            color: #c53030 !important;
+        .suggestion-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            cursor: pointer;
         }
 
-        .logout-btn .nav-icon {
-            color: #e53e3e;
+        .suggestion-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
         }
 
-        .logout-btn:hover .nav-icon {
-            color: #c53030;
+        .suggestion-name-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .suggestion-name {
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .suggestion-name-link:hover .suggestion-name {
+            color: var(--accent-primary);
+        }
+
+        .suggestion-handle-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .suggestion-handle {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .suggestion-handle-link:hover .suggestion-handle {
+            color: var(--accent-primary);
+        }
+
+        .widget-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-accent);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+
+        .btn-show-all {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.75rem;
+            background: transparent;
+            color: var(--accent-primary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-show-all:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+
+        .no-recommendations {
+            padding: 2rem 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s ease;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background: var(--bg-accent);
+            border-radius: var(--radius-md);
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            transition: border-color 0.2s ease;
+        }
+
+        .suggestion-avatar:hover .avatar-img {
+            border-color: var(--accent-primary);
+        }
+
+        .suggestion-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .suggestion-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0.25rem 0 0 0;
+        }
+
+        .btn-follow {
+            padding: 0.5rem 1rem;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-follow:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
         }
     </style>
 </head>
 <body>
 
-<!-- Mobile Header -->
-<header class="mobile-header">
-    <div class="mobile-logo">
-        <div class="mobile-logo-icon">
-            <i class="fas fa-crown"></i>
-        </div>
-        <div class="mobile-logo-text">Cleopatra</div>
-    </div>
-    <button class="hamburger-btn" onclick="toggleMobileMenu()">
-        <i class="fas fa-bars"></i>
-    </button>
-</header>
+<!-- ПОДКЛЮЧЕНИЕ МОБИЛЬНОГО ХЕДЕРА ИЗ ФРАГМЕНТА -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
 
-<!-- Mobile Overlay -->
-<div class="mobile-overlay" onclick="closeMobileMenu()"></div>
-
-<!-- Left Sidebar Navigation -->
-<nav class="sidebar">
-    <div class="logo">
-        <div class="logo-icon">
-            <i class="fas fa-crown"></i>
-        </div>
-        <div class="logo-text">Cleopatra</div>
-    </div>
-
-    <div class="nav-section">
-        <div class="nav-section-title">Главное</div>
-        <a href="/dashboard" class="nav-item">
-            <i class="fas fa-home nav-icon"></i>
-            <span class="nav-text">Главная</span>
-        </a>
-
-
-        <a href="/recommendations" class="nav-item">
-            <i class="fas fa-search-plus nav-icon"></i>
-            <span class="nav-text">Найти людей</span>
-        </a>
-
-
-        <a href="/notifications" class="nav-item">
-            <i class="fas fa-bell nav-icon"></i>
-            <span class="nav-text">Уведомления</span>
-        </a>
-    </div>
-
-    <div class="nav-section">
-        <div class="nav-section-title">Социальное</div>
-        <a href="/messages" class="nav-item">
-            <i class="fas fa-envelope nav-icon"></i>
-            <span class="nav-text">Сообщения</span>
-        </a>
-        <a href="/bookmarks" class="nav-item">
-            <i class="fas fa-bookmark nav-icon"></i>
-            <span class="nav-text">Закладки</span>
-        </a>
-        <a th:href="@{/profile/{userId}(userId=${currentUserId})}"  class="nav-item active">
-            <i class="fas fa-user nav-icon"></i>
-            <span class="nav-text">Профиль</span>
-        </a>
-
-        <a href="/logout"
-           class="nav-item logout-btn"
-           onclick="return confirm('Вы уверены, что хотите выйти?')">
-            <i class="fas fa-sign-out-alt nav-icon"></i>
-            <span class="nav-text">Выйти</span>
-        </a>
-
-    </div>
-
-    <div class="nav-section">
-        <div class="nav-section-title">Настройки</div>
-        <a href="/settings" class="nav-item">
-            <i class="fas fa-cog nav-icon"></i>
-            <span class="nav-text">Настройки</span>
-        </a>
-
-        <a href="/devices" class="nav-item">
-            <i class="fas fa-microchip nav-icon"></i> <!-- или fa-plug, fa-laptop -->
-            <span class="nav-text">Устройства</span>
-        </a>
-
-    </div>
-
-</nav>
+<!-- ПОДКЛЮЧЕНИЕ SIDEBAR ИЗ ФРАГМЕНТА С УКАЗАНИЕМ АКТИВНОЙ СЕКЦИИ -->
+<th:block th:replace="~{fragments/sidebar :: sidebar('profile')}"></th:block>
 
 <!-- Main Content -->
 <main class="main-content">
@@ -969,20 +798,15 @@
             </h1>
             <p class="profile-username" th:text="'@' + ${user.email.split('@')[0]}"></p>
 
-
-
-
-            <!-- Action Buttons с исправленной логикой видимости -->
+            <!-- Action Buttons -->
             <div class="profile-actions">
-                <!-- Кнопки для ЧУЖОГО профиля (когда currentUserId != user.id) -->
+                <!-- Кнопки для ЧУЖОГО профиля -->
                 <th:block th:if="${currentUserId != null and currentUserId != user.id}">
-                    <!-- Сообщение - показываем только для других пользователей -->
                     <a href="#" class="btn-luxury btn-secondary-luxury" onclick="sendMessage()">
                         <i class="fas fa-envelope"></i>
                         <span>Сообщение</span>
                     </a>
 
-                    <!-- Подписаться - показываем только для других пользователей -->
                     <a href="#" class="btn-luxury btn-primary-luxury" onclick="toggleFollow()">
                         <i class="fas fa-user-plus"></i>
                         <span>Подписаться</span>
@@ -993,43 +817,25 @@
                         <span>Поделиться</span>
                     </button>
 
-
-                    <!-- Заблокировать - показываем только для других пользователей -->
                     <a href="#" class="btn-luxury btn-danger-luxury" onclick="blockUser()">
                         <i class="fas fa-ban"></i>
                         <span>Заблокировать</span>
                     </a>
                 </th:block>
 
-                <!-- Кнопки для СОБСТВЕННОГО профиля (когда currentUserId == user.id) -->
+                <!-- Кнопки для СОБСТВЕННОГО профиля -->
                 <th:block th:if="${currentUserId != null and currentUserId == user.id}">
-                    <!-- Редактировать - показываем только для своего профиля -->
                     <a th:href="@{/profile/{userId}/edit(userId=${user.id})}" class="btn-luxury btn-primary-luxury">
                         <i class="fas fa-edit"></i>
                         <span>Редактировать профиль</span>
                     </a>
 
-
-                    <!-- Статистика профиля - полезно для владельца -->
                     <a th:href="@{/showProfileStats/{userId}/stats(userId=${user.id})}" class="btn-luxury btn-secondary-luxury">
                         <i class="fas fa-chart-bar"></i>
                         <span>Статистика</span>
                     </a>
                 </th:block>
             </div>
-
-            <!-- Подключаем модули в правильном порядке -->
-            <script th:src="@{/js/profile/notifications.js}"></script>
-            <script th:src="@{/js/profile/apiClient.js}"></script>
-            <script th:src="@{/js/profile/userActions.js}"></script>
-            <script th:src="@{/js/profile/profileUtils.js}"></script>
-            <script th:src="@{/js/profile/profileMain.js}"></script>
-
-
-
-
-
-
 
             <!-- Meta Information -->
             <div class="profile-meta">
@@ -1058,22 +864,6 @@
                     <span class="stat-label">Постов</span>
                 </a>
             </div>
-
-<!--            &lt;!&ndash; Stats Section &ndash;&gt;-->
-<!--            <div class="stats-section">-->
-<!--                <a href="#" class="stat-item">-->
-<!--                    <span class="stat-number">0</span>-->
-<!--                    <span class="stat-label">Подписок</span>-->
-<!--                </a>-->
-<!--                <a href="#" class="stat-item">-->
-<!--                    <span class="stat-number">0</span>-->
-<!--                    <span class="stat-label">Подписчиков</span>-->
-<!--                </a>-->
-<!--                <a href="#" class="stat-item">-->
-<!--                    <span class="stat-number">0</span>-->
-<!--                    <span class="stat-label">Постов</span>-->
-<!--                </a>-->
-<!--            </div>-->
 
             <!-- Navigation Tabs -->
             <div class="profile-nav">
@@ -1127,10 +917,6 @@
             </div>
         </div>
     </div>
-
-
-
-
 
     <!-- Recommendations -->
     <div class="widget">
@@ -1202,245 +988,6 @@
         </div>
     </div>
 
-
-    <style>
-        /* Кликабельная аватарка */
-        .suggestion-avatar-link {
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-        }
-
-        .suggestion-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            overflow: hidden;
-            flex-shrink: 0;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .suggestion-avatar:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
-        }
-
-        /* Кликабельное имя */
-        .suggestion-name-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .suggestion-name {
-            margin: 0;
-            font-weight: 600;
-            color: var(--text-primary);
-            transition: color 0.2s ease;
-            cursor: pointer;
-        }
-
-        .suggestion-name-link:hover .suggestion-name {
-            color: var(--accent-primary);
-        }
-
-        /* Кликабельный handle */
-        .suggestion-handle-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .suggestion-handle {
-            margin: 0;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            transition: color 0.2s ease;
-            cursor: pointer;
-        }
-
-        .suggestion-handle-link:hover .suggestion-handle {
-            color: var(--accent-primary);
-        }
-        /* Footer кнопка */
-        .widget-footer {
-            padding: 1rem;
-            border-top: 1px solid var(--border-color);
-            background: var(--bg-accent);
-            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-        }
-
-        .btn-show-all {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            width: 100%;
-            padding: 0.75rem;
-            background: transparent;
-            color: var(--accent-primary);
-            text-decoration: none;
-            border-radius: var(--radius-md);
-            font-weight: 500;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-        }
-
-        .btn-show-all:hover {
-            background: var(--bg-secondary);
-            border-color: var(--accent-primary);
-            transform: translateY(-1px);
-        }
-        /* Пустое состояние */
-        .no-recommendations {
-            padding: 2rem 1rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 1rem;
-        }
-
-        .empty-state p {
-            margin: 0;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-
-        /* Общие стили для suggestion-item */
-        .suggestion-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border-color);
-            transition: background 0.2s ease;
-        }
-
-        .suggestion-item:last-child {
-            border-bottom: none;
-        }
-
-        .suggestion-item:hover {
-            background: var(--bg-accent);
-            border-radius: var(--radius-md);
-        }
-
-        /* Аватарка */
-        .avatar-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border: 2px solid var(--border-color);
-            border-radius: 50%;
-            transition: border-color 0.2s ease;
-        }
-
-        .suggestion-avatar:hover .avatar-img {
-            border-color: var(--accent-primary);
-        }
-
-        /* Информация о пользователе */
-        .suggestion-info {
-            flex: 1;
-            min-width: 0; /* Для правильного сжатия текста */
-        }
-
-        /* Метаинформация */
-        .suggestion-meta {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin: 0.25rem 0 0 0;
-        }
-
-        /* Кнопка подписки */
-        .btn-follow {
-            padding: 0.5rem 1rem;
-            background: var(--accent-primary);
-            color: white;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .btn-follow:hover {
-            background: var(--accent-secondary);
-            transform: translateY(-1px);
-        }
-
-
-        /* Адаптивность */
-        @media (max-width: 768px) {
-            .suggestion-item {
-                padding: 0.75rem;
-                gap: 0.75rem;
-            }
-
-            .suggestion-avatar {
-                width: 40px;
-                height: 40px;
-            }
-
-            .suggestion-name {
-                font-size: 0.9rem;
-            }
-
-            .suggestion-handle {
-                font-size: 0.8rem;
-            }
-
-            .btn-follow {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.75rem;
-            }
-        }
-    </style>
-
-
-
-
-
-
-<!--    &lt;!&ndash; Recommendations &ndash;&gt;-->
-<!--    <div class="widget">-->
-<!--        <div class="widget-header">-->
-<!--            <h3 class="widget-title">Рекомендации</h3>-->
-<!--        </div>-->
-<!--        <div class="widget-content">-->
-<!--            <div class="suggestion-item">-->
-<!--                <div class="suggestion-avatar"></div>-->
-<!--                <div class="suggestion-info">-->
-<!--                    <p class="suggestion-name">Анна Смирнова</p>-->
-<!--                    <p class="suggestion-handle">@anna_design</p>-->
-<!--                </div>-->
-<!--                <button class="btn-follow">Читать</button>-->
-<!--            </div>-->
-<!--            <div class="suggestion-item">-->
-<!--                <div class="suggestion-avatar"></div>-->
-<!--                <div class="suggestion-info">-->
-<!--                    <p class="suggestion-name">Михаил Петров</p>-->
-<!--                    <p class="suggestion-handle">@mikhail_dev</p>-->
-<!--                </div>-->
-<!--                <button class="btn-follow">Читать</button>-->
-<!--            </div>-->
-<!--            <div class="suggestion-item">-->
-<!--                <div class="suggestion-avatar"></div>-->
-<!--                <div class="suggestion-info">-->
-<!--                    <p class="suggestion-name">Елена Волкова</p>-->
-<!--                    <p class="suggestion-handle">@elena_art</p>-->
-<!--                </div>-->
-<!--                <button class="btn-follow">Читать</button>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
     <!-- Quick Stats -->
     <div class="widget">
         <div class="widget-header">
@@ -1464,59 +1011,12 @@
 </aside>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ ИЗ ФРАГМЕНТА -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
 <script>
-    // Mobile menu functionality
-    function toggleMobileMenu() {
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.querySelector('.mobile-overlay');
-        const hamburgerBtn = document.querySelector('.hamburger-btn');
-
-        sidebar.classList.toggle('mobile-open');
-        overlay.classList.toggle('active');
-
-        // Change hamburger icon
-        const icon = hamburgerBtn.querySelector('i');
-        if (sidebar.classList.contains('mobile-open')) {
-            icon.className = 'fas fa-times';
-        } else {
-            icon.className = 'fas fa-bars';
-        }
-
-        // Prevent body scroll when menu is open
-        if (sidebar.classList.contains('mobile-open')) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-    }
-
-    function closeMobileMenu() {
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.querySelector('.mobile-overlay');
-        const hamburgerBtn = document.querySelector('.hamburger-btn');
-
-        sidebar.classList.remove('mobile-open');
-        overlay.classList.remove('active');
-
-        // Reset hamburger icon
-        const icon = hamburgerBtn.querySelector('i');
-        icon.className = 'fas fa-bars';
-
-        // Restore body scroll
-        document.body.style.overflow = '';
-    }
-
-    // Close mobile menu when clicking on nav links
-    document.querySelectorAll('.nav-item').forEach(link => {
-        link.addEventListener('click', closeMobileMenu);
-    });
-
-    // Handle window resize
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            closeMobileMenu();
-        }
-    });
+    // Дополнительные скрипты для страницы профиля
 
     // Smooth hover animations
     document.querySelectorAll('.btn-luxury').forEach(btn => {
@@ -1537,8 +1037,7 @@
             // Add active class to clicked tab
             this.classList.add('active');
 
-            // Here you would typically load different content
-            // For now, we'll just update the empty state message
+            // Update content based on selected tab
             const emptyTitle = document.querySelector('.empty-title');
             const emptyDescription = document.querySelector('.empty-description');
 
@@ -1626,6 +1125,1655 @@
             addLoadingState(this);
         });
     });
+
+    // Profile action functions (заглушки для демонстрации)
+    function sendMessage() {
+        console.log('Отправка сообщения...');
+        // Здесь будет логика отправки сообщения
+    }
+
+    function toggleFollow() {
+        console.log('Переключение подписки...');
+        // Здесь будет логика подписки/отписки
+    }
+
+    function shareProfile() {
+        console.log('Поделиться профилем...');
+        // Здесь будет логика sharing
+    }
+
+    function blockUser() {
+        console.log('Блокировка пользователя...');
+        // Здесь будет логика блокировки
+    }
 </script>
+
+<!-- Подключаем ваши собственные модули в правильном порядке -->
+<script th:src="@{/js/profile/notifications.js}"></script>
+<script th:src="@{/js/profile/apiClient.js}"></script>
+<script th:src="@{/js/profile/userActions.js}"></script>
+<script th:src="@{/js/profile/profileUtils.js}"></script>
+<script th:src="@{/js/profile/profileMain.js}"></script>
+
 </body>
 </html>
+
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Профиль пользователя - Cleopatra</title>-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+<!--    <style>-->
+<!--        :root {-->
+<!--            /* Luxury Minimalism Color Palette */-->
+<!--            &#45;&#45;bg-primary: #fafafa;-->
+<!--            &#45;&#45;bg-secondary: #ffffff;-->
+<!--            &#45;&#45;bg-accent: #f8f9fa;-->
+<!--            &#45;&#45;surface-elevated: rgba(255, 255, 255, 0.95);-->
+
+<!--            /* Sophisticated Neutrals */-->
+<!--            &#45;&#45;text-primary: #1a1a1a;-->
+<!--            &#45;&#45;text-secondary: #6b7280;-->
+<!--            &#45;&#45;text-muted: #9ca3af;-->
+<!--            &#45;&#45;text-light: #d1d5db;-->
+
+<!--            /* Premium Accent Colors */-->
+<!--            &#45;&#45;accent-primary: #2563eb;-->
+<!--            &#45;&#45;accent-secondary: #7c3aed;-->
+<!--            &#45;&#45;accent-success: #059669;-->
+<!--            &#45;&#45;accent-warning: #d97706;-->
+
+<!--            /* Elegant Borders & Shadows */-->
+<!--            &#45;&#45;border-primary: rgba(0, 0, 0, 0.06);-->
+<!--            &#45;&#45;border-secondary: rgba(0, 0, 0, 0.04);-->
+<!--            &#45;&#45;shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);-->
+<!--            &#45;&#45;shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);-->
+<!--            &#45;&#45;shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);-->
+<!--            &#45;&#45;shadow-xl: 0 20px 64px rgba(0, 0, 0, 0.16);-->
+
+<!--            /* Spacing & Sizing */-->
+<!--            &#45;&#45;radius-sm: 8px;-->
+<!--            &#45;&#45;radius-md: 12px;-->
+<!--            &#45;&#45;radius-lg: 16px;-->
+<!--            &#45;&#45;radius-xl: 24px;-->
+<!--        }-->
+
+<!--        * {-->
+<!--            box-sizing: border-box;-->
+<!--        }-->
+
+<!--        body {-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;bg-primary) 0%, var(&#45;&#45;bg-accent) 100%);-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;-->
+<!--            font-weight: 400;-->
+<!--            line-height: 1.6;-->
+<!--            min-height: 100vh;-->
+<!--        }-->
+
+<!--        /* Typography Hierarchy */-->
+<!--        .serif-heading {-->
+<!--            font-family: 'Playfair Display', serif;-->
+<!--            font-weight: 600;-->
+<!--            letter-spacing: -0.02em;-->
+<!--        }-->
+
+<!--        .sans-serif-body {-->
+<!--            font-family: 'Inter', sans-serif;-->
+<!--            font-weight: 400;-->
+<!--        }-->
+
+<!--        .text-display {-->
+<!--            font-size: 2.5rem;-->
+<!--            font-weight: 700;-->
+<!--            letter-spacing: -0.03em;-->
+<!--        }-->
+
+<!--        .text-title {-->
+<!--            font-size: 1.75rem;-->
+<!--            font-weight: 600;-->
+<!--            letter-spacing: -0.02em;-->
+<!--        }-->
+
+<!--        .text-subtitle {-->
+<!--            font-size: 1.125rem;-->
+<!--            font-weight: 500;-->
+<!--        }-->
+
+<!--        .text-caption {-->
+<!--            font-size: 0.875rem;-->
+<!--            font-weight: 500;-->
+<!--            letter-spacing: 0.01em;-->
+<!--        }-->
+
+<!--        /* Sidebar Navigation */-->
+<!--        .sidebar {-->
+<!--            position: fixed;-->
+<!--            top: 0;-->
+<!--            left: 0;-->
+<!--            height: 100vh;-->
+<!--            width: 280px;-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            backdrop-filter: blur(20px);-->
+<!--            border-right: 1px solid var(&#45;&#45;border-primary);-->
+<!--            padding: 2rem 1.5rem;-->
+<!--            z-index: 1000;-->
+<!--            box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--        }-->
+
+<!--        .logo {-->
+<!--            margin-bottom: 3rem;-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        .logo-icon {-->
+<!--            width: 48px;-->
+<!--            height: 48px;-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            color: white;-->
+<!--            font-size: 1.5rem;-->
+<!--            font-weight: 700;-->
+<!--            margin: 0 auto 0.75rem;-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--        }-->
+
+<!--        .logo-text {-->
+<!--            font-family: 'Playfair Display', serif;-->
+<!--            font-size: 1.25rem;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            letter-spacing: -0.01em;-->
+<!--        }-->
+
+<!--        .nav-section {-->
+<!--            margin-bottom: 2rem;-->
+<!--        }-->
+
+<!--        .nav-section-title {-->
+<!--            font-size: 0.75rem;-->
+<!--            font-weight: 600;-->
+<!--            text-transform: uppercase;-->
+<!--            letter-spacing: 0.05em;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            margin-bottom: 1rem;-->
+<!--            padding: 0 1rem;-->
+<!--        }-->
+
+<!--        .nav-item {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            padding: 0.875rem 1rem;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            text-decoration: none;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--            margin-bottom: 0.25rem;-->
+<!--            position: relative;-->
+<!--        }-->
+
+<!--        .nav-item:hover {-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            transform: translateX(2px);-->
+<!--        }-->
+
+<!--        .nav-item.active {-->
+<!--            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));-->
+<!--            color: var(&#45;&#45;accent-primary);-->
+<!--            font-weight: 500;-->
+<!--        }-->
+
+<!--        .nav-item.active::before {-->
+<!--            content: '';-->
+<!--            position: absolute;-->
+<!--            left: 0;-->
+<!--            top: 50%;-->
+<!--            transform: translateY(-50%);-->
+<!--            width: 3px;-->
+<!--            height: 24px;-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--            border-radius: 0 2px 2px 0;-->
+<!--        }-->
+
+<!--        .nav-icon {-->
+<!--            width: 20px;-->
+<!--            margin-right: 0.875rem;-->
+<!--            font-size: 1.125rem;-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        /* Main Content */-->
+<!--        .main-content {-->
+<!--            margin-left: 280px;-->
+<!--            margin-right: 380px;-->
+<!--            min-height: 100vh;-->
+<!--            padding: 2rem 0;-->
+<!--        }-->
+
+<!--        /* Right Sidebar */-->
+<!--        .right-sidebar {-->
+<!--            position: fixed;-->
+<!--            top: 0;-->
+<!--            right: 0;-->
+<!--            height: 100vh;-->
+<!--            width: 380px;-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            border-left: 1px solid var(&#45;&#45;border-primary);-->
+<!--            padding: 2rem 1.5rem;-->
+<!--            overflow-y: auto;-->
+<!--            box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--        }-->
+
+<!--        /* Profile Container */-->
+<!--        .profile-container {-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            border-radius: var(&#45;&#45;radius-xl);-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            overflow: hidden;-->
+<!--            margin: 0 2rem;-->
+<!--        }-->
+
+<!--        /* Cover Section */-->
+<!--        .cover-section {-->
+<!--            height: 280px;-->
+<!--            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);-->
+<!--            position: relative;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        .cover-image {-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            object-fit: cover;-->
+<!--        }-->
+
+<!--        .cover-overlay {-->
+<!--            position: absolute;-->
+<!--            top: 0;-->
+<!--            left: 0;-->
+<!--            right: 0;-->
+<!--            bottom: 0;-->
+<!--            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 100%);-->
+<!--        }-->
+
+<!--        /* Profile Header */-->
+<!--        .profile-header {-->
+<!--            position: relative;-->
+<!--            padding: 0 2.5rem;-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--        }-->
+
+<!--        .profile-avatar-container {-->
+<!--            position: absolute;-->
+<!--            top: -80px;-->
+<!--            left: 2.5rem;-->
+<!--            z-index: 10;-->
+<!--        }-->
+
+<!--        .profile-avatar {-->
+<!--            width: 160px;-->
+<!--            height: 160px;-->
+<!--            border: 6px solid var(&#45;&#45;bg-secondary);-->
+<!--            border-radius: 50%;-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--            box-shadow: var(&#45;&#45;shadow-xl);-->
+<!--            overflow: hidden;-->
+<!--            position: relative;-->
+<!--        }-->
+
+<!--        .avatar-image {-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            object-fit: cover;-->
+<!--        }-->
+
+<!--        .default-avatar {-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;bg-accent), #f1f5f9);-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--        }-->
+
+<!--        /* Profile Actions - перенесено в профиль инфо */-->
+<!--        .profile-actions {-->
+<!--            display: flex;-->
+<!--            gap: 0.75rem;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--            flex-wrap: wrap;-->
+<!--        }-->
+
+<!--        .btn-luxury {-->
+<!--            padding: 0.75rem 1.5rem;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            font-weight: 500;-->
+<!--            font-size: 0.875rem;-->
+<!--            letter-spacing: 0.01em;-->
+<!--            text-decoration: none;-->
+<!--            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--            border: 1px solid var(&#45;&#45;border-primary);-->
+<!--            display: inline-flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--            backdrop-filter: blur(20px);-->
+<!--            position: relative;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        .btn-luxury::before {-->
+<!--            content: '';-->
+<!--            position: absolute;-->
+<!--            top: 0;-->
+<!--            left: -100%;-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);-->
+<!--            transition: left 0.5s;-->
+<!--        }-->
+
+<!--        .btn-luxury:hover::before {-->
+<!--            left: 100%;-->
+<!--        }-->
+
+<!--        .btn-primary-luxury {-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--            color: white;-->
+<!--            border-color: transparent;-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--        }-->
+
+<!--        .btn-primary-luxury:hover {-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .btn-secondary-luxury {-->
+<!--            background: var(&#45;&#45;surface-elevated);-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            border-color: var(&#45;&#45;border-secondary);-->
+<!--        }-->
+
+<!--        .btn-secondary-luxury:hover {-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            transform: translateY(-1px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--        }-->
+
+<!--        /* Button variants */-->
+<!--        .btn-danger-luxury {-->
+<!--            background: linear-gradient(135deg, #dc2626, #b91c1c);-->
+<!--            color: white;-->
+<!--            border-color: transparent;-->
+<!--        }-->
+
+<!--        .btn-danger-luxury:hover {-->
+<!--            background: linear-gradient(135deg, #b91c1c, #991b1b);-->
+<!--            color: white;-->
+<!--            transform: translateY(-1px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--        }-->
+
+<!--        /* Profile Info */-->
+<!--        .profile-info {-->
+<!--            padding: 6rem 2.5rem 2.5rem;-->
+<!--        }-->
+
+<!--        .profile-name {-->
+<!--            font-family: 'Playfair Display', serif;-->
+<!--            font-size: 2.25rem;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            margin-bottom: 0.5rem;-->
+<!--            letter-spacing: -0.02em;-->
+<!--        }-->
+
+<!--        .profile-username {-->
+<!--            font-size: 1.125rem;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            margin-bottom: 1.5rem;-->
+<!--            font-weight: 400;-->
+<!--        }-->
+
+<!--        .profile-meta {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 1.5rem;-->
+<!--            margin-bottom: 2rem;-->
+<!--            flex-wrap: wrap;-->
+<!--        }-->
+
+<!--        .meta-item {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            font-size: 0.875rem;-->
+<!--        }-->
+
+<!--        .meta-icon {-->
+<!--            width: 16px;-->
+<!--            height: 16px;-->
+<!--            opacity: 0.7;-->
+<!--        }-->
+
+<!--        /* Stats Section */-->
+<!--        .stats-section {-->
+<!--            display: flex;-->
+<!--            gap: 2rem;-->
+<!--            margin-bottom: 2rem;-->
+<!--            padding: 1.5rem 0;-->
+<!--            border-top: 1px solid var(&#45;&#45;border-secondary);-->
+<!--            border-bottom: 1px solid var(&#45;&#45;border-secondary);-->
+<!--        }-->
+
+<!--        .stat-item {-->
+<!--            text-decoration: none;-->
+<!--            color: inherit;-->
+<!--            transition: all 0.2s;-->
+<!--        }-->
+
+<!--        .stat-item:hover {-->
+<!--            color: var(&#45;&#45;accent-primary);-->
+<!--            transform: translateY(-1px);-->
+<!--        }-->
+
+<!--        .stat-number {-->
+<!--            display: block;-->
+<!--            font-size: 1.5rem;-->
+<!--            font-weight: 700;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            line-height: 1.2;-->
+<!--        }-->
+
+<!--        .stat-label {-->
+<!--            font-size: 0.875rem;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            font-weight: 400;-->
+<!--        }-->
+
+<!--        /* Navigation Tabs */-->
+<!--        .profile-nav {-->
+<!--            margin-bottom: 0;-->
+<!--        }-->
+
+<!--        .nav-tabs-luxury {-->
+<!--            border: none;-->
+<!--            gap: 0.5rem;-->
+<!--        }-->
+
+<!--        .nav-tab-luxury {-->
+<!--            padding: 1rem 1.5rem;-->
+<!--            border: none;-->
+<!--            background: transparent;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            font-weight: 500;-->
+<!--            font-size: 0.875rem;-->
+<!--            letter-spacing: 0.01em;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            transition: all 0.2s;-->
+<!--            position: relative;-->
+<!--        }-->
+
+<!--        .nav-tab-luxury:hover {-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--        }-->
+
+<!--        .nav-tab-luxury.active {-->
+<!--            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));-->
+<!--            color: var(&#45;&#45;accent-primary);-->
+<!--        }-->
+
+<!--        .nav-tab-luxury.active::after {-->
+<!--            content: '';-->
+<!--            position: absolute;-->
+<!--            bottom: 0;-->
+<!--            left: 50%;-->
+<!--            transform: translateX(-50%);-->
+<!--            width: 24px;-->
+<!--            height: 2px;-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--            border-radius: 1px;-->
+<!--        }-->
+
+<!--        /* Content Area */-->
+<!--        .content-area {-->
+<!--            padding: 2.5rem;-->
+<!--            min-height: 400px;-->
+<!--        }-->
+
+<!--        .empty-state {-->
+<!--            text-align: center;-->
+<!--            padding: 4rem 2rem;-->
+<!--        }-->
+
+<!--        .empty-icon {-->
+<!--            width: 80px;-->
+<!--            height: 80px;-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;bg-accent), #f1f5f9);-->
+<!--            border-radius: 50%;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            margin: 0 auto 1.5rem;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            font-size: 2rem;-->
+<!--        }-->
+
+<!--        .empty-title {-->
+<!--            font-family: 'Playfair Display', serif;-->
+<!--            font-size: 1.5rem;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            margin-bottom: 0.75rem;-->
+<!--        }-->
+
+<!--        .empty-description {-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            font-size: 1rem;-->
+<!--        }-->
+
+<!--        /* Right Sidebar Widgets */-->
+<!--        .widget {-->
+<!--            background: var(&#45;&#45;surface-elevated);-->
+<!--            border-radius: var(&#45;&#45;radius-lg);-->
+<!--            margin-bottom: 1.5rem;-->
+<!--            overflow: hidden;-->
+<!--            box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--            border: 1px solid var(&#45;&#45;border-secondary);-->
+<!--        }-->
+
+<!--        .widget-header {-->
+<!--            padding: 1.5rem 1.5rem 1rem;-->
+<!--            border-bottom: 1px solid var(&#45;&#45;border-secondary);-->
+<!--        }-->
+
+<!--        .widget-title {-->
+<!--            font-family: 'Playfair Display', serif;-->
+<!--            font-size: 1.25rem;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            margin: 0;-->
+<!--        }-->
+
+<!--        .widget-content {-->
+<!--            padding: 1rem 1.5rem 1.5rem;-->
+<!--        }-->
+
+<!--        .suggestion-item {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            padding: 1rem 0;-->
+<!--            border-bottom: 1px solid var(&#45;&#45;border-secondary);-->
+<!--            transition: all 0.2s;-->
+<!--        }-->
+
+<!--        .suggestion-item:last-child {-->
+<!--            border-bottom: none;-->
+<!--        }-->
+
+<!--        .suggestion-item:hover {-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--            margin: 0 -1.5rem;-->
+<!--            padding-left: 1.5rem;-->
+<!--            padding-right: 1.5rem;-->
+<!--            border-radius: var(&#45;&#45;radius-sm);-->
+<!--        }-->
+
+<!--        .suggestion-avatar {-->
+<!--            width: 48px;-->
+<!--            height: 48px;-->
+<!--            border-radius: 50%;-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;bg-accent), #f1f5f9);-->
+<!--            margin-right: 1rem;-->
+<!--            box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--        }-->
+
+<!--        .suggestion-info {-->
+<!--            flex: 1;-->
+<!--        }-->
+
+<!--        .suggestion-name {-->
+<!--            font-weight: 600;-->
+<!--            font-size: 0.875rem;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            margin: 0 0 0.25rem;-->
+<!--        }-->
+
+<!--        .suggestion-handle {-->
+<!--            font-size: 0.75rem;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            margin: 0;-->
+<!--        }-->
+
+<!--        .btn-follow {-->
+<!--            background: var(&#45;&#45;accent-primary);-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            padding: 0.5rem 1rem;-->
+<!--            border-radius: var(&#45;&#45;radius-sm);-->
+<!--            font-weight: 500;-->
+<!--            font-size: 0.75rem;-->
+<!--            transition: all 0.2s;-->
+<!--        }-->
+
+<!--        .btn-follow:hover {-->
+<!--            background: var(&#45;&#45;accent-secondary);-->
+<!--            transform: translateY(-1px);-->
+<!--        }-->
+
+<!--        /* Alerts */-->
+<!--        .alert-luxury {-->
+<!--            border: none;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            margin: 2rem;-->
+<!--            padding: 1rem 1.5rem;-->
+<!--            box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--        }-->
+
+<!--        .alert-success-luxury {-->
+<!--            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.1));-->
+<!--            color: var(&#45;&#45;accent-success);-->
+<!--            border-left: 4px solid var(&#45;&#45;accent-success);-->
+<!--        }-->
+
+<!--        .alert-danger-luxury {-->
+<!--            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(248, 113, 113, 0.1));-->
+<!--            color: #dc2626;-->
+<!--            border-left: 4px solid #dc2626;-->
+<!--        }-->
+
+<!--        /* Mobile Navigation */-->
+<!--        .mobile-header {-->
+<!--            display: none;-->
+<!--            position: fixed;-->
+<!--            top: 0;-->
+<!--            left: 0;-->
+<!--            right: 0;-->
+<!--            height: 60px;-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            border-bottom: 1px solid var(&#45;&#45;border-primary);-->
+<!--            padding: 0 1rem;-->
+<!--            align-items: center;-->
+<!--            justify-content: space-between;-->
+<!--            z-index: 1001;-->
+<!--            box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--        }-->
+
+<!--        .mobile-logo {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--        }-->
+
+<!--        .mobile-logo-icon {-->
+<!--            width: 32px;-->
+<!--            height: 32px;-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--            border-radius: var(&#45;&#45;radius-sm);-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            color: white;-->
+<!--            font-size: 1rem;-->
+<!--        }-->
+
+<!--        .mobile-logo-text {-->
+<!--            font-family: 'Playfair Display', serif;-->
+<!--            font-size: 1.125rem;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--        }-->
+
+<!--        .hamburger-btn {-->
+<!--            background: none;-->
+<!--            border: none;-->
+<!--            padding: 0.5rem;-->
+<!--            cursor: pointer;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            font-size: 1.25rem;-->
+<!--            border-radius: var(&#45;&#45;radius-sm);-->
+<!--            transition: background-color 0.2s;-->
+<!--        }-->
+
+<!--        .hamburger-btn:hover {-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--        }-->
+
+<!--        /* Mobile Sidebar Overlay */-->
+<!--        .mobile-overlay {-->
+<!--            display: none;-->
+<!--            position: fixed;-->
+<!--            top: 0;-->
+<!--            left: 0;-->
+<!--            right: 0;-->
+<!--            bottom: 0;-->
+<!--            background: rgba(0, 0, 0, 0.5);-->
+<!--            z-index: 1002;-->
+<!--            backdrop-filter: blur(4px);-->
+<!--        }-->
+
+<!--        .mobile-overlay.active {-->
+<!--            display: block;-->
+<!--        }-->
+
+<!--        .sidebar.mobile-open {-->
+<!--            transform: translateX(0);-->
+<!--        }-->
+
+<!--        /* Responsive Design */-->
+<!--        @media (max-width: 1400px) {-->
+<!--            .right-sidebar {-->
+<!--                display: none;-->
+<!--            }-->
+<!--            .main-content {-->
+<!--                margin-right: 0;-->
+<!--            }-->
+<!--        }-->
+
+<!--        @media (max-width: 1024px) {-->
+<!--            .sidebar {-->
+<!--                width: 80px;-->
+<!--            }-->
+<!--            .nav-text {-->
+<!--                display: none;-->
+<!--            }-->
+<!--            .main-content {-->
+<!--                margin-left: 80px;-->
+<!--            }-->
+<!--            .nav-section-title {-->
+<!--                display: none;-->
+<!--            }-->
+<!--        }-->
+
+<!--        @media (max-width: 768px) {-->
+<!--            .mobile-header {-->
+<!--                display: flex;-->
+<!--            }-->
+
+<!--            .sidebar {-->
+<!--                transform: translateX(-100%);-->
+<!--                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--                z-index: 1003;-->
+<!--                width: 280px;-->
+<!--            }-->
+
+<!--            .sidebar .nav-text {-->
+<!--                display: block;-->
+<!--            }-->
+
+<!--            .sidebar .nav-section-title {-->
+<!--                display: block;-->
+<!--            }-->
+
+<!--            .main-content {-->
+<!--                margin-left: 0;-->
+<!--                margin-top: 60px;-->
+<!--                padding: 1rem 0;-->
+<!--            }-->
+
+<!--            .profile-container {-->
+<!--                margin: 0 1rem;-->
+<!--            }-->
+
+<!--            .profile-header, .profile-info, .content-area {-->
+<!--                padding-left: 1.5rem;-->
+<!--                padding-right: 1.5rem;-->
+<!--            }-->
+
+<!--            .profile-avatar-container {-->
+<!--                left: 1.5rem;-->
+<!--            }-->
+
+<!--            /* Убираем позиционирование для мобильных устройств */-->
+<!--            .profile-actions {-->
+<!--                justify-content: flex-start;-->
+<!--                gap: 0.5rem;-->
+<!--            }-->
+
+<!--            .btn-luxury {-->
+<!--                padding: 0.625rem 1rem;-->
+<!--                font-size: 0.8125rem;-->
+<!--                flex: 1;-->
+<!--                min-width: 100px;-->
+<!--                text-align: center;-->
+<!--                justify-content: center;-->
+<!--            }-->
+<!--        }-->
+
+<!--        @media (max-width: 480px) {-->
+<!--            .profile-actions {-->
+<!--                flex-direction: column;-->
+<!--                gap: 0.75rem;-->
+<!--            }-->
+
+<!--            .btn-luxury {-->
+<!--                width: 100%;-->
+<!--                flex: none;-->
+<!--            }-->
+
+<!--            .profile-info {-->
+<!--                padding-top: 5rem;-->
+<!--            }-->
+<!--        }-->
+
+<!--        .logout-btn:hover .nav-icon {-->
+<!--            color: #c53030;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--&lt;!&ndash; Mobile Header &ndash;&gt;-->
+<!--<header class="mobile-header">-->
+<!--    <div class="mobile-logo">-->
+<!--        <div class="mobile-logo-icon">-->
+<!--            <i class="fas fa-crown"></i>-->
+<!--        </div>-->
+<!--        <div class="mobile-logo-text">Cleopatra</div>-->
+<!--    </div>-->
+<!--    <button class="hamburger-btn" onclick="toggleMobileMenu()">-->
+<!--        <i class="fas fa-bars"></i>-->
+<!--    </button>-->
+<!--</header>-->
+
+<!--&lt;!&ndash; Mobile Overlay &ndash;&gt;-->
+<!--<div class="mobile-overlay" onclick="closeMobileMenu()"></div>-->
+
+<!--&lt;!&ndash; Left Sidebar Navigation &ndash;&gt;-->
+<!--<nav class="sidebar">-->
+<!--    <div class="logo">-->
+<!--        <div class="logo-icon">-->
+<!--            <i class="fas fa-crown"></i>-->
+<!--        </div>-->
+<!--        <div class="logo-text">Cleopatra</div>-->
+<!--    </div>-->
+
+<!--    <div class="nav-section">-->
+<!--        <div class="nav-section-title">Главное</div>-->
+<!--        <a href="/dashboard" class="nav-item">-->
+<!--            <i class="fas fa-home nav-icon"></i>-->
+<!--            <span class="nav-text">Главная</span>-->
+<!--        </a>-->
+
+
+<!--        <a href="/recommendations" class="nav-item">-->
+<!--            <i class="fas fa-search-plus nav-icon"></i>-->
+<!--            <span class="nav-text">Найти людей</span>-->
+<!--        </a>-->
+
+
+<!--        <a href="/notifications" class="nav-item">-->
+<!--            <i class="fas fa-bell nav-icon"></i>-->
+<!--            <span class="nav-text">Уведомления</span>-->
+<!--        </a>-->
+<!--    </div>-->
+
+<!--    <div class="nav-section">-->
+<!--        <div class="nav-section-title">Социальное</div>-->
+<!--        <a href="/messages" class="nav-item">-->
+<!--            <i class="fas fa-envelope nav-icon"></i>-->
+<!--            <span class="nav-text">Сообщения</span>-->
+<!--        </a>-->
+<!--        <a href="/bookmarks" class="nav-item">-->
+<!--            <i class="fas fa-bookmark nav-icon"></i>-->
+<!--            <span class="nav-text">Закладки</span>-->
+<!--        </a>-->
+<!--        <a th:href="@{/profile/{userId}(userId=${currentUserId})}"  class="nav-item active">-->
+<!--            <i class="fas fa-user nav-icon"></i>-->
+<!--            <span class="nav-text">Профиль</span>-->
+<!--        </a>-->
+
+<!--        <a href="/logout"-->
+<!--           class="nav-item logout-btn"-->
+<!--           onclick="return confirm('Вы уверены, что хотите выйти?')">-->
+<!--            <i class="fas fa-sign-out-alt nav-icon"></i>-->
+<!--            <span class="nav-text">Выйти</span>-->
+<!--        </a>-->
+
+<!--    </div>-->
+
+<!--    <div class="nav-section">-->
+<!--        <div class="nav-section-title">Настройки</div>-->
+<!--        <a href="/settings" class="nav-item">-->
+<!--            <i class="fas fa-cog nav-icon"></i>-->
+<!--            <span class="nav-text">Настройки</span>-->
+<!--        </a>-->
+
+<!--        <a href="/devices" class="nav-item">-->
+<!--            <i class="fas fa-microchip nav-icon"></i> &lt;!&ndash; или fa-plug, fa-laptop &ndash;&gt;-->
+<!--            <span class="nav-text">Устройства</span>-->
+<!--        </a>-->
+
+<!--    </div>-->
+
+<!--</nav>-->
+
+<!--&lt;!&ndash; Main Content &ndash;&gt;-->
+<!--<main class="main-content">-->
+<!--    &lt;!&ndash; Success/Error Messages &ndash;&gt;-->
+<!--    <div th:if="${successMessage}" class="alert-luxury alert-success-luxury">-->
+<!--        <i class="fas fa-check-circle me-2"></i>-->
+<!--        <span th:text="${successMessage}"></span>-->
+<!--    </div>-->
+
+<!--    <div th:if="${errorMessage}" class="alert-luxury alert-danger-luxury">-->
+<!--        <i class="fas fa-exclamation-circle me-2"></i>-->
+<!--        <span th:text="${errorMessage}"></span>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Profile Container &ndash;&gt;-->
+<!--    <div class="profile-container">-->
+<!--        &lt;!&ndash; Cover Section &ndash;&gt;-->
+<!--        <div class="cover-section">-->
+<!--            <img th:if="${user.imgBackground}"-->
+<!--                 th:src="${user.imgBackground}"-->
+<!--                 alt="Cover"-->
+<!--                 class="cover-image">-->
+<!--            <div class="cover-overlay"></div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Profile Header &ndash;&gt;-->
+<!--        <div class="profile-header">-->
+<!--            &lt;!&ndash; Avatar &ndash;&gt;-->
+<!--            <div class="profile-avatar-container">-->
+<!--                <div class="profile-avatar">-->
+<!--                    <img th:if="${user.imageUrl}"-->
+<!--                         th:src="${user.imageUrl}"-->
+<!--                         alt="Аватар"-->
+<!--                         class="avatar-image">-->
+<!--                    <div th:unless="${user.imageUrl}" class="default-avatar">-->
+<!--                        <i class="fas fa-user fa-3x"></i>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Profile Info &ndash;&gt;-->
+<!--        <div class="profile-info">-->
+<!--            <h1 class="profile-name">-->
+<!--                <th:block th:if="${!#strings.isEmpty(user.firstName) || !#strings.isEmpty(user.lastName)}">-->
+<!--                    <span th:text="${user.firstName ?: ''}"></span>-->
+<!--                    <span th:text="${user.lastName ?: ''}"></span>-->
+<!--                </th:block>-->
+<!--                <th:block th:unless="${!#strings.isEmpty(user.firstName) || !#strings.isEmpty(user.lastName)}">-->
+<!--                    Добро пожаловать-->
+<!--                </th:block>-->
+<!--            </h1>-->
+<!--            <p class="profile-username" th:text="'@' + ${user.email.split('@')[0]}"></p>-->
+
+
+
+
+<!--            &lt;!&ndash; Action Buttons с исправленной логикой видимости &ndash;&gt;-->
+<!--            <div class="profile-actions">-->
+<!--                &lt;!&ndash; Кнопки для ЧУЖОГО профиля (когда currentUserId != user.id) &ndash;&gt;-->
+<!--                <th:block th:if="${currentUserId != null and currentUserId != user.id}">-->
+<!--                    &lt;!&ndash; Сообщение - показываем только для других пользователей &ndash;&gt;-->
+<!--                    <a href="#" class="btn-luxury btn-secondary-luxury" onclick="sendMessage()">-->
+<!--                        <i class="fas fa-envelope"></i>-->
+<!--                        <span>Сообщение</span>-->
+<!--                    </a>-->
+
+<!--                    &lt;!&ndash; Подписаться - показываем только для других пользователей &ndash;&gt;-->
+<!--                    <a href="#" class="btn-luxury btn-primary-luxury" onclick="toggleFollow()">-->
+<!--                        <i class="fas fa-user-plus"></i>-->
+<!--                        <span>Подписаться</span>-->
+<!--                    </a>-->
+
+<!--                    <button type="button" onclick="shareProfile()" class="btn btn-outline-luxury">-->
+<!--                        <i class="fas fa-share"></i>-->
+<!--                        <span>Поделиться</span>-->
+<!--                    </button>-->
+
+
+<!--                    &lt;!&ndash; Заблокировать - показываем только для других пользователей &ndash;&gt;-->
+<!--                    <a href="#" class="btn-luxury btn-danger-luxury" onclick="blockUser()">-->
+<!--                        <i class="fas fa-ban"></i>-->
+<!--                        <span>Заблокировать</span>-->
+<!--                    </a>-->
+<!--                </th:block>-->
+
+<!--                &lt;!&ndash; Кнопки для СОБСТВЕННОГО профиля (когда currentUserId == user.id) &ndash;&gt;-->
+<!--                <th:block th:if="${currentUserId != null and currentUserId == user.id}">-->
+<!--                    &lt;!&ndash; Редактировать - показываем только для своего профиля &ndash;&gt;-->
+<!--                    <a th:href="@{/profile/{userId}/edit(userId=${user.id})}" class="btn-luxury btn-primary-luxury">-->
+<!--                        <i class="fas fa-edit"></i>-->
+<!--                        <span>Редактировать профиль</span>-->
+<!--                    </a>-->
+
+
+<!--                    &lt;!&ndash; Статистика профиля - полезно для владельца &ndash;&gt;-->
+<!--                    <a th:href="@{/showProfileStats/{userId}/stats(userId=${user.id})}" class="btn-luxury btn-secondary-luxury">-->
+<!--                        <i class="fas fa-chart-bar"></i>-->
+<!--                        <span>Статистика</span>-->
+<!--                    </a>-->
+<!--                </th:block>-->
+<!--            </div>-->
+
+
+
+
+
+
+
+
+
+<!--            &lt;!&ndash; Meta Information &ndash;&gt;-->
+<!--            <div class="profile-meta">-->
+<!--                <div class="meta-item">-->
+<!--                    <i class="fas fa-calendar-alt meta-icon"></i>-->
+<!--                    <span th:text="'Присоединился ' + ${#temporals.format(user.createdAt, 'MMMM yyyy', new java.util.Locale('ru'))}"></span>-->
+<!--                </div>-->
+<!--                <div class="meta-item">-->
+<!--                    <i class="fas fa-map-marker-alt meta-icon"></i>-->
+<!--                    <span>Местоположение не указано</span>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Stats Section &ndash;&gt;-->
+<!--            <div class="stats-section">-->
+<!--                <a href="#" class="stat-item">-->
+<!--                    <span class="stat-number" th:text="${user.followingCount ?: 0}">0</span>-->
+<!--                    <span class="stat-label">Подписок</span>-->
+<!--                </a>-->
+<!--                <a href="#" class="stat-item">-->
+<!--                    <span class="stat-number" th:text="${user.followersCount ?: 0}">0</span>-->
+<!--                    <span class="stat-label">Подписчиков</span>-->
+<!--                </a>-->
+<!--                <a href="#" class="stat-item">-->
+<!--                    <span class="stat-number" th:text="${user.postsCount ?: 0}">0</span>-->
+<!--                    <span class="stat-label">Постов</span>-->
+<!--                </a>-->
+<!--            </div>-->
+
+<!--&lt;!&ndash;            &lt;!&ndash; Stats Section &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="stats-section">&ndash;&gt;-->
+<!--&lt;!&ndash;                <a href="#" class="stat-item">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <span class="stat-number">0</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <span class="stat-label">Подписок</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                </a>&ndash;&gt;-->
+<!--&lt;!&ndash;                <a href="#" class="stat-item">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <span class="stat-number">0</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <span class="stat-label">Подписчиков</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                </a>&ndash;&gt;-->
+<!--&lt;!&ndash;                <a href="#" class="stat-item">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <span class="stat-number">0</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <span class="stat-label">Постов</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                </a>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+
+<!--            &lt;!&ndash; Navigation Tabs &ndash;&gt;-->
+<!--            <div class="profile-nav">-->
+<!--                <div class="nav-tabs-luxury d-flex">-->
+<!--                    <button class="nav-tab-luxury active">Посты</button>-->
+<!--                    <button class="nav-tab-luxury">Ответы</button>-->
+<!--                    <button class="nav-tab-luxury">Медиа</button>-->
+<!--                    <button class="nav-tab-luxury">Нравится</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Content Area &ndash;&gt;-->
+<!--        <div class="content-area">-->
+<!--            <div class="empty-state">-->
+<!--                <div class="empty-icon">-->
+<!--                    <i class="fas fa-feather-alt"></i>-->
+<!--                </div>-->
+<!--                <h3 class="empty-title">Ваша история начинается здесь</h3>-->
+<!--                <p class="empty-description">Поделитесь своими мыслями и начните создавать свой уникальный контент</p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</main>-->
+
+<!--&lt;!&ndash; Right Sidebar &ndash;&gt;-->
+<!--<aside class="right-sidebar">-->
+<!--    &lt;!&ndash; Trending Topics &ndash;&gt;-->
+<!--    <div class="widget">-->
+<!--        <div class="widget-header">-->
+<!--            <h3 class="widget-title">Актуальные темы</h3>-->
+<!--        </div>-->
+<!--        <div class="widget-content">-->
+<!--            <div class="suggestion-item">-->
+<!--                <div class="suggestion-info">-->
+<!--                    <p class="suggestion-name">#Технологии</p>-->
+<!--                    <p class="suggestion-handle">1.2M обсуждений</p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="suggestion-item">-->
+<!--                <div class="suggestion-info">-->
+<!--                    <p class="suggestion-name">#Дизайн</p>-->
+<!--                    <p class="suggestion-handle">845K обсуждений</p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="suggestion-item">-->
+<!--                <div class="suggestion-info">-->
+<!--                    <p class="suggestion-name">#Искусство</p>-->
+<!--                    <p class="suggestion-handle">654K обсуждений</p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+
+
+
+
+<!--    &lt;!&ndash; Recommendations &ndash;&gt;-->
+<!--    <div class="widget">-->
+<!--        <div class="widget-header">-->
+<!--            <h3 class="widget-title">Рекомендации</h3>-->
+<!--        </div>-->
+<!--        <div class="widget-content">-->
+<!--            &lt;!&ndash; Проверяем, есть ли рекомендации &ndash;&gt;-->
+<!--            <div th:if="${recommendations != null and !recommendations.empty}">-->
+<!--                <div class="suggestion-item" th:each="recommendation : ${recommendations}">-->
+<!--                    &lt;!&ndash; Кликабельная аватарка &ndash;&gt;-->
+<!--                    <a th:href="@{/profile/{userId}(userId=${recommendation.id})}" class="suggestion-avatar-link">-->
+<!--                        <div class="suggestion-avatar">-->
+<!--                            <img th:src="${recommendation.imageUrl != null ? recommendation.imageUrl : '/images/default-avatar.png'}"-->
+<!--                                 th:alt="${recommendation.firstName + ' ' + recommendation.lastName}"-->
+<!--                                 class="avatar-img">-->
+<!--                        </div>-->
+<!--                    </a>-->
+
+<!--                    <div class="suggestion-info">-->
+<!--                        &lt;!&ndash; Кликабельное имя &ndash;&gt;-->
+<!--                        <a th:href="@{/profile/{userId}(userId=${recommendation.id})}" class="suggestion-name-link">-->
+<!--                            <p class="suggestion-name"-->
+<!--                               th:text="${recommendation.firstName + ' ' + recommendation.lastName}">-->
+<!--                                Анна Смирнова-->
+<!--                            </p>-->
+<!--                        </a>-->
+
+<!--                        &lt;!&ndash; Кликабельный handle &ndash;&gt;-->
+<!--                        <a th:href="@{/profile/{userId}(userId=${recommendation.id})}" class="suggestion-handle-link">-->
+<!--                            <p class="suggestion-handle"-->
+<!--                               th:text="'@user' + ${recommendation.id}">-->
+<!--                                @user123-->
+<!--                            </p>-->
+<!--                        </a>-->
+
+<!--                        &lt;!&ndash; Показываем количество подписчиков, если больше 0 &ndash;&gt;-->
+<!--                        <p class="suggestion-meta"-->
+<!--                           th:if="${recommendation.followersCount != null and recommendation.followersCount > 0}">-->
+<!--                            <span th:text="${recommendation.followersCount}">150</span> подписчиков-->
+<!--                        </p>-->
+<!--                    </div>-->
+<!--                    <button class="btn-follow"-->
+<!--                            th:data-user-id="${recommendation.id}"-->
+<!--                            th:text="${recommendation.isFollowing ? 'Читаю' : 'Читать'}">-->
+<!--                        Читать-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Сообщение если нет рекомендаций &ndash;&gt;-->
+<!--            <div th:if="${recommendations == null or recommendations.empty}" class="no-recommendations">-->
+<!--                <div class="empty-state">-->
+<!--                    <i class="fas fa-users" style="font-size: 2rem; color: var(&#45;&#45;text-muted); margin-bottom: 1rem;"></i>-->
+<!--                    <p style="color: var(&#45;&#45;text-muted); text-align: center;">-->
+<!--                        Пока нет рекомендаций.<br>-->
+<!--                        Попробуйте позже!-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Footer с кнопкой "Посмотреть всех" &ndash;&gt;-->
+<!--        <div class="widget-footer" th:if="${recommendations != null and !recommendations.empty}">-->
+<!--            <a th:href="@{/recommendations}" class="btn-show-all">-->
+<!--                <span>Посмотреть всех</span>-->
+<!--                <i class="fas fa-arrow-right"></i>-->
+<!--            </a>-->
+<!--        </div>-->
+<!--    </div>-->
+
+
+<!--    <style>-->
+<!--        /* Кликабельная аватарка */-->
+<!--        .suggestion-avatar-link {-->
+<!--            text-decoration: none;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--        }-->
+
+<!--        .suggestion-avatar {-->
+<!--            width: 48px;-->
+<!--            height: 48px;-->
+<!--            border-radius: 50%;-->
+<!--            overflow: hidden;-->
+<!--            flex-shrink: 0;-->
+<!--            transition: all 0.2s ease;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+
+<!--        .suggestion-avatar:hover {-->
+<!--            transform: scale(1.05);-->
+<!--            box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);-->
+<!--        }-->
+
+<!--        /* Кликабельное имя */-->
+<!--        .suggestion-name-link {-->
+<!--            text-decoration: none;-->
+<!--            color: inherit;-->
+<!--            display: block;-->
+<!--        }-->
+
+<!--        .suggestion-name {-->
+<!--            margin: 0;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            transition: color 0.2s ease;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+
+<!--        .suggestion-name-link:hover .suggestion-name {-->
+<!--            color: var(&#45;&#45;accent-primary);-->
+<!--        }-->
+
+<!--        /* Кликабельный handle */-->
+<!--        .suggestion-handle-link {-->
+<!--            text-decoration: none;-->
+<!--            color: inherit;-->
+<!--            display: block;-->
+<!--        }-->
+
+<!--        .suggestion-handle {-->
+<!--            margin: 0;-->
+<!--            font-size: 0.9rem;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            transition: color 0.2s ease;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+
+<!--        .suggestion-handle-link:hover .suggestion-handle {-->
+<!--            color: var(&#45;&#45;accent-primary);-->
+<!--        }-->
+<!--        /* Footer кнопка */-->
+<!--        .widget-footer {-->
+<!--            padding: 1rem;-->
+<!--            border-top: 1px solid var(&#45;&#45;border-color);-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--            border-radius: 0 0 var(&#45;&#45;radius-lg) var(&#45;&#45;radius-lg);-->
+<!--        }-->
+
+<!--        .btn-show-all {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            gap: 0.5rem;-->
+<!--            width: 100%;-->
+<!--            padding: 0.75rem;-->
+<!--            background: transparent;-->
+<!--            color: var(&#45;&#45;accent-primary);-->
+<!--            text-decoration: none;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            font-weight: 500;-->
+<!--            transition: all 0.2s ease;-->
+<!--            border: 1px solid transparent;-->
+<!--        }-->
+
+<!--        .btn-show-all:hover {-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            border-color: var(&#45;&#45;accent-primary);-->
+<!--            transform: translateY(-1px);-->
+<!--        }-->
+<!--        /* Пустое состояние */-->
+<!--        .no-recommendations {-->
+<!--            padding: 2rem 1rem;-->
+<!--        }-->
+
+<!--        .empty-state {-->
+<!--            text-align: center;-->
+<!--            padding: 1rem;-->
+<!--        }-->
+
+<!--        .empty-state p {-->
+<!--            margin: 0;-->
+<!--            font-size: 0.9rem;-->
+<!--            line-height: 1.4;-->
+<!--        }-->
+
+
+<!--        /* Общие стили для suggestion-item */-->
+<!--        .suggestion-item {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 1rem;-->
+<!--            padding: 1rem 0;-->
+<!--            border-bottom: 1px solid var(&#45;&#45;border-color);-->
+<!--            transition: background 0.2s ease;-->
+<!--        }-->
+
+<!--        .suggestion-item:last-child {-->
+<!--            border-bottom: none;-->
+<!--        }-->
+
+<!--        .suggestion-item:hover {-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--        }-->
+
+<!--        /* Аватарка */-->
+<!--        .avatar-img {-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            object-fit: cover;-->
+<!--            border: 2px solid var(&#45;&#45;border-color);-->
+<!--            border-radius: 50%;-->
+<!--            transition: border-color 0.2s ease;-->
+<!--        }-->
+
+<!--        .suggestion-avatar:hover .avatar-img {-->
+<!--            border-color: var(&#45;&#45;accent-primary);-->
+<!--        }-->
+
+<!--        /* Информация о пользователе */-->
+<!--        .suggestion-info {-->
+<!--            flex: 1;-->
+<!--            min-width: 0; /* Для правильного сжатия текста */-->
+<!--        }-->
+
+<!--        /* Метаинформация */-->
+<!--        .suggestion-meta {-->
+<!--            font-size: 0.8rem;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            margin: 0.25rem 0 0 0;-->
+<!--        }-->
+
+<!--        /* Кнопка подписки */-->
+<!--        .btn-follow {-->
+<!--            padding: 0.5rem 1rem;-->
+<!--            background: var(&#45;&#45;accent-primary);-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            border-radius: var(&#45;&#45;radius-sm);-->
+<!--            font-size: 0.8rem;-->
+<!--            font-weight: 600;-->
+<!--            cursor: pointer;-->
+<!--            transition: all 0.2s ease;-->
+<!--            white-space: nowrap;-->
+<!--            flex-shrink: 0;-->
+<!--        }-->
+
+<!--        .btn-follow:hover {-->
+<!--            background: var(&#45;&#45;accent-secondary);-->
+<!--            transform: translateY(-1px);-->
+<!--        }-->
+
+
+<!--        /* Адаптивность */-->
+<!--        @media (max-width: 768px) {-->
+<!--            .suggestion-item {-->
+<!--                padding: 0.75rem;-->
+<!--                gap: 0.75rem;-->
+<!--            }-->
+
+<!--            .suggestion-avatar {-->
+<!--                width: 40px;-->
+<!--                height: 40px;-->
+<!--            }-->
+
+<!--            .suggestion-name {-->
+<!--                font-size: 0.9rem;-->
+<!--            }-->
+
+<!--            .suggestion-handle {-->
+<!--                font-size: 0.8rem;-->
+<!--            }-->
+
+<!--            .btn-follow {-->
+<!--                padding: 0.4rem 0.8rem;-->
+<!--                font-size: 0.75rem;-->
+<!--            }-->
+<!--        }-->
+<!--    </style>-->
+
+
+
+
+
+
+<!--&lt;!&ndash;    &lt;!&ndash; Recommendations &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="widget">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="widget-header">&ndash;&gt;-->
+<!--&lt;!&ndash;            <h3 class="widget-title">Рекомендации</h3>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="widget-content">&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="suggestion-item">&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="suggestion-avatar"></div>&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="suggestion-info">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p class="suggestion-name">Анна Смирнова</p>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p class="suggestion-handle">@anna_design</p>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                <button class="btn-follow">Читать</button>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="suggestion-item">&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="suggestion-avatar"></div>&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="suggestion-info">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p class="suggestion-name">Михаил Петров</p>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p class="suggestion-handle">@mikhail_dev</p>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                <button class="btn-follow">Читать</button>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="suggestion-item">&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="suggestion-avatar"></div>&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="suggestion-info">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p class="suggestion-name">Елена Волкова</p>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p class="suggestion-handle">@elena_art</p>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                <button class="btn-follow">Читать</button>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--    &lt;!&ndash; Quick Stats &ndash;&gt;-->
+<!--    <div class="widget">-->
+<!--        <div class="widget-header">-->
+<!--            <h3 class="widget-title">Ваша активность</h3>-->
+<!--        </div>-->
+<!--        <div class="widget-content">-->
+<!--            <div class="suggestion-item">-->
+<!--                <div class="suggestion-info">-->
+<!--                    <p class="suggestion-name">Просмотры профиля</p>-->
+<!--                    <p class="suggestion-handle">24 за эту неделю</p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="suggestion-item">-->
+<!--                <div class="suggestion-info">-->
+<!--                    <p class="suggestion-name">Взаимодействия</p>-->
+<!--                    <p class="suggestion-handle">12 новых лайков</p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</aside>-->
+
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>-->
+<!--<script>-->
+<!--    // Mobile menu functionality-->
+<!--    function toggleMobileMenu() {-->
+<!--        const sidebar = document.querySelector('.sidebar');-->
+<!--        const overlay = document.querySelector('.mobile-overlay');-->
+<!--        const hamburgerBtn = document.querySelector('.hamburger-btn');-->
+
+<!--        sidebar.classList.toggle('mobile-open');-->
+<!--        overlay.classList.toggle('active');-->
+
+<!--        // Change hamburger icon-->
+<!--        const icon = hamburgerBtn.querySelector('i');-->
+<!--        if (sidebar.classList.contains('mobile-open')) {-->
+<!--            icon.className = 'fas fa-times';-->
+<!--        } else {-->
+<!--            icon.className = 'fas fa-bars';-->
+<!--        }-->
+
+<!--        // Prevent body scroll when menu is open-->
+<!--        if (sidebar.classList.contains('mobile-open')) {-->
+<!--            document.body.style.overflow = 'hidden';-->
+<!--        } else {-->
+<!--            document.body.style.overflow = '';-->
+<!--        }-->
+<!--    }-->
+
+<!--    function closeMobileMenu() {-->
+<!--        const sidebar = document.querySelector('.sidebar');-->
+<!--        const overlay = document.querySelector('.mobile-overlay');-->
+<!--        const hamburgerBtn = document.querySelector('.hamburger-btn');-->
+
+<!--        sidebar.classList.remove('mobile-open');-->
+<!--        overlay.classList.remove('active');-->
+
+<!--        // Reset hamburger icon-->
+<!--        const icon = hamburgerBtn.querySelector('i');-->
+<!--        icon.className = 'fas fa-bars';-->
+
+<!--        // Restore body scroll-->
+<!--        document.body.style.overflow = '';-->
+<!--    }-->
+
+<!--    // Close mobile menu when clicking on nav links-->
+<!--    document.querySelectorAll('.nav-item').forEach(link => {-->
+<!--        link.addEventListener('click', closeMobileMenu);-->
+<!--    });-->
+
+<!--    // Handle window resize-->
+<!--    window.addEventListener('resize', function() {-->
+<!--        if (window.innerWidth > 768) {-->
+<!--            closeMobileMenu();-->
+<!--        }-->
+<!--    });-->
+
+<!--    // Smooth hover animations-->
+<!--    document.querySelectorAll('.btn-luxury').forEach(btn => {-->
+<!--        btn.addEventListener('mouseenter', function() {-->
+<!--            this.style.transform = 'translateY(-2px)';-->
+<!--        });-->
+
+<!--        btn.addEventListener('mouseleave', function() {-->
+<!--            this.style.transform = 'translateY(0)';-->
+<!--        });-->
+<!--    });-->
+
+<!--    // Tab switching functionality-->
+<!--    document.querySelectorAll('.nav-tab-luxury').forEach(tab => {-->
+<!--        tab.addEventListener('click', function() {-->
+<!--            // Remove active class from all tabs-->
+<!--            document.querySelectorAll('.nav-tab-luxury').forEach(t => t.classList.remove('active'));-->
+<!--            // Add active class to clicked tab-->
+<!--            this.classList.add('active');-->
+
+<!--            // Here you would typically load different content-->
+<!--            // For now, we'll just update the empty state message-->
+<!--            const emptyTitle = document.querySelector('.empty-title');-->
+<!--            const emptyDescription = document.querySelector('.empty-description');-->
+
+<!--            switch(this.textContent.trim()) {-->
+<!--                case 'Посты':-->
+<!--                    emptyTitle.textContent = 'Ваша история начинается здесь';-->
+<!--                    emptyDescription.textContent = 'Поделитесь своими мыслями и начните создавать свой уникальный контент';-->
+<!--                    break;-->
+<!--                case 'Ответы':-->
+<!--                    emptyTitle.textContent = 'Пока нет ответов';-->
+<!--                    emptyDescription.textContent = 'Ваши ответы на посты других пользователей будут отображаться здесь';-->
+<!--                    break;-->
+<!--                case 'Медиа':-->
+<!--                    emptyTitle.textContent = 'Медиа контент отсутствует';-->
+<!--                    emptyDescription.textContent = 'Фотографии и видео из ваших постов будут собраны в этом разделе';-->
+<!--                    break;-->
+<!--                case 'Нравится':-->
+<!--                    emptyTitle.textContent = 'Нет отмеченных постов';-->
+<!--                    emptyDescription.textContent = 'Посты, которые вам понравились, будут сохранены здесь';-->
+<!--                    break;-->
+<!--            }-->
+<!--        });-->
+<!--    });-->
+
+<!--    // Parallax effect for cover image-->
+<!--    window.addEventListener('scroll', function() {-->
+<!--        const scrolled = window.pageYOffset;-->
+<!--        const coverSection = document.querySelector('.cover-section');-->
+<!--        if (coverSection) {-->
+<!--            const rate = scrolled * -0.5;-->
+<!--            coverSection.style.transform = `translateY(${rate}px)`;-->
+<!--        }-->
+<!--    });-->
+
+<!--    // Intersection Observer for fade-in animations-->
+<!--    const observerOptions = {-->
+<!--        threshold: 0.1,-->
+<!--        rootMargin: '0px 0px -50px 0px'-->
+<!--    };-->
+
+<!--    const observer = new IntersectionObserver(function(entries) {-->
+<!--        entries.forEach(entry => {-->
+<!--            if (entry.isIntersecting) {-->
+<!--                entry.target.style.opacity = '1';-->
+<!--                entry.target.style.transform = 'translateY(0)';-->
+<!--            }-->
+<!--        });-->
+<!--    }, observerOptions);-->
+
+<!--    // Observe elements for animation-->
+<!--    document.querySelectorAll('.widget, .stat-item').forEach(el => {-->
+<!--        el.style.opacity = '0';-->
+<!--        el.style.transform = 'translateY(20px)';-->
+<!--        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';-->
+<!--        observer.observe(el);-->
+<!--    });-->
+
+<!--    // Avatar hover effect-->
+<!--    const avatar = document.querySelector('.profile-avatar');-->
+<!--    if (avatar) {-->
+<!--        avatar.addEventListener('mouseenter', function() {-->
+<!--            this.style.transform = 'scale(1.05)';-->
+<!--            this.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';-->
+<!--        });-->
+
+<!--        avatar.addEventListener('mouseleave', function() {-->
+<!--            this.style.transform = 'scale(1)';-->
+<!--        });-->
+<!--    }-->
+
+<!--    // Elegant loading states-->
+<!--    function addLoadingState(element) {-->
+<!--        element.style.opacity = '0.7';-->
+<!--        element.style.pointerEvents = 'none';-->
+
+<!--        setTimeout(() => {-->
+<!--            element.style.opacity = '1';-->
+<!--            element.style.pointerEvents = 'auto';-->
+<!--        }, 300);-->
+<!--    }-->
+
+<!--    // Apply loading state to buttons-->
+<!--    document.querySelectorAll('.btn-follow').forEach(btn => {-->
+<!--        btn.addEventListener('click', function() {-->
+<!--            addLoadingState(this);-->
+<!--        });-->
+<!--    });-->
+<!--</script>-->
+<!--&lt;!&ndash; Подключаем модули в правильном порядке &ndash;&gt;-->
+<!--<script th:src="@{/js/profile/notifications.js}"></script>-->
+<!--<script th:src="@{/js/profile/apiClient.js}"></script>-->
+<!--<script th:src="@{/js/profile/userActions.js}"></script>-->
+<!--<script th:src="@{/js/profile/profileUtils.js}"></script>-->
+<!--<script th:src="@{/js/profile/profileMain.js}"></script>-->
+<!--</body>-->
+<!--</html>-->
