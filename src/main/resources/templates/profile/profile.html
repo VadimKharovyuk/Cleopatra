@@ -906,7 +906,14 @@
             <i class="fas fa-cog nav-icon"></i>
             <span class="nav-text">Настройки</span>
         </a>
+
+        <a href="/devices" class="nav-item">
+            <i class="fas fa-microchip nav-icon"></i> <!-- или fa-plug, fa-laptop -->
+            <span class="nav-text">Устройства</span>
+        </a>
+
     </div>
+
 </nav>
 
 <!-- Main Content -->
@@ -961,13 +968,6 @@
                 </th:block>
             </h1>
             <p class="profile-username" th:text="'@' + ${user.email.split('@')[0]}"></p>
-
-
-
-
-
-
-
 
 
 

@@ -1,72 +1,898 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Тест API доверенных устройств</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>Тест API доверенных устройств</h1>-->
+
+<!--<section>-->
+<!--  <h2>Тестирование API endpoints</h2>-->
+
+<!--  <div>-->
+<!--    <h3>1. Получить информацию о текущем устройстве</h3>-->
+<!--    <button onclick="testCurrentDevice()">GET /devices/api/current</button>-->
+<!--    <pre id="current-device-result"></pre>-->
+<!--  </div>-->
+
+<!--  <div>-->
+<!--    <h3>2. Получить список доверенных устройств</h3>-->
+<!--    <button onclick="testDevicesList()">GET /devices/api/list</button>-->
+<!--    <pre id="devices-list-result"></pre>-->
+<!--  </div>-->
+
+<!--  <div>-->
+<!--    <h3>3. Получить статистику устройств</h3>-->
+<!--    <button onclick="testDeviceStats()">GET /devices/api/stats</button>-->
+<!--    <pre id="device-stats-result"></pre>-->
+<!--  </div>-->
+
+<!--  <div>-->
+<!--    <h3>4. Добавить текущее устройство в доверенные</h3>-->
+<!--    <input type="text" id="trust-device-name" placeholder="Название устройства (необязательно)">-->
+<!--    <button onclick="testTrustDevice()">POST /devices/api/trust</button>-->
+<!--    <pre id="trust-device-result"></pre>-->
+<!--  </div>-->
+
+<!--  <div>-->
+<!--    <h3>5. Удалить текущее устройство из доверенных</h3>-->
+<!--    <button onclick="testRevokeCurrentDevice()">POST /devices/api/revoke-current</button>-->
+<!--    <pre id="revoke-current-result"></pre>-->
+<!--  </div>-->
+
+<!--  <div>-->
+<!--    <h3>6. Удалить устройство по ID</h3>-->
+<!--    <input type="number" id="revoke-device-id" placeholder="ID устройства">-->
+<!--    <button onclick="testRevokeDevice()">DELETE /devices/api/{id}</button>-->
+<!--    <pre id="revoke-device-result"></pre>-->
+<!--  </div>-->
+<!--</section>-->
+
+<!--<section>-->
+<!--  <h2>Информация о браузере</h2>-->
+<!--  <div id="browser-info">-->
+<!--    <p><strong>User-Agent:</strong> <span id="user-agent"></span></p>-->
+<!--    <p><strong>Cookies:</strong> <span id="cookies-info"></span></p>-->
+<!--    <p><strong>Определенный тип устройства:</strong> <span id="device-type"></span></p>-->
+<!--  </div>-->
+<!--</section>-->
+
+<!--<p><a href="/devices">← Вернуться к управлению устройствами</a></p>-->
+
+<!--<script>-->
+<!--  // Отображаем информацию о браузере при загрузке-->
+<!--  document.addEventListener('DOMContentLoaded', function() {-->
+<!--    document.getElementById('user-agent').textContent = navigator.userAgent;-->
+<!--    document.getElementById('cookies-info').textContent = document.cookie || 'Нет cookies';-->
+<!--    document.getElementById('device-type').textContent = detectDeviceType();-->
+<!--  });-->
+
+<!--  function detectDeviceType() {-->
+<!--    const ua = navigator.userAgent;-->
+<!--    if (ua.includes('Mobile')) {-->
+<!--      if (ua.includes('iPhone')) return 'iPhone';-->
+<!--      if (ua.includes('iPad')) return 'iPad';-->
+<!--      if (ua.includes('Android')) return 'Android устройство';-->
+<!--      return 'Мобильное устройство';-->
+<!--    }-->
+<!--    if (ua.includes('Windows')) return 'Windows компьютер';-->
+<!--    if (ua.includes('Macintosh')) return 'Mac компьютер';-->
+<!--    if (ua.includes('Linux')) return 'Linux компьютер';-->
+<!--    return 'Браузер';-->
+<!--  }-->
+
+<!--  async function testCurrentDevice() {-->
+<!--    try {-->
+<!--      const response = await fetch('/devices/api/current');-->
+<!--      const data = await response.json();-->
+<!--      document.getElementById('current-device-result').textContent =-->
+<!--              JSON.stringify(data, null, 2);-->
+<!--    } catch (error) {-->
+<!--      document.getElementById('current-device-result').textContent =-->
+<!--              'Ошибка: ' + error.message;-->
+<!--    }-->
+<!--  }-->
+
+<!--  async function testDevicesList() {-->
+<!--    try {-->
+<!--      const response = await fetch('/devices/api/list');-->
+<!--      const data = await response.json();-->
+<!--      document.getElementById('devices-list-result').textContent =-->
+<!--              JSON.stringify(data, null, 2);-->
+<!--    } catch (error) {-->
+<!--      document.getElementById('devices-list-result').textContent =-->
+<!--              'Ошибка: ' + error.message;-->
+<!--    }-->
+<!--  }-->
+
+<!--  async function testDeviceStats() {-->
+<!--    try {-->
+<!--      const response = await fetch('/devices/api/stats');-->
+<!--      const data = await response.json();-->
+<!--      document.getElementById('device-stats-result').textContent =-->
+<!--              JSON.stringify(data, null, 2);-->
+<!--    } catch (error) {-->
+<!--      document.getElementById('device-stats-result').textContent =-->
+<!--              'Ошибка: ' + error.message;-->
+<!--    }-->
+<!--  }-->
+
+<!--  async function testTrustDevice() {-->
+<!--    try {-->
+<!--      const deviceName = document.getElementById('trust-device-name').value;-->
+<!--      const response = await fetch('/devices/api/trust', {-->
+<!--        method: 'POST',-->
+<!--        headers: {-->
+<!--          'Content-Type': 'application/json',-->
+<!--        },-->
+<!--        body: JSON.stringify({-->
+<!--          deviceName: deviceName || null-->
+<!--        })-->
+<!--      });-->
+<!--      const data = await response.json();-->
+<!--      document.getElementById('trust-device-result').textContent =-->
+<!--              JSON.stringify(data, null, 2);-->
+<!--    } catch (error) {-->
+<!--      document.getElementById('trust-device-result').textContent =-->
+<!--              'Ошибка: ' + error.message;-->
+<!--    }-->
+<!--  }-->
+
+<!--  async function testRevokeCurrentDevice() {-->
+<!--    try {-->
+<!--      const response = await fetch('/devices/api/revoke-current', {-->
+<!--        method: 'POST'-->
+<!--      });-->
+<!--      const data = await response.json();-->
+<!--      document.getElementById('revoke-current-result').textContent =-->
+<!--              JSON.stringify(data, null, 2);-->
+<!--    } catch (error) {-->
+<!--      document.getElementById('revoke-current-result').textContent =-->
+<!--              'Ошибка: ' + error.message;-->
+<!--    }-->
+<!--  }-->
+
+<!--  async function testRevokeDevice() {-->
+<!--    try {-->
+<!--      const deviceId = document.getElementById('revoke-device-id').value;-->
+<!--      if (!deviceId) {-->
+<!--        alert('Введите ID устройства');-->
+<!--        return;-->
+<!--      }-->
+
+<!--      const response = await fetch(`/devices/api/${deviceId}`, {-->
+<!--        method: 'DELETE'-->
+<!--      });-->
+<!--      const data = await response.json();-->
+<!--      document.getElementById('revoke-device-result').textContent =-->
+<!--              JSON.stringify(data, null, 2);-->
+<!--    } catch (error) {-->
+<!--      document.getElementById('revoke-device-result').textContent =-->
+<!--              'Ошибка: ' + error.message;-->
+<!--    }-->
+<!--  }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Тест API доверенных устройств</title>
+  <title>Тест API доверенных устройств - Cleopatra</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Luxury Color Palette */
+      --bg-primary: #fafafa;
+      --bg-secondary: #ffffff;
+      --bg-accent: #f8f9fa;
+      --surface-elevated: rgba(255, 255, 255, 0.95);
+
+      /* Text Colors */
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --text-light: #d1d5db;
+
+      /* Premium Accent Colors */
+      --accent-primary: #2563eb;
+      --accent-secondary: #7c3aed;
+      --accent-success: #059669;
+      --accent-warning: #d97706;
+      --accent-danger: #dc2626;
+      --accent-info: #0891b2;
+
+      /* Borders & Shadows */
+      --border-primary: rgba(0, 0, 0, 0.06);
+      --border-secondary: rgba(0, 0, 0, 0.04);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+      --shadow-xl: 0 20px 64px rgba(0, 0, 0, 0.16);
+
+      /* Radius */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    /* Header Styles */
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 3rem 2rem;
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-accent));
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-primary);
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .page-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Section Styles */
+    .section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--accent-primary);
+    }
+
+    .section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .section:hover::before {
+      opacity: 1;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* API Test Items */
+    .api-test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .api-test-item {
+      background: var(--bg-accent);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .api-test-item:hover {
+      background: var(--bg-secondary);
+      border-color: var(--accent-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .test-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .http-method {
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .method-get {
+      background: rgba(5, 150, 105, 0.1);
+      color: var(--accent-success);
+    }
+
+    .method-post {
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--accent-primary);
+    }
+
+    .method-delete {
+      background: rgba(220, 38, 38, 0.1);
+      color: var(--accent-danger);
+    }
+
+    .test-controls {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* Button Styles */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.875rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+    }
+
+    .btn-success {
+      background: var(--accent-success);
+      color: white;
+    }
+
+    .btn-danger {
+      background: var(--accent-danger);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: var(--bg-accent);
+      color: var(--text-primary);
+      border: 1px solid var(--border-primary);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    /* Form Styles */
+    .form-input {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+      min-width: 200px;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Result Display */
+    .result-container {
+      margin-top: 1rem;
+    }
+
+    .result-pre {
+      background: #1a1a1a;
+      color: #f8f8f2;
+      padding: 1.5rem;
+      border-radius: var(--radius-md);
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border-primary);
+      position: relative;
+    }
+
+    .result-pre:empty::before {
+      content: 'Результат появится здесь...';
+      color: #6c7293;
+      font-style: italic;
+    }
+
+    .result-pre.loading::before {
+      content: 'Загрузка...';
+      color: var(--accent-primary);
+    }
+
+    /* JSON Syntax Highlighting */
+    .json-key { color: #79c0ff; }
+    .json-string { color: #a5d6ff; }
+    .json-number { color: #79c0ff; }
+    .json-boolean { color: #ff7b72; }
+    .json-null { color: #ff7b72; }
+
+    /* Info Section */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .info-item {
+      padding: 1rem;
+      background: var(--bg-accent);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-secondary);
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-value {
+      color: var(--text-secondary);
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.875rem;
+      word-break: break-all;
+    }
+
+    /* Navigation */
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
+      transition: all 0.3s ease;
+      margin-top: 2rem;
+    }
+
+    .nav-link:hover {
+      background: var(--accent-primary);
+      color: white;
+      text-decoration: none;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Loading Animation */
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border-primary);
+      border-top: 2px solid var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Status Indicators */
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-success {
+      background: rgba(5, 150, 105, 0.1);
+      color: var(--accent-success);
+    }
+
+    .status-error {
+      background: rgba(220, 38, 38, 0.1);
+      color: var(--accent-danger);
+    }
+
+    .status-pending {
+      background: rgba(208, 166, 55, 0.1);
+      color: var(--accent-warning);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem 0.5rem;
+      }
+
+      .page-title {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .api-test-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .test-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .form-input {
+        min-width: unset;
+        width: 100%;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Animation for cards */
+    .api-test-item {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .api-test-item:nth-child(1) { animation-delay: 0.1s; }
+    .api-test-item:nth-child(2) { animation-delay: 0.2s; }
+    .api-test-item:nth-child(3) { animation-delay: 0.3s; }
+    .api-test-item:nth-child(4) { animation-delay: 0.4s; }
+    .api-test-item:nth-child(5) { animation-delay: 0.5s; }
+    .api-test-item:nth-child(6) { animation-delay: 0.6s; }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>Тест API доверенных устройств</h1>
-
-<section>
-  <h2>Тестирование API endpoints</h2>
-
-  <div>
-    <h3>1. Получить информацию о текущем устройстве</h3>
-    <button onclick="testCurrentDevice()">GET /devices/api/current</button>
-    <pre id="current-device-result"></pre>
+<div class="container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <i class="fas fa-code"></i>
+      Тест API доверенных устройств
+    </h1>
+    <p class="page-subtitle">
+      Интерактивная панель для тестирования всех endpoint'ов API управления доверенными устройствами.
+      Проверьте функциональность и получите подробные ответы от сервера.
+    </p>
   </div>
 
-  <div>
-    <h3>2. Получить список доверенных устройств</h3>
-    <button onclick="testDevicesList()">GET /devices/api/list</button>
-    <pre id="devices-list-result"></pre>
+  <!-- API Testing Section -->
+  <div class="section">
+    <h2 class="section-title">
+      <div class="section-icon">
+        <i class="fas fa-flask"></i>
+      </div>
+      Тестирование API endpoints
+    </h2>
+
+    <div class="api-test-grid">
+      <!-- Test 1: Current Device -->
+      <div class="api-test-item">
+        <div class="test-title">
+          <i class="fas fa-laptop"></i>
+          Информация о текущем устройстве
+        </div>
+        <div class="test-controls">
+          <button onclick="testCurrentDevice()" class="btn btn-success">
+            <span class="http-method method-get">GET</span>
+            <i class="fas fa-play"></i>
+            /devices/api/current
+          </button>
+        </div>
+        <div class="result-container">
+          <pre id="current-device-result" class="result-pre"></pre>
+        </div>
+      </div>
+
+      <!-- Test 2: Devices List -->
+      <div class="api-test-item">
+        <div class="test-title">
+          <i class="fas fa-list"></i>
+          Список доверенных устройств
+        </div>
+        <div class="test-controls">
+          <button onclick="testDevicesList()" class="btn btn-success">
+            <span class="http-method method-get">GET</span>
+            <i class="fas fa-play"></i>
+            /devices/api/list
+          </button>
+        </div>
+        <div class="result-container">
+          <pre id="devices-list-result" class="result-pre"></pre>
+        </div>
+      </div>
+
+      <!-- Test 3: Device Stats -->
+      <div class="api-test-item">
+        <div class="test-title">
+          <i class="fas fa-chart-bar"></i>
+          Статистика устройств
+        </div>
+        <div class="test-controls">
+          <button onclick="testDeviceStats()" class="btn btn-success">
+            <span class="http-method method-get">GET</span>
+            <i class="fas fa-play"></i>
+            /devices/api/stats
+          </button>
+        </div>
+        <div class="result-container">
+          <pre id="device-stats-result" class="result-pre"></pre>
+        </div>
+      </div>
+
+      <!-- Test 4: Trust Device -->
+      <div class="api-test-item">
+        <div class="test-title">
+          <i class="fas fa-shield-check"></i>
+          Добавить устройство в доверенные
+        </div>
+        <div class="test-controls">
+          <input type="text" id="trust-device-name" placeholder="Название устройства (необязательно)" class="form-input">
+          <button onclick="testTrustDevice()" class="btn btn-primary">
+            <span class="http-method method-post">POST</span>
+            <i class="fas fa-plus"></i>
+            /devices/api/trust
+          </button>
+        </div>
+        <div class="result-container">
+          <pre id="trust-device-result" class="result-pre"></pre>
+        </div>
+      </div>
+
+      <!-- Test 5: Revoke Current Device -->
+      <div class="api-test-item">
+        <div class="test-title">
+          <i class="fas fa-times-circle"></i>
+          Удалить текущее устройство
+        </div>
+        <div class="test-controls">
+          <button onclick="testRevokeCurrentDevice()" class="btn btn-danger">
+            <span class="http-method method-post">POST</span>
+            <i class="fas fa-trash"></i>
+            /devices/api/revoke-current
+          </button>
+        </div>
+        <div class="result-container">
+          <pre id="revoke-current-result" class="result-pre"></pre>
+        </div>
+      </div>
+
+      <!-- Test 6: Revoke Device by ID -->
+      <div class="api-test-item">
+        <div class="test-title">
+          <i class="fas fa-trash-alt"></i>
+          Удалить устройство по ID
+        </div>
+        <div class="test-controls">
+          <input type="number" id="revoke-device-id" placeholder="ID устройства" class="form-input">
+          <button onclick="testRevokeDevice()" class="btn btn-danger">
+            <span class="http-method method-delete">DELETE</span>
+            <i class="fas fa-trash"></i>
+            /devices/api/{id}
+          </button>
+        </div>
+        <div class="result-container">
+          <pre id="revoke-device-result" class="result-pre"></pre>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div>
-    <h3>3. Получить статистику устройств</h3>
-    <button onclick="testDeviceStats()">GET /devices/api/stats</button>
-    <pre id="device-stats-result"></pre>
+  <!-- Browser Info Section -->
+  <div class="section">
+    <h2 class="section-title">
+      <div class="section-icon">
+        <i class="fas fa-info-circle"></i>
+      </div>
+      Информация о браузере
+    </h2>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-user-agent"></i>
+          User-Agent
+        </div>
+        <div class="info-value" id="user-agent"></div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-cookie-bite"></i>
+          Cookies
+        </div>
+        <div class="info-value" id="cookies-info"></div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-mobile-alt"></i>
+          Тип устройства
+        </div>
+        <div class="info-value" id="device-type"></div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-globe"></i>
+          Язык браузера
+        </div>
+        <div class="info-value" id="browser-language"></div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-desktop"></i>
+          Разрешение экрана
+        </div>
+        <div class="info-value" id="screen-resolution"></div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-label">
+          <i class="fas fa-clock"></i>
+          Часовой пояс
+        </div>
+        <div class="info-value" id="timezone"></div>
+      </div>
+    </div>
   </div>
 
-  <div>
-    <h3>4. Добавить текущее устройство в доверенные</h3>
-    <input type="text" id="trust-device-name" placeholder="Название устройства (необязательно)">
-    <button onclick="testTrustDevice()">POST /devices/api/trust</button>
-    <pre id="trust-device-result"></pre>
-  </div>
-
-  <div>
-    <h3>5. Удалить текущее устройство из доверенных</h3>
-    <button onclick="testRevokeCurrentDevice()">POST /devices/api/revoke-current</button>
-    <pre id="revoke-current-result"></pre>
-  </div>
-
-  <div>
-    <h3>6. Удалить устройство по ID</h3>
-    <input type="number" id="revoke-device-id" placeholder="ID устройства">
-    <button onclick="testRevokeDevice()">DELETE /devices/api/{id}</button>
-    <pre id="revoke-device-result"></pre>
-  </div>
-</section>
-
-<section>
-  <h2>Информация о браузере</h2>
-  <div id="browser-info">
-    <p><strong>User-Agent:</strong> <span id="user-agent"></span></p>
-    <p><strong>Cookies:</strong> <span id="cookies-info"></span></p>
-    <p><strong>Определенный тип устройства:</strong> <span id="device-type"></span></p>
-  </div>
-</section>
-
-<p><a href="/devices">← Вернуться к управлению устройствами</a></p>
+  <!-- Navigation -->
+  <a href="/devices" class="nav-link">
+    <i class="fas fa-arrow-left"></i>
+    Вернуться к управлению устройствами
+  </a>
+</div>
 
 <script>
-  // Отображаем информацию о браузере при загрузке
+  // Display browser information on load
   document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('user-agent').textContent = navigator.userAgent;
     document.getElementById('cookies-info').textContent = document.cookie || 'Нет cookies';
     document.getElementById('device-type').textContent = detectDeviceType();
+    document.getElementById('browser-language').textContent = navigator.language || 'Неизвестно';
+    document.getElementById('screen-resolution').textContent = `${screen.width}x${screen.height}`;
+    document.getElementById('timezone').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
   });
 
   function detectDeviceType() {
@@ -83,43 +909,82 @@
     return 'Браузер';
   }
 
+  function showLoading(elementId) {
+    const element = document.getElementById(elementId);
+    element.innerHTML = '<div class="loading-spinner"></div>Загрузка...';
+    element.classList.add('loading');
+  }
+
+  function showResult(elementId, data, isError = false) {
+    const element = document.getElementById(elementId);
+    element.classList.remove('loading');
+
+    if (isError) {
+      element.innerHTML = `<span style="color: var(--accent-danger);">❌ Ошибка: ${data}</span>`;
+    } else {
+      // Pretty print JSON with syntax highlighting
+      element.textContent = JSON.stringify(data, null, 2);
+      highlightJSON(element);
+    }
+  }
+
+  function highlightJSON(element) {
+    let content = element.textContent;
+
+    // Simple JSON syntax highlighting
+    content = content
+            .replace(/"([^"]+)":/g, '<span class="json-key">"$1":</span>')
+            .replace(/:\s*"([^"]*)"/g, ': <span class="json-string">"$1"</span>')
+            .replace(/:\s*(\d+\.?\d*)/g, ': <span class="json-number">$1</span>')
+            .replace(/:\s*(true|false)/g, ': <span class="json-boolean">$1</span>')
+            .replace(/:\s*(null)/g, ': <span class="json-null">$1</span>');
+
+    element.innerHTML = content;
+  }
+
   async function testCurrentDevice() {
+    const resultId = 'current-device-result';
+    showLoading(resultId);
+
     try {
       const response = await fetch('/devices/api/current');
       const data = await response.json();
-      document.getElementById('current-device-result').textContent =
-              JSON.stringify(data, null, 2);
+      showResult(resultId, data);
     } catch (error) {
-      document.getElementById('current-device-result').textContent =
-              'Ошибка: ' + error.message;
+      showResult(resultId, error.message, true);
     }
   }
 
   async function testDevicesList() {
+    const resultId = 'devices-list-result';
+    showLoading(resultId);
+
     try {
       const response = await fetch('/devices/api/list');
       const data = await response.json();
-      document.getElementById('devices-list-result').textContent =
-              JSON.stringify(data, null, 2);
+      showResult(resultId, data);
     } catch (error) {
-      document.getElementById('devices-list-result').textContent =
-              'Ошибка: ' + error.message;
+      showResult(resultId, error.message, true);
     }
   }
 
   async function testDeviceStats() {
+    const resultId = 'device-stats-result';
+    showLoading(resultId);
+
     try {
       const response = await fetch('/devices/api/stats');
       const data = await response.json();
-      document.getElementById('device-stats-result').textContent =
-              JSON.stringify(data, null, 2);
+      showResult(resultId, data);
     } catch (error) {
-      document.getElementById('device-stats-result').textContent =
-              'Ошибка: ' + error.message;
+      showResult(resultId, error.message, true);
     }
   }
 
   async function testTrustDevice() {
+    const resultId = 'trust-device-result';
+    showLoading(resultId);
+
     try {
       const deviceName = document.getElementById('trust-device-name').value;
       const response = await fetch('/devices/api/trust', {
@@ -132,47 +997,73 @@
         })
       });
       const data = await response.json();
-      document.getElementById('trust-device-result').textContent =
-              JSON.stringify(data, null, 2);
+      showResult(resultId, data);
     } catch (error) {
-      document.getElementById('trust-device-result').textContent =
-              'Ошибка: ' + error.message;
+      showResult(resultId, error.message, true);
     }
   }
 
   async function testRevokeCurrentDevice() {
+    const resultId = 'revoke-current-result';
+    showLoading(resultId);
+
     try {
       const response = await fetch('/devices/api/revoke-current', {
         method: 'POST'
       });
       const data = await response.json();
-      document.getElementById('revoke-current-result').textContent =
-              JSON.stringify(data, null, 2);
+      showResult(resultId, data);
     } catch (error) {
-      document.getElementById('revoke-current-result').textContent =
-              'Ошибка: ' + error.message;
+      showResult(resultId, error.message, true);
     }
   }
 
   async function testRevokeDevice() {
-    try {
-      const deviceId = document.getElementById('revoke-device-id').value;
-      if (!deviceId) {
-        alert('Введите ID устройства');
-        return;
-      }
+    const deviceId = document.getElementById('revoke-device-id').value;
+    const resultId = 'revoke-device-result';
 
+    if (!deviceId) {
+      showResult(resultId, 'Введите ID устройства', true);
+      return;
+    }
+
+    showLoading(resultId);
+
+    try {
       const response = await fetch(`/devices/api/${deviceId}`, {
         method: 'DELETE'
       });
       const data = await response.json();
-      document.getElementById('revoke-device-result').textContent =
-              JSON.stringify(data, null, 2);
+      showResult(resultId, data);
     } catch (error) {
-      document.getElementById('revoke-device-result').textContent =
-              'Ошибка: ' + error.message;
+      showResult(resultId, error.message, true);
     }
   }
+
+  // Add keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey || e.metaKey) {
+      switch(e.key) {
+        case '1':
+          e.preventDefault();
+          testCurrentDevice();
+          break;
+        case '2':
+          e.preventDefault();
+          testDevicesList();
+          break;
+        case '3':
+          e.preventDefault();
+          testDeviceStats();
+          break;
+      }
+    }
+  });
+
+  // Add tooltips for keyboard shortcuts
+  document.querySelector('button[onclick="testCurrentDevice()"]').title = 'Ctrl/Cmd + 1';
+  document.querySelector('button[onclick="testDevicesList()"]').title = 'Ctrl/Cmd + 2';
+  document.querySelector('button[onclick="testDeviceStats()"]').title = 'Ctrl/Cmd + 3';
 </script>
 </body>
 </html>

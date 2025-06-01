@@ -65,6 +65,7 @@ public class TrustedDeviceController {
         }
     }
 
+
     /**
      * GET /devices/api/list - API: Получить список доверенных устройств
      */
