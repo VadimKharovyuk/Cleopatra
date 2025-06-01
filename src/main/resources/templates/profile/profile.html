@@ -843,10 +843,14 @@
             <i class="fas fa-home nav-icon"></i>
             <span class="nav-text">Главная</span>
         </a>
-        <a href="/explore" class="nav-item">
-            <i class="fas fa-compass nav-icon"></i>
-            <span class="nav-text">Обзор</span>
+
+
+        <a href="/recommendations" class="nav-item">
+            <i class="fas fa-search-plus nav-icon"></i>
+            <span class="nav-text">Найти людей</span>
         </a>
+
+
         <a href="/notifications" class="nav-item">
             <i class="fas fa-bell nav-icon"></i>
             <span class="nav-text">Уведомления</span>
@@ -996,30 +1000,6 @@
             <script th:src="@{/js/profile/profileMain.js}"></script>
 
 
-<!--            &lt;!&ndash; Action Buttons - теперь расположены в profile-info под именем &ndash;&gt;-->
-<!--            <div class="profile-actions">-->
-<!--                <a href="#" class="btn-luxury btn-secondary-luxury">-->
-<!--                    <i class="fas fa-envelope"></i>-->
-<!--                    <span>Сообщение</span>-->
-<!--                </a>-->
-<!--                <a href="#" class="btn-luxury btn-primary-luxury">-->
-<!--                    <i class="fas fa-user-plus"></i>-->
-<!--                    <span>Подписаться</span>-->
-<!--                </a>-->
-<!--                <a href="#" class="btn-luxury btn-danger-luxury">-->
-<!--                    <i class="fas fa-ban"></i>-->
-<!--                    <span>Заблокировать</span>-->
-<!--                </a>-->
-<!--                <a th:href="@{/profile/{userId}/edit(userId=${user.id})}" class="btn-luxury btn-secondary-luxury">-->
-<!--                    <i class="fas fa-edit"></i>-->
-<!--                    <span>Редактировать</span>-->
-<!--                </a>-->
-<!--            </div>-->
-
-
-
-
-
 
 
 
@@ -1106,38 +1086,318 @@
         </div>
     </div>
 
+
+
+
+
     <!-- Recommendations -->
     <div class="widget">
         <div class="widget-header">
             <h3 class="widget-title">Рекомендации</h3>
         </div>
         <div class="widget-content">
-            <div class="suggestion-item">
-                <div class="suggestion-avatar"></div>
-                <div class="suggestion-info">
-                    <p class="suggestion-name">Анна Смирнова</p>
-                    <p class="suggestion-handle">@anna_design</p>
+            <!-- Проверяем, есть ли рекомендации -->
+            <div th:if="${recommendations != null and !recommendations.empty}">
+                <div class="suggestion-item" th:each="recommendation : ${recommendations}">
+                    <!-- Кликабельная аватарка -->
+                    <a th:href="@{/profile/{userId}(userId=${recommendation.id})}" class="suggestion-avatar-link">
+                        <div class="suggestion-avatar">
+                            <img th:src="${recommendation.imageUrl != null ? recommendation.imageUrl : '/images/default-avatar.png'}"
+                                 th:alt="${recommendation.firstName + ' ' + recommendation.lastName}"
+                                 class="avatar-img">
+                        </div>
+                    </a>
+
+                    <div class="suggestion-info">
+                        <!-- Кликабельное имя -->
+                        <a th:href="@{/profile/{userId}(userId=${recommendation.id})}" class="suggestion-name-link">
+                            <p class="suggestion-name"
+                               th:text="${recommendation.firstName + ' ' + recommendation.lastName}">
+                                Анна Смирнова
+                            </p>
+                        </a>
+
+                        <!-- Кликабельный handle -->
+                        <a th:href="@{/profile/{userId}(userId=${recommendation.id})}" class="suggestion-handle-link">
+                            <p class="suggestion-handle"
+                               th:text="'@user' + ${recommendation.id}">
+                                @user123
+                            </p>
+                        </a>
+
+                        <!-- Показываем количество подписчиков, если больше 0 -->
+                        <p class="suggestion-meta"
+                           th:if="${recommendation.followersCount != null and recommendation.followersCount > 0}">
+                            <span th:text="${recommendation.followersCount}">150</span> подписчиков
+                        </p>
+                    </div>
+                    <button class="btn-follow"
+                            th:data-user-id="${recommendation.id}"
+                            th:text="${recommendation.isFollowing ? 'Читаю' : 'Читать'}">
+                        Читать
+                    </button>
                 </div>
-                <button class="btn-follow">Читать</button>
             </div>
-            <div class="suggestion-item">
-                <div class="suggestion-avatar"></div>
-                <div class="suggestion-info">
-                    <p class="suggestion-name">Михаил Петров</p>
-                    <p class="suggestion-handle">@mikhail_dev</p>
+
+            <!-- Сообщение если нет рекомендаций -->
+            <div th:if="${recommendations == null or recommendations.empty}" class="no-recommendations">
+                <div class="empty-state">
+                    <i class="fas fa-users" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--text-muted); text-align: center;">
+                        Пока нет рекомендаций.<br>
+                        Попробуйте позже!
+                    </p>
                 </div>
-                <button class="btn-follow">Читать</button>
-            </div>
-            <div class="suggestion-item">
-                <div class="suggestion-avatar"></div>
-                <div class="suggestion-info">
-                    <p class="suggestion-name">Елена Волкова</p>
-                    <p class="suggestion-handle">@elena_art</p>
-                </div>
-                <button class="btn-follow">Читать</button>
             </div>
         </div>
+
+        <!-- Footer с кнопкой "Посмотреть всех" -->
+        <div class="widget-footer" th:if="${recommendations != null and !recommendations.empty}">
+            <a th:href="@{/recommendations}" class="btn-show-all">
+                <span>Посмотреть всех</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
     </div>
+
+
+    <style>
+        /* Кликабельная аватарка */
+        .suggestion-avatar-link {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .suggestion-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .suggestion-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Кликабельное имя */
+        .suggestion-name-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .suggestion-name {
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .suggestion-name-link:hover .suggestion-name {
+            color: var(--accent-primary);
+        }
+
+        /* Кликабельный handle */
+        .suggestion-handle-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .suggestion-handle {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .suggestion-handle-link:hover .suggestion-handle {
+            color: var(--accent-primary);
+        }
+        /* Footer кнопка */
+        .widget-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-accent);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+
+        .btn-show-all {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.75rem;
+            background: transparent;
+            color: var(--accent-primary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-show-all:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+        }
+        /* Пустое состояние */
+        .no-recommendations {
+            padding: 2rem 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+
+        /* Общие стили для suggestion-item */
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s ease;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background: var(--bg-accent);
+            border-radius: var(--radius-md);
+        }
+
+        /* Аватарка */
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            transition: border-color 0.2s ease;
+        }
+
+        .suggestion-avatar:hover .avatar-img {
+            border-color: var(--accent-primary);
+        }
+
+        /* Информация о пользователе */
+        .suggestion-info {
+            flex: 1;
+            min-width: 0; /* Для правильного сжатия текста */
+        }
+
+        /* Метаинформация */
+        .suggestion-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0.25rem 0 0 0;
+        }
+
+        /* Кнопка подписки */
+        .btn-follow {
+            padding: 0.5rem 1rem;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-follow:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+        }
+
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .suggestion-item {
+                padding: 0.75rem;
+                gap: 0.75rem;
+            }
+
+            .suggestion-avatar {
+                width: 40px;
+                height: 40px;
+            }
+
+            .suggestion-name {
+                font-size: 0.9rem;
+            }
+
+            .suggestion-handle {
+                font-size: 0.8rem;
+            }
+
+            .btn-follow {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+
+
+
+
+
+
+<!--    &lt;!&ndash; Recommendations &ndash;&gt;-->
+<!--    <div class="widget">-->
+<!--        <div class="widget-header">-->
+<!--            <h3 class="widget-title">Рекомендации</h3>-->
+<!--        </div>-->
+<!--        <div class="widget-content">-->
+<!--            <div class="suggestion-item">-->
+<!--                <div class="suggestion-avatar"></div>-->
+<!--                <div class="suggestion-info">-->
+<!--                    <p class="suggestion-name">Анна Смирнова</p>-->
+<!--                    <p class="suggestion-handle">@anna_design</p>-->
+<!--                </div>-->
+<!--                <button class="btn-follow">Читать</button>-->
+<!--            </div>-->
+<!--            <div class="suggestion-item">-->
+<!--                <div class="suggestion-avatar"></div>-->
+<!--                <div class="suggestion-info">-->
+<!--                    <p class="suggestion-name">Михаил Петров</p>-->
+<!--                    <p class="suggestion-handle">@mikhail_dev</p>-->
+<!--                </div>-->
+<!--                <button class="btn-follow">Читать</button>-->
+<!--            </div>-->
+<!--            <div class="suggestion-item">-->
+<!--                <div class="suggestion-avatar"></div>-->
+<!--                <div class="suggestion-info">-->
+<!--                    <p class="suggestion-name">Елена Волкова</p>-->
+<!--                    <p class="suggestion-handle">@elena_art</p>-->
+<!--                </div>-->
+<!--                <button class="btn-follow">Читать</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 
     <!-- Quick Stats -->
     <div class="widget">

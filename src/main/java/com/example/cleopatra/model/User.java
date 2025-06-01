@@ -55,6 +55,9 @@ public class User {
 
     private String imgBackgroundID;
 
+    ///ToDU add to Dto
+    private Long followersCount = 0L;
+
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<TrustedDevice> trustedDevices = new ArrayList<>();

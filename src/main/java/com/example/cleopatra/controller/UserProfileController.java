@@ -1,7 +1,9 @@
 package com.example.cleopatra.controller;
 
 import com.example.cleopatra.dto.user.UpdateProfileDto;
+import com.example.cleopatra.dto.user.UserRecommendationDto;
 import com.example.cleopatra.dto.user.UserResponse;
+import com.example.cleopatra.service.RecommendationService;
 import com.example.cleopatra.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/profile")
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ import jakarta.validation.Valid;
 public class UserProfileController {
 
     private final UserService userService;
+    private final RecommendationService recommendationService;
 
 
     @GetMapping("/{userId}")
@@ -30,6 +35,12 @@ public class UserProfileController {
             UserResponse user = userService.getUserById(userId);
             model.addAttribute("user", user);
             model.addAttribute("updateProfileDto", new UpdateProfileDto());
+
+
+            List<UserRecommendationDto> recommendations =recommendationService.getTopRecommendations(userId);
+            model.addAttribute("recommendations", recommendations);
+
+
             return "profile/profile";
         } catch (RuntimeException e) {
             log.error("Ошибка при загрузке профиля пользователя {}: {}", userId, e.getMessage());

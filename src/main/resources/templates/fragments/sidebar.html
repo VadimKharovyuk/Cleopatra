@@ -306,12 +306,15 @@
                 <i class="fas fa-home nav-icon"></i>
                 <span class="nav-text">Главная</span>
             </a>
-            <a href="/explore"
+
+            <a href="/recommendations"
                class="nav-item"
-               th:classappend="${activeSection == 'explore'} ? 'active' : ''">
-                <i class="fas fa-compass nav-icon"></i>
-                <span class="nav-text">Обзор</span>
+               th:classappend="${activeSection == 'recommendations'} ? 'active' : ''">
+                <i class="fas fa-search-plus nav-icon"></i>
+                <span class="nav-text">Найти людей</span>
             </a>
+
+
             <a href="/notifications"
                class="nav-item"
                th:classappend="${activeSection == 'notifications'} ? 'active' : ''">
@@ -351,6 +354,8 @@
                 <span class="nav-text">Настройки</span>
             </a>
         </div>
+
+
     </nav>
 </th:block>
 

@@ -22,12 +22,12 @@ public class ProfileStatsController {
     private final UserService userService;
 
 
+
     @GetMapping("/{userId}/stats")
     public String showProfileStats(@PathVariable Long userId,
                                    @ModelAttribute("currentUserId") Long currentUserId,
                                    Model model) {
         try {
-            // Проверка авторизации
             if (currentUserId == null) {
                 return "redirect:/login?returnUrl=/profile/" + userId + "/stats";
             }
@@ -37,7 +37,6 @@ public class ProfileStatsController {
                 return "redirect:/profile/" + userId + "?error=access_denied";
             }
 
-            // Получаем данные пользователя
             UserResponse user = userService.getUserById(userId);
             if (user == null) {
                 return "error/404";
@@ -60,7 +59,6 @@ public class ProfileStatsController {
         }
     }
 
-    // Временный метод для демонстрации (удалить когда будет готов StatisticsService)
     private void addMockStatsData(Model model) {
         Map<String, Object> mockStats = new HashMap<>();
         mockStats.put("profileViews", 1247);

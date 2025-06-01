@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Рекомендации пользователей - Cleopatra</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Подключаем стили сайдбара -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+  <style>
+    /* Основные переменные уже определены в sidebar-styles */
+
+    /* Main Container */
+    .main-container {
+      margin-left: 280px;
+      min-height: 100vh;
+      background: var(--bg-primary);
+      transition: margin-left 0.3s ease;
+    }
+
+    .content-wrapper {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .page-header {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-primary);
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    /* Search and Filters Section */
+    .search-filters-section {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-primary);
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      background: var(--bg-accent);
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      background: var(--bg-secondary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter-label {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .filter-select {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      background: var(--bg-accent);
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      background: var(--bg-secondary);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      align-items: center;
+    }
+
+    .btn-filter {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background: var(--bg-accent);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-primary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    /* Users Grid */
+    .users-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .user-card {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      border: 1px solid var(--border-primary);
+      transition: all 0.3s ease;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .user-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--accent-primary);
+    }
+
+    .user-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .user-card:hover::before {
+      opacity: 1;
+    }
+
+    .user-avatar-container {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+    }
+
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--border-primary);
+      transition: all 0.3s ease;
+    }
+
+    .user-card:hover .user-avatar {
+      border-color: var(--accent-primary);
+      transform: scale(1.05);
+    }
+
+    .user-avatar-link {
+      text-decoration: none;
+    }
+
+    .user-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      transition: color 0.2s ease;
+    }
+
+    .user-name-link {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .user-name-link:hover .user-name {
+      color: var(--accent-primary);
+    }
+
+    .user-handle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .user-stats {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .user-stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .btn-follow {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      flex: 1;
+      max-width: 120px;
+    }
+
+    .btn-follow.following {
+      background: var(--bg-accent);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-primary);
+    }
+
+    .btn-follow.following:hover {
+      background: var(--accent-danger);
+      color: white;
+      border-color: var(--accent-danger);
+    }
+
+    .btn-follow:not(.following) {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+    }
+
+    .btn-follow:not(.following):hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-message {
+      padding: 0.75rem;
+      background: var(--bg-accent);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-message:hover {
+      background: var(--accent-primary);
+      color: white;
+      border-color: var(--accent-primary);
+    }
+
+    /* Load More Section */
+    .load-more-section {
+      text-align: center;
+      margin: 3rem 0;
+    }
+
+    .btn-load-more {
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-load-more:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .loading-spinner {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .loading-spinner.active {
+      display: flex;
+    }
+
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-primary);
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-message {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-container {
+        margin-left: 80px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        margin-left: 0;
+        padding-top: 60px;
+      }
+
+      .content-wrapper {
+        padding: 1rem;
+      }
+
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .users-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .user-card {
+        padding: 1.5rem;
+      }
+
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .user-stats {
+        gap: 1rem;
+      }
+
+      .user-actions {
+        flex-direction: column;
+      }
+
+      .btn-follow {
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Mobile Header -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+
+<!-- Sidebar -->
+<th:block th:replace="~{fragments/sidebar :: sidebar('recommendations')}"></th:block>
+
+<!-- Main Content -->
+<main class="main-container">
+  <div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">
+        <i class="fas fa-users"></i>
+        Рекомендации пользователей
+      </h1>
+      <p class="page-subtitle">
+        Найдите интересных людей для подписки и общения
+      </p>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-filters-section">
+      <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text"
+               class="search-input"
+               placeholder="Поиск по имени пользователя..."
+               id="searchInput">
+      </div>
+
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label class="filter-label">Сортировка</label>
+          <select class="filter-select" id="sortFilter">
+            <option value="newest">Новые пользователи</option>
+            <option value="popular">По популярности</option>
+            <option value="alphabetical">По алфавиту</option>
+            <option value="active">Активные</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Количество подписчиков</label>
+          <select class="filter-select" id="followersFilter">
+            <option value="all">Все</option>
+            <option value="0-10">0-10 подписчиков</option>
+            <option value="10-100">10-100 подписчиков</option>
+            <option value="100-1000">100-1000 подписчиков</option>
+            <option value="1000+">1000+ подписчиков</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Статус</label>
+          <select class="filter-select" id="statusFilter">
+            <option value="all">Все пользователи</option>
+            <option value="not-following">Не подписан</option>
+            <option value="mutual">Взаимная подписка</option>
+            <option value="active-today">Активны сегодня</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-filter btn-primary" onclick="applyFilters()">
+          <i class="fas fa-filter"></i>
+          Применить фильтры
+        </button>
+        <button class="btn-filter btn-secondary" onclick="resetFilters()">
+          <i class="fas fa-undo"></i>
+          Сбросить
+        </button>
+        <span class="filter-results" id="filterResults">
+                        Найдено: <span th:text="${recommendations?.userRecommendations?.size() ?: 0}">0</span> пользователей
+                    </span>
+      </div>
+    </div>
+
+    <!-- Users Grid -->
+    <div class="users-grid" id="usersGrid">
+      <!-- Проверяем наличие пользователей -->
+      <div th:if="${recommendations?.userRecommendations != null and !recommendations.userRecommendations.empty}">
+        <div class="user-card" th:each="user : ${recommendations.userRecommendations}">
+          <!-- Avatar -->
+          <div class="user-avatar-container">
+            <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-avatar-link">
+              <img th:src="${user.imageUrl != null ? user.imageUrl : '/images/default-avatar.png'}"
+                   th:alt="${user.firstName + ' ' + user.lastName}"
+                   class="user-avatar">
+            </a>
+          </div>
+
+          <!-- User Info -->
+          <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-name-link">
+            <h3 class="user-name" th:text="${user.firstName + ' ' + user.lastName}">
+              Анна Смирнова
+            </h3>
+          </a>
+
+          <p class="user-handle" th:text="'@user' + ${user.id}">
+            @user123
+          </p>
+
+          <!-- User Stats -->
+          <div class="user-stats">
+            <div class="user-stat">
+              <span class="stat-number" th:text="${user.followersCount ?: 0}">127</span>
+              <span class="stat-label">подписчики</span>
+            </div>
+            <div class="user-stat">
+              <span class="stat-number">24</span>
+              <span class="stat-label">посты</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="user-actions">
+            <button class="btn-follow"
+                    th:data-user-id="${user.id}"
+                    th:classappend="${user.isFollowing ? 'following' : ''}"
+                    th:text="${user.isFollowing ? 'Читаю' : 'Читать'}">
+              Читать
+            </button>
+            <button class="btn-message"
+                    th:data-user-id="${user.id}"
+                    title="Написать сообщение">
+              <i class="fas fa-envelope"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${recommendations?.userRecommendations == null or recommendations.userRecommendations.empty}"
+         class="empty-state">
+      <i class="fas fa-user-friends empty-icon"></i>
+      <h3 class="empty-title">Пользователи не найдены</h3>
+      <p class="empty-message">
+        Попробуйте изменить параметры поиска или фильтры
+      </p>
+    </div>
+
+    <!-- Load More Section -->
+    <div class="load-more-section"
+         th:if="${recommendations?.hasNext != null and recommendations.hasNext}">
+      <button class="btn-load-more"
+              id="loadMoreBtn"
+              th:data-next-page="${recommendations.nextPage}">
+        <i class="fas fa-plus"></i>
+        Загрузить еще
+      </button>
+
+      <div class="loading-spinner" id="loadingSpinner">
+        <i class="fas fa-spinner spinner"></i>
+        <span>Загружаем пользователей...</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Подключаем скрипты сайдбара -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<!-- Подключаем скрипт для подписок -->
+<script th:src="@{/js/profile/isFollowing.js}"></script>
+
+<!-- Page Scripts -->
+<script>
+  // ========================================
+  // RECOMMENDATIONS PAGE FUNCTIONALITY
+  // ========================================
+
+  let currentFilters = {
+    search: '',
+    sort: 'newest',
+    followers: 'all',
+    status: 'all'
+  };
+
+  /**
+   * Apply filters to user list
+   */
+  function applyFilters() {
+    // Собираем значения фильтров
+    currentFilters.search = document.getElementById('searchInput').value.trim();
+    currentFilters.sort = document.getElementById('sortFilter').value;
+    currentFilters.followers = document.getElementById('followersFilter').value;
+    currentFilters.status = document.getElementById('statusFilter').value;
+
+    console.log('🔍 Applying filters:', currentFilters);
+
+    // TODO: Здесь будет AJAX запрос с фильтрами
+    // Пока что просто фильтруем на клиенте
+    filterUsersClient();
+  }
+
+  /**
+   * Reset all filters
+   */
+  function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('sortFilter').value = 'newest';
+    document.getElementById('followersFilter').value = 'all';
+    document.getElementById('statusFilter').value = 'all';
+
+    currentFilters = {
+      search: '',
+      sort: 'newest',
+      followers: 'all',
+      status: 'all'
+    };
+
+    console.log('🔄 Filters reset');
+
+    // Показываем всех пользователей
+    showAllUsers();
+  }
+
+  /**
+   * Client-side filtering (temporary solution)
+   */
+  function filterUsersClient() {
+    const userCards = document.querySelectorAll('.user-card');
+    let visibleCount = 0;
+
+    userCards.forEach(card => {
+      const userName = card.querySelector('.user-name').textContent.toLowerCase();
+      const userHandle = card.querySelector('.user-handle').textContent.toLowerCase();
+      const followersCount = parseInt(card.querySelector('.stat-number').textContent) || 0;
+
+      let shouldShow = true;
+
+      // Search filter
+      if (currentFilters.search) {
+        const searchTerm = currentFilters.search.toLowerCase();
+        shouldShow = userName.includes(searchTerm) || userHandle.includes(searchTerm);
+      }
+
+      // Followers filter
+      if (shouldShow && currentFilters.followers !== 'all') {
+        switch (currentFilters.followers) {
+          case '0-10':
+            shouldShow = followersCount >= 0 && followersCount <= 10;
+            break;
+          case '10-100':
+            shouldShow = followersCount > 10 && followersCount <= 100;
+            break;
+          case '100-1000':
+            shouldShow = followersCount > 100 && followersCount <= 1000;
+            break;
+          case '1000+':
+            shouldShow = followersCount > 1000;
+            break;
+        }
+      }
+
+      // Show/hide card
+      if (shouldShow) {
+        card.style.display = 'block';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    // Update results count
+    document.getElementById('filterResults').innerHTML =
+            `Найдено: <strong>${visibleCount}</strong> пользователей`;
+  }
+
+  /**
+   * Show all users
+   */
+  function showAllUsers() {
+    const userCards = document.querySelectorAll('.user-card');
+    userCards.forEach(card => {
+      card.style.display = 'block';
+    });
+
+    document.getElementById('filterResults').innerHTML =
+            `Найдено: <strong>${userCards.length}</strong> пользователей`;
+  }
+
+  /**
+   * Load more users
+   */
+  async function loadMoreUsers() {
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+
+    if (!loadMoreBtn) return;
+
+    const nextPage = loadMoreBtn.dataset.nextPage;
+
+    // Show loading state
+    loadMoreBtn.style.display = 'none';
+    loadingSpinner.classList.add('active');
+
+    try {
+      const response = await fetch(`/recommendations/load-more?page=${nextPage}`);
+      const data = await response.json();
+
+      if (data.userRecommendations && data.userRecommendations.length > 0) {
+        // Add new users to grid
+        const usersGrid = document.getElementById('usersGrid');
+        data.userRecommendations.forEach(user => {
+          const userCard = createUserCard(user);
+          usersGrid.appendChild(userCard);
+        });
+
+        // Update load more button
+        if (data.hasNext) {
+          loadMoreBtn.dataset.nextPage = data.nextPage;
+          loadMoreBtn.style.display = 'inline-flex';
+        }
+
+        // Reinitialize follow buttons for new cards
+        initializeFollowButtons();
+      }
+
+    } catch (error) {
+      console.error('❌ Error loading more users:', error);
+      alert('Ошибка при загрузке пользователей');
+      loadMoreBtn.style.display = 'inline-flex';
+    } finally {
+      loadingSpinner.classList.remove('active');
+    }
+  }
+
+  /**
+   * Create user card HTML
+   */
+  function createUserCard(user) {
+    const card = document.createElement('div');
+    card.className = 'user-card';
+    card.innerHTML = `
+                <div class="user-avatar-container">
+                    <a href="/profile/${user.id}" class="user-avatar-link">
+                        <img src="${user.imageUrl || '/images/default-avatar.png'}"
+                             alt="${user.firstName} ${user.lastName}"
+                             class="user-avatar">
+                    </a>
+                </div>
+
+                <a href="/profile/${user.id}" class="user-name-link">
+                    <h3 class="user-name">${user.firstName} ${user.lastName}</h3>
+                </a>
+
+                <p class="user-handle">@user${user.id}</p>
+
+                <div class="user-stats">
+                    <div class="user-stat">
+                        <span class="stat-number">${user.followersCount || 0}</span>
+                        <span class="stat-label">подписчики</span>
+                    </div>
+                    <div class="user-stat">
+                        <span class="stat-number">0</span>
+                        <span class="stat-label">посты</span>
+                    </div>
+                </div>
+
+                <div class="user-actions">
+                    <button class="btn-follow ${user.isFollowing ? 'following' : ''}"
+                            data-user-id="${user.id}">
+                        ${user.isFollowing ? 'Читаю' : 'Читать'}
+                    </button>
+                    <button class="btn-message"
+                            data-user-id="${user.id}"
+                            title="Написать сообщение">
+                        <i class="fas fa-envelope"></i>
+                    </button>
+                </div>
+            `;
+    return card;
+  }
+
+  /**
+   * Initialize follow buttons for dynamically added content
+   */
+  function initializeFollowButtons() {
+    // This will be handled by isFollowing.js
+  }
+
+  /**
+   * Handle message button clicks
+   */
+  function initializeMessageButtons() {
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.btn-message')) {
+        const userId = e.target.closest('.btn-message').dataset.userId;
+        window.location.href = `/messages/new?to=${userId}`;
+      }
+    });
+  }
+
+  /**
+   * Initialize search input
+   */
+  function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        applyFilters();
+      }, 300); // Debounce search
+    });
+  }
+
+  /**
+   * Initialize page
+   */
+  function initializePage() {
+    console.log('📄 Initializing recommendations page');
+
+    // Initialize search
+    initializeSearch();
+
+    // Initialize message buttons
+    initializeMessageButtons();
+
+    // Initialize load more button
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', loadMoreUsers);
+    }
+
+    // Initialize filter form submission
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && e.target.id === 'searchInput') {
+        e.preventDefault();
+        applyFilters();
+      }
+    });
+
+    console.log('✅ Recommendations page initialized');
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePage);
+  } else {
+    initializePage();
+  }
+</script>
+</body>
+</html>
