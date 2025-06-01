@@ -97,6 +97,7 @@ public class RecommendationController {
         }
     }
 
+
     /**
      * Загрузить больше рекомендаций (для кнопки "Загрузить еще")
      */
