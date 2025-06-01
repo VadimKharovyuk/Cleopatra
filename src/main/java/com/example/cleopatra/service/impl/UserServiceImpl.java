@@ -109,9 +109,7 @@ public class UserServiceImpl implements UserService {
         userResponse.setFollowingCount((long) random.nextInt(500) + 20);   // 20-520
         userResponse.setPostsCount((long) random.nextInt(200) + 5);
 
-//        userResponse.setFollowersCount(125L);  // количество подписчиков
-//        userResponse.setFollowingCount(89L);   // количество подписок
-//        userResponse.setPostsCount(47L);
+
         return userResponse;
     }
     // Вспомогательные методы для получения статистики

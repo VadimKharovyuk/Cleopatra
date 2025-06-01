@@ -7,15 +7,8 @@ import lombok.Data;
 public class UserRecommendationDto {
     private Long id;
     private String imageUrl;
-
     private String firstName;
     private String lastName;
-
-
-    // Метрики для рекомендаций
     private Long followersCount;
     private Boolean isFollowing;
-
-
-
 }

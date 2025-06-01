@@ -22,54 +22,69 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class RecommendationServiceImpl implements RecommendationService {
+    private static final int PAGE_SIZE = 12;
+    private static final int TOP_RECOMMENDATIONS_SIZE = 6;
+
+
     private final UserRepository userRepository;
     private final RecommendationsMapper recommendationsMapper;
 
-
-    private static final int DEFAULT_RECOMMENDATIONS_LIMIT = 5;
-    private static final int PAGE_SIZE = 20; // размер страницы для полного списка
-
+    /**
+     * Топ рекомендации для главной страницы
+     */
     @Override
     public List<UserRecommendationDto> getTopRecommendations(Long currentUserId) {
         try {
-            log.info("🔍 Получение рекомендаций для пользователя: {}", currentUserId);
+            log.debug("Получение топ рекомендаций для пользователя: {}", currentUserId);
 
-            List<User> users = userRepository.findTopRecommendationsForUser(currentUserId, PageRequest.of(0, DEFAULT_RECOMMENDATIONS_LIMIT));
-            log.info("📊 Найдено пользователей в базе: {}", users.size());
+            Pageable pageable = PageRequest.of(0, TOP_RECOMMENDATIONS_SIZE);
+            List<User> topUsers = userRepository.findTopRecommendations(currentUserId, pageable);
 
-            List<UserRecommendationDto> recommendations = users.stream()
-                    .map(user -> {
-                        log.debug("👤 Обрабатываем пользователя: {} {} (ID: {})",
-                                user.getFirstName(), user.getLastName(), user.getId());
-                        return recommendationsMapper.mapToRecommendationDto(user, currentUserId);
-                    })
+            List<UserRecommendationDto> recommendations = topUsers.stream()
+                    .map(user -> recommendationsMapper.mapToRecommendationDto(user, currentUserId))
                     .collect(Collectors.toList());
 
-            log.info("✅ Возвращаем рекомендаций: {}", recommendations.size());
+            log.debug("Найдено {} топ рекомендаций для пользователя {}",
+                    recommendations.size(), currentUserId);
+
             return recommendations;
+
         } catch (Exception e) {
-            log.error("❌ Ошибка при получении топ рекомендаций для пользователя {}: {}", currentUserId, e.getMessage());
+            log.error("Ошибка при получении топ рекомендаций для пользователя {}: {}",
+                    currentUserId, e.getMessage(), e);
             return Collections.emptyList();
         }
     }
 
+    /**
+     * Получить всех пользователей с пагинацией (без поиска)
+     */
     @Override
     public UserRecommendationListDto getAllRecommendations(Long currentUserId, int page) {
         try {
-            Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("createdAt").descending());
-            Slice<User> usersSlice = userRepository.findAllRecommendationsForUser(currentUserId, pageable);
+            log.debug("Получение всех рекомендаций для пользователя: {}, страница: {}",
+                    currentUserId, page);
 
+            // Создаем Pageable с сортировкой по популярности
+            Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+
+            // Используем поиск с пустым запросом (покажет всех пользователей)
+            Slice<User> usersSlice = userRepository.findRecommendationsWithSearch(
+                    currentUserId, "", pageable);
+
+            // Маппим результаты
             List<UserRecommendationDto> recommendations = usersSlice.getContent()
                     .stream()
                     .map(user -> recommendationsMapper.mapToRecommendationDto(user, currentUserId))
                     .collect(Collectors.toList());
 
+            log.debug("Найдено {} рекомендаций на странице {} для пользователя {}",
+                    recommendations.size(), page, currentUserId);
+
             return UserRecommendationListDto.builder()
                     .userRecommendations(recommendations)
                     .currentPage(page)
                     .itemsPerPage(PAGE_SIZE)
-                    .totalPages(null) // Slice не предоставляет общее количество страниц
-                    .totalItems(null) // Slice не предоставляет общее количество элементов
                     .hasNext(usersSlice.hasNext())
                     .hasPrevious(usersSlice.hasPrevious())
                     .nextPage(usersSlice.hasNext() ? page + 1 : null)
@@ -77,41 +92,48 @@ public class RecommendationServiceImpl implements RecommendationService {
                     .build();
 
         } catch (Exception e) {
-            log.error("Ошибка при получении всех рекомендаций для пользователя {}: {}", currentUserId, e.getMessage());
-            return UserRecommendationListDto.builder()
-                    .userRecommendations(Collections.emptyList())
-                    .currentPage(page)
-                    .itemsPerPage(PAGE_SIZE)
-                    .hasNext(false)
-                    .hasPrevious(false)
-                    .build();
+            log.error("Ошибка при получении всех рекомендаций для пользователя {}, страница {}: {}",
+                    currentUserId, page, e.getMessage(), e);
+            return createEmptyRecommendations(page);
         }
     }
 
+    /**
+     * Поиск пользователей по запросу с пагинацией
+     */
     @Override
-    public UserRecommendationListDto searchRecommendations(Long currentUserId, String query,
-                                                           String sort, String followers,
-                                                           String status, int page) {
+    public UserRecommendationListDto searchRecommendations(
+            Long currentUserId,
+            String searchQuery,
+            int page) {
+
         try {
-            // Создаем Pageable с нужной сортировкой
-            Sort sortOrder = createSortOrder(sort);
-            Pageable pageable = PageRequest.of(page, PAGE_SIZE, sortOrder);
+            log.debug("Поиск рекомендаций для пользователя: {}, запрос: '{}', страница: {}",
+                    currentUserId, searchQuery, page);
 
-            // Выполняем поиск с фильтрами
-            Slice<User> usersSlice = userRepository.findRecommendationsWithFilters(
-                    currentUserId, query, followers, status, pageable);
+            // Создаем Pageable с сортировкой по популярности
+            Pageable pageable = PageRequest.of(page, PAGE_SIZE);
 
+            // Очищаем поисковый запрос
+            String cleanQuery = (searchQuery != null) ? searchQuery.trim() : "";
+
+            // Выполняем поиск
+            Slice<User> usersSlice = userRepository.findRecommendationsWithSearch(
+                    currentUserId, cleanQuery, pageable);
+
+            // Маппим результаты
             List<UserRecommendationDto> recommendations = usersSlice.getContent()
                     .stream()
                     .map(user -> recommendationsMapper.mapToRecommendationDto(user, currentUserId))
                     .collect(Collectors.toList());
 
+            log.debug("Найдено {} результатов поиска на странице {} для пользователя {}",
+                    recommendations.size(), page, currentUserId);
+
             return UserRecommendationListDto.builder()
                     .userRecommendations(recommendations)
                     .currentPage(page)
                     .itemsPerPage(PAGE_SIZE)
-                    .totalPages(null)
-                    .totalItems(null)
                     .hasNext(usersSlice.hasNext())
                     .hasPrevious(usersSlice.hasPrevious())
                     .nextPage(usersSlice.hasNext() ? page + 1 : null)
@@ -119,28 +141,24 @@ public class RecommendationServiceImpl implements RecommendationService {
                     .build();
 
         } catch (Exception e) {
-            log.error("Ошибка при поиске рекомендаций: {}", e.getMessage());
-            return UserRecommendationListDto.builder()
-                    .userRecommendations(Collections.emptyList())
-                    .currentPage(page)
-                    .itemsPerPage(PAGE_SIZE)
-                    .hasNext(false)
-                    .hasPrevious(false)
-                    .build();
+            log.error("Ошибка при поиске рекомендаций для пользователя {}, запрос '{}', страница {}: {}",
+                    currentUserId, searchQuery, page, e.getMessage(), e);
+            return createEmptyRecommendations(page);
         }
     }
 
-    private Sort createSortOrder(String sortType) {
-        switch (sortType) {
-            case "popular":
-                return Sort.by("followersCount").descending();
-            case "alphabetical":
-                return Sort.by("firstName").ascending();
-            case "active":
-                return Sort.by("lastActiveAt").descending();
-            case "newest":
-            default:
-                return Sort.by("createdAt").descending();
-        }
+    /**
+     * Создать пустой результат
+     */
+    private UserRecommendationListDto createEmptyRecommendations(int page) {
+        return UserRecommendationListDto.builder()
+                .userRecommendations(Collections.emptyList())
+                .currentPage(page)
+                .itemsPerPage(PAGE_SIZE)
+                .hasNext(false)
+                .hasPrevious(false)
+                .nextPage(null)
+                .previousPage(null)
+                .build();
     }
 }

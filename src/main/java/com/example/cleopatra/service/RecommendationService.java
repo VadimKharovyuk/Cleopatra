@@ -7,10 +7,21 @@ import java.util.List;
 
 public interface RecommendationService {
 
-    List<UserRecommendationDto> getTopRecommendations(Long currentUserId) ;
+    /**
+     * Главная страница - топ рекомендации (небольшое количество)
+     */
+    List<UserRecommendationDto> getTopRecommendations(Long currentUserId);
 
+    /**
+     * Поиск/просмотр всех пользователей с пагинацией
+     */
     UserRecommendationListDto getAllRecommendations(Long currentUserId, int page);
 
-
-    UserRecommendationListDto searchRecommendations(Long currentUserId, String query, String sort, String followers, String status, int page);
+    /**
+     * Поиск пользователей по запросу с пагинацией
+     */
+    UserRecommendationListDto searchRecommendations(
+            Long currentUserId,
+            String searchQuery,
+            int page);
 }
