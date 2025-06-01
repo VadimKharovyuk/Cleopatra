@@ -16,4 +16,6 @@ public class UserRecommendationDto {
     private Long followersCount;
     private Boolean isFollowing;
 
+
+
 }

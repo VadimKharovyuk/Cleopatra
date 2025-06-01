@@ -1020,18 +1020,34 @@
             <!-- Stats Section -->
             <div class="stats-section">
                 <a href="#" class="stat-item">
-                    <span class="stat-number">0</span>
+                    <span class="stat-number" th:text="${user.followingCount ?: 0}">0</span>
                     <span class="stat-label">Подписок</span>
                 </a>
                 <a href="#" class="stat-item">
-                    <span class="stat-number">0</span>
+                    <span class="stat-number" th:text="${user.followersCount ?: 0}">0</span>
                     <span class="stat-label">Подписчиков</span>
                 </a>
                 <a href="#" class="stat-item">
-                    <span class="stat-number">0</span>
+                    <span class="stat-number" th:text="${user.postsCount ?: 0}">0</span>
                     <span class="stat-label">Постов</span>
                 </a>
             </div>
+
+<!--            &lt;!&ndash; Stats Section &ndash;&gt;-->
+<!--            <div class="stats-section">-->
+<!--                <a href="#" class="stat-item">-->
+<!--                    <span class="stat-number">0</span>-->
+<!--                    <span class="stat-label">Подписок</span>-->
+<!--                </a>-->
+<!--                <a href="#" class="stat-item">-->
+<!--                    <span class="stat-number">0</span>-->
+<!--                    <span class="stat-label">Подписчиков</span>-->
+<!--                </a>-->
+<!--                <a href="#" class="stat-item">-->
+<!--                    <span class="stat-number">0</span>-->
+<!--                    <span class="stat-label">Постов</span>-->
+<!--                </a>-->
+<!--            </div>-->
 
             <!-- Navigation Tabs -->
             <div class="profile-nav">

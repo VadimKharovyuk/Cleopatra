@@ -36,6 +36,13 @@ public class UserMapper {
         ///фон
         response.setImgBackground(user.getImgBackground());
         response.setImgBackgroundID(user.getImgBackgroundID());
+        ///подпищики
+        // Устанавливаем значения по умолчанию, если в User они null
+        response.setFollowersCount(user.getFollowersCount() != null ? user.getFollowersCount() : 0L);
+        response.setFollowingCount(user.getFollowingCount() != null ? user.getFollowingCount() : 0L);
+
+
+        response.setPostsCount(user.getPostsCount() != null ? user.getPostsCount() : 0L);
 
         response.setCreatedAt(user.getCreatedAt());
         return response;

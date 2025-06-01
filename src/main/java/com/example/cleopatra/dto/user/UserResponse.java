@@ -20,9 +20,14 @@ public class UserResponse {
     private String imgId;
 
 
-    ///toDu
+
     private String imgBackground ;
     private String imgBackgroundID;
+
+
+    private Long followersCount; // количество подписчиков
+    private Long followingCount; // количество подписок
+    private Long postsCount;
 
     private LocalDateTime createdAt;
 }

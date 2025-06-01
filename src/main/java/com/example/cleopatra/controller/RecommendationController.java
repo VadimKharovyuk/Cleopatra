@@ -71,7 +71,7 @@ public class RecommendationController {
         }
 
         try {
-            // TODO: Реализовать поиск с фильтрами в сервисе
+
             UserRecommendationListDto recommendations = recommendationService.searchRecommendations(
                     currentUserId, query, sort, followers, status, page);
             return ResponseEntity.ok(recommendations);

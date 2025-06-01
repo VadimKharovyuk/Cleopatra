@@ -19,6 +19,7 @@ public class RecommendationsMapper {
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setFollowersCount((long) (user.getFollowersCount() != null ? user.getFollowersCount().intValue() : 0));
+
         dto.setIsFollowing(false); // TODO: реализовать когда будет Follow entity
 
         return dto;

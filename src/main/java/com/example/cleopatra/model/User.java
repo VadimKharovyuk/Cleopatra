@@ -55,8 +55,15 @@ public class User {
 
     private String imgBackgroundID;
 
-    ///ToDU add to Dto
+
+    @Column(name = "followers_count")
     private Long followersCount = 0L;
+
+    @Column(name = "following_count")
+    private Long followingCount = 0L;
+
+    @Column(name = "posts_count")
+    private Long postsCount = 0L;
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
