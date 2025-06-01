@@ -263,6 +263,25 @@
                 display: block;
             }
         }
+        .logout-btn {
+            color: #e53e3e !important;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(229, 62, 62, 0.1) !important;
+            border-left-color: #e53e3e !important;
+            color: #c53030 !important;
+        }
+
+        .logout-btn .nav-icon {
+            color: #e53e3e;
+        }
+
+        .logout-btn:hover .nav-icon {
+            color: #c53030;
+        }
     </style>
 </th:block>
 
@@ -353,7 +372,17 @@
                 <i class="fas fa-cog nav-icon"></i>
                 <span class="nav-text">Настройки</span>
             </a>
+
+            <!-- Кнопка выхода -->
+            <a href="/logout"
+               class="nav-item logout-btn"
+               onclick="return confirm('Вы уверены, что хотите выйти?')">
+                <i class="fas fa-sign-out-alt nav-icon"></i>
+                <span class="nav-text">Выйти</span>
+            </a>
         </div>
+
+
 
 
     </nav>

@@ -842,7 +842,17 @@
       <li><a href="#" class="nav-link">Шоу</a></li>
       <li><a href="#" class="nav-link">Галерея</a></li>
       <li><a href="#" class="nav-link">Контакты</a></li>
-      <li><a href="/login" class="nav-link">Вход</a></li>
+<!--      <li><a href="/login" class="nav-link">Вход</a></li>-->
+      <li th:if="${currentUserId == null}">
+        <a href="/login" class="nav-link">Вход</a>
+      </li>
+      <li th:if="${currentUserId != null}">
+        <a th:href="@{/profile/{userId}(userId=${currentUserId})}" class="nav-link">Профиль</a>
+      </li>
+
+      <li th:if="${currentUserId != null}">
+        <a href="/logout" class="nav-link">Выход</a>
+      </li>
     </ul>
 
     <!-- Mobile Menu Toggle -->
@@ -871,8 +881,17 @@
       <li class="mobile-nav-item">
         <a href="#" class="mobile-nav-link">Контакты</a>
       </li>
-      <li class="mobile-nav-item">
+<!--      <li class="mobile-nav-item">-->
+<!--        <a href="/login" class="mobile-nav-link">Вход</a>-->
+<!--      </li>-->
+      <li class="mobile-nav-item" th:if="${currentUserId == null}">
         <a href="/login" class="mobile-nav-link">Вход</a>
+      </li>
+      <li class="mobile-nav-item" th:if="${currentUserId != null}">
+        <a th:href="@{/profile/{userId}(userId=${currentUserId})}" class="mobile-nav-link">Профиль</a>
+      </li>
+      <li class="mobile-nav-item" th:if="${currentUserId != null}">
+        <a href="/logout" class="mobile-nav-link">Выход</a>
       </li>
       <li class="mobile-nav-item">
         <a href="/register" class="mobile-nav-link mobile-nav-cta">Присоединиться</a>
