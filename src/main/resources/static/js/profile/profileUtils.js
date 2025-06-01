@@ -8,25 +8,35 @@ class ProfileUtils {
 
     // Поделиться профилем
     async shareProfile() {
+        console.log('🔗 shareProfile() started');
+
         const profileUrl = window.location.href;
+        console.log('📍 Profile URL:', profileUrl);
 
         // Проверяем поддержку Web Share API
         if (navigator.share) {
             try {
+                console.log('📱 Using Web Share API');
                 await navigator.share({
                     title: `Профиль ${this.userName} - Cleopatra`,
                     text: `Посмотрите профиль ${this.userName} в Cleopatra`,
                     url: profileUrl
                 });
+                console.log('✅ Share completed');
             } catch (err) {
-                console.log('Ошибка при sharing:', err);
+                if (err.name !== 'AbortError') { // Игнорируем отмену пользователем
+                    console.log('❌ Ошибка при sharing:', err);
+                }
             }
         } else {
             // Fallback - копируем в буфер обмена
             try {
+                console.log('📋 Using clipboard fallback');
                 await navigator.clipboard.writeText(profileUrl);
                 window.notificationManager.show('Ссылка на профиль скопирована в буфер обмена', 'success');
+                console.log('✅ Copied to clipboard');
             } catch (error) {
+                console.log('❌ Clipboard failed, using prompt');
                 // Если и это не работает, показываем ссылку
                 prompt('Скопируйте ссылку на профиль:', profileUrl);
             }

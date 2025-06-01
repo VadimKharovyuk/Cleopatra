@@ -2,12 +2,15 @@ package com.example.cleopatra.config;
 
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * Глобальный ControllerAdvice для автоматического добавления
@@ -74,9 +77,29 @@ public class GlobalControllerAdvice {
      */
     @ModelAttribute("currentUserId")
     public Long getCurrentUserId() {
-        UserResponse user = getCurrentUser();
-        return user != null ? user.getId() : null;
+        try {
+            HttpServletRequest request = ((ServletRequestAttributes)
+                    RequestContextHolder.currentRequestAttributes()).getRequest();
+
+            String userAgent = request.getHeader("User-Agent");
+            String requestURI = request.getRequestURI();
+            String method = request.getMethod();
+
+            log.debug("🔍 getCurrentUserId() - URI: {}, Method: {}, UserAgent: {}",
+                    requestURI, method, userAgent);
+
+            UserResponse user = getCurrentUser();
+            return user != null ? user.getId() : null;
+        } catch (Exception e) {
+            log.debug("❌ Ошибка в getCurrentUserId(): {}", e.getMessage());
+            return null;
+        }
     }
+//    @ModelAttribute("currentUserId")
+//    public Long getCurrentUserId() {
+//        UserResponse user = getCurrentUser();
+//        return user != null ? user.getId() : null;
+//    }
 
     /**
      * Добавляет email текущего пользователя

@@ -958,11 +958,11 @@
                         <span>Подписаться</span>
                     </a>
 
-                    <!-- Поделиться профилем - показываем для чужих профилей -->
-                    <a href="#" class="btn-luxury btn-secondary-luxury" onclick="shareProfile()">
+                    <button type="button" onclick="shareProfile()" class="btn btn-outline-luxury">
                         <i class="fas fa-share"></i>
                         <span>Поделиться</span>
-                    </a>
+                    </button>
+
 
                     <!-- Заблокировать - показываем только для других пользователей -->
                     <a href="#" class="btn-luxury btn-danger-luxury" onclick="blockUser()">
@@ -979,14 +979,9 @@
                         <span>Редактировать профиль</span>
                     </a>
 
-<!--                    &lt;!&ndash; Настройки - дополнительная кнопка для своего профиля &ndash;&gt;-->
-<!--                    <a href="/settings" class="btn-luxury btn-secondary-luxury">-->
-<!--                        <i class="fas fa-cog"></i>-->
-<!--                        <span>Настройки</span>-->
-<!--                    </a>-->
 
                     <!-- Статистика профиля - полезно для владельца -->
-                    <a href="#" class="btn-luxury btn-secondary-luxury" onclick="showProfileStats()">
+                    <a th:href="@{/showProfileStats/{userId}/stats(userId=${user.id})}" class="btn-luxury btn-secondary-luxury">
                         <i class="fas fa-chart-bar"></i>
                         <span>Статистика</span>
                     </a>
