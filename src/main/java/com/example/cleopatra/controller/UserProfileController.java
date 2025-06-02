@@ -1,8 +1,10 @@
 package com.example.cleopatra.controller;
 
+import com.example.cleopatra.ExistsException.ImageValidationException;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserRecommendationDto;
 import com.example.cleopatra.dto.user.UserResponse;
+import com.example.cleopatra.service.ImageValidator;
 import com.example.cleopatra.service.RecommendationService;
 import com.example.cleopatra.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class UserProfileController {
 
     private final UserService userService;
     private final RecommendationService recommendationService;
+    private final ImageValidator imageValidator;
 
 
 
@@ -69,6 +72,11 @@ public class UserProfileController {
 
             model.addAttribute("user", user);
             model.addAttribute("updateProfileDto", dto);
+
+            model.addAttribute("maxFileSize", imageValidator.getMaxFileSizeMB());
+            model.addAttribute("allowedFormats", imageValidator.getAllowedExtensions());
+            model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());
+
             return "profile/edit";
         } catch (RuntimeException e) {
             log.error("Ошибка при загрузке страницы редактирования профиля {}: {}", userId, e.getMessage());
@@ -110,29 +118,64 @@ public class UserProfileController {
     }
 
     /**
-     * Обрабатывает загрузку аватара
+     * Загрузка аватара
      */
-    @PostMapping("/{userId}/avatar/upload")
+    @PostMapping("/{userId}/avatar")
     public String uploadAvatar(
             @PathVariable Long userId,
-            @RequestParam("avatarFile") MultipartFile file,
+            @RequestParam("avatar") MultipartFile file,
             RedirectAttributes redirectAttributes) {
 
+        // ✅ Минимальная проверка в контроллере (для быстрого ответа)
         if (file.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Пожалуйста, выберите файл для загрузки");
+            redirectAttributes.addFlashAttribute("errorMessage", "Пожалуйста, выберите файл");
             return "redirect:/profile/" + userId + "/edit";
         }
 
         try {
-            userService.uploadAvatar(userId, file);
-            redirectAttributes.addFlashAttribute("successMessage", "Аватар успешно загружен!");
-        } catch (RuntimeException e) {
-            log.error("Ошибка при загрузке аватара для пользователя {}: {}", userId, e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при загрузке аватара: " + e.getMessage());
-        }
+            // ✅ Основная валидация и бизнес-логика В СЕРВИСЕ
+            UserResponse updatedUser = userService.uploadAvatar(userId, file);
+            redirectAttributes.addFlashAttribute("successMessage", "Аватар успешно обновлен!");
+            return "redirect:/profile/" + userId;
 
-        return "redirect:/profile/" + userId;
+        } catch (ImageValidationException e) {
+            // Специфичные ошибки валидации изображений
+            log.warn("Ошибка валидации изображения для пользователя {}: {}", userId, e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/profile/" + userId + "/edit";
+
+        } catch (RuntimeException e) {
+            // Общие ошибки
+            log.error("Ошибка при загрузке аватара для пользователя {}: {}", userId, e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при загрузке аватара. Попробуйте позже.");
+            return "redirect:/profile/" + userId + "/edit";
+        }
     }
+//
+//    /**
+//     * Обрабатывает загрузку аватара
+//     */
+//    @PostMapping("/{userId}/avatar/upload")
+//    public String uploadAvatar(
+//            @PathVariable Long userId,
+//            @RequestParam("avatarFile") MultipartFile file,
+//            RedirectAttributes redirectAttributes) {
+//
+//        if (file.isEmpty()) {
+//            redirectAttributes.addFlashAttribute("errorMessage", "Пожалуйста, выберите файл для загрузки");
+//            return "redirect:/profile/" + userId + "/edit";
+//        }
+//
+//        try {
+//            userService.uploadAvatar(userId, file);
+//            redirectAttributes.addFlashAttribute("successMessage", "Аватар успешно загружен!");
+//        } catch (RuntimeException e) {
+//            log.error("Ошибка при загрузке аватара для пользователя {}: {}", userId, e.getMessage());
+//            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при загрузке аватара: " + e.getMessage());
+//        }
+//
+//        return "redirect:/profile/" + userId;
+//    }
 
     /**
      * Удаляет аватар пользователя

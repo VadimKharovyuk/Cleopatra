@@ -7,7 +7,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -68,6 +70,20 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<TrustedDevice> trustedDevices = new ArrayList<>();
+
+
+
+    // Подписчики (кто подписался на этого пользователя)
+    @OneToMany(mappedBy = "subscribedTo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Subscription> subscribers = new HashSet<>();
+
+    // Подписки (на кого подписан этот пользователь)
+    @OneToMany(mappedBy = "subscriber", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Subscription> subscriptions = new HashSet<>();
+
+
 
 
     // Системные поля
