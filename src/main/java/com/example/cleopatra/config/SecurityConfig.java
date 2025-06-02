@@ -1,6 +1,7 @@
 package com.example.cleopatra.config;
 import com.example.cleopatra.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,10 +18,14 @@ public class SecurityConfig {
 
     private final AuthenticationService authenticationService;
 
+    @Value("${security.rememberme.key}")
+    private String rememberMeKey;
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -44,10 +49,10 @@ public class SecurityConfig {
                                 "/devices/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
-                        // API эндпоинты - ПОРЯДОК ВАЖЕН!
-                        .requestMatchers("/api/auth/**").permitAll()  // Сначала более специфичные
-                        .requestMatchers("/api/subscriptions/**").authenticated()  // Потом менее специфичные
-                        // .requestMatchers("/api/**").permitAll()  // ← УБЕРИ ЭТУ СТРОКУ!
+                        // API эндпоинты - порядок важен!
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/subscriptions/**").authenticated()
+                        // .requestMatchers("/api/**").permitAll() ← эту строку не включай
 
                         // Эндпоинты только для админов
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -55,7 +60,7 @@ public class SecurityConfig {
                         // Эндпоинты для артистов и админов
                         .requestMatchers("/performer/**").hasAnyRole("PERFORMER", "ADMIN")
 
-                        // Все остальные требуют аутентификации
+                        // Остальные требуют аутентификации
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -64,11 +69,16 @@ public class SecurityConfig {
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
+                .rememberMe(remember -> remember
+                        .key(rememberMeKey)
+                        .rememberMeParameter("remember-me")
+                        .tokenValiditySeconds(60 * 60 * 24 * 14) // 14 дней
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("JSESSIONID", "remember-me")
                         .permitAll()
                 )
                 .userDetailsService(authenticationService);
