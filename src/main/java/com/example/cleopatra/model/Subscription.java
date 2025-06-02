@@ -6,13 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 @Entity
-@Table(name = "subscriptions",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"subscriber_id", "subscribed_to_id"}),
-        indexes = {
-                @Index(name = "idx_subscriber_id", columnList = "subscriber_id"),
-                @Index(name = "idx_subscribed_to_id", columnList = "subscribed_to_id"),
-                @Index(name = "idx_created_at", columnList = "created_at")
-        })
+@Table(name = "subscriptions")
 @Getter
 @Setter
 @NoArgsConstructor

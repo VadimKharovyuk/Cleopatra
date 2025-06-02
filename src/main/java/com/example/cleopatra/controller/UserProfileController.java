@@ -59,13 +59,11 @@ public class UserProfileController {
         }
     }
 
-
     @GetMapping("/{userId}/edit")
     public String showEditProfile(@PathVariable Long userId, Model model) {
         try {
             UserResponse user = userService.getUserById(userId);
 
-            // Заполняем DTO текущими данными
             UpdateProfileDto dto = new UpdateProfileDto();
             dto.setFirstName(user.getFirstName());
             dto.setLastName(user.getLastName());
@@ -73,6 +71,7 @@ public class UserProfileController {
             model.addAttribute("user", user);
             model.addAttribute("updateProfileDto", dto);
 
+            // ✅ Добавляем настройки валидации
             model.addAttribute("maxFileSize", imageValidator.getMaxFileSizeMB());
             model.addAttribute("allowedFormats", imageValidator.getAllowedExtensions());
             model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());
@@ -84,7 +83,6 @@ public class UserProfileController {
             return "error/404";
         }
     }
-
 
     @PostMapping("/{userId}/update")
     public String updateProfile(
@@ -99,6 +97,13 @@ public class UserProfileController {
                 UserResponse user = userService.getUserById(userId);
                 model.addAttribute("user", user);
                 model.addAttribute("updateProfileDto", updateProfileDto);
+
+                // Не забываем добавить настройки валидации при ошибках
+                model.addAttribute("maxFileSize", imageValidator.getMaxFileSizeMB());
+                model.addAttribute("allowedFormats", imageValidator.getAllowedExtensions());
+                model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());
+
+
                 return "profile/edit";
             } catch (RuntimeException e) {
                 model.addAttribute("error", "Пользователь не найден");
@@ -118,7 +123,9 @@ public class UserProfileController {
     }
 
     /**
-     * Загрузка аватара
+     * ✅ ИСПРАВЛЕННЫЙ маршрут для загрузки аватара
+     * URL: /profile/{userId}/avatar (БЕЗ /upload)
+     * Параметр: avatar (НЕ avatarFile)
      */
     @PostMapping("/{userId}/avatar")
     public String uploadAvatar(
@@ -126,8 +133,11 @@ public class UserProfileController {
             @RequestParam("avatar") MultipartFile file,
             RedirectAttributes redirectAttributes) {
 
-        // ✅ Минимальная проверка в контроллере (для быстрого ответа)
+        log.info("📤 Загрузка аватара для пользователя {}: {}", userId, file.getOriginalFilename());
+
+        // ✅ Минимальная проверка в контроллере
         if (file.isEmpty()) {
+            log.warn("⚠️ Пустой файл аватара для пользователя {}", userId);
             redirectAttributes.addFlashAttribute("errorMessage", "Пожалуйста, выберите файл");
             return "redirect:/profile/" + userId + "/edit";
         }
@@ -135,69 +145,29 @@ public class UserProfileController {
         try {
             // ✅ Основная валидация и бизнес-логика В СЕРВИСЕ
             UserResponse updatedUser = userService.uploadAvatar(userId, file);
+
+            log.info("✅ Аватар успешно загружен для пользователя {}", userId);
             redirectAttributes.addFlashAttribute("successMessage", "Аватар успешно обновлен!");
             return "redirect:/profile/" + userId;
 
         } catch (ImageValidationException e) {
             // Специфичные ошибки валидации изображений
-            log.warn("Ошибка валидации изображения для пользователя {}: {}", userId, e.getMessage());
+            log.warn("❌ Ошибка валидации аватара для пользователя {}: {}", userId, e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/profile/" + userId + "/edit";
 
         } catch (RuntimeException e) {
             // Общие ошибки
-            log.error("Ошибка при загрузке аватара для пользователя {}: {}", userId, e.getMessage());
+            log.error("❌ Ошибка при загрузке аватара для пользователя {}: {}", userId, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при загрузке аватара. Попробуйте позже.");
             return "redirect:/profile/" + userId + "/edit";
         }
     }
-//
-//    /**
-//     * Обрабатывает загрузку аватара
-//     */
-//    @PostMapping("/{userId}/avatar/upload")
-//    public String uploadAvatar(
-//            @PathVariable Long userId,
-//            @RequestParam("avatarFile") MultipartFile file,
-//            RedirectAttributes redirectAttributes) {
-//
-//        if (file.isEmpty()) {
-//            redirectAttributes.addFlashAttribute("errorMessage", "Пожалуйста, выберите файл для загрузки");
-//            return "redirect:/profile/" + userId + "/edit";
-//        }
-//
-//        try {
-//            userService.uploadAvatar(userId, file);
-//            redirectAttributes.addFlashAttribute("successMessage", "Аватар успешно загружен!");
-//        } catch (RuntimeException e) {
-//            log.error("Ошибка при загрузке аватара для пользователя {}: {}", userId, e.getMessage());
-//            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при загрузке аватара: " + e.getMessage());
-//        }
-//
-//        return "redirect:/profile/" + userId;
-//    }
 
     /**
-     * Удаляет аватар пользователя
-     */
-    @PostMapping("/{userId}/avatar/delete")
-    public String deleteAvatar(
-            @PathVariable Long userId,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-            userService.deleteAvatar(userId);
-            redirectAttributes.addFlashAttribute("successMessage", "Аватар успешно удален!");
-        } catch (RuntimeException e) {
-            log.error("Ошибка при удалении аватара для пользователя {}: {}", userId, e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при удалении аватара: " + e.getMessage());
-        }
-
-        return "redirect:/profile/" + userId;
-    }
-
-    /**
-     * Обрабатывает загрузку фонового изображения
+     * ✅ КОРРЕКТНЫЙ маршрут для загрузки фона
+     * URL: /profile/{userId}/background/upload (КАК В HTML)
+     * Параметр: backgroundFile (КАК В HTML)
      */
     @PostMapping("/{userId}/background/upload")
     public String uploadBackgroundImage(
@@ -205,39 +175,95 @@ public class UserProfileController {
             @RequestParam("backgroundFile") MultipartFile file,
             RedirectAttributes redirectAttributes) {
 
+        log.info("📤 Загрузка фона для пользователя {}: {}", userId, file.getOriginalFilename());
+
         if (file.isEmpty()) {
+            log.warn("⚠️ Пустой файл фона для пользователя {}", userId);
             redirectAttributes.addFlashAttribute("errorMessage", "Пожалуйста, выберите файл для загрузки");
             return "redirect:/profile/" + userId + "/edit";
         }
 
         try {
             userService.uploadBackgroundImage(userId, file);
-            redirectAttributes.addFlashAttribute("successMessage", "Фоновое изображение успешно загружено!");
-        } catch (RuntimeException e) {
-            log.error("Ошибка при загрузке фонового изображения для пользователя {}: {}", userId, e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при загрузке фонового изображения: " + e.getMessage());
-        }
 
-        return "redirect:/profile/" + userId;
+            log.info("✅ Фон успешно загружен для пользователя {}", userId);
+            redirectAttributes.addFlashAttribute("successMessage", "Фоновое изображение успешно загружено!");
+            return "redirect:/profile/" + userId;
+
+        } catch (ImageValidationException e) {
+            // Специфичные ошибки валидации изображений
+            log.warn("❌ Ошибка валидации фона для пользователя {}: {}", userId, e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/profile/" + userId + "/edit";
+
+        } catch (RuntimeException e) {
+            log.error("❌ Ошибка при загрузке фона для пользователя {}: {}", userId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при загрузке фонового изображения: " + e.getMessage());
+            return "redirect:/profile/" + userId + "/edit";
+        }
     }
 
     /**
-     * Удаляет фоновое изображение пользователя
+     * ✅ Удаление аватара
      */
-    @PostMapping("/{userId}/background/delete")
-    public String deleteBackgroundImage(
+    @PostMapping("/{userId}/avatar/delete")
+    public String deleteAvatar(
             @PathVariable Long userId,
             RedirectAttributes redirectAttributes) {
 
+        log.info("🗑️ Удаление аватара для пользователя {}", userId);
+
+        try {
+            userService.deleteAvatar(userId);
+
+            log.info("✅ Аватар успешно удален для пользователя {}", userId);
+            redirectAttributes.addFlashAttribute("successMessage", "Фотография профиля удалена!");
+            return "redirect:/profile/" + userId;
+
+        } catch (RuntimeException e) {
+            log.error("❌ Ошибка при удалении аватара для пользователя {}: {}", userId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при удалении фотографии профиля");
+            return "redirect:/profile/" + userId + "/edit";
+        }
+    }
+
+    /**
+     * ✅ Удаление фона
+     */
+    @PostMapping("/{userId}/background/delete")
+    public String deleteBackground(
+            @PathVariable Long userId,
+            RedirectAttributes redirectAttributes) {
+
+        log.info("🗑️ Удаление фона для пользователя {}", userId);
+
         try {
             userService.deleteBackgroundImage(userId);
-            redirectAttributes.addFlashAttribute("successMessage", "Фоновое изображение успешно удалено!");
-        } catch (RuntimeException e) {
-            log.error("Ошибка при удалении фонового изображения для пользователя {}: {}", userId, e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при удалении фонового изображения: " + e.getMessage());
-        }
 
-        return "redirect:/profile/" + userId;
+            log.info("✅ Фон успешно удален для пользователя {}", userId);
+            redirectAttributes.addFlashAttribute("successMessage", "Фоновое изображение удалено!");
+            return "redirect:/profile/" + userId;
+
+        } catch (RuntimeException e) {
+            log.error("❌ Ошибка при удалении фона для пользователя {}: {}", userId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при удалении фонового изображения");
+            return "redirect:/profile/" + userId + "/edit";
+        }
+    }
+
+    // ========================================
+    // ДОПОЛНИТЕЛЬНЫЕ УТИЛИТАРНЫЕ МЕТОДЫ
+    // ========================================
+
+
+
+    /**
+     * Добавление настроек валидации в модель
+     */
+    private void addValidationAttributesToModel(Model model) {
+        model.addAttribute("maxFileSize", imageValidator.getMaxFileSizeMB());
+        model.addAttribute("allowedFormats", imageValidator.getAllowedExtensions());
+        model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());
     }
 
 

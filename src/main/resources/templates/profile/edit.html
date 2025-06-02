@@ -553,12 +553,31 @@
                     <div class="upload-info">
                         <p class="upload-hint">
                             <i class="fas fa-info-circle me-1"></i>
-                            Поддерживаемые форматы: JPG, PNG, GIF. Максимальный размер: 5 МБ
+                            Поддерживаемые форматы: <span th:text="${allowedFormats}">JPG, PNG</span>.
+                            Максимальный размер: <span th:text="${maxFileSize}">10</span> МБ
                         </p>
                     </div>
 
-                    <!-- ✅ ОТДЕЛЬНАЯ ФОРМА ДЛЯ АВАТАРА -->
-                    <form th:action="@{/profile/{userId}/avatar/upload(userId=${user.id})}"
+<!--                    <form id="avatarUploadForm" enctype="multipart/form-data">-->
+<!--                        <input-->
+<!--                                type="file"-->
+<!--                                id="avatarFile"-->
+<!--                                name="avatar"-->
+<!--                                accept="image/*"-->
+<!--                                onchange="uploadAvatarAjax()"-->
+<!--                        required-->
+<!--                        >-->
+<!--                        <label for="avatarFile" class="upload-btn" id="avatarUploadBtn">-->
+<!--                            <i class="fas fa-upload"></i>-->
+<!--                            <span>Загрузить фото</span>-->
+<!--                        </label>-->
+<!--                    </form>-->
+
+
+
+
+<!--                    &lt;!&ndash; ✅ ИСПРАВЛЕННАЯ ФОРМА ДЛЯ АВАТАРА &ndash;&gt;-->
+                    <form th:action="@{/profile/{userId}/avatar(userId=${user.id})}"
                           method="post"
                           enctype="multipart/form-data"
                           id="avatarUploadForm"
@@ -566,7 +585,7 @@
                         <div class="file-upload">
                             <input type="file"
                                    id="avatarFile"
-                                   name="avatarFile"
+                                   name="avatar"
                                    accept="image/*"
                                    onchange="uploadAvatar()"
                                    required>
@@ -600,7 +619,6 @@
             </p>
 
             <div class="background-preview" id="backgroundPreview">
-                <!-- ✅ ИСПРАВЛЕН ID: backgroundImage -> backgroundImagePreview -->
                 <img th:if="${user.imgBackground}"
                      th:src="${user.imgBackground}"
                      alt="Фон профиля"
@@ -616,11 +634,25 @@
                 <div class="upload-info" style="margin-bottom: 1rem;">
                     <p class="upload-hint">
                         <i class="fas fa-info-circle me-1"></i>
-                        Поддерживаемые форматы: JPG, PNG. Максимальный размер: 10 МБ
+                        Поддерживаемые форматы: <span th:text="${allowedFormats}">JPG, PNG</span>.
+                        Максимальный размер: <span th:text="${maxFileSize}">10</span> МБ
                     </p>
                 </div>
 
-                <!-- ✅ ОТДЕЛЬНАЯ ФОРМА ДЛЯ ФОНА -->
+<!--                <form id="backgroundUploadForm" enctype="multipart/form-data">-->
+<!--                    <input type="file"-->
+<!--                           id="backgroundFile"-->
+<!--                           name="background"-->
+<!--                           accept="image/*"-->
+<!--                           onchange="uploadBackgroundAjax()"-->
+<!--                    required>-->
+<!--                    <label for="backgroundFile" class="upload-btn" id="backgroundUploadBtn">-->
+<!--                        <i class="fas fa-upload"></i>-->
+<!--                        <span>Загрузить фон</span>-->
+<!--                    </label>-->
+<!--                </form>-->
+
+                 ✅ ИСПРАВЛЕННАЯ ФОРМА ДЛЯ ФОНА
                 <form th:action="@{/profile/{userId}/background/upload(userId=${user.id})}"
                       method="post"
                       enctype="multipart/form-data"
@@ -656,10 +688,26 @@
     </div>
 </main>
 
+
 <!-- JS в конце страницы -->
 <th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
 
+<script th:src="@{/js/profile/AjaxAvatarUploader.js}"></script>
+<script th:src="@{/js/profile/AjaxBackgroundUploader.js}"></script>
 <script>
+    // ========================================
+    // КОНФИГУРАЦИЯ ВАЛИДАЦИИ ИЗ BACKEND
+    // ========================================
+
+    // Получаем настройки валидации из Thymeleaf
+    const VALIDATION_CONFIG = {
+        maxFileSize: /*[[${maxFileSize}]]*/ 10, // МБ из ImageValidator
+        allowedFormats: /*[[${allowedFormats}]]*/ ['.jpg', '.jpeg', '.png'],
+        validationRules: /*[[${validationRules}]]*/ 'Максимальный размер: 10 MB. Поддерживаемые форматы: .jpg, .jpeg, .png'
+    };
+
+    console.log('⚙️ Настройки валидации:', VALIDATION_CONFIG);
+
     // ========================================
     // ФУНКЦИИ ЗАГРУЗКИ ИЗОБРАЖЕНИЙ
     // ========================================
@@ -673,16 +721,26 @@
         console.log('🔍 Upload Avatar:', { form: !!form, fileInput: !!fileInput });
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
-            console.log('📁 Файл выбран:', fileInput.files[0].name);
+            const file = fileInput.files[0];
+            console.log('📁 Файл выбран:', file.name, `(${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+
+            // ✅ ВАЛИДАЦИЯ ПЕРЕД ЗАГРУЗКОЙ
+            if (!validateImageFile(file, 'avatar')) {
+                fileInput.value = ''; // Очищаем input
+                return;
+            }
 
             // Показываем превью
             previewImage(fileInput, 'avatarPreview', 'avatarPlaceholder');
 
-            // Добавляем loading состояние
+            // ✅ ИСПРАВЛЕНО: Добавляем loading состояние ПРАВИЛЬНО
             if (uploadBtn) {
                 uploadBtn.classList.add('loading');
                 uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Загружаем...</span>';
             }
+
+            // ✅ Помечаем форму как отправляющуюся
+            form.setAttribute('data-submitting', 'true');
 
             // Отправляем форму
             console.log('🚀 Отправляем форму аватара');
@@ -701,16 +759,26 @@
         console.log('🔍 Upload Background:', { form: !!form, fileInput: !!fileInput });
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
-            console.log('📁 Фоновый файл выбран:', fileInput.files[0].name);
+            const file = fileInput.files[0];
+            console.log('📁 Фоновый файл выбран:', file.name, `(${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+
+            // ✅ ВАЛИДАЦИЯ ПЕРЕД ЗАГРУЗКОЙ
+            if (!validateImageFile(file, 'background')) {
+                fileInput.value = ''; // Очищаем input
+                return;
+            }
 
             // Показываем превью
             previewBackgroundImage(fileInput);
 
-            // Добавляем loading состояние
+            // ✅ ИСПРАВЛЕНО: Добавляем loading состояние ПРАВИЛЬНО
             if (uploadBtn) {
                 uploadBtn.classList.add('loading');
                 uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Загружаем...</span>';
             }
+
+            // ✅ Помечаем форму как отправляющуюся
+            form.setAttribute('data-submitting', 'true');
 
             // Отправляем форму
             console.log('🚀 Отправляем форму фона');
@@ -751,6 +819,7 @@
 
             reader.onerror = function() {
                 console.error('❌ Ошибка при чтении файла аватара');
+                showErrorAlert('Ошибка при чтении файла изображения');
             };
 
             reader.readAsDataURL(input.files[0]);
@@ -759,7 +828,6 @@
 
     // Background image preview для ФОНА
     function previewBackgroundImage(input) {
-        // ✅ ИСПРАВЛЕНО: используем правильный ID
         const preview = document.getElementById('backgroundImagePreview');
         const placeholder = document.getElementById('backgroundPlaceholder');
 
@@ -785,6 +853,7 @@
 
             reader.onerror = function() {
                 console.error('❌ Ошибка при чтении файла фона');
+                showErrorAlert('Ошибка при чтении файла изображения');
             };
 
             reader.readAsDataURL(input.files[0]);
@@ -792,23 +861,164 @@
     }
 
     // ========================================
-    // ВАЛИДАЦИЯ ФАЙЛОВ
+    // УЛУЧШЕННАЯ ВАЛИДАЦИЯ ФАЙЛОВ
     // ========================================
 
-    function validateImageFile(file, maxSizeMB, allowedTypes = ['image/jpeg', 'image/png', 'image/gif']) {
-        // Проверка размера
-        if (file.size > maxSizeMB * 1024 * 1024) {
-            alert(`Файл слишком большой. Максимальный размер: ${maxSizeMB}MB`);
+    function validateImageFile(file, type = 'image') {
+        console.log(`🔍 Валидация файла ${type}:`, {
+            name: file.name,
+            size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+            type: file.type,
+            maxAllowed: `${VALIDATION_CONFIG.maxFileSize} MB`
+        });
+
+        // ✅ 1. Проверка размера (используем настройки из backend)
+        if (file.size > VALIDATION_CONFIG.maxFileSize * 1024 * 1024) {
+            const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+            const errorMessage = `Файл слишком большой: ${fileSizeMB} MB. Максимальный размер: ${VALIDATION_CONFIG.maxFileSize} MB`;
+
+            console.warn('❌ Размер файла превышен:', errorMessage);
+            showErrorAlert(errorMessage);
             return false;
         }
 
-        // Проверка типа
-        if (!allowedTypes.includes(file.type)) {
-            alert('Неподдерживаемый формат файла. Используйте JPG, PNG или GIF');
+        // ✅ 2. Проверка пустого файла
+        if (file.size === 0) {
+            const errorMessage = 'Файл пустой или поврежден';
+            console.warn('❌ Пустой файл:', errorMessage);
+            showErrorAlert(errorMessage);
             return false;
         }
 
+        // ✅ 3. Проверка MIME типа
+        const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!allowedMimeTypes.includes(file.type.toLowerCase())) {
+            const errorMessage = `Неподдерживаемый формат: ${file.type}. Поддерживаются: JPG, PNG`;
+            console.warn('❌ Неподдерживаемый тип:', errorMessage);
+            showErrorAlert(errorMessage);
+            return false;
+        }
+
+        // ✅ 4. Проверка расширения файла
+        const fileName = file.name.toLowerCase();
+        const hasValidExtension = VALIDATION_CONFIG.allowedFormats.some(ext =>
+            fileName.endsWith(ext.toLowerCase())
+        );
+
+        if (!hasValidExtension) {
+            const errorMessage = `Неподдерживаемое расширение файла. Поддерживаются: ${VALIDATION_CONFIG.allowedFormats.join(', ')}`;
+            console.warn('❌ Неподдерживаемое расширение:', errorMessage);
+            showErrorAlert(errorMessage);
+            return false;
+        }
+
+        // ✅ 5. Дополнительная проверка для фона (больший размер)
+        if (type === 'background') {
+            // Для фона можно добавить дополнительные проверки
+            if (file.size < 50 * 1024) { // Минимум 50KB
+                const errorMessage = 'Файл слишком маленький для фонового изображения (минимум 50KB)';
+                console.warn('❌ Файл слишком маленький:', errorMessage);
+                showErrorAlert(errorMessage);
+                return false;
+            }
+        }
+
+        console.log('✅ Файл прошел валидацию');
         return true;
+    }
+
+    // ========================================
+    // СИСТЕМА УВЕДОМЛЕНИЙ
+    // ========================================
+
+    function showErrorAlert(message) {
+        // Удаляем предыдущие алерты
+        removeExistingAlerts();
+
+        // Создаем новый алерт
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert-luxury alert-danger-luxury validation-alert';
+        alertDiv.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            <span>${message}</span>
+            <button type="button" class="alert-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        // Добавляем стили для кнопки закрытия
+        alertDiv.querySelector('.alert-close').style.cssText = `
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            float: right;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            padding: 0;
+            margin-left: 1rem;
+            transition: opacity 0.2s ease;
+        `;
+
+        // Вставляем в начало main-content
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.insertBefore(alertDiv, mainContent.firstChild);
+        }
+
+        // Анимация появления
+        alertDiv.style.opacity = '0';
+        alertDiv.style.transform = 'translateY(-20px)';
+        alertDiv.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+        setTimeout(() => {
+            alertDiv.style.opacity = '1';
+            alertDiv.style.transform = 'translateY(0)';
+        }, 10);
+
+        // Автоудаление через 7 секунд
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 300);
+            }
+        }, 7000);
+
+        console.log('🚨 Показан алерт:', message);
+    }
+
+    function showSuccessAlert(message) {
+        removeExistingAlerts();
+
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert-luxury alert-success-luxury validation-alert';
+        alertDiv.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <span>${message}</span>
+        `;
+
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.insertBefore(alertDiv, mainContent.firstChild);
+        }
+
+        // Автоудаление через 3 секунды
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.style.opacity = '0';
+                setTimeout(() => alertDiv.remove(), 300);
+            }
+        }, 3000);
+    }
+
+    function removeExistingAlerts() {
+        const existingAlerts = document.querySelectorAll('.validation-alert');
+        existingAlerts.forEach(alert => alert.remove());
     }
 
     // ========================================
@@ -821,6 +1031,13 @@
 
         const counterDiv = document.createElement('div');
         counterDiv.className = 'character-counter';
+        counterDiv.style.cssText = `
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 0.25rem;
+            transition: color 0.2s ease;
+        `;
 
         function updateCounter() {
             const currentLength = input.value.length;
@@ -828,6 +1045,8 @@
 
             if (currentLength > maxLength * 0.9) {
                 counterDiv.style.color = '#d97706';
+            } else if (currentLength > maxLength * 0.8) {
+                counterDiv.style.color = '#f59e0b';
             } else {
                 counterDiv.style.color = 'var(--text-muted)';
             }
@@ -844,6 +1063,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🔍 Инициализация страницы редактирования профиля...');
+        console.log('⚙️ Настройки валидации из backend:', VALIDATION_CONFIG);
 
         // Проверяем элементы
         const avatarForm = document.getElementById('avatarUploadForm');
@@ -880,48 +1100,65 @@
         });
 
         // ========================================
-        // ВАЛИДАЦИЯ АВАТАРА
+        // ВАЛИДАЦИЯ АВАТАРА С ПРЕДВАРИТЕЛЬНОЙ ПРОВЕРКОЙ
         // ========================================
 
         if (avatarInput) {
             avatarInput.addEventListener('change', function() {
                 const file = this.files[0];
                 if (file) {
-                    console.log('📁 Файл аватара:', {
+                    console.log('📁 Файл аватара выбран:', {
                         name: file.name,
                         size: (file.size / 1024 / 1024).toFixed(2) + 'MB',
                         type: file.type
                     });
 
-                    if (!validateImageFile(file, 5)) {
+                    // Предварительная валидация (без загрузки)
+                    if (!validateImageFile(file, 'avatar')) {
                         this.value = '';
                         return;
                     }
+
+                    // Если валидация прошла, показываем превью
+                    previewImage(this, 'avatarPreview', 'avatarPlaceholder');
                 }
             });
         }
 
         // ========================================
-        // ВАЛИДАЦИЯ ФОНА
+        // ВАЛИДАЦИЯ ФОНА С ПРЕДВАРИТЕЛЬНОЙ ПРОВЕРКОЙ
         // ========================================
 
         if (backgroundInput) {
             backgroundInput.addEventListener('change', function() {
                 const file = this.files[0];
                 if (file) {
-                    console.log('📁 Файл фона:', {
+                    console.log('📁 Файл фона выбран:', {
                         name: file.name,
                         size: (file.size / 1024 / 1024).toFixed(2) + 'MB',
                         type: file.type
                     });
 
-                    if (!validateImageFile(file, 10, ['image/jpeg', 'image/png'])) {
+                    // Предварительная валидация (без загрузки)
+                    if (!validateImageFile(file, 'background')) {
                         this.value = '';
                         return;
                     }
+
+                    // Если валидация прошла, показываем превью
+                    previewBackgroundImage(this);
                 }
             });
         }
+
+        // ========================================
+        // ИНИЦИАЛИЗАЦИЯ ОБРАБОТЧИКОВ ФОРМ
+        // ========================================
+
+        // Инициализируем обработчики для форм
+        handleFormSubmission('profileForm');
+        handleFormSubmission('avatarUploadForm');
+        handleFormSubmission('backgroundUploadForm');
 
         // ========================================
         // ФОРМА ПРОФИЛЯ
@@ -930,12 +1167,18 @@
         if (profileForm && saveBtn) {
             profileForm.addEventListener('submit', function() {
                 saveBtn.disabled = true;
+                saveBtn.classList.add('loading');
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Сохранение...</span>';
+
+                // Помечаем форму как отправляющуюся
+                this.setAttribute('data-submitting', 'true');
 
                 // Восстанавливаем кнопку через 10 секунд (на случай ошибки)
                 setTimeout(() => {
                     saveBtn.disabled = false;
+                    saveBtn.classList.remove('loading');
                     saveBtn.innerHTML = '<i class="fas fa-save"></i> <span>Сохранить изменения</span>';
+                    this.removeAttribute('data-submitting');
                 }, 10000);
             });
         }
@@ -980,57 +1223,6 @@
         });
 
         // ========================================
-        // ОБРАБОТКА ОШИБОК
-        // ========================================
-
-        // Показываем детали ошибок при клике
-        document.querySelectorAll('.error-message').forEach(error => {
-            error.addEventListener('click', function() {
-                const details = this.getAttribute('title') || 'Подробности недоступны';
-                alert(details);
-            });
-        });
-
-        // ========================================
-        // УВЕДОМЛЕНИЯ
-        // ========================================
-
-        // Автоскрытие успешных уведомлений
-        const successAlerts = document.querySelectorAll('.alert-success-luxury');
-        successAlerts.forEach(alert => {
-            setTimeout(() => {
-                alert.style.opacity = '0';
-                alert.style.transform = 'translateY(-20px)';
-                setTimeout(() => {
-                    alert.remove();
-                }, 300);
-            }, 5000);
-        });
-
-        // ========================================
-        // ВОССТАНОВЛЕНИЕ СОСТОЯНИЯ
-        // ========================================
-
-        // Восстанавливаем кнопки загрузки если страница перезагружена
-        const resetUploadButtons = () => {
-            const avatarBtn = document.getElementById('avatarUploadBtn');
-            const backgroundBtn = document.getElementById('backgroundUploadBtn');
-
-            if (avatarBtn && avatarBtn.classList.contains('loading')) {
-                avatarBtn.classList.remove('loading');
-                avatarBtn.innerHTML = '<i class="fas fa-upload"></i> <span>Загрузить фото</span>';
-            }
-
-            if (backgroundBtn && backgroundBtn.classList.contains('loading')) {
-                backgroundBtn.classList.remove('loading');
-                backgroundBtn.innerHTML = '<i class="fas fa-upload"></i> <span>Загрузить фон</span>';
-            }
-        };
-
-        // Сбрасываем состояние кнопок при загрузке
-        resetUploadButtons();
-
-        // ========================================
         // ГОРЯЧИЕ КЛАВИШИ
         // ========================================
 
@@ -1058,17 +1250,12 @@
 
         console.log('✅ Страница редактирования профиля готова!');
         console.log('🎯 Доступные функции:');
-        console.log('  - Загрузка аватара с превью');
-        console.log('  - Загрузка фона с превью');
-        console.log('  - Валидация файлов');
+        console.log('  - Загрузка аватара с превью и валидацией');
+        console.log('  - Загрузка фона с превью и валидацией');
+        console.log(`  - Валидация файлов (макс. ${VALIDATION_CONFIG.maxFileSize} MB)`);
+        console.log('  - Красивые алерты для ошибок');
         console.log('  - Счетчики символов');
         console.log('  - Горячие клавиши (Ctrl+S, Escape)');
-        console.log('  - Автоматические уведомления');
-
-        // Уведомляем пользователя о готовности (только в dev режиме)
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            console.log('🚀 DEV MODE: Страница полностью загружена');
-        }
     });
 
     // ========================================
@@ -1080,6 +1267,9 @@
     window.uploadBackground = uploadBackground;
     window.previewImage = previewImage;
     window.previewBackgroundImage = previewBackgroundImage;
+    window.validateImageFile = validateImageFile;
+    window.showErrorAlert = showErrorAlert;
+    window.showSuccessAlert = showSuccessAlert;
 
     // ========================================
     // ОБРАБОТКА ОШИБОК ЗАГРУЗКИ
@@ -1088,16 +1278,27 @@
     window.addEventListener('error', function(e) {
         console.error('❌ Ошибка на странице:', e.error);
 
+        // Восстанавливаем все формы при ошибке
+        document.querySelectorAll('form[data-submitting="true"]').forEach(form => {
+            form.removeAttribute('data-submitting');
+        });
+
         // Восстанавливаем кнопки при ошибке
-        const loadingBtns = document.querySelectorAll('.upload-btn.loading');
+        const loadingBtns = document.querySelectorAll('.upload-btn.loading, .btn-luxury.loading');
         loadingBtns.forEach(btn => {
             btn.classList.remove('loading');
+            btn.disabled = false;
+
             if (btn.id === 'avatarUploadBtn') {
                 btn.innerHTML = '<i class="fas fa-upload"></i> <span>Загрузить фото</span>';
             } else if (btn.id === 'backgroundUploadBtn') {
                 btn.innerHTML = '<i class="fas fa-upload"></i> <span>Загрузить фон</span>';
+            } else if (btn.id === 'saveProfileBtn') {
+                btn.innerHTML = '<i class="fas fa-save"></i> <span>Сохранить изменения</span>';
             }
         });
+
+        showErrorAlert('Произошла ошибка на странице. Попробуйте обновить страницу.');
     });
 
     // ========================================
@@ -1105,13 +1306,50 @@
     // ========================================
 
     window.addEventListener('beforeunload', function(e) {
-        const loadingElements = document.querySelectorAll('.loading');
-        if (loadingElements.length > 0) {
+        // Проверяем только элементы которые реально загружаются
+        const activeUploads = document.querySelectorAll('.upload-btn.loading, #saveProfileBtn.loading');
+
+        // Также проверяем формы которые сейчас отправляются
+        const submittingForms = document.querySelectorAll('form[data-submitting="true"]');
+
+        if (activeUploads.length > 0 || submittingForms.length > 0) {
+            console.log('⚠️ Предотвращение закрытия: загрузка в процессе');
             e.preventDefault();
             e.returnValue = 'Загрузка файла в процессе. Вы уверены, что хотите покинуть страницу?';
             return e.returnValue;
         }
     });
+
+    // ========================================
+    // УЛУЧШЕННАЯ ОБРАБОТКА ОТПРАВКИ ФОРМ
+    // ========================================
+
+    function handleFormSubmission(formId, loadingClass = 'loading') {
+        const form = document.getElementById(formId);
+        if (!form) return;
+
+        form.addEventListener('submit', function() {
+            // Помечаем форму как отправляющуюся
+            this.setAttribute('data-submitting', 'true');
+
+            // Добавляем loading класс к кнопкам
+            const buttons = this.querySelectorAll('button, .upload-btn');
+            buttons.forEach(btn => {
+                btn.classList.add(loadingClass);
+            });
+
+            // Убираем флаг через некоторое время (на случай если redirect не сработает)
+            setTimeout(() => {
+                this.removeAttribute('data-submitting');
+                buttons.forEach(btn => {
+                    btn.classList.remove(loadingClass);
+                });
+            }, 5000);
+        });
+    }
 </script>
+
+
+
 </body>
 </html>
