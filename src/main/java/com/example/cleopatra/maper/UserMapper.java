@@ -44,6 +44,8 @@ public class UserMapper {
 
         response.setPostsCount(user.getPostsCount() != null ? user.getPostsCount() : 0L);
 
+        response.setCity(user.getCity());
+
         response.setCreatedAt(user.getCreatedAt());
         return response;
     }
@@ -55,6 +57,9 @@ public class UserMapper {
 
         if (dto.getLastName() != null) {
             user.setLastName(dto.getLastName().trim());
+        }
+        if (dto.getCity() != null) {
+            user.setCity(dto.getCity().trim());
         }
 
 

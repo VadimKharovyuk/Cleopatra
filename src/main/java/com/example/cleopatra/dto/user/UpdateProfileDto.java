@@ -13,4 +13,8 @@ public class UpdateProfileDto {
 
     @Size(max = 50, message = "Фамилия не должна превышать 50 символов")
     private String lastName;
+
+
+    @Size(max = 50, message = "Город не должна превышать 50 символов")
+    private String city;
 }

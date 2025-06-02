@@ -843,9 +843,11 @@
                     <i class="fas fa-calendar-alt meta-icon"></i>
                     <span th:text="'Присоединился ' + ${#temporals.format(user.createdAt, 'MMMM yyyy', new java.util.Locale('ru'))}"></span>
                 </div>
+
                 <div class="meta-item">
                     <i class="fas fa-map-marker-alt meta-icon"></i>
-                    <span>Местоположение не указано</span>
+                    <span th:if="${user.city != null and !#strings.isEmpty(user.city)}" th:text="${user.city}"></span>
+                    <span th:if="${user.city == null or #strings.isEmpty(user.city)}">Местоположение не указано</span>
                 </div>
             </div>
 

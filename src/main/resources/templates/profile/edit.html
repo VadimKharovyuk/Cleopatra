@@ -511,6 +511,25 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="city" class="form-label">Город</label>
+                            <input type="text"
+                                   id="city"
+                                   th:field="*{city}"
+                                   class="form-control-luxury"
+                                   placeholder="Введите ваш город"
+                                   maxlength="100">
+                            <div th:if="${#fields.hasErrors('city')}" class="error-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span th:errors="*{city}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Form Actions -->
@@ -692,8 +711,8 @@
 <!-- JS в конце страницы -->
 <th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
 
-<script th:src="@{/js/profile/AjaxAvatarUploader.js}"></script>
-<script th:src="@{/js/profile/AjaxBackgroundUploader.js}"></script>
+<!--<script th:src="@{/js/profile/AjaxAvatarUploader.js}"></script>-->
+<!--<script th:src="@{/js/profile/AjaxBackgroundUploader.js}"></script>-->
 <script>
     // ========================================
     // КОНФИГУРАЦИЯ ВАЛИДАЦИИ ИЗ BACKEND

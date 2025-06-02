@@ -39,9 +39,6 @@ public class UserProfileController {
             UserResponse user = userService.getUserById(userId);
             model.addAttribute("user", user);
 
-            System.out.println(user.getFollowersCount() + " количество подписок ");
-            System.out.println(user.getFollowingCount() + " количество подписок ");
-            System.out.println(user.getPostsCount() + " количество  постов ");
 
 
             model.addAttribute("updateProfileDto", new UpdateProfileDto());

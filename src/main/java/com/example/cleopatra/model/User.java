@@ -68,6 +68,10 @@ public class User {
     private Long postsCount = 0L;
 
 
+    @Column(name = "city")
+    private String city;
+
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<TrustedDevice> trustedDevices = new ArrayList<>();
 

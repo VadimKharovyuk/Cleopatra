@@ -29,5 +29,7 @@ public class UserResponse {
     private Long followingCount; // количество подписок
     private Long postsCount;
 
+    private String city;
+
     private LocalDateTime createdAt;
 }
