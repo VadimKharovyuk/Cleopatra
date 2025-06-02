@@ -41,9 +41,6 @@ public class Subscription {
         }
     }
 
-    // ========================================
-    // КРИТИЧЕСКИ ВАЖНО: equals() и hashCode() для Set
-    // ========================================
 
     @Override
     public boolean equals(Object o) {

@@ -4,11 +4,13 @@ import com.example.cleopatra.model.Subscription;
 import com.example.cleopatra.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,10 +23,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
      */
     boolean existsBySubscriberIdAndSubscribedToId(Long subscriberId, Long subscribedToId);
 
-    /**
-     * Находит подписку
-     */
-    Optional<Subscription> findBySubscriberIdAndSubscribedToId(Long subscriberId, Long subscribedToId);
 
     /**
      * Получает всех подписчиков пользователя
@@ -38,15 +36,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     @Query("SELECT s FROM Subscription s WHERE s.subscriber.id = :userId ORDER BY s.createdAt DESC")
     Page<Subscription> findSubscriptionsByUserId(@Param("userId") Long userId, Pageable pageable);
 
-    /**
-     * Количество подписчиков
-     */
-    long countBySubscribedToId(Long userId);
-
-    /**
-     * Количество подписок
-     */
-    long countBySubscriberId(Long userId);
 
     /**
      * Удаляет подписку
@@ -70,7 +59,8 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
      * Взаимные подписки (друзья)
      */
     @Query("""
-        SELECT s1.subscribedTo FROM Subscription s1 
+
+            SELECT s1.subscribedTo FROM Subscription s1 
         WHERE s1.subscriber.id = :userId 
         AND EXISTS (
             SELECT s2 FROM Subscription s2 
@@ -98,4 +88,43 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
      */
     @Query("SELECT s.subscribedTo.id FROM Subscription s WHERE s.subscriber.id = :subscriberId AND s.subscribedTo.id IN :userIds")
     List<Long> findSubscribedToIdsInList(@Param("subscriberId") Long subscriberId, @Param("userIds") List<Long> userIds);
+
+
+    // Подписчики (кто подписался на пользователя)
+    Slice<Subscription> findBySubscribedToId(Long subscribedToId, Pageable pageable);
+
+    // Подписки (на кого подписан пользователь)
+    Slice<Subscription> findBySubscriberId(Long subscriberId, Pageable pageable);
+
+    /**
+     * Подсчитать количество подписок пользователя (на кого он подписан)
+     * @param subscriberId - ID пользователя
+     * @return количество подписок
+     */
+    long countBySubscriberId(Long subscriberId);
+
+    /**
+     * Подсчитать количество подписчиков пользователя (кто на него подписан)
+     * @param subscribedToId - ID пользователя
+     * @return количество подписчиков
+     */
+    long countBySubscribedToId(Long subscribedToId);
+
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u SET u.followingCount = :count WHERE u.id = :userId")
+    void updateFollowingCount(@Param("userId") Long userId, @Param("count") Long count);
+
+    /**
+     * Обновить количество подписчиков пользователя (кто подписан)
+     * @param userId - ID пользователя
+     * @param count - новое количество подписчиков
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u SET u.followersCount = :count WHERE u.id = :userId")
+    void updateFollowersCount(@Param("userId") Long userId, @Param("count") Long count);
+
+
 }

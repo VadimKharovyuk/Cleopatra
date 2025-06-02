@@ -112,6 +112,7 @@ public class UserServiceImpl implements UserService {
 
         return userResponse;
     }
+
     // Вспомогательные методы для получения статистики
     private Long getFollowersCount(Long userId) {
         // TODO: когда будет готов Follow entity
