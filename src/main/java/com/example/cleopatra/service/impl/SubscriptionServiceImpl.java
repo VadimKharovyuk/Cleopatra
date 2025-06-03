@@ -181,6 +181,7 @@ public class SubscriptionServiceImpl  implements SubscriptionService {
             // Используем Slice для подписок пользователя (на кого он подписан)
             Slice<Subscription> subscriptionsSlice = subscriptionRepository.findBySubscriberId(userId, pageable);
 
+
             // Маппим содержимое страницы в карточки
             List<UserSubscriptionCard> cards = subscriptionsSlice.getContent()
                     .stream()
@@ -192,6 +193,8 @@ public class SubscriptionServiceImpl  implements SubscriptionService {
 
             log.debug("Найдено {} подписок на странице {} для пользователя {}",
                     cards.size(), pageable.getPageNumber(), userId);
+
+
 
             // Строим итоговый DTO с пагинацией через Slice
             return UserSubscriptionListDto.builder()
@@ -218,9 +221,7 @@ public class SubscriptionServiceImpl  implements SubscriptionService {
     }
 
 
-    /**
-     * Обновляет счетчики подписок и подписчиков
-     */
+
     /**
      * Обновляет счетчики подписок и подписчиков
      */

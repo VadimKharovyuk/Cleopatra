@@ -93,7 +93,7 @@ public class SubscriptionViewController {
                     model.addAttribute("currentUserId", currentUser.getId());
                 } catch (Exception e) {
                     log.warn("Не удалось получить текущего пользователя: {}", e.getMessage());
-                    // Не критично, продолжаем без currentUser
+
                 }
             }
 

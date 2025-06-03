@@ -360,6 +360,14 @@
                 <span class="nav-text">Закладки</span>
             </a>
 
+            <!-- 👁️ НОВАЯ ФУНКЦИЯ -->
+            <a href="/views"
+               class="nav-item"
+               th:classappend="${activeSection == 'views'} ? 'active' : ''">
+                <i class="fas fa-eye nav-icon"></i>
+                <span class="nav-text">Просмотры</span>
+            </a>
+
             <a th:href="@{/profile/{userId}(userId=${currentUserId ?: 1})}"
                class="nav-item"
                th:classappend="${activeSection == 'profile'} ? 'active' : ''">

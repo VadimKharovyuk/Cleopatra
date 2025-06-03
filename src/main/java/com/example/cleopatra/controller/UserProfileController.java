@@ -4,10 +4,8 @@ import com.example.cleopatra.ExistsException.ImageValidationException;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserRecommendationDto;
 import com.example.cleopatra.dto.user.UserResponse;
-import com.example.cleopatra.service.ImageValidator;
-import com.example.cleopatra.service.RecommendationService;
-import com.example.cleopatra.service.SubscriptionService;
-import com.example.cleopatra.service.UserService;
+import com.example.cleopatra.service.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -34,14 +32,14 @@ public class UserProfileController {
     private final RecommendationService recommendationService;
     private final ImageValidator imageValidator;
     private final SubscriptionService subscriptionService;
+    private final VisitService visitService;
 
     @GetMapping("/{userId}")
     public String showProfile(@PathVariable Long userId,
                               Model model,
+                              HttpServletRequest request,
                               Authentication authentication) {
         try {
-
-
             // Получаем информацию о пользователе
             UserResponse user = userService.getUserById(userId);
             model.addAttribute("user", user);
@@ -52,13 +50,31 @@ public class UserProfileController {
                 UserResponse currentUser = userService.getUserByEmail(authentication.getName());
                 model.addAttribute("currentUserId", currentUser.getId());
                 log.debug("Current User добавлен в модель: ID={}, Email={}", currentUser.getId(), currentUser.getEmail());
+
                 // ДОБАВИТЬ ЭТУ ОТЛАДКУ
                 log.debug("Сравнение ID: currentUserId={}, profileUserId={}, равны={}",
                         currentUser.getId(), userId, currentUser.getId().equals(userId));
 
+                // ===== ЗАПИСЫВАЕМ ВИЗИТ =====
+                try {
+                    String ipAddress = getClientIpAddress(request);
+                    String userAgent = request.getHeader("User-Agent");
+
+                    // Записываем визит (метод сам проверит, что это не самопосещение)
+                    visitService.recordVisit(userId, currentUser.getId(), ipAddress, userAgent);
+
+                    log.debug("Визит записан: пользователь {} посетил профиль {}",
+                            currentUser.getId(), userId);
+
+                } catch (Exception e) {
+                    log.warn("Не удалось записать визит пользователя {} к профилю {}: {}",
+                            currentUser.getId(), userId, e.getMessage());
+                    // Не прерываем выполнение, продолжаем показывать профиль
+                }
+                // ===== КОНЕЦ ЗАПИСИ ВИЗИТА =====
+
                 // Проверяем подписку только для чужих профилей
                 if (!currentUser.getId().equals(userId)) {
-
                     boolean isSubscribed = subscriptionService.isSubscribed(currentUser.getId(), userId);
                     model.addAttribute("isSubscribed", isSubscribed);
                     log.debug("Статус подписки {} -> {}: {}", currentUser.getId(), userId, isSubscribed);
@@ -66,14 +82,15 @@ public class UserProfileController {
                     model.addAttribute("isSubscribed", false);
                     log.debug("Собственный профиль - подписка не проверяется");
                 }
+
                 List<UserRecommendationDto> recommendations = recommendationService.getTopRecommendations(currentUser.getId());
                 model.addAttribute("recommendations", recommendations);
+
             } else {
-                log.debug("Пользователь не авторизован");
+                log.debug("Пользователь не авторизован - визит не записывается");
                 model.addAttribute("currentUserId", null);
                 model.addAttribute("isSubscribed", false);
             }
-
 
             return "profile/profile";
 
@@ -82,6 +99,36 @@ public class UserProfileController {
             model.addAttribute("errorMessage", "Не удалось загрузить профиль пользователя");
             return "error/404";
         }
+    }
+
+    /**
+     * Получение реального IP адреса клиента
+     */
+    private String getClientIpAddress(HttpServletRequest request) {
+        // Проверяем заголовки прокси
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
+            // Берем первый IP из списка
+            return xForwardedFor.split(",")[0].trim();
+        }
+
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty() && !"unknown".equalsIgnoreCase(xRealIp)) {
+            return xRealIp;
+        }
+
+        String xForwarded = request.getHeader("X-Forwarded");
+        if (xForwarded != null && !xForwarded.isEmpty() && !"unknown".equalsIgnoreCase(xForwarded)) {
+            return xForwarded;
+        }
+
+        String forwarded = request.getHeader("Forwarded");
+        if (forwarded != null && !forwarded.isEmpty() && !"unknown".equalsIgnoreCase(forwarded)) {
+            return forwarded;
+        }
+
+        // Если ничего не найдено, возвращаем стандартный IP
+        return request.getRemoteAddr();
     }
 
     @GetMapping("/{userId}/edit")
@@ -271,7 +318,6 @@ public class UserProfileController {
     // ========================================
 
 
-
     /**
      * Добавление настроек валидации в модель
      */
@@ -280,5 +326,6 @@ public class UserProfileController {
         model.addAttribute("allowedFormats", imageValidator.getAllowedExtensions());
         model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());
     }
+
 
 }

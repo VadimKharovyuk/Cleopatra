@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кто посещал мой профиль</title>
+</head>
+<body>
+<div class="container">
+    <!-- Заголовок страницы -->
+    <div class="page-header">
+        <h1>Кто посещал мой профиль</h1>
+        <p>Посмотрите, кто заходил на вашу страницу</p>
+    </div>
+
+    <!-- Сообщения об ошибках -->
+    <div th:if="${errorMessage}" class="error-message">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <!-- Статистика -->
+    <div class="stats-section">
+        <h2>Статистика просмотров</h2>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-number" th:text="${visitStats.totalVisits}">0</span>
+                <span class="stat-label">Всего просмотров</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" th:text="${visitStats.todayVisits}">0</span>
+                <span class="stat-label">Сегодня</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" th:text="${visitStats.weekVisits}">0</span>
+                <span class="stat-label">За неделю</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" th:text="${visitStats.monthVisits}">0</span>
+                <span class="stat-label">За месяц</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" th:text="${visitStats.uniqueVisitorsCount}">0</span>
+                <span class="stat-label">Уникальных посетителей</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Фильтр по периоду -->
+    <div class="filter-section">
+        <h3>Период просмотра:</h3>
+        <form method="get" action="/views">
+            <select name="days" onchange="this.form.submit()">
+                <option th:each="period : ${periodOptions}"
+                        th:value="${period.key}"
+                        th:text="${period.value}"
+                        th:selected="${period.key == selectedDays}">
+                </option>
+            </select>
+        </form>
+    </div>
+
+    <!-- Список посетителей -->
+    <div class="visitors-section">
+        <h2>
+            Посетители
+            <span th:if="${selectedDays == 1}">за сегодня</span>
+            <span th:if="${selectedDays == 7}">за неделю</span>
+            <span th:if="${selectedDays == 30}">за месяц</span>
+            <span th:if="${selectedDays == 90}">за 3 месяца</span>
+            <span th:if="${selectedDays == 365}">за год</span>
+            <span th:if="${selectedDays != 1 and selectedDays != 7 and selectedDays != 30 and selectedDays != 90 and selectedDays != 365}">
+                    за [[${selectedDays}]] дней
+                </span>
+        </h2>
+
+        <!-- Если нет посетителей -->
+        <div th:if="${visitors == null or #lists.isEmpty(visitors)}" class="no-visitors">
+            <p>За выбранный период никто не посещал ваш профиль</p>
+            <p>Попробуйте:</p>
+            <ul>
+                <li>Увеличить период просмотра</li>
+                <li>Добавить больше информации в свой профиль</li>
+                <li>Быть более активным в сообществе</li>
+            </ul>
+        </div>
+
+        <!-- Список посетителей -->
+        <div th:if="${visitors != null and !#lists.isEmpty(visitors)}" class="visitors-list">
+            <div th:each="visitor : ${visitors}" class="visitor-card">
+                <div class="visitor-avatar">
+                    <a th:href="@{/profile/{userId}(userId=${visitor.visitorId})}">
+                        <img th:if="${visitor.visitorImageUrl}"
+                             th:src="${visitor.visitorImageUrl}"
+                             th:alt="${visitor.getVisitorFirstName() + ' ' + visitor.getVisitorLastName()}"
+                             width="50" height="50">
+                        <div th:unless="${visitor.visitorImageUrl}" class="default-avatar">
+                            👤
+                        </div>
+                    </a>
+                    <div th:if="${visitor.visitorIsOnline}" class="online-indicator">🟢</div>
+                </div>
+
+                <div class="visitor-info">
+                    <div class="visitor-name">
+                        <a th:href="@{/profile/{userId}(userId=${visitor.visitorId})}" th:text="${visitor.getVisitorFirstName() + ' ' + visitor.getVisitorLastName()}">
+                            Имя пользователя
+                        </a>
+                    </div>
+
+                    <div class="visitor-details">
+                        <div th:if="${visitor.visitorCity}" class="visitor-location">
+                            📍 <span th:text="${visitor.visitorCity}">Город</span>
+                        </div>
+
+                        <div class="visitor-date" th:if="${visitor.visitedAt}">
+                            🕒 Заходил:
+                            <span th:text="${#temporals.format(visitor.visitedAt, 'dd.MM.yyyy HH:mm')}">дата</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visitor-actions">
+                    <a th:href="@{/profile/{userId}(userId=${visitor.visitorId})}" class="btn-view-profile">
+                        Посмотреть профиль
+                    </a>
+                    <button class="btn-send-message"
+                            th:onclick="'sendMessage(' + ${visitor.visitorId} + ')'"
+                            th:if="${visitor.visitorId != currentUser.id}">
+                        Написать
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Информационный блок -->
+    <div class="info-section">
+        <h3>ℹ️ Информация</h3>
+        <ul>
+            <li>Показываются только зарегистрированные пользователи</li>
+            <li>Каждый посетитель показывается один раз за выбранный период</li>
+            <li>Ваши собственные посещения не учитываются</li>
+            <li>Данные обновляются в реальном времени</li>
+        </ul>
+    </div>
+
+
+</div>
+
+<script>
+
+    // Показать количество посетителей в заголовке
+    document.addEventListener('DOMContentLoaded', function() {
+        const visitorsCount = document.querySelectorAll('.visitor-card').length;
+        if (visitorsCount > 0) {
+            const header = document.querySelector('.visitors-section h2');
+            header.innerHTML = header.innerHTML + ' (' + visitorsCount + ')';
+        }
+    });
+</script>
+</body>
+</html>

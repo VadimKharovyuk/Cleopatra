@@ -42,12 +42,12 @@ public class GlobalControllerAdvice {
             }
 
             String userEmail = authentication.getName();
-            log.debug("🔍 Получаем пользователя для email: {}", userEmail);
+//            log.debug("🔍 Получаем пользователя для email: {}", userEmail);
 
             UserResponse currentUser = userService.getUserByEmail(userEmail);
-            log.debug("✅ Пользователь найден: {} (ID: {})",
-                    currentUser.getFirstName() != null ? currentUser.getFirstName() : "Unnamed",
-                    currentUser.getId());
+//            log.debug("✅ Пользователь найден: {} (ID: {})",
+//                    currentUser.getFirstName() != null ? currentUser.getFirstName() : "Unnamed",
+//                    currentUser.getId());
 
             return currentUser;
 

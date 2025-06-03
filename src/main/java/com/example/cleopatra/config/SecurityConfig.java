@@ -69,11 +69,11 @@ public class SecurityConfig {
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
-//                .rememberMe(remember -> remember
-//                        .key(rememberMeKey)
-//                        .rememberMeParameter("remember-me")
-//                        .tokenValiditySeconds(60 * 60 * 24 * 14) // 14 дней
-//                )
+                .rememberMe(remember -> remember
+                        .key(rememberMeKey)
+                        .rememberMeParameter("remember-me")
+                        .tokenValiditySeconds(60 * 60 * 24 * 14) // 14 дней
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")

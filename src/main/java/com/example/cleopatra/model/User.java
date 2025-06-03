@@ -88,6 +88,17 @@ public class User {
     private Set<Subscription> subscriptions = new HashSet<>();
 
 
+    @OneToMany(mappedBy = "visitedUser", fetch = FetchType.LAZY)
+    @OrderBy("visitedAt DESC")
+    private List<Visit> pageVisits = new ArrayList<>();
+
+    @OneToMany(mappedBy = "visitor", fetch = FetchType.LAZY)
+    @OrderBy("visitedAt DESC")
+    private List<Visit> myVisits = new ArrayList<>();
+
+    @Column(name = "total_visits")
+    @Builder.Default
+    private Long totalVisits = 0L;
 
 
     // Системные поля

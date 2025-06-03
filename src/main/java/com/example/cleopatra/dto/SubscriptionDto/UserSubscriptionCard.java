@@ -18,7 +18,7 @@ public class UserSubscriptionCard {
     private String imageUrl;
     private String city;
     private LocalDateTime subscribedAt;
-///todu
+    ///todu
     private Boolean isOnline;
 
 
