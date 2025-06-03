@@ -40,7 +40,7 @@ public class UserProfileController {
                               Model model,
                               Authentication authentication) {
         try {
-            log.debug("=== Показать профиль пользователя: {} ===", userId);
+
 
             // Получаем информацию о пользователе
             UserResponse user = userService.getUserById(userId);
@@ -74,19 +74,6 @@ public class UserProfileController {
                 model.addAttribute("isSubscribed", false);
             }
 
-            log.debug("=== Данные для шаблона ===");
-            log.debug("user.id: {}", user.getId());
-            log.debug("currentUserId: {}", model.getAttribute("currentUserId"));
-            log.debug("isSubscribed: {}", model.getAttribute("isSubscribed"));
-
-            // ПРОВЕРИТЬ ЧТО ПЕРЕДАЕТСЯ В ШАБЛОН
-            log.debug("=== Финальные данные для шаблона ===");
-            log.debug("user.id: {}", user.getId());
-            log.debug("currentUserId: {}", model.getAttribute("currentUserId"));
-            log.debug("isSubscribed: {}", model.getAttribute("isSubscribed"));
-            log.debug("Условие (currentUserId != null and currentUserId != user.id): {}",
-                    model.getAttribute("currentUserId") != null &&
-                            !model.getAttribute("currentUserId").equals(user.getId()));
 
             return "profile/profile";
 
@@ -196,11 +183,7 @@ public class UserProfileController {
         }
     }
 
-    /**
-     * ✅ КОРРЕКТНЫЙ маршрут для загрузки фона
-     * URL: /profile/{userId}/background/upload (КАК В HTML)
-     * Параметр: backgroundFile (КАК В HTML)
-     */
+
     @PostMapping("/{userId}/background/upload")
     public String uploadBackgroundImage(
             @PathVariable Long userId,

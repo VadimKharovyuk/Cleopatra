@@ -967,15 +967,6 @@
                             </p>
                         </a>
 
-                        <!-- Кликабельный handle -->
-                        <a th:href="@{/profile/{userId}(userId=${recommendation.id})}" class="suggestion-handle-link">
-                            <p class="suggestion-handle"
-                               th:text="'@user' + ${recommendation.id}">
-                                @user123
-                            </p>
-                        </a>
-
-                        <!-- Показываем количество подписчиков, если больше 0 -->
                         <p class="suggestion-meta"
                            th:if="${recommendation.followersCount != null and recommendation.followersCount > 0}">
                             <span th:text="${recommendation.followersCount}">150</span> подписчиков

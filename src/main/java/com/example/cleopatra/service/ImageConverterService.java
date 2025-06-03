@@ -22,6 +22,18 @@ import java.io.InputStream;
 import java.util.Set;
 
 
+//
+//// Весь процесс в одном вызове:
+//ProcessedImage result = imageValidator.validateAndProcess(file);
+//
+//        // Внутри происходит:
+//// 1. ImageValidator проверяет файл
+//// 2. ImageValidator спрашивает ImageConverterService: нужна конвертация?
+//// 3. Если да - ImageValidator просит ImageConverterService конвертировать
+//// 4. Если нет - ImageValidator создает ProcessedImage из исходного файла
+
+
+
 //✅ Определяет нужна ли конвертация (needsConversion())
 //        ✅ Читает HEIF/HEIC файлы
 //✅ Конвертирует в JPEG с настройкой качества

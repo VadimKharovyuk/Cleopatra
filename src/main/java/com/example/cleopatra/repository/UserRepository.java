@@ -47,16 +47,46 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * Топ рекомендации для главной страницы (ограниченное количество)
      */
     @Query("""
-        SELECT u FROM User u 
-        WHERE u.id != :currentUserId 
-        AND u.firstName IS NOT NULL 
-        AND u.lastName IS NOT NULL
-        ORDER BY u.followersCount DESC, u.createdAt DESC
-        """)
+    SELECT u FROM User u 
+    WHERE u.id != :currentUserId 
+    AND u.firstName IS NOT NULL 
+    AND u.lastName IS NOT NULL
+    ORDER BY 
+        CASE 
+            WHEN u.id = 1 THEN 6                   
+            WHEN u.followersCount >= 10000 THEN 5
+            WHEN u.followersCount >= 1000 THEN 4
+            WHEN u.followersCount >= 100 THEN 3
+            WHEN u.followersCount >= 10 THEN 2
+            ELSE 1
+        END DESC,
+        u.followersCount DESC,
+        u.createdAt DESC
+    """)
     List<User> findTopRecommendations(
             @Param("currentUserId") Long currentUserId,
             Pageable pageable
     );
+//    @Query("""
+//    SELECT u FROM User u
+//    WHERE u.id != :currentUserId
+//    AND u.firstName IS NOT NULL
+//    AND u.lastName IS NOT NULL
+//    ORDER BY
+//        CASE
+//            WHEN u.followersCount >= 10000 THEN 5
+//            WHEN u.followersCount >= 1000 THEN 4
+//            WHEN u.followersCount >= 100 THEN 3
+//            WHEN u.followersCount >= 10 THEN 2
+//            ELSE 1
+//        END DESC,
+//        u.followersCount DESC,
+//        u.createdAt DESC
+//    """)
+//    List<User> findTopRecommendations(
+//            @Param("currentUserId") Long currentUserId,
+//            Pageable pageable
+//    );
 
 
     @Modifying
