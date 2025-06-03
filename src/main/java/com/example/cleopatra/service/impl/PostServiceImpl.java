@@ -21,6 +21,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +36,7 @@ public class PostServiceImpl implements PostService {
     private final ImageValidator imageValidator;
     private final PostMapper postMapper;
     private final UserRepository userRepository;
+    private final SubscriptionService subscriptionService;
 
     @Override
     public PostResponseDto createPost(PostCreateDto postCreateDto) {
@@ -131,6 +134,41 @@ public class PostServiceImpl implements PostService {
         log.info("Получение собственных постов, страница: {}, размер: {}", page, size);
         User currentUser = getCurrentUser();
         return getUserPosts(currentUser.getId(), page, size);
+    }
+
+    @Override
+    public PostListDto getFeedPosts(Long userId, int page, int size) {
+        log.info("Получение ленты новостей для пользователя: {}, страница: {}, размер: {}", userId, page, size);
+
+        // Получаем ID пользователей, на которых подписан текущий пользователь
+        List<Long> subscriptionIds = subscriptionService.getSubscriptionIds(userId);
+
+        if (subscriptionIds.isEmpty()) {
+            log.info("У пользователя {} нет подписок, показываем рекомендованные посты", userId);
+            return getRecommendedPosts(userId, page, size);
+        }
+
+        // Создаем Pageable с сортировкой по дате (новые сначала)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        // Получаем посты от пользователей из подписок
+        Slice<Post> postSlice = postRepository.findByAuthor_IdInAndIsDeletedFalse(subscriptionIds, pageable);
+
+        log.info("Найдено {} постов в ленте для пользователя {}", postSlice.getNumberOfElements(), userId);
+
+        return postMapper.toListDtoFromSlice(postSlice);
+    }
+
+    @Override
+    public PostListDto getRecommendedPosts(Long userId, int page, int size) {
+        log.info("Получение рекомендованных постов для пользователя: {}", userId);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        // Показываем популярные посты (можно добавить другую логику)
+        Slice<Post> postSlice = postRepository.findByIsDeletedFalseOrderByLikesCountDescCreatedAtDesc(pageable);
+
+        return postMapper.toListDtoFromSlice(postSlice);
     }
 
     private User getCurrentUser() {

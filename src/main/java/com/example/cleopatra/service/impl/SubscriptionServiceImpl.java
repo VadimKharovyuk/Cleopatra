@@ -220,6 +220,26 @@ public class SubscriptionServiceImpl  implements SubscriptionService {
         }
     }
 
+    @Override
+    public List<Long> getSubscriptionIds(Long subscriberId) {
+        try {
+            log.debug("Получение ID подписок для пользователя: {}", subscriberId);
+
+            List<Long> subscriptionIds = subscriptionRepository.findSubscribedToIdsBySubscriberId(subscriberId);
+
+            log.debug("Найдено {} подписок для пользователя {}", subscriptionIds.size(), subscriberId);
+            return subscriptionIds;
+
+        } catch (Exception e) {
+            log.error("Ошибка при получении ID подписок для пользователя {}: {}", subscriberId, e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public boolean hasAnySubscriptions(Long subscriberId) {
+        return subscriptionRepository.countBySubscriberId(subscriberId) > 0;
+    }
 
 
     /**

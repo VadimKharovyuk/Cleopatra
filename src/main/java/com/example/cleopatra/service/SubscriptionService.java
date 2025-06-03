@@ -41,4 +41,14 @@ public interface SubscriptionService {
      */
     UserSubscriptionListDto getSubscriptions(Long userId, Pageable pageable);
 
+    /**
+     * Получить ID всех пользователей, на которых подписан данный пользователь
+     */
+    List<Long> getSubscriptionIds(Long subscriberId);
+
+    /**
+     * Проверить подписан ли пользователь на кого-либо
+     */
+    boolean hasAnySubscriptions(Long subscriberId);
+
 }

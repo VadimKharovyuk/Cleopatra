@@ -14,4 +14,14 @@ public interface PostService {
 
 
     PostListDto getMyPosts(int page, int size);
+
+    /**
+     * Получить ленту новостей (посты подписок) для пользователя
+     */
+    PostListDto getFeedPosts(Long userId, int page, int size);
+
+    /**
+     * Получить рекомендованные посты если нет подписок
+     */
+    PostListDto getRecommendedPosts(Long userId, int page, int size);
 }

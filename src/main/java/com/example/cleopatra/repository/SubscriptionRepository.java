@@ -115,4 +115,9 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
 
 
+    /**
+     * Получить только ID пользователей, на которых подписан subscriberId
+     */
+    @Query("SELECT s.subscribedTo.id FROM Subscription s WHERE s.subscriber.id = :subscriberId")
+    List<Long> findSubscribedToIdsBySubscriberId(@Param("subscriberId") Long subscriberId);
 }
