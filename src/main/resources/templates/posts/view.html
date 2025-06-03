@@ -12,28 +12,115 @@
         <p th:text="${successMessage}"></p>
     </div>
 
-    <h1>Пост создан успешно!</h1>
-
-    <p>ID поста: <span th:text="${postId}"></span></p>
-
-    <div style="margin-top: 20px;">
-        <a href="/posts/create">Создать еще один пост</a>
-        <br><br>
-        <a href="/">На главную</a>
+    <!-- Навигация -->
+    <div style="margin-bottom: 20px;">
+        <a href="/">На главную</a> |
+        <a href="/posts/create">Создать пост</a>
     </div>
 
-    <!-- TODO: Здесь будет полная информация о посте -->
-    <div style="margin-top: 30px; padding: 20px; border: 1px solid #ccc;">
-        <h3>Информация о посте будет здесь</h3>
-        <p>Здесь будет отображаться:</p>
-        <ul>
-            <li>Текст поста</li>
-            <li>Изображение (если есть)</li>
-            <li>Информация об авторе</li>
-            <li>Дата создания</li>
-            <li>Количество лайков и комментариев</li>
-        </ul>
+    <!-- Основная информация о посте -->
+    <div th:if="${post}" style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px;">
+
+        <!-- Заголовок поста -->
+        <h1>Пост #<span th:text="${post.id}"></span></h1>
+
+        <!-- Информация об авторе -->
+        <div style="margin-bottom: 15px; padding: 10px; background-color: #f9f9f9; border-left: 4px solid #007bff;">
+            <h3>Автор:</h3>
+            <p>
+                <strong th:text="${post.author.firstName + ' ' + post.author.lastName}"></strong>
+            </p>
+
+            <!-- Аватар автора -->
+            <div th:if="${post.author.imageUrl}">
+                <img th:src="${post.author.imageUrl}"
+                     th:alt="${post.author.firstName}"
+                     style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+            </div>
+            <div th:unless="${post.author.imageUrl}">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background-color: #ccc; display: flex; align-items: center; justify-content: center;">
+                    <span th:text="${#strings.substring(post.author.firstName, 0, 1) + #strings.substring(post.author.lastName, 0, 1)}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Дата создания -->
+        <div style="margin-bottom: 15px; color: #666; font-size: 14px;">
+            <p>Опубликовано: <span th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy HH:mm')}"></span></p>
+        </div>
+
+        <!-- Изображение поста -->
+        <div th:if="${post.imageUrl}" style="margin-bottom: 20px; text-align: center;">
+            <img th:src="${post.imageUrl}"
+                 alt="Изображение поста"
+                 style="max-width: 100%; max-height: 500px; border: 1px solid #ddd;">
+        </div>
+
+        <!-- Текст поста -->
+        <div style="margin-bottom: 20px;">
+            <h3>Содержание:</h3>
+            <div style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; white-space: pre-wrap;" th:text="${post.content}"></div>
+        </div>
+
+        <!-- Статистика поста -->
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+            <h4>Статистика:</h4>
+            <div style="display: flex; gap: 20px;">
+                <span>👁️ Просмотры: <strong th:text="${post.viewsCount}"></strong></span>
+                <span>❤️ Лайки: <strong th:text="${post.likesCount}"></strong></span>
+                <span>💬 Комментарии: <strong th:text="${post.commentsCount}"></strong></span>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+            <button onclick="likePost()" style="margin-right: 10px;">❤️ Лайк</button>
+            <button onclick="sharePost()" style="margin-right: 10px;">📤 Поделиться</button>
+            <button onclick="showComments()">💬 Комментарии</button>
+        </div>
+    </div>
+
+    <!-- Если пост не найден -->
+    <div th:unless="${post}" style="text-align: center; padding: 40px;">
+        <h2>Пост не найден</h2>
+        <p>Запрашиваемый пост не существует или был удален.</p>
+        <a href="/">Вернуться на главную</a>
+    </div>
+
+    <!-- Секция комментариев (заглушка) -->
+    <div id="commentsSection" style="display: none; margin-top: 30px; border: 1px solid #ddd; padding: 20px;">
+        <h3>Комментарии</h3>
+        <p>Функция комментариев будет реализована позже</p>
+
+        <!-- Форма добавления комментария -->
+        <div style="margin-top: 15px;">
+            <textarea placeholder="Написать комментарий..." rows="3" style="width: 100%; margin-bottom: 10px;"></textarea>
+            <button>Отправить комментарий</button>
+        </div>
     </div>
 </div>
+
+<script>
+    function likePost() {
+        // TODO: реализовать лайк поста
+        alert('Функция лайков будет реализована позже');
+    }
+
+    function sharePost() {
+        // Копируем URL в буфер обмена
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Ссылка на пост скопирована в буфер обмена!');
+        });
+    }
+
+    function showComments() {
+        const commentsSection = document.getElementById('commentsSection');
+        if (commentsSection.style.display === 'none') {
+            commentsSection.style.display = 'block';
+        } else {
+            commentsSection.style.display = 'none';
+        }
+    }
+</script>
 </body>
 </html>

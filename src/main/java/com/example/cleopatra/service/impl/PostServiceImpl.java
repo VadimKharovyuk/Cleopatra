@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -79,6 +80,22 @@ public class PostServiceImpl implements PostService {
         log.info("Пост успешно создан с ID: {}", savedPost.getId());
 
         return postMapper.toResponseDto(savedPost);
+    }
+
+    @Override
+    public PostResponseDto getPostById(Long id) {
+        log.info("Получение поста с ID: {}", id);
+
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Пост с ID " + id + " не найден"));
+
+        // Увеличиваем счетчик просмотров
+        post.setViewsCount(post.getViewsCount() + 1);
+        postRepository.save(post);
+
+        log.info("Пост найден: {}", post.getContent().substring(0, Math.min(50, post.getContent().length())));
+
+        return postMapper.toResponseDto(post);
     }
 
     private User getCurrentUser() {

@@ -41,6 +41,7 @@ public class PostController {
             return "posts/create";
         }
 
+
         try {
             PostResponseDto createdPost = postService.createPost(postCreateDto);
 
@@ -72,13 +73,10 @@ public class PostController {
         }
     }
 
-    /**
-     * Показать пост по ID (заглушка)
-     */
     @GetMapping("/{id}")
     public String showPost(@PathVariable Long id, Model model) {
-        // TODO: реализовать показ поста
-        model.addAttribute("postId", id);
+        PostResponseDto post = postService.getPostById(id);
+        model.addAttribute("post", post);
         return "posts/view";
     }
 }
