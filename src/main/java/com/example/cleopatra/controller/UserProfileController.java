@@ -1,6 +1,7 @@
 package com.example.cleopatra.controller;
 
 import com.example.cleopatra.ExistsException.ImageValidationException;
+import com.example.cleopatra.dto.Post.PostListDto;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserRecommendationDto;
 import com.example.cleopatra.dto.user.UserResponse;
@@ -8,6 +9,7 @@ import com.example.cleopatra.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,10 +36,12 @@ public class UserProfileController {
     private final SubscriptionService subscriptionService;
     private final VisitService visitService;
     private final  IpAddressService ipAddressService;
-
+    private final PostService postService;
 
     @GetMapping("/{userId}")
     public String showProfile(@PathVariable Long userId,
+                              @RequestParam(defaultValue = "0") int page,
+                              @RequestParam(defaultValue = "6") int size,
                               Model model,
                               HttpServletRequest request,
                               Authentication authentication) {
@@ -47,10 +51,18 @@ public class UserProfileController {
             model.addAttribute("user", user);
             log.debug("User добавлен в модель: ID={}, Email={}", user.getId(), user.getEmail());
 
+            // Получаем посты пользователя
+            PostListDto userPosts = postService.getUserPosts(userId, page, size);
+            model.addAttribute("posts", userPosts);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("pageSize", size);
+            log.debug("Загружено {} постов для пользователя {}", userPosts.getNumberOfElements(), userId);
+
             // Обрабатываем данные текущего пользователя
             if (authentication != null && authentication.isAuthenticated()) {
                 UserResponse currentUser = userService.getUserByEmail(authentication.getName());
                 model.addAttribute("currentUserId", currentUser.getId());
+                model.addAttribute("isOwnProfile", currentUser.getId().equals(userId));
                 log.debug("Current User добавлен в модель: ID={}, Email={}", currentUser.getId(), currentUser.getEmail());
 
                 // ДОБАВИТЬ ЭТУ ОТЛАДКУ
@@ -59,7 +71,7 @@ public class UserProfileController {
 
                 // ===== ЗАПИСЫВАЕМ ВИЗИТ (УПРОЩЕННО) =====
                 ipAddressService.recordUserVisit(userId, currentUser.getId(), request);
-                // ===== КОНЕЦ ЗАПИСИ ВИЗИТА =====
+
 
                 // Проверяем подписку только для чужих профилей
                 if (!currentUser.getId().equals(userId)) {
@@ -78,6 +90,7 @@ public class UserProfileController {
                 log.debug("Пользователь не авторизован - визит не записывается");
                 model.addAttribute("currentUserId", null);
                 model.addAttribute("isSubscribed", false);
+                model.addAttribute("isOwnProfile", false);
             }
 
             return "profile/profile";
@@ -86,6 +99,23 @@ public class UserProfileController {
             log.error("Ошибка при показе профиля {}: {}", userId, e.getMessage(), e);
             model.addAttribute("errorMessage", "Не удалось загрузить профиль пользователя");
             return "error/404";
+        }
+    }
+
+    /**
+     * AJAX загрузка постов для бесконечного скролла
+     */
+    @GetMapping("/{userId}/posts")
+    @ResponseBody
+    public ResponseEntity<PostListDto> getUserPostsAjax(@PathVariable Long userId,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "6") int size) {
+        try {
+            PostListDto userPosts = postService.getUserPosts(userId, page, size);
+            return ResponseEntity.ok(userPosts);
+        } catch (Exception e) {
+            log.error("Ошибка AJAX загрузки постов пользователя {}: {}", userId, e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 

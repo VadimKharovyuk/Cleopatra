@@ -1,126 +1,999 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Просмотр поста</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div>-->
+<!--    &lt;!&ndash; Сообщение об успешном создании &ndash;&gt;-->
+<!--    <div th:if="${successMessage}" style="color: green; margin-bottom: 15px; padding: 10px; border: 1px solid green; background-color: #f0fff0;">-->
+<!--        <p th:text="${successMessage}"></p>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Навигация &ndash;&gt;-->
+<!--    <div style="margin-bottom: 20px;">-->
+<!--        <a href="/">На главную</a> |-->
+<!--        <a href="/posts/create">Создать пост</a>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Основная информация о посте &ndash;&gt;-->
+<!--    <div th:if="${post}" style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px;">-->
+
+<!--        &lt;!&ndash; Заголовок поста &ndash;&gt;-->
+<!--        <h1>Пост #<span th:text="${post.id}"></span></h1>-->
+
+<!--        &lt;!&ndash; Информация об авторе &ndash;&gt;-->
+<!--        <div style="margin-bottom: 15px; padding: 10px; background-color: #f9f9f9; border-left: 4px solid #007bff;">-->
+<!--            <h3>Автор:</h3>-->
+<!--            <p>-->
+<!--                <strong th:text="${post.author.firstName + ' ' + post.author.lastName}"></strong>-->
+<!--            </p>-->
+
+<!--            &lt;!&ndash; Аватар автора &ndash;&gt;-->
+<!--            <div th:if="${post.author.imageUrl}">-->
+<!--                <img th:src="${post.author.imageUrl}"-->
+<!--                     th:alt="${post.author.firstName}"-->
+<!--                     style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">-->
+<!--            </div>-->
+<!--            <div th:unless="${post.author.imageUrl}">-->
+<!--                <div style="width: 50px; height: 50px; border-radius: 50%; background-color: #ccc; display: flex; align-items: center; justify-content: center;">-->
+<!--                    <span th:text="${#strings.substring(post.author.firstName, 0, 1) + #strings.substring(post.author.lastName, 0, 1)}"></span>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Дата создания &ndash;&gt;-->
+<!--        <div style="margin-bottom: 15px; color: #666; font-size: 14px;">-->
+<!--            <p>Опубликовано: <span th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy HH:mm')}"></span></p>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Изображение поста &ndash;&gt;-->
+<!--        <div th:if="${post.imageUrl}" style="margin-bottom: 20px; text-align: center;">-->
+<!--            <img th:src="${post.imageUrl}"-->
+<!--                 alt="Изображение поста"-->
+<!--                 style="max-width: 100%; max-height: 500px; border: 1px solid #ddd;">-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Текст поста &ndash;&gt;-->
+<!--        <div style="margin-bottom: 20px;">-->
+<!--            <h3>Содержание:</h3>-->
+<!--            <div style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; white-space: pre-wrap;" th:text="${post.content}"></div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Статистика поста &ndash;&gt;-->
+<!--        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">-->
+<!--            <h4>Статистика:</h4>-->
+<!--            <div style="display: flex; gap: 20px;">-->
+<!--                <span>👁️ Просмотры: <strong th:text="${post.viewsCount}"></strong></span>-->
+<!--                <span>❤️ Лайки: <strong th:text="${post.likesCount}"></strong></span>-->
+<!--                <span>💬 Комментарии: <strong th:text="${post.commentsCount}"></strong></span>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Кнопки действий &ndash;&gt;-->
+<!--        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">-->
+<!--            <button onclick="likePost()" style="margin-right: 10px;">❤️ Лайк</button>-->
+<!--            <button onclick="sharePost()" style="margin-right: 10px;">📤 Поделиться</button>-->
+<!--            <button onclick="showComments()">💬 Комментарии</button>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Если пост не найден &ndash;&gt;-->
+<!--    <div th:unless="${post}" style="text-align: center; padding: 40px;">-->
+<!--        <h2>Пост не найден</h2>-->
+<!--        <p>Запрашиваемый пост не существует или был удален.</p>-->
+<!--        <a href="/">Вернуться на главную</a>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Секция комментариев (заглушка) &ndash;&gt;-->
+<!--    <div id="commentsSection" style="display: none; margin-top: 30px; border: 1px solid #ddd; padding: 20px;">-->
+<!--        <h3>Комментарии</h3>-->
+<!--        <p>Функция комментариев будет реализована позже</p>-->
+
+<!--        &lt;!&ndash; Форма добавления комментария &ndash;&gt;-->
+<!--        <div style="margin-top: 15px;">-->
+<!--            <textarea placeholder="Написать комментарий..." rows="3" style="width: 100%; margin-bottom: 10px;"></textarea>-->
+<!--            <button>Отправить комментарий</button>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--    function likePost() {-->
+<!--        // TODO: реализовать лайк поста-->
+<!--        alert('Функция лайков будет реализована позже');-->
+<!--    }-->
+
+<!--    function sharePost() {-->
+<!--        // Копируем URL в буфер обмена-->
+<!--        navigator.clipboard.writeText(window.location.href).then(() => {-->
+<!--            alert('Ссылка на пост скопирована в буфер обмена!');-->
+<!--        });-->
+<!--    }-->
+
+<!--    function showComments() {-->
+<!--        const commentsSection = document.getElementById('commentsSection');-->
+<!--        if (commentsSection.style.display === 'none') {-->
+<!--            commentsSection.style.display = 'block';-->
+<!--        } else {-->
+<!--            commentsSection.style.display = 'none';-->
+<!--        }-->
+<!--    }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Просмотр поста</title>
+    <title>Просмотр поста - Cleopatra</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- ПОДКЛЮЧЕНИЕ ФРАГМЕНТА СТИЛЕЙ -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            margin-left: 280px;
+            margin-right: 380px;
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        /* Right Sidebar */
+        .right-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 380px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-primary);
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Post Container */
+        .post-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            margin: 0 2rem;
+            border: 1px solid var(--border-primary);
+        }
+
+        /* Post Header */
+        .post-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid var(--border-secondary);
+            background: var(--surface-elevated);
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-link:hover {
+            color: var(--accent-primary);
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-muted);
+        }
+
+        .post-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        /* Author Section */
+        .author-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            background: var(--bg-accent);
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .author-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--border-primary);
+            box-shadow: var(--shadow-md);
+            transition: transform 0.2s;
+        }
+
+        .author-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .author-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .default-avatar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .author-info {
+            flex: 1;
+        }
+
+        .author-name {
+            font-weight: 600;
+            font-size: 1.125rem;
+            color: var(--text-primary);
+            margin: 0 0 0.25rem;
+            text-decoration: none;
+        }
+
+        .author-name:hover {
+            color: var(--accent-primary);
+        }
+
+        .author-handle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin: 0 0 0.5rem;
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .follow-btn {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .follow-btn:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+            color: white;
+        }
+
+        /* Post Content */
+        .post-content {
+            padding: 2rem;
+        }
+
+        .post-image {
+            width: 100%;
+            max-height: 600px;
+            object-fit: cover;
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-primary);
+        }
+
+        .post-text {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Post Actions */
+        .post-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--border-secondary);
+            background: var(--bg-accent);
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .like-btn:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .comment-btn:hover {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .share-btn:hover {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .post-stats {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            margin: 2rem;
+            border: 1px solid var(--border-primary);
+        }
+
+        .comments-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-secondary);
+            background: var(--surface-elevated);
+        }
+
+        .comments-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .comment-form {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .comment-textarea {
+            width: 100%;
+            min-height: 100px;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            font-family: inherit;
+            font-size: 0.875rem;
+            resize: vertical;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: border-color 0.2s;
+        }
+
+        .comment-textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .comment-submit {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+
+        .comment-submit:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+        }
+
+        /* Widget Styles for Sidebar */
+        .widget {
+            background: var(--surface-elevated);
+            border-radius: var(--radius-lg);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .widget-header {
+            padding: 1.5rem 1.5rem 1rem;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .widget-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .widget-content {
+            padding: 1rem 1.5rem 1.5rem;
+        }
+
+        .trend-item, .related-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-secondary);
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .trend-item:last-child, .related-item:last-child {
+            border-bottom: none;
+        }
+
+        .trend-item:hover, .related-item:hover {
+            background: var(--bg-accent);
+            margin: 0 -1.5rem;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .trend-info {
+            flex: 1;
+        }
+
+        .trend-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            margin: 0 0 0.25rem;
+        }
+
+        .trend-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Alerts */
+        .alert-luxury {
+            border: none;
+            border-radius: var(--radius-md);
+            margin: 2rem;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .alert-success-luxury {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.1));
+            color: var(--accent-success);
+            border-left: 4px solid var(--accent-success);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .right-sidebar {
+                display: none;
+            }
+            .main-content {
+                margin-right: 0;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                margin-top: 60px;
+                padding: 1rem 0;
+            }
+
+            .post-container, .comments-section {
+                margin: 0 1rem;
+            }
+
+            .post-header, .author-section, .post-content, .post-actions {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+
+            .author-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .post-actions {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
-<body>
-<div>
-    <!-- Сообщение об успешном создании -->
-    <div th:if="${successMessage}" style="color: green; margin-bottom: 15px; padding: 10px; border: 1px solid green; background-color: #f0fff0;">
-        <p th:text="${successMessage}"></p>
+<body th:data-current-user-id="${currentUserId}"
+      th:data-profile-user-id="${post?.author?.id}">
+
+<!-- ПОДКЛЮЧЕНИЕ МОБИЛЬНОГО ХЕДЕРА ИЗ ФРАГМЕНТА -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+
+<!-- ПОДКЛЮЧЕНИЕ SIDEBAR ИЗ ФРАГМЕНТА -->
+<th:block th:replace="~{fragments/sidebar :: sidebar('home')}"></th:block>
+
+<!-- Main Content -->
+<main class="main-content">
+
+    <!-- Success Message -->
+    <div th:if="${successMessage}" class="alert-luxury alert-success-luxury">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
     </div>
 
-    <!-- Навигация -->
-    <div style="margin-bottom: 20px;">
-        <a href="/">На главную</a> |
-        <a href="/posts/create">Создать пост</a>
-    </div>
+    <!-- Post Container -->
+    <div th:if="${post}" class="post-container">
 
-    <!-- Основная информация о посте -->
-    <div th:if="${post}" style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px;">
+        <!-- Post Header -->
+        <div class="post-header">
+            <nav class="breadcrumb-nav">
+                <a href="/" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    Главная
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="/posts/create" class="breadcrumb-link">Посты</a>
+                <span class="breadcrumb-separator">/</span>
+            </nav>
 
-        <!-- Заголовок поста -->
-        <h1>Пост #<span th:text="${post.id}"></span></h1>
 
-        <!-- Информация об авторе -->
-        <div style="margin-bottom: 15px; padding: 10px; background-color: #f9f9f9; border-left: 4px solid #007bff;">
-            <h3>Автор:</h3>
-            <p>
-                <strong th:text="${post.author.firstName + ' ' + post.author.lastName}"></strong>
-            </p>
+        </div>
 
-            <!-- Аватар автора -->
-            <div th:if="${post.author.imageUrl}">
-                <img th:src="${post.author.imageUrl}"
-                     th:alt="${post.author.firstName}"
-                     style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+        <!-- Author Section -->
+        <div class="author-section">
+            <a th:href="@{/profile/{userId}(userId=${post.author.id})}" class="author-avatar">
+                <img th:if="${post.author.imageUrl}"
+                     th:src="${post.author.imageUrl}"
+                     th:alt="${post.author.firstName}">
+                <div th:unless="${post.author.imageUrl}" class="default-avatar">
+                    <span th:text="${#strings.substring(post.author.firstName, 0, 1) + #strings.substring(post.author.lastName, 0, 1)}">AB</span>
+                </div>
+            </a>
+
+            <div class="author-info">
+                <a th:href="@{/profile/{userId}(userId=${post.author.id})}" class="author-name">
+                    <span th:text="${post.author.firstName + ' ' + post.author.lastName}">Имя Автора</span>
+                </a>
+                <p class="author-handle" th:text="'@' + ${post.author.firstName?.toLowerCase()}">@автор</p>
+
+                <div class="post-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span th:text="${#temporals.format(post.createdAt, 'dd MMMM yyyy, HH:mm', new java.util.Locale('ru'))}">1 января 2024, 15:30</span>
+                    </div>
+                </div>
             </div>
-            <div th:unless="${post.author.imageUrl}">
-                <div style="width: 50px; height: 50px; border-radius: 50%; background-color: #ccc; display: flex; align-items: center; justify-content: center;">
-                    <span th:text="${#strings.substring(post.author.firstName, 0, 1) + #strings.substring(post.author.lastName, 0, 1)}"></span>
+
+            <button id="follow-btn"
+                    class="follow-btn"
+                    onclick="simpleToggleFollow()"
+                    th:data-user-id="${post.author.id}">
+                <i id="follow-icon" class="fas fa-plus"></i>
+                <span id="follow-text">Подписаться</span>
+            </button>
+        </div>
+
+        <!-- Post Content -->
+        <div class="post-content">
+            <!-- Post Image -->
+            <img th:if="${post.imageUrl}"
+                 th:src="${post.imageUrl}"
+                 alt="Изображение поста"
+                 class="post-image">
+
+            <!-- Post Text -->
+            <div class="post-text" th:text="${post.content}">
+                Содержание поста будет отображено здесь...
+            </div>
+        </div>
+
+        <!-- Post Actions -->
+        <div class="post-actions">
+            <div class="action-buttons">
+                <button class="action-btn like-btn" onclick="toggleLike()">
+                    <i class="far fa-heart"></i>
+                    <span>Нравится</span>
+                </button>
+
+                <button class="action-btn comment-btn" onclick="showComments()">
+                    <i class="far fa-comment"></i>
+                    <span>Комментировать</span>
+                </button>
+
+                <button class="action-btn share-btn" onclick="sharePost()">
+                    <i class="fas fa-share"></i>
+                    <span>Поделиться</span>
+                </button>
+            </div>
+
+            <div class="post-stats">
+                <div class="stat-item">
+                    <i class="far fa-eye"></i>
+                    <span th:text="${post.viewsCount}">0</span>
+                </div>
+                <div class="stat-item">
+                    <i class="far fa-heart"></i>
+                    <span th:text="${post.likesCount}">0</span>
+                </div>
+                <div class="stat-item">
+                    <i class="far fa-comment"></i>
+                    <span th:text="${post.commentsCount}">0</span>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Дата создания -->
-        <div style="margin-bottom: 15px; color: #666; font-size: 14px;">
-            <p>Опубликовано: <span th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy HH:mm')}"></span></p>
+    <!-- Comments Section -->
+    <div id="commentsSection" class="comments-section" style="display: none;">
+        <div class="comments-header">
+            <h3 class="comments-title">Комментарии</h3>
         </div>
 
-        <!-- Изображение поста -->
-        <div th:if="${post.imageUrl}" style="margin-bottom: 20px; text-align: center;">
-            <img th:src="${post.imageUrl}"
-                 alt="Изображение поста"
-                 style="max-width: 100%; max-height: 500px; border: 1px solid #ddd;">
+        <div class="comment-form">
+            <textarea class="comment-textarea" placeholder="Написать комментарий..."></textarea>
+            <button class="comment-submit">Отправить комментарий</button>
         </div>
 
-        <!-- Текст поста -->
-        <div style="margin-bottom: 20px;">
-            <h3>Содержание:</h3>
-            <div style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; white-space: pre-wrap;" th:text="${post.content}"></div>
+        <div class="widget-content">
+            <p style="color: var(--text-muted); text-align: center; padding: 2rem;">
+                Функция комментариев будет реализована позже
+            </p>
         </div>
+    </div>
 
-        <!-- Статистика поста -->
-        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-            <h4>Статистика:</h4>
-            <div style="display: flex; gap: 20px;">
-                <span>👁️ Просмотры: <strong th:text="${post.viewsCount}"></strong></span>
-                <span>❤️ Лайки: <strong th:text="${post.likesCount}"></strong></span>
-                <span>💬 Комментарии: <strong th:text="${post.commentsCount}"></strong></span>
+    <!-- Post Not Found -->
+    <div th:unless="${post}" class="post-container">
+        <div style="text-align: center; padding: 4rem 2rem;">
+            <div style="font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem;">
+                <i class="fas fa-file-alt"></i>
             </div>
+            <h2 style="color: var(--text-primary); margin-bottom: 1rem;">Пост не найден</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                Запрашиваемый пост не существует или был удален.
+            </p>
+            <a href="/" class="follow-btn">
+                <i class="fas fa-home"></i>
+                Вернуться на главную
+            </a>
         </div>
+    </div>
+</main>
 
-        <!-- Кнопки действий -->
-        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-            <button onclick="likePost()" style="margin-right: 10px;">❤️ Лайк</button>
-            <button onclick="sharePost()" style="margin-right: 10px;">📤 Поделиться</button>
-            <button onclick="showComments()">💬 Комментарии</button>
+<!-- Right Sidebar -->
+<aside class="right-sidebar">
+    <!-- Trending Topics -->
+    <div class="widget">
+        <div class="widget-header">
+            <h3 class="widget-title">Актуальные темы</h3>
+        </div>
+        <div class="widget-content">
+            <a href="#" class="trend-item">
+                <div class="trend-info">
+                    <p class="trend-name">#Технологии</p>
+                    <p class="trend-count">1.2M обсуждений</p>
+                </div>
+            </a>
+            <a href="#" class="trend-item">
+                <div class="trend-info">
+                    <p class="trend-name">#Дизайн</p>
+                    <p class="trend-count">845K обсуждений</p>
+                </div>
+            </a>
+            <a href="#" class="trend-item">
+                <div class="trend-info">
+                    <p class="trend-name">#Искусство</p>
+                    <p class="trend-count">654K обсуждений</p>
+                </div>
+            </a>
         </div>
     </div>
 
-    <!-- Если пост не найден -->
-    <div th:unless="${post}" style="text-align: center; padding: 40px;">
-        <h2>Пост не найден</h2>
-        <p>Запрашиваемый пост не существует или был удален.</p>
-        <a href="/">Вернуться на главную</a>
-    </div>
-
-    <!-- Секция комментариев (заглушка) -->
-    <div id="commentsSection" style="display: none; margin-top: 30px; border: 1px solid #ddd; padding: 20px;">
-        <h3>Комментарии</h3>
-        <p>Функция комментариев будет реализована позже</p>
-
-        <!-- Форма добавления комментария -->
-        <div style="margin-top: 15px;">
-            <textarea placeholder="Написать комментарий..." rows="3" style="width: 100%; margin-bottom: 10px;"></textarea>
-            <button>Отправить комментарий</button>
+    <!-- Related Posts -->
+    <div class="widget">
+        <div class="widget-header">
+            <h3 class="widget-title">Похожие посты</h3>
+        </div>
+        <div class="widget-content">
+            <a href="#" class="related-item">
+                <div class="trend-info">
+                    <p class="trend-name">Интересный пост о веб-разработке</p>
+                    <p class="trend-count">5 часов назад</p>
+                </div>
+            </a>
+            <a href="#" class="related-item">
+                <div class="trend-info">
+                    <p class="trend-name">Советы по дизайну интерфейсов</p>
+                    <p class="trend-count">1 день назад</p>
+                </div>
+            </a>
+            <a href="#" class="related-item">
+                <div class="trend-info">
+                    <p class="trend-name">Будущее искусственного интеллекта</p>
+                    <p class="trend-count">3 дня назад</p>
+                </div>
+            </a>
         </div>
     </div>
-</div>
+
+    <!-- Quick Actions -->
+    <div class="widget">
+        <div class="widget-header">
+            <h3 class="widget-title">Быстрые действия</h3>
+        </div>
+        <div class="widget-content">
+            <a href="/posts/create" class="follow-btn" style="width: 100%; margin-bottom: 1rem; justify-content: center;">
+                <i class="fas fa-plus"></i>
+                Создать пост
+            </a>
+            <a href="/" class="action-btn" style="width: 100%; justify-content: center;">
+                <i class="fas fa-home"></i>
+                На главную
+            </a>
+        </div>
+    </div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ ИЗ ФРАГМЕНТА -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
 
 <script>
-    function likePost() {
-        // TODO: реализовать лайк поста
-        alert('Функция лайков будет реализована позже');
+    // Функция для показа красивых уведомлений
+    function showNotification(message, type = 'success') {
+        const alertClass = type === 'success' ? 'alert-success-luxury' : 'alert-danger-luxury';
+        const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+        const alert = document.createElement('div');
+        alert.className = `alert-luxury ${alertClass}`;
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateY(-20px)';
+        alert.style.transition = 'all 0.3s ease';
+        alert.innerHTML = `
+            <i class="fas ${iconClass} me-2"></i>
+            <span>${message}</span>
+        `;
+
+        const mainContent = document.querySelector('.main-content');
+        const postContainer = document.querySelector('.post-container');
+
+        if (mainContent && postContainer) {
+            mainContent.insertBefore(alert, postContainer);
+
+            // Анимация появления
+            setTimeout(() => {
+                alert.style.opacity = '1';
+                alert.style.transform = 'translateY(0)';
+            }, 10);
+
+            // Автоматическое скрытие через 3 секунды
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.parentNode.removeChild(alert);
+                    }
+                }, 300);
+            }, 3000);
+        }
+    }
+
+    // Обновленная функция подписки с красивыми уведомлениями
+    async function simpleToggleFollow() {
+        console.log('🔄 Простая подписка');
+
+        const currentUserId = document.body.dataset.currentUserId;
+        const profileUserId = document.body.dataset.profileUserId;
+
+        if (!currentUserId) {
+            window.location.href = '/login';
+            return;
+        }
+
+        const btn = document.getElementById('follow-btn');
+        const icon = document.getElementById('follow-icon');
+        const text = document.getElementById('follow-text');
+
+        // Показываем загрузку
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        icon.className = 'fas fa-spinner fa-spin';
+
+        try {
+            const response = await fetch('/api/subscriptions/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    subscribedToId: parseInt(profileUserId)
+                })
+            });
+
+            const result = await response.json();
+            console.log('Результат:', result);
+
+            if (result.success) {
+                // Обновляем кнопку
+                if (result.isSubscribed) {
+                    btn.className = 'follow-btn subscribed';
+                    btn.style.background = 'var(--text-secondary)';
+                    icon.className = 'fas fa-user-check';
+                    text.textContent = 'Подписан';
+                } else {
+                    btn.className = 'follow-btn';
+                    btn.style.background = 'var(--accent-primary)';
+                    icon.className = 'fas fa-user-plus';
+                    text.textContent = 'Подписаться';
+                }
+
+                // Красивое уведомление вместо alert
+                showNotification(result.message, 'success');
+
+                // Добавляем короткую анимацию успеха для кнопки
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                }, 150);
+
+            } else {
+                showNotification('Ошибка: ' + result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showNotification('Произошла ошибка при подписке', 'error');
+        } finally {
+            // Убираем загрузку
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+    }
+
+    function toggleLike() {
+        const btn = document.querySelector('.like-btn');
+        const icon = btn.querySelector('i');
+        const text = btn.querySelector('span');
+
+        if (btn.classList.contains('liked')) {
+            btn.classList.remove('liked');
+            icon.className = 'far fa-heart';
+            text.textContent = 'Нравится';
+        } else {
+            btn.classList.add('liked');
+            icon.className = 'fas fa-heart';
+            text.textContent = 'Нравится';
+            btn.style.color = '#ef4444';
+        }
     }
 
     function sharePost() {
-        // Копируем URL в буфер обмена
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            alert('Ссылка на пост скопирована в буфер обмена!');
-        });
+        if (navigator.share) {
+            navigator.share({
+                title: document.title,
+                url: window.location.href
+            });
+        } else {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showNotification('Ссылка на пост скопирована в буфер обмена!', 'success');
+            });
+        }
     }
 
     function showComments() {
         const commentsSection = document.getElementById('commentsSection');
+        const btn = document.querySelector('.comment-btn');
+
         if (commentsSection.style.display === 'none') {
             commentsSection.style.display = 'block';
+            btn.style.background = 'rgba(59, 130, 246, 0.1)';
+            btn.style.color = '#3b82f6';
+
+            // Scroll to comments
+            commentsSection.scrollIntoView({ behavior: 'smooth' });
         } else {
             commentsSection.style.display = 'none';
+            btn.style.background = '';
+            btn.style.color = '';
         }
     }
 </script>
+
 </body>
 </html>

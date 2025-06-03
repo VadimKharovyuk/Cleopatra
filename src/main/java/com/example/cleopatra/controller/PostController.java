@@ -115,7 +115,6 @@ public class PostController {
 
         try {
 
-
             // Получаем информацию о текущем пользователе
             User currentUser = userService.getCurrentUserEntity();
 
