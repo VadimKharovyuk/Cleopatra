@@ -3,6 +3,7 @@ package com.example.cleopatra.service;
 import com.example.cleopatra.dto.Post.PostCreateDto;
 import com.example.cleopatra.dto.Post.PostListDto;
 import com.example.cleopatra.dto.Post.PostResponseDto;
+import com.example.cleopatra.model.Post;
 
 public interface PostService {
 
@@ -24,4 +25,9 @@ public interface PostService {
      * Получить рекомендованные посты если нет подписок
      */
     PostListDto getRecommendedPosts(Long userId, int page, int size);
+
+    void deletePost(Long id);
+
+
+    Post findById(Long postId);
 }

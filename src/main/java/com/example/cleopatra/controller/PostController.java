@@ -106,6 +106,7 @@ public class PostController {
     }
 
 
+
     @GetMapping("/my-posts")
     public String getMyPosts(@RequestParam(defaultValue = "0") int page,
                              @RequestParam(defaultValue = "10") int size,

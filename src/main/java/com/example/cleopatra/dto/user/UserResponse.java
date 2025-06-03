@@ -2,11 +2,16 @@ package com.example.cleopatra.dto.user;
 
 import com.example.cleopatra.enums.Gender;
 import com.example.cleopatra.enums.Role;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserResponse {
     private Long id;
     private String email;

@@ -1,5 +1,6 @@
 package com.example.cleopatra.service.impl;
 
+import com.example.cleopatra.ExistsException.PostNotFoundException;
 import com.example.cleopatra.dto.Post.PostCreateDto;
 import com.example.cleopatra.dto.Post.PostListDto;
 import com.example.cleopatra.dto.Post.PostResponseDto;
@@ -10,6 +11,7 @@ import com.example.cleopatra.model.User;
 import com.example.cleopatra.repository.PostRepository;
 import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.service.*;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -73,14 +75,6 @@ public class PostServiceImpl implements PostService {
 
         // Сохраняем пост
         Post savedPost = postRepository.save(post);
-
-        // Увеличиваем счетчик постов у пользователя (с проверкой на null)
-        Long currentPostsCount = currentUser.getPostsCount();
-        if (currentPostsCount == null) {
-            currentUser.setPostsCount(1L);
-        } else {
-            currentUser.setPostsCount(currentPostsCount + 1);
-        }
 
         // Сохраняем изменения пользователя
         userRepository.save(currentUser);
@@ -169,6 +163,31 @@ public class PostServiceImpl implements PostService {
         Slice<Post> postSlice = postRepository.findByIsDeletedFalseOrderByLikesCountDescCreatedAtDesc(pageable);
 
         return postMapper.toListDtoFromSlice(postSlice);
+    }
+
+    @Override
+    @Transactional
+    public void deletePost(Long postId) {
+        Post post = findById(postId);
+        Long userId = post.getAuthor().getId();
+
+        log.info("🗑️ Удаляем пост {} пользователя {}", postId, userId);
+
+        // Логируем ДО удаления
+        Long countBefore = postRepository.countByAuthorId(userId);
+        log.info("📊 Количество постов ДО удаления: {}", countBefore);
+
+        postRepository.deleteById(postId);
+
+        // Логируем ПОСЛЕ удаления
+        Long countAfter = postRepository.countByAuthorId(userId);
+        log.info("📊 Количество постов ПОСЛЕ удаления: {}", countAfter);
+    }
+
+    @Override
+    public Post findById(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Пост с ID " + postId + " не найден"));
     }
 
     private User getCurrentUser() {

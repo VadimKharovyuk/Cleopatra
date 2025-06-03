@@ -107,9 +107,7 @@ public class User {
     @Builder.Default
     private List<Post> posts = new ArrayList<>();
 
-    @Column(name = "posts_count")
-    @Builder.Default
-    private Long postsCount = 0L;
+
 
     // Комментарии пользователя
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)

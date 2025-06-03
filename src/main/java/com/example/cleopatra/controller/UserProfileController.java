@@ -49,25 +49,21 @@ public class UserProfileController {
             // Получаем информацию о пользователе
             UserResponse user = userService.getUserById(userId);
             model.addAttribute("user", user);
-            log.debug("User добавлен в модель: ID={}, Email={}", user.getId(), user.getEmail());
+
 
             // Получаем посты пользователя
             PostListDto userPosts = postService.getUserPosts(userId, page, size);
             model.addAttribute("posts", userPosts);
             model.addAttribute("currentPage", page);
             model.addAttribute("pageSize", size);
-            log.debug("Загружено {} постов для пользователя {}", userPosts.getNumberOfElements(), userId);
+
 
             // Обрабатываем данные текущего пользователя
             if (authentication != null && authentication.isAuthenticated()) {
                 UserResponse currentUser = userService.getUserByEmail(authentication.getName());
                 model.addAttribute("currentUserId", currentUser.getId());
                 model.addAttribute("isOwnProfile", currentUser.getId().equals(userId));
-                log.debug("Current User добавлен в модель: ID={}, Email={}", currentUser.getId(), currentUser.getEmail());
 
-                // ДОБАВИТЬ ЭТУ ОТЛАДКУ
-                log.debug("Сравнение ID: currentUserId={}, profileUserId={}, равны={}",
-                        currentUser.getId(), userId, currentUser.getId().equals(userId));
 
                 // ===== ЗАПИСЫВАЕМ ВИЗИТ (УПРОЩЕННО) =====
                 ipAddressService.recordUserVisit(userId, currentUser.getId(), request);

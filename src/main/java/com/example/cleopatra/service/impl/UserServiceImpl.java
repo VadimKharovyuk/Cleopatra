@@ -6,6 +6,7 @@ import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.maper.UserMapper;
 import com.example.cleopatra.model.User;
+import com.example.cleopatra.repository.PostRepository;
 import com.example.cleopatra.repository.SubscriptionRepository;
 import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.service.ImageConverterService;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final ImageValidator imageValidator;
     private final StorageService storageService;
     private final SubscriptionRepository subscriptionRepository;
+    private final PostRepository postRepository;
 
 
     @Override
@@ -116,11 +119,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse getUserById(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Пользователь с ID " + userId + " не найден"));
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
+        // Маппим базовую информацию
         UserResponse userResponse = userMapper.toResponse(user);
-        getFollowersCount(userId);
-        getFollowingCount(userId);
+
+        // Добавляем статистику
+        userResponse.setPostsCount(getPostsCount(userId));
+        userResponse.setFollowersCount(getFollowersCount(userId));
+        userResponse.setFollowingCount(getFollowingCount(userId));
 
         return userResponse;
     }
@@ -136,11 +143,9 @@ public class UserServiceImpl implements UserService {
     }
 
     private Long getPostsCount(Long userId) {
-        // TODO: когда будет готов Post entity
-        // return postRepository.countByAuthorId(userId);
-
-        // Временная заглушка
-        return 47L;
+        Long count = postRepository.countByAuthorId(userId);
+        log.info("🔢 Подсчет постов для пользователя {}: {}", userId, count);
+        return count;
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.example.cleopatra.dto.Post.PostListDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.service.PostService;
+import com.example.cleopatra.service.SubscriptionService;
 import com.example.cleopatra.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class DashboardController {
 
 
 
+
     @GetMapping
     public String dashboard(Model model, Authentication authentication) {
         model.addAttribute("postCreateDto", new PostCreateDto());
@@ -36,9 +38,11 @@ public class DashboardController {
                 User currentUser = userService.getCurrentUserEntity();
 
                 // Добавляем несколько последних постов из ленты на главную (показываем только 3-5)
-                PostListDto recentFeedPosts = postService.getFeedPosts(currentUser.getId(), 0, 3);
+                PostListDto recentFeedPosts = postService.getFeedPosts(currentUser.getId(), 0, 10);
                 model.addAttribute("recentPosts", recentFeedPosts);
                 model.addAttribute("currentUser", currentUser);
+
+
 
                 // Дополнительно можно добавить статистику для dashboard
                 // model.addAttribute("totalFollowers", userService.getFollowersCount(currentUser.getId()));

@@ -6,7 +6,8 @@
     <title>Профиль пользователя - Cleopatra</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
 
     <!-- ПОДКЛЮЧЕНИЕ ФРАГМЕНТА СТИЛЕЙ -->
     <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
@@ -511,6 +512,7 @@
             .right-sidebar {
                 display: none;
             }
+
             .main-content {
                 margin-right: 0;
             }
@@ -844,7 +846,8 @@
                         <span>Редактировать профиль</span>
                     </a>
 
-                    <a th:href="@{/showProfileStats/{userId}/stats(userId=${user.id})}" class="btn-luxury btn-secondary-luxury">
+                    <a th:href="@{/showProfileStats/{userId}/stats(userId=${user.id})}"
+                       class="btn-luxury btn-secondary-luxury">
                         <i class="fas fa-chart-bar"></i>
                         <span>Статистика</span>
                     </a>
@@ -891,7 +894,6 @@
             <div class="profile-nav">
                 <div class="nav-tabs-luxury d-flex">
                     <button class="nav-tab-luxury active">Посты</button>
-                    <button class="nav-tab-luxury">Ответы</button>
                     <button class="nav-tab-luxury">Медиа</button>
                     <button class="nav-tab-luxury">Нравится</button>
                 </div>
@@ -899,10 +901,6 @@
         </div>
 
 
-
-
-
-        <!-- Content Area -->
         <!-- Content Area - заменить существующий блок -->
         <div class="content-area">
 
@@ -938,7 +936,8 @@
                                     <span class="author-handle" th:text="'@' + ${post.author.firstName?.toLowerCase()}">@автор</span>
                                     <!-- Дата теперь ссылка на пост -->
                                     <a th:href="@{/posts/{id}(id=${post.id})}" class="post-date-link">
-                                        <span class="post-date" th:text="${#temporals.format(post.createdAt, 'dd MMM', new java.util.Locale('ru'))}">1 янв</span>
+                                        <span class="post-date"
+                                              th:text="${#temporals.format(post.createdAt, 'dd MMM', new java.util.Locale('ru'))}">1 янв</span>
                                     </a>
                                 </div>
                             </div>
@@ -953,7 +952,8 @@
                                         <i class="fas fa-link"></i>
                                         Перейти к посту
                                     </a>
-                                    <a href="#" class="menu-item" onclick="copyPostLink(this)" th:data-post-id="${post.id}">
+                                    <a href="#" class="menu-item" onclick="copyPostLink(this)"
+                                       th:data-post-id="${post.id}">
                                         <i class="fas fa-copy"></i>
                                         Копировать ссылку
                                     </a>
@@ -961,10 +961,293 @@
                                         <i class="fas fa-edit"></i>
                                         Редактировать
                                     </a>
-                                    <a href="#" class="menu-item danger" th:if="${isOwnProfile}">
+                                    <a href="#" class="menu-item danger" th:if="${isOwnProfile}"
+                                       onclick="deletePost(event, this)" th:data-post-id="${post.id}">
                                         <i class="fas fa-trash"></i>
                                         Удалить
                                     </a>
+                                    <!-- Модальное окно подтверждения -->
+                                    <div id="deleteConfirmModal" class="modal-overlay" style="display: none;">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h3>Удалить пост?</h3>
+                                                <button class="modal-close" onclick="closeDeleteModal()">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Это действие нельзя отменить. Пост будет удален навсегда.</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn-secondary" onclick="closeDeleteModal()">
+                                                    Отмена
+                                                </button>
+                                                <button class="btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">
+                                                    <span class="btn-text">Удалить</span>
+                                                    <i class="fas fa-spinner fa-spin btn-spinner" style="display: none;"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <style>
+                                        /* Стили для модального окна */
+                                        .modal-overlay {
+                                            position: fixed;
+                                            top: 0;
+                                            left: 0;
+                                            right: 0;
+                                            bottom: 0;
+                                            background: rgba(0, 0, 0, 0.5);
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            z-index: 1000;
+                                            backdrop-filter: blur(4px);
+                                        }
+
+                                        .modal-content {
+                                            background: white;
+                                            border-radius: 12px;
+                                            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+                                            max-width: 400px;
+                                            width: 90%;
+                                            max-height: 90vh;
+                                            overflow: hidden;
+                                        }
+
+                                        .modal-header {
+                                            padding: 1.5rem;
+                                            border-bottom: 1px solid #e5e7eb;
+                                            display: flex;
+                                            justify-content: space-between;
+                                            align-items: center;
+                                        }
+
+                                        .modal-header h3 {
+                                            margin: 0;
+                                            font-size: 1.125rem;
+                                            font-weight: 600;
+                                            color: #111827;
+                                        }
+
+                                        .modal-close {
+                                            background: none;
+                                            border: none;
+                                            color: #6b7280;
+                                            cursor: pointer;
+                                            padding: 0.5rem;
+                                            border-radius: 6px;
+                                            transition: all 0.2s;
+                                        }
+
+                                        .modal-close:hover {
+                                            background: #f3f4f6;
+                                            color: #374151;
+                                        }
+
+                                        .modal-body {
+                                            padding: 1.5rem;
+                                            color: #6b7280;
+                                            line-height: 1.6;
+                                        }
+
+                                        .modal-footer {
+                                            padding: 1.5rem;
+                                            border-top: 1px solid #e5e7eb;
+                                            display: flex;
+                                            gap: 0.75rem;
+                                            justify-content: flex-end;
+                                        }
+
+                                        .btn-secondary {
+                                            background: #f3f4f6;
+                                            color: #374151;
+                                            border: none;
+                                            padding: 0.5rem 1rem;
+                                            border-radius: 6px;
+                                            font-weight: 500;
+                                            cursor: pointer;
+                                            transition: all 0.2s;
+                                        }
+
+                                        .btn-secondary:hover {
+                                            background: #e5e7eb;
+                                        }
+
+                                        .btn-danger {
+                                            background: #dc2626;
+                                            color: white;
+                                            border: none;
+                                            padding: 0.5rem 1rem;
+                                            border-radius: 6px;
+                                            font-weight: 500;
+                                            cursor: pointer;
+                                            transition: all 0.2s;
+                                            position: relative;
+                                            min-width: 80px;
+                                        }
+
+                                        .btn-danger:hover {
+                                            background: #b91c1c;
+                                        }
+
+                                        .btn-danger:disabled {
+                                            opacity: 0.5;
+                                            cursor: not-allowed;
+                                        }
+
+                                        .btn-danger .btn-spinner {
+                                            position: absolute;
+                                            left: 50%;
+                                            top: 50%;
+                                            transform: translate(-50%, -50%);
+                                        }
+
+                                        .btn-danger:disabled .btn-text {
+                                            opacity: 0;
+                                        }
+                                    </style>
+
+                                    <script>
+                                        let postToDelete = null;
+
+                                        // Функция для инициации удаления поста
+                                        function deletePost(event, element) {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+
+                                            const postId = element.getAttribute('data-post-id');
+                                            if (!postId) {
+                                                console.error('ID поста не найден');
+                                                return;
+                                            }
+
+                                            // Сохраняем ID поста для подтверждения
+                                            postToDelete = postId;
+
+                                            // Показываем модальное окно
+                                            const modal = document.getElementById('deleteConfirmModal');
+                                            if (modal) {
+                                                modal.style.display = 'flex';
+                                                document.body.style.overflow = 'hidden'; // Блокируем скролл
+                                            }
+                                        }
+
+                                        // Закрытие модального окна
+                                        function closeDeleteModal() {
+                                            const modal = document.getElementById('deleteConfirmModal');
+                                            if (modal) {
+                                                modal.style.display = 'none';
+                                                document.body.style.overflow = ''; // Восстанавливаем скролл
+                                            }
+                                            postToDelete = null;
+                                        }
+
+                                        // Подтверждение удаления
+                                        async function confirmDelete() {
+                                            if (!postToDelete) {
+                                                console.error('ID поста для удаления не найден');
+                                                return;
+                                            }
+
+                                            const confirmBtn = document.getElementById('confirmDeleteBtn');
+                                            const btnText = confirmBtn.querySelector('.btn-text');
+                                            const btnSpinner = confirmBtn.querySelector('.btn-spinner');
+
+                                            // Показываем состояние загрузки
+                                            confirmBtn.disabled = true;
+                                            if (btnText) btnText.style.opacity = '0';
+                                            if (btnSpinner) btnSpinner.style.display = 'inline-block';
+
+                                            try {
+                                                console.log('Удаляем пост:', postToDelete);
+
+                                                const response = await fetch(`/api/posts/${postToDelete}`, {
+                                                    method: 'DELETE',
+                                                    headers: {
+                                                        'Content-Type': 'application/json'
+                                                    }
+                                                });
+
+                                                const result = await response.json();
+
+                                                if (response.ok && result.success) {
+                                                    console.log('Пост успешно удален');
+
+                                                    // Показываем уведомление об успехе
+                                                    if (typeof showNotification === 'function') {
+                                                        showNotification('Пост успешно удален', 'success');
+                                                    }
+
+                                                    // Удаляем элемент поста из DOM
+                                                    const postElement = document.querySelector(`[data-post-id="${postToDelete}"]`);
+                                                    if (postElement) {
+                                                        // Находим родительский элемент поста (article.post-card)
+                                                        const postCard = postElement.closest('article.post-card');
+                                                        if (postCard) {
+                                                            // Анимация исчезновения
+                                                            postCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                                                            postCard.style.opacity = '0';
+                                                            postCard.style.transform = 'translateY(-20px)';
+
+                                                            setTimeout(() => {
+                                                                postCard.remove();
+
+                                                                // Проверяем, остались ли посты
+                                                                const remainingPosts = document.querySelectorAll('article.post-card');
+                                                                if (remainingPosts.length === 0) {
+                                                                    // Перезагружаем страницу для показа empty state
+                                                                    window.location.reload();
+                                                                }
+                                                            }, 300);
+                                                        }
+                                                    }
+
+                                                    // Закрываем модальное окно
+                                                    closeDeleteModal();
+
+                                                } else {
+                                                    // Показываем ошибку
+                                                    const errorMessage = result.error || 'Произошла ошибка при удалении поста';
+                                                    if (typeof showNotification === 'function') {
+                                                        showNotification(errorMessage, 'error');
+                                                    } else {
+                                                        alert(errorMessage);
+                                                    }
+                                                }
+
+                                            } catch (error) {
+                                                console.error('Ошибка при удалении поста:', error);
+                                                if (typeof showNotification === 'function') {
+                                                    showNotification('Произошла ошибка при удалении поста', 'error');
+                                                } else {
+                                                    alert('Произошла ошибка при удалении поста');
+                                                }
+                                            } finally {
+                                                // Восстанавливаем состояние кнопки
+                                                confirmBtn.disabled = false;
+                                                if (btnText) btnText.style.opacity = '1';
+                                                if (btnSpinner) btnSpinner.style.display = 'none';
+                                            }
+                                        }
+
+                                        // Закрытие модального окна по клику вне его
+                                        document.addEventListener('click', function(event) {
+                                            const modal = document.getElementById('deleteConfirmModal');
+                                            if (event.target === modal) {
+                                                closeDeleteModal();
+                                            }
+                                        });
+
+                                        // Закрытие модального окна по нажатию Escape
+                                        document.addEventListener('keydown', function(event) {
+                                            if (event.key === 'Escape') {
+                                                closeDeleteModal();
+                                            }
+                                        });
+                                    </script>
+
+
                                 </div>
                             </div>
                         </div>
@@ -1015,7 +1298,9 @@
             </span>
                             </div>
                         </div>
+
                     </article>
+
 
                     <style>
                         /* Дополнительные стили для навигации */
@@ -1161,7 +1446,8 @@
                 <h3 class="empty-title" th:text="${isOwnProfile ? 'Ваша история начинается здесь' : 'Пока нет постов'}">
                     Ваша история начинается здесь
                 </h3>
-                <p class="empty-description" th:text="${isOwnProfile ? 'Поделитесь своими мыслями и начните создавать свой уникальный контент' : 'Этот пользователь еще не публиковал посты'}">
+                <p class="empty-description"
+                   th:text="${isOwnProfile ? 'Поделитесь своими мыслями и начните создавать свой уникальный контент' : 'Этот пользователь еще не публиковал посты'}">
                     Поделитесь своими мыслями и начните создавать свой уникальный контент
                 </p>
                 <a th:if="${isOwnProfile}"
@@ -1595,7 +1881,7 @@
             }
 
             // Закрытие меню при клике вне его
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 if (!e.target.closest('.post-menu')) {
                     document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
                         menu.classList.remove('show');
@@ -1728,28 +2014,28 @@
 
 <script>
     // Инициализация других функций профиля
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Smooth hover animations
         document.querySelectorAll('.btn-luxury:not([data-action="follow"])').forEach(btn => {
-            btn.addEventListener('mouseenter', function() {
+            btn.addEventListener('mouseenter', function () {
                 this.style.transform = 'translateY(-2px)';
             });
 
-            btn.addEventListener('mouseleave', function() {
+            btn.addEventListener('mouseleave', function () {
                 this.style.transform = 'translateY(0)';
             });
         });
 
         // Tab switching functionality
         document.querySelectorAll('.nav-tab-luxury').forEach(tab => {
-            tab.addEventListener('click', function() {
+            tab.addEventListener('click', function () {
                 document.querySelectorAll('.nav-tab-luxury').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
 
                 const emptyTitle = document.querySelector('.empty-title');
                 const emptyDescription = document.querySelector('.empty-description');
 
-                switch(this.textContent.trim()) {
+                switch (this.textContent.trim()) {
                     case 'Посты':
                         emptyTitle.textContent = 'Ваша история начинается здесь';
                         emptyDescription.textContent = 'Поделитесь своими мыслями и начните создавать свой уникальный контент';
@@ -1804,9 +2090,15 @@
 <!-- В конце body, перед закрывающим тегом -->
 <script>
     // Простые функции
-    function sendMessage() { alert('В разработке'); }
-    function shareProfile() { /* код */ }
-    function blockUser() { /* код */ }
+    function sendMessage() {
+        alert('В разработке');
+    }
+
+    function shareProfile() { /* код */
+    }
+
+    function blockUser() { /* код */
+    }
 </script>
 
 <!-- Модуль подписок загружается последним -->
@@ -1817,8 +2109,6 @@
 <script th:src="@{/js/profile/apiClient.js}"></script>
 <script th:src="@{/js/profile/userActions.js}"></script>
 <script th:src="@{/js/profile/profileUtils.js}"></script>
-
-
 
 
 </body>

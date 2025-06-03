@@ -42,8 +42,6 @@ public class UserMapper {
         response.setFollowingCount(user.getFollowingCount() != null ? user.getFollowingCount() : 0L);
 
 
-        response.setPostsCount(user.getPostsCount() != null ? user.getPostsCount() : 0L);
-
         response.setCity(user.getCity());
 
         response.setCreatedAt(user.getCreatedAt());
