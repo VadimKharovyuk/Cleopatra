@@ -21,6 +21,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
+
+//✅ Определяет нужна ли конвертация (needsConversion())
+//        ✅ Читает HEIF/HEIC файлы
+//✅ Конвертирует в JPEG с настройкой качества
+//✅ Обрабатывает цветовые пространства
+//✅ Генерирует новые имена файлов
+//✅ Создает ProcessedImage с результатом
 @Service
 @Slf4j
 public class ImageConverterService {
@@ -129,7 +136,7 @@ public class ImageConverterService {
         return nameWithoutExtension + TARGET_EXTENSION;
     }
 
-    // Статический внутренний класс
+
     @Data
     @Builder
     @AllArgsConstructor
