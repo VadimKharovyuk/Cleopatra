@@ -58,5 +58,25 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to);
 
+
+
+
+    // НОВЫЕ МЕТОДЫ ДЛЯ IP АНАЛИТИКИ
+
+    @Query("SELECT COUNT(DISTINCT v.ipAddress) FROM Visit v WHERE v.visitedUser.id = :userId")
+    Long countUniqueIpsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT v.ipAddress, COUNT(v) FROM Visit v WHERE v.visitedUser.id = :userId " +
+            "GROUP BY v.ipAddress ORDER BY COUNT(v) DESC")
+    List<Object[]> findTopIpAddressesByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    Long countByIpAddressAndVisitedAtAfter(String ipAddress, LocalDateTime after);
+
+    @Query("SELECT v FROM Visit v WHERE v.visitedUser.id = :userId AND v.ipAddress = :ipAddress " +
+            "ORDER BY v.visitedAt DESC")
+    List<Visit> findByUserIdAndIpAddress(@Param("userId") Long userId,
+                                         @Param("ipAddress") String ipAddress,
+                                         Pageable pageable);
+
 }
 

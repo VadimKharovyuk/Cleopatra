@@ -128,6 +128,7 @@ public class ProfileViewController {
             log.debug("Успешно загружена страница просмотров для пользователя {}", currentUser.getId());
             return "profile/views";
 
+
         } catch (Exception e) {
             log.error("Критическая ошибка при показе просмотров профиля: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Произошла ошибка при загрузке страницы");
