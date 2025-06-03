@@ -57,3 +57,4 @@ public class GeoLocationService {
         private Double longitude;
     }
 }
+

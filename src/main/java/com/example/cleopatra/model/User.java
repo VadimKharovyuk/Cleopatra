@@ -64,8 +64,7 @@ public class User {
     @Column(name = "following_count")
     private Long followingCount = 0L;
 
-    @Column(name = "posts_count")
-    private Long postsCount = 0L;
+
 
 
     @Column(name = "city")
@@ -99,6 +98,34 @@ public class User {
     @Column(name = "total_visits")
     @Builder.Default
     private Long totalVisits = 0L;
+
+
+
+    // Посты пользователя
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("createdAt DESC")
+    @Builder.Default
+    private List<Post> posts = new ArrayList<>();
+
+    @Column(name = "posts_count")
+    @Builder.Default
+    private Long postsCount = 0L;
+
+    // Комментарии пользователя
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    @OrderBy("createdAt DESC")
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
+
+    // Просмотренные посты
+    @OneToMany(mappedBy = "viewer", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<PostView> viewedPosts = new HashSet<>();
+
+    // Понравившиеся посты
+    @ManyToMany(mappedBy = "likedBy", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Post> likedPosts = new HashSet<>();
 
 
     // Системные поля

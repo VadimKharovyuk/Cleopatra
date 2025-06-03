@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр поста</title>
+</head>
+<body>
+<div>
+    <!-- Сообщение об успешном создании -->
+    <div th:if="${successMessage}" style="color: green; margin-bottom: 15px; padding: 10px; border: 1px solid green; background-color: #f0fff0;">
+        <p th:text="${successMessage}"></p>
+    </div>
+
+    <h1>Пост создан успешно!</h1>
+
+    <p>ID поста: <span th:text="${postId}"></span></p>
+
+    <div style="margin-top: 20px;">
+        <a href="/posts/create">Создать еще один пост</a>
+        <br><br>
+        <a href="/">На главную</a>
+    </div>
+
+    <!-- TODO: Здесь будет полная информация о посте -->
+    <div style="margin-top: 30px; padding: 20px; border: 1px solid #ccc;">
+        <h3>Информация о посте будет здесь</h3>
+        <p>Здесь будет отображаться:</p>
+        <ul>
+            <li>Текст поста</li>
+            <li>Изображение (если есть)</li>
+            <li>Информация об авторе</li>
+            <li>Дата создания</li>
+            <li>Количество лайков и комментариев</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

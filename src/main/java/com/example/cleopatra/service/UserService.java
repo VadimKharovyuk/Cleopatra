@@ -3,6 +3,7 @@ package com.example.cleopatra.service;
 import com.example.cleopatra.dto.user.RegisterDto;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
+import com.example.cleopatra.model.User;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
@@ -32,5 +33,5 @@ public interface UserService {
 
     UserResponse getUserByEmail(String userEmail);
 
-
+    User getCurrentUserEntity();
 }
