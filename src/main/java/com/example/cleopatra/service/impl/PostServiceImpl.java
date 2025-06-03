@@ -1,6 +1,7 @@
 package com.example.cleopatra.service.impl;
 
 import com.example.cleopatra.dto.Post.PostCreateDto;
+import com.example.cleopatra.dto.Post.PostListDto;
 import com.example.cleopatra.dto.Post.PostResponseDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.maper.PostMapper;
@@ -11,6 +12,10 @@ import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -96,6 +101,36 @@ public class PostServiceImpl implements PostService {
         log.info("Пост найден: {}", post.getContent().substring(0, Math.min(50, post.getContent().length())));
 
         return postMapper.toResponseDto(post);
+    }
+
+    @Override
+    public PostListDto getUserPosts(Long userId, int page, int size) {
+        log.info("Получение постов пользователя с ID: {}, страница: {}, размер: {}", userId, page, size);
+
+        // Проверяем существование пользователя
+        if (!userService.userExists(userId)) {
+            throw new RuntimeException("Пользователь с ID " + userId + " не найден");
+        }
+
+        // Создаем Pageable для сортировки по дате создания (новые сначала)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        // Получаем посты пользователя (только неудаленные)
+        Slice<Post> postSlice = postRepository.findByAuthor_IdAndIsDeletedFalse(userId, pageable);
+
+        log.info("Найдено {} постов для пользователя {}", postSlice.getNumberOfElements(), userId);
+
+        return postMapper.toListDtoFromSlice(postSlice);
+    }
+
+    /**
+     * Получить посты текущего пользователя
+     */
+    @Override
+    public PostListDto getMyPosts(int page, int size) {
+        log.info("Получение собственных постов, страница: {}, размер: {}", page, size);
+        User currentUser = getCurrentUser();
+        return getUserPosts(currentUser.getId(), page, size);
     }
 
     private User getCurrentUser() {
