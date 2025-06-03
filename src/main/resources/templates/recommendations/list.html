@@ -578,9 +578,9 @@
               <span th:text="${user.firstName + ' ' + user.lastName}">Имя Пользователя</span>
             </a>
 
-            <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-handle">
-              @<span th:text="'user' + ${user.id}">username</span>
-            </a>
+<!--            <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-handle">-->
+<!--              @<span th:text="'user' + ${user.id}">username</span>-->
+<!--            </a>-->
 
             <div class="user-stats" th:if="${user.followersCount != null and user.followersCount > 0}">
               <span th:text="${user.followersCount}">0</span> подписчиков

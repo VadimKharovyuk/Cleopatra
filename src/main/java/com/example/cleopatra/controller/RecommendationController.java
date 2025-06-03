@@ -38,9 +38,6 @@ public class RecommendationController {
         }
 
         try {
-            log.info("Загрузка всех рекомендаций для пользователя: {}, страница: {}",
-                    currentUserId, page);
-
             UserRecommendationListDto recommendations =
                     recommendationService.getAllRecommendations(currentUserId, page);
 
