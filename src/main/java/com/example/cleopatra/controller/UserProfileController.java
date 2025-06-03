@@ -160,18 +160,13 @@ public class UserProfileController {
         }
     }
 
-    /**
-     * ✅ ИСПРАВЛЕННЫЙ маршрут для загрузки аватара
-     * URL: /profile/{userId}/avatar (БЕЗ /upload)
-     * Параметр: avatar (НЕ avatarFile)
-     */
+
     @PostMapping("/{userId}/avatar")
     public String uploadAvatar(
             @PathVariable Long userId,
             @RequestParam("avatar") MultipartFile file,
             RedirectAttributes redirectAttributes) {
 
-        log.info("📤 Загрузка аватара для пользователя {}: {}", userId, file.getOriginalFilename());
 
         // ✅ Минимальная проверка в контроллере
         if (file.isEmpty()) {
@@ -184,7 +179,6 @@ public class UserProfileController {
             // ✅ Основная валидация и бизнес-логика В СЕРВИСЕ
             UserResponse updatedUser = userService.uploadAvatar(userId, file);
 
-            log.info("✅ Аватар успешно загружен для пользователя {}", userId);
             redirectAttributes.addFlashAttribute("successMessage", "Аватар успешно обновлен!");
             return "redirect:/profile/" + userId;
 

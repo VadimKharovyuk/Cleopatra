@@ -177,27 +177,36 @@ public class UserServiceImpl implements UserService {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Пользователь с ID " + userId + " не найден"));
 
-            imageValidator.validateImage(file);
+            // ✅ ИЗМЕНЕНИЕ: Используем validateAndProcess вместо validateImage
+            ImageConverterService.ProcessedImage processedImage = imageValidator.validateAndProcess(file);
+
+            // Логируем информацию о конвертации
+            if (!processedImage.getContentType().equals(file.getContentType())) {
+                log.info("Фоновое изображение {} было конвертировано из {} в {}",
+                        file.getOriginalFilename(),
+                        file.getContentType(),
+                        processedImage.getContentType());
+            }
 
             if (user.getImgBackgroundID() != null && !user.getImgBackgroundID().isEmpty()) {
                 log.debug("Удаляем старое фоновое изображение с ID: {}", user.getImgBackgroundID());
                 storageService.deleteImage(user.getImgBackgroundID());
             }
 
-            StorageService.StorageResult uploadResult = storageService.uploadImage(file);
+            // ✅ ИЗМЕНЕНИЕ: Передаем обработанное изображение в storage
+            StorageService.StorageResult uploadResult = storageService.uploadProcessedImage(processedImage);
 
             user.setImgBackground(uploadResult.getUrl());
             user.setImgBackgroundID(uploadResult.getImageId());
 
             User savedUser = userRepository.save(user);
 
-            log.info("Фоновое изображение успешно загружено для пользователя с ID: {}. URL: {}",
-                    userId, uploadResult.getUrl());
+            log.info("Фоновое изображение успешно загружено для пользователя с ID: {}. URL: {}, финальный формат: {}",
+                    userId, uploadResult.getUrl(), processedImage.getContentType());
 
             return userMapper.toResponse(savedUser);
 
         } catch (IOException e) {
-
             log.error("Ошибка при загрузке фонового изображения для пользователя с ID {}: {}", userId, e.getMessage());
             throw new RuntimeException("Ошибка при загрузке фонового изображения: " + e.getMessage(), e);
         }
