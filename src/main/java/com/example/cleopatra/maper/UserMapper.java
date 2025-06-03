@@ -51,18 +51,21 @@ public class UserMapper {
     }
 
     public void updateUserFromDto(User user, UpdateProfileDto dto) {
-        if (dto.getFirstName() != null) {
+        // УЛУЧШИТЕ ПРОВЕРКИ:
+        if (dto.getFirstName() != null && !dto.getFirstName().trim().isEmpty()) {
             user.setFirstName(dto.getFirstName().trim());
         }
 
-        if (dto.getLastName() != null) {
+        if (dto.getLastName() != null && !dto.getLastName().trim().isEmpty()) {
             user.setLastName(dto.getLastName().trim());
         }
-        if (dto.getCity() != null) {
+
+        if (dto.getCity() != null && !dto.getCity().trim().isEmpty()) {
             user.setCity(dto.getCity().trim());
+        } else if (dto.getCity() != null && dto.getCity().trim().isEmpty()) {
+            // Если передали пустую строку, устанавливаем null
+            user.setCity(null);
         }
-
-
     }
 
 }

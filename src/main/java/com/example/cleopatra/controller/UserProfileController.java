@@ -34,6 +34,7 @@ public class UserProfileController {
     private final SubscriptionService subscriptionService;
     private final VisitService visitService;
 
+
     @GetMapping("/{userId}")
     public String showProfile(@PathVariable Long userId,
                               Model model,
@@ -140,6 +141,7 @@ public class UserProfileController {
             UpdateProfileDto dto = new UpdateProfileDto();
             dto.setFirstName(user.getFirstName());
             dto.setLastName(user.getLastName());
+            dto.setCity(user.getCity());
 
             model.addAttribute("user", user);
             model.addAttribute("updateProfileDto", dto);
@@ -179,6 +181,12 @@ public class UserProfileController {
                 UserResponse user = userService.getUserById(userId);
                 model.addAttribute("user", user);
                 model.addAttribute("currentUserId", currentUser.getId());
+
+
+                model.addAttribute("maxFileSize", imageValidator.getMaxFileSizeMB());
+                model.addAttribute("allowedFormats", imageValidator.getAllowedExtensions());
+                model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());
+
                 return "profile/edit";
             }
 

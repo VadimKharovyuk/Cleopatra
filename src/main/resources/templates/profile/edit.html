@@ -467,10 +467,11 @@
     <!-- Form Container -->
     <div class="form-container">
         <!-- Personal Information Form -->
-        <form th:action="@{/profile/{userId}/update(userId=${user.id})}"
+        <form th:action="@{/profile/{userId}/edit(userId=${user.id})}"
               th:object="${updateProfileDto}"
               method="post"
-              id="profileForm">
+              enctype="multipart/form-data">
+
 
             <!-- Personal Information Section -->
             <div class="form-section">
