@@ -33,6 +33,7 @@ public class UserProfileController {
     private final ImageValidator imageValidator;
     private final SubscriptionService subscriptionService;
     private final VisitService visitService;
+    private final  IpAddressService ipAddressService;
 
 
     @GetMapping("/{userId}")
@@ -56,22 +57,8 @@ public class UserProfileController {
                 log.debug("Сравнение ID: currentUserId={}, profileUserId={}, равны={}",
                         currentUser.getId(), userId, currentUser.getId().equals(userId));
 
-                // ===== ЗАПИСЫВАЕМ ВИЗИТ =====
-                try {
-                    String ipAddress = getClientIpAddress(request);
-                    String userAgent = request.getHeader("User-Agent");
-
-                    // Записываем визит (метод сам проверит, что это не самопосещение)
-                    visitService.recordVisit(userId, currentUser.getId(), ipAddress, userAgent);
-
-                    log.debug("Визит записан: пользователь {} посетил профиль {}",
-                            currentUser.getId(), userId);
-
-                } catch (Exception e) {
-                    log.warn("Не удалось записать визит пользователя {} к профилю {}: {}",
-                            currentUser.getId(), userId, e.getMessage());
-                    // Не прерываем выполнение, продолжаем показывать профиль
-                }
+                // ===== ЗАПИСЫВАЕМ ВИЗИТ (УПРОЩЕННО) =====
+                ipAddressService.recordUserVisit(userId, currentUser.getId(), request);
                 // ===== КОНЕЦ ЗАПИСИ ВИЗИТА =====
 
                 // Проверяем подписку только для чужих профилей
@@ -102,35 +89,7 @@ public class UserProfileController {
         }
     }
 
-    /**
-     * Получение реального IP адреса клиента
-     */
-    private String getClientIpAddress(HttpServletRequest request) {
-        // Проверяем заголовки прокси
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
-            // Берем первый IP из списка
-            return xForwardedFor.split(",")[0].trim();
-        }
 
-        String xRealIp = request.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isEmpty() && !"unknown".equalsIgnoreCase(xRealIp)) {
-            return xRealIp;
-        }
-
-        String xForwarded = request.getHeader("X-Forwarded");
-        if (xForwarded != null && !xForwarded.isEmpty() && !"unknown".equalsIgnoreCase(xForwarded)) {
-            return xForwarded;
-        }
-
-        String forwarded = request.getHeader("Forwarded");
-        if (forwarded != null && !forwarded.isEmpty() && !"unknown".equalsIgnoreCase(forwarded)) {
-            return forwarded;
-        }
-
-        // Если ничего не найдено, возвращаем стандартный IP
-        return request.getRemoteAddr();
-    }
 
     @GetMapping("/{userId}/edit")
     public String showEditProfile(@PathVariable Long userId, Model model) {

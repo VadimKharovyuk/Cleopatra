@@ -9,6 +9,7 @@ import com.example.cleopatra.model.Visit;
 import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.repository.VisitRepository;
 import com.example.cleopatra.service.VisitService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,10 +20,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
+
 public class VisitServiceImpl implements VisitService {
 
     private final  VisitRepository visitRepository;
@@ -58,7 +61,8 @@ public class VisitServiceImpl implements VisitService {
                     visitRepository.save(visit);
 
                     // Обновляем счетчик
-                    visitedUser.setTotalVisits(visitedUser.getTotalVisits() + 1);
+                    Long currentVisits = visitedUser.getTotalVisits();
+                    visitedUser.setTotalVisits((currentVisits != null ? currentVisits : 0L) + 1);
                     userRepository.save(visitedUser);
                 }
             }
@@ -130,6 +134,7 @@ public class VisitServiceImpl implements VisitService {
         }
     }
 
+
     private VisitStatsDto createEmptyVisitStats() {
         return VisitStatsDto.builder()
                 .totalVisits(0L)
@@ -139,6 +144,7 @@ public class VisitServiceImpl implements VisitService {
                 .uniqueVisitorsCount(0L)
                 .build();
     }
+
 
 
 }

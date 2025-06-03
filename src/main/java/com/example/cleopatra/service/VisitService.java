@@ -3,6 +3,7 @@ package com.example.cleopatra.service;
 import com.example.cleopatra.dto.VisitDto.VisitDtoCard;
 import com.example.cleopatra.dto.VisitDto.VisitListDto;
 import com.example.cleopatra.dto.VisitDto.VisitStatsDto;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
@@ -18,4 +19,6 @@ public interface VisitService {
 
 
     VisitStatsDto getVisitStats(Long id);
+
+
 }
