@@ -132,19 +132,18 @@ public class UserServiceImpl implements UserService {
         return userResponse;
     }
 
-
     private Long getFollowersCount(Long userId) {
-        return subscriptionRepository.countBySubscriberId(userId);
-
+        // Подписчики = кто подписан НА этого пользователя
+        return subscriptionRepository.countBySubscribedToId(userId);
     }
 
     private Long getFollowingCount(Long userId) {
-      return   subscriptionRepository.countBySubscriberId(userId);
+        // Подписки = на кого подписан этот пользователь
+        return subscriptionRepository.countBySubscriberId(userId);
     }
 
     private Long getPostsCount(Long userId) {
         Long count = postRepository.countByAuthorId(userId);
-        log.info("🔢 Подсчет постов для пользователя {}: {}", userId, count);
         return count;
     }
 
