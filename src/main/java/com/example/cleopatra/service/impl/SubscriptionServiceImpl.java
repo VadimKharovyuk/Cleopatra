@@ -221,13 +221,32 @@ public class SubscriptionServiceImpl  implements SubscriptionService {
     /**
      * Обновляет счетчики подписок и подписчиков
      */
+    /**
+     * Обновляет счетчики подписок и подписчиков
+     */
     private void updateSubscriptionCounts(Long subscriberId, Long subscribedToId) {
-        // Обновляем количество подписок у subscriber
-        long subscriptionsCount = subscriptionRepository.countBySubscriberId(subscriberId);
-        userRepository.updateFollowingCount(subscriberId, subscriptionsCount); // ← ЗДЕСЬ ОШИБКА
+        try {
+            // Обновляем количество подписок у subscriber
+            long subscriptionsCount = subscriptionRepository.countBySubscriberId(subscriberId);
+            User subscriber = userRepository.findById(subscriberId).orElse(null);
+            if (subscriber != null) {
+                subscriber.setFollowingCount(subscriptionsCount);
+                userRepository.save(subscriber);
+            }
 
-        // Обновляем количество подписчиков у subscribedTo
-        long subscribersCount = subscriptionRepository.countBySubscribedToId(subscribedToId);
-        userRepository.updateFollowersCount(subscribedToId, subscribersCount); // ← ИЛИ ЗДЕСЬ
+            // Обновляем количество подписчиков у subscribedTo
+            long subscribersCount = subscriptionRepository.countBySubscribedToId(subscribedToId);
+            User subscribedTo = userRepository.findById(subscribedToId).orElse(null);
+            if (subscribedTo != null) {
+                subscribedTo.setFollowersCount(subscribersCount);
+                userRepository.save(subscribedTo);
+            }
+
+            log.debug("Счетчики обновлены: subscriber {} -> {}, subscribedTo {} -> {}",
+                    subscriberId, subscriptionsCount, subscribedToId, subscribersCount);
+
+        } catch (Exception e) {
+            log.error("Ошибка при обновлении счетчиков: {}", e.getMessage(), e);
+        }
     }
 }

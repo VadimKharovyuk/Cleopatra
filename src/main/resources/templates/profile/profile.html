@@ -736,8 +736,12 @@
             transform: translateY(-1px);
         }
     </style>
+
+
 </head>
-<body>
+<body th:data-current-user-id="${currentUserId}"
+      th:data-profile-user-id="${user.id}"
+      th:data-is-subscribed="${isSubscribed ?: false}">
 
 <!-- ПОДКЛЮЧЕНИЕ МОБИЛЬНОГО ХЕДЕРА ИЗ ФРАГМЕНТА -->
 <th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
@@ -747,6 +751,10 @@
 
 <!-- Main Content -->
 <main class="main-content">
+
+    <div style="display: none;"
+         th:text="'Debug: user.id=' + ${user.id} + ', currentUserId=' + ${currentUserId} + ', isSubscribed=' + ${isSubscribed}">
+    </div>
     <!-- Success/Error Messages -->
     <div th:if="${successMessage}" class="alert-luxury alert-success-luxury">
         <i class="fas fa-check-circle me-2"></i>
@@ -798,21 +806,26 @@
             </h1>
             <p class="profile-username" th:text="'@' + ${user.email.split('@')[0]}"></p>
 
-            <!-- Action Buttons -->
+
             <div class="profile-actions">
                 <!-- Кнопки для ЧУЖОГО профиля -->
                 <th:block th:if="${currentUserId != null and currentUserId != user.id}">
+
                     <a href="#" class="btn-luxury btn-secondary-luxury" onclick="sendMessage()">
                         <i class="fas fa-envelope"></i>
                         <span>Сообщение</span>
                     </a>
 
-                    <a href="#" class="btn-luxury btn-primary-luxury" onclick="toggleFollow()">
-                        <i class="fas fa-user-plus"></i>
-                        <span>Подписаться</span>
-                    </a>
+                    <!-- ПРОСТАЯ кнопка подписки -->
+                    <button type="button"
+                            id="follow-btn"
+                            th:class="${isSubscribed} ? 'btn-luxury btn-secondary-luxury' : 'btn-luxury btn-primary-luxury'"
+                            onclick="simpleToggleFollow()">
+                        <i th:class="${isSubscribed} ? 'fas fa-user-check' : 'fas fa-user-plus'" id="follow-icon"></i>
+                        <span id="follow-text" th:text="${isSubscribed} ? 'Подписан' : 'Подписаться'">Подписаться</span>
+                    </button>
 
-                    <button type="button" onclick="shareProfile()" class="btn btn-outline-luxury">
+                    <button type="button" onclick="shareProfile()" class="btn-luxury btn-secondary-luxury">
                         <i class="fas fa-share"></i>
                         <span>Поделиться</span>
                     </button>
@@ -825,6 +838,7 @@
 
                 <!-- Кнопки для СОБСТВЕННОГО профиля -->
                 <th:block th:if="${currentUserId != null and currentUserId == user.id}">
+
                     <a th:href="@{/profile/{userId}/edit(userId=${user.id})}" class="btn-luxury btn-primary-luxury">
                         <i class="fas fa-edit"></i>
                         <span>Редактировать профиль</span>
@@ -835,6 +849,11 @@
                         <span>Статистика</span>
                     </a>
                 </th:block>
+
+                <!-- Если никакие условия не сработали -->
+                <div th:if="${currentUserId == null}">
+                    <p style="color: red;">❌ Пользователь не авторизован</p>
+                </div>
             </div>
 
             <!-- Meta Information -->
@@ -851,13 +870,14 @@
                 </div>
             </div>
 
-            <!-- Stats Section -->
+
+            <!-- Stats Section с правильными ссылками -->
             <div class="stats-section">
-                <a href="#" class="stat-item">
+                <a th:href="@{/subscriptions/{userId}/following(userId=${user.id})}" class="stat-item">
                     <span class="stat-number" th:text="${user.followingCount ?: 0}">0</span>
                     <span class="stat-label">Подписок</span>
                 </a>
-                <a href="#" class="stat-item">
+                <a th:href="@{/subscriptions/{userId}/followers(userId=${user.id})}" class="stat-item">
                     <span class="stat-number" th:text="${user.followersCount ?: 0}">0</span>
                     <span class="stat-label">Подписчиков</span>
                 </a>
@@ -1017,145 +1037,101 @@
 <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ ИЗ ФРАГМЕНТА -->
 <th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
 
+
 <script>
-    // Дополнительные скрипты для страницы профиля
+    // Инициализация других функций профиля
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth hover animations
+        document.querySelectorAll('.btn-luxury:not([data-action="follow"])').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
 
-    // Smooth hover animations
-    document.querySelectorAll('.btn-luxury').forEach(btn => {
-        btn.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-2px)';
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
         });
 
-        btn.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
+        // Tab switching functionality
+        document.querySelectorAll('.nav-tab-luxury').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.nav-tab-luxury').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const emptyTitle = document.querySelector('.empty-title');
+                const emptyDescription = document.querySelector('.empty-description');
+
+                switch(this.textContent.trim()) {
+                    case 'Посты':
+                        emptyTitle.textContent = 'Ваша история начинается здесь';
+                        emptyDescription.textContent = 'Поделитесь своими мыслями и начните создавать свой уникальный контент';
+                        break;
+                    case 'Ответы':
+                        emptyTitle.textContent = 'Пока нет ответов';
+                        emptyDescription.textContent = 'Ваши ответы на посты других пользователей будут отображаться здесь';
+                        break;
+                    case 'Медиа':
+                        emptyTitle.textContent = 'Медиа контент отсутствует';
+                        emptyDescription.textContent = 'Фотографии и видео из ваших постов будут собраны в этом разделе';
+                        break;
+                    case 'Нравится':
+                        emptyTitle.textContent = 'Нет отмеченных постов';
+                        emptyDescription.textContent = 'Посты, которые вам понравились, будут сохранены здесь';
+                        break;
+                }
+            });
         });
+
+        // Другие функции...
     });
 
-    // Tab switching functionality
-    document.querySelectorAll('.nav-tab-luxury').forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Remove active class from all tabs
-            document.querySelectorAll('.nav-tab-luxury').forEach(t => t.classList.remove('active'));
-            // Add active class to clicked tab
-            this.classList.add('active');
-
-            // Update content based on selected tab
-            const emptyTitle = document.querySelector('.empty-title');
-            const emptyDescription = document.querySelector('.empty-description');
-
-            switch(this.textContent.trim()) {
-                case 'Посты':
-                    emptyTitle.textContent = 'Ваша история начинается здесь';
-                    emptyDescription.textContent = 'Поделитесь своими мыслями и начните создавать свой уникальный контент';
-                    break;
-                case 'Ответы':
-                    emptyTitle.textContent = 'Пока нет ответов';
-                    emptyDescription.textContent = 'Ваши ответы на посты других пользователей будут отображаться здесь';
-                    break;
-                case 'Медиа':
-                    emptyTitle.textContent = 'Медиа контент отсутствует';
-                    emptyDescription.textContent = 'Фотографии и видео из ваших постов будут собраны в этом разделе';
-                    break;
-                case 'Нравится':
-                    emptyTitle.textContent = 'Нет отмеченных постов';
-                    emptyDescription.textContent = 'Посты, которые вам понравились, будут сохранены здесь';
-                    break;
-            }
-        });
-    });
-
-    // Parallax effect for cover image
-    window.addEventListener('scroll', function() {
-        const scrolled = window.pageYOffset;
-        const coverSection = document.querySelector('.cover-section');
-        if (coverSection) {
-            const rate = scrolled * -0.5;
-            coverSection.style.transform = `translateY(${rate}px)`;
-        }
-    });
-
-    // Intersection Observer for fade-in animations
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-
-    // Observe elements for animation
-    document.querySelectorAll('.widget, .stat-item').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
-
-    // Avatar hover effect
-    const avatar = document.querySelector('.profile-avatar');
-    if (avatar) {
-        avatar.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.05)';
-            this.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-        });
-
-        avatar.addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1)';
-        });
-    }
-
-    // Elegant loading states
-    function addLoadingState(element) {
-        element.style.opacity = '0.7';
-        element.style.pointerEvents = 'none';
-
-        setTimeout(() => {
-            element.style.opacity = '1';
-            element.style.pointerEvents = 'auto';
-        }, 300);
-    }
-
-    // Apply loading state to buttons
-    document.querySelectorAll('.btn-follow').forEach(btn => {
-        btn.addEventListener('click', function() {
-            addLoadingState(this);
-        });
-    });
-
-    // Profile action functions (заглушки для демонстрации)
+    // Заглушки для других функций (можно также вынести в отдельные модули)
     function sendMessage() {
         console.log('Отправка сообщения...');
-        // Здесь будет логика отправки сообщения
-    }
-
-    function toggleFollow() {
-        console.log('Переключение подписки...');
-        // Здесь будет логика подписки/отписки
+        // TODO: Реализовать логику отправки сообщения
     }
 
     function shareProfile() {
-        console.log('Поделиться профилем...');
-        // Здесь будет логика sharing
+        if (navigator.share) {
+            navigator.share({
+                title: document.title,
+                url: window.location.href
+            });
+        } else {
+            // Fallback для старых браузеров
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                window.subscriptionManager?.showNotification('Ссылка скопирована!', 'success');
+            });
+        }
     }
 
     function blockUser() {
-        console.log('Блокировка пользователя...');
-        // Здесь будет логика блокировки
+        if (confirm('Вы уверены, что хотите заблокировать этого пользователя?')) {
+            console.log('Блокировка пользователя...');
+            // TODO: Реализовать логику блокировки
+        }
     }
 </script>
+
+<!-- В конце body, перед закрывающим тегом -->
+<script>
+    // Простые функции
+    function sendMessage() { alert('В разработке'); }
+    function shareProfile() { /* код */ }
+    function blockUser() { /* код */ }
+</script>
+
+<!-- Модуль подписок загружается последним -->
+<script th:src="@{/js/profile/subscriptionActions.js}"></script>
 
 <!-- Подключаем ваши собственные модули в правильном порядке -->
 <script th:src="@{/js/profile/notifications.js}"></script>
 <script th:src="@{/js/profile/apiClient.js}"></script>
 <script th:src="@{/js/profile/userActions.js}"></script>
 <script th:src="@{/js/profile/profileUtils.js}"></script>
-<script th:src="@{/js/profile/profileMain.js}"></script>
+
+
+
 
 </body>
 </html>

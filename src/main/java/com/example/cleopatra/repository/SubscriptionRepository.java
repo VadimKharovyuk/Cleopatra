@@ -41,7 +41,10 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
      * Удаляет подписку
      */
     @Modifying
-    void deleteBySubscriberIdAndSubscribedToId(Long subscriberId, Long subscribedToId);
+    @Transactional
+    @Query("DELETE FROM Subscription s WHERE s.subscriber.id = :subscriberId AND s.subscribedTo.id = :subscribedToId")
+    void deleteBySubscriberIdAndSubscribedToId(@Param("subscriberId") Long subscriberId,
+                                               @Param("subscribedToId") Long subscribedToId);
 
     /**
      * Получает ID пользователей, на которых подписан данный пользователь
@@ -110,21 +113,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
      */
     long countBySubscribedToId(Long subscribedToId);
 
-
-    @Modifying
-    @Transactional
-    @Query("UPDATE User u SET u.followingCount = :count WHERE u.id = :userId")
-    void updateFollowingCount(@Param("userId") Long userId, @Param("count") Long count);
-
-    /**
-     * Обновить количество подписчиков пользователя (кто подписан)
-     * @param userId - ID пользователя
-     * @param count - новое количество подписчиков
-     */
-    @Modifying
-    @Transactional
-    @Query("UPDATE User u SET u.followersCount = :count WHERE u.id = :userId")
-    void updateFollowersCount(@Param("userId") Long userId, @Param("count") Long count);
 
 
 }

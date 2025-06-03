@@ -52,7 +52,7 @@ public class SecurityConfig {
                         // API эндпоинты - порядок важен!
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/subscriptions/**").authenticated()
-                        // .requestMatchers("/api/**").permitAll() ← эту строку не включай
+
 
                         // Эндпоинты только для админов
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -69,11 +69,11 @@ public class SecurityConfig {
                         .failureUrl("/login?error=true")
                         .permitAll()
                 )
-                .rememberMe(remember -> remember
-                        .key(rememberMeKey)
-                        .rememberMeParameter("remember-me")
-                        .tokenValiditySeconds(60 * 60 * 24 * 14) // 14 дней
-                )
+//                .rememberMe(remember -> remember
+//                        .key(rememberMeKey)
+//                        .rememberMeParameter("remember-me")
+//                        .tokenValiditySeconds(60 * 60 * 24 * 14) // 14 дней
+//                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")

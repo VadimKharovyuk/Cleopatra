@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -59,11 +60,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
     @Modifying
-    @Query("UPDATE User u SET u.followersCount = :count WHERE u.id = :userId")
-    void updateFollowersCount(@Param("userId") Long userId, @Param("count") Long count);
+    @Transactional
+    @Query("UPDATE User u SET u.followingCount = :count WHERE u.id = :userId")
+    void updateFollowingCount(@Param("userId") Long userId, @Param("count") long count);
 
     @Modifying
-    @Query("UPDATE User u SET u.followingCount = :count WHERE u.id = :userId")
-    void updateFollowingCount(@Param("userId") Long userId, @Param("count") Long count);
+    @Transactional
+    @Query("UPDATE User u SET u.followersCount = :count WHERE u.id = :userId")
+    void updateFollowersCount(@Param("userId") Long userId, @Param("count") long count);
 
 }

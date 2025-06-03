@@ -6,9 +6,11 @@ import com.example.cleopatra.dto.user.UserRecommendationDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.service.ImageValidator;
 import com.example.cleopatra.service.RecommendationService;
+import com.example.cleopatra.service.SubscriptionService;
 import com.example.cleopatra.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -30,91 +33,134 @@ public class UserProfileController {
     private final UserService userService;
     private final RecommendationService recommendationService;
     private final ImageValidator imageValidator;
-
-
+    private final SubscriptionService subscriptionService;
 
     @GetMapping("/{userId}")
-    public String showProfile(@PathVariable Long userId, Model model) {
+    public String showProfile(@PathVariable Long userId,
+                              Model model,
+                              Authentication authentication) {
         try {
+            log.debug("=== Показать профиль пользователя: {} ===", userId);
+
+            // Получаем информацию о пользователе
             UserResponse user = userService.getUserById(userId);
             model.addAttribute("user", user);
+            log.debug("User добавлен в модель: ID={}, Email={}", user.getId(), user.getEmail());
 
+            // Обрабатываем данные текущего пользователя
+            if (authentication != null && authentication.isAuthenticated()) {
+                UserResponse currentUser = userService.getUserByEmail(authentication.getName());
+                model.addAttribute("currentUserId", currentUser.getId());
+                log.debug("Current User добавлен в модель: ID={}, Email={}", currentUser.getId(), currentUser.getEmail());
+                // ДОБАВИТЬ ЭТУ ОТЛАДКУ
+                log.debug("Сравнение ID: currentUserId={}, profileUserId={}, равны={}",
+                        currentUser.getId(), userId, currentUser.getId().equals(userId));
 
+                // Проверяем подписку только для чужих профилей
+                if (!currentUser.getId().equals(userId)) {
 
-            model.addAttribute("updateProfileDto", new UpdateProfileDto());
+                    boolean isSubscribed = subscriptionService.isSubscribed(currentUser.getId(), userId);
+                    model.addAttribute("isSubscribed", isSubscribed);
+                    log.debug("Статус подписки {} -> {}: {}", currentUser.getId(), userId, isSubscribed);
+                } else {
+                    model.addAttribute("isSubscribed", false);
+                    log.debug("Собственный профиль - подписка не проверяется");
+                }
+                List<UserRecommendationDto> recommendations = recommendationService.getTopRecommendations(currentUser.getId());
+                model.addAttribute("recommendations", recommendations);
+            } else {
+                log.debug("Пользователь не авторизован");
+                model.addAttribute("currentUserId", null);
+                model.addAttribute("isSubscribed", false);
+            }
 
+            log.debug("=== Данные для шаблона ===");
+            log.debug("user.id: {}", user.getId());
+            log.debug("currentUserId: {}", model.getAttribute("currentUserId"));
+            log.debug("isSubscribed: {}", model.getAttribute("isSubscribed"));
 
-            List<UserRecommendationDto> recommendations =recommendationService.getTopRecommendations(userId);
-            model.addAttribute("recommendations", recommendations);
-
+            // ПРОВЕРИТЬ ЧТО ПЕРЕДАЕТСЯ В ШАБЛОН
+            log.debug("=== Финальные данные для шаблона ===");
+            log.debug("user.id: {}", user.getId());
+            log.debug("currentUserId: {}", model.getAttribute("currentUserId"));
+            log.debug("isSubscribed: {}", model.getAttribute("isSubscribed"));
+            log.debug("Условие (currentUserId != null and currentUserId != user.id): {}",
+                    model.getAttribute("currentUserId") != null &&
+                            !model.getAttribute("currentUserId").equals(user.getId()));
 
             return "profile/profile";
-        } catch (RuntimeException e) {
-            log.error("Ошибка при загрузке профиля пользователя {}: {}", userId, e.getMessage());
-            model.addAttribute("error", "Пользователь не найден");
+
+        } catch (Exception e) {
+            log.error("Ошибка при показе профиля {}: {}", userId, e.getMessage(), e);
+            model.addAttribute("errorMessage", "Не удалось загрузить профиль пользователя");
             return "error/404";
         }
     }
 
     @GetMapping("/{userId}/edit")
-    public String showEditProfile(@PathVariable Long userId, Model model) {
+    public String editProfile(@PathVariable Long userId,
+                              Model model,
+                              Authentication authentication) {
         try {
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return "redirect:/login";
+            }
+
+            UserResponse currentUser = userService.getUserByEmail(authentication.getName());
+
+            // Проверяем, что пользователь редактирует свой профиль
+            if (!currentUser.getId().equals(userId)) {
+                log.warn("Пользователь {} пытается редактировать чужой профиль {}",
+                        currentUser.getId(), userId);
+                return "redirect:/profile/" + currentUser.getId();
+            }
+
             UserResponse user = userService.getUserById(userId);
-
-            UpdateProfileDto dto = new UpdateProfileDto();
-            dto.setFirstName(user.getFirstName());
-            dto.setLastName(user.getLastName());
-
             model.addAttribute("user", user);
-            model.addAttribute("updateProfileDto", dto);
-
-            // ✅ Добавляем настройки валидации
-            model.addAttribute("maxFileSize", imageValidator.getMaxFileSizeMB());
-            model.addAttribute("allowedFormats", imageValidator.getAllowedExtensions());
-            model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());
+            model.addAttribute("currentUserId", currentUser.getId());
 
             return "profile/edit";
-        } catch (RuntimeException e) {
-            log.error("Ошибка при загрузке страницы редактирования профиля {}: {}", userId, e.getMessage());
-            model.addAttribute("error", "Пользователь не найден");
-            return "error/404";
+
+        } catch (Exception e) {
+            log.error("Ошибка при переходе к редактированию профиля {}: {}", userId, e.getMessage(), e);
+            return "redirect:/profile/" + userId;
         }
     }
 
-    @PostMapping("/{userId}/update")
-    public String updateProfile(
-            @PathVariable Long userId,
-            @Valid @ModelAttribute UpdateProfileDto updateProfileDto,
-            BindingResult bindingResult,
-            RedirectAttributes redirectAttributes,
-            Model model) {
+    @PostMapping("/{userId}/edit")
+    public String updateProfile(@PathVariable Long userId,
+                                @Valid @ModelAttribute UpdateProfileDto updateDto,
+                                BindingResult bindingResult,
+                                Model model,
+                                Authentication authentication,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return "redirect:/login";
+            }
 
-        if (bindingResult.hasErrors()) {
-            try {
+            UserResponse currentUser = userService.getUserByEmail(authentication.getName());
+
+            if (!currentUser.getId().equals(userId)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Недостаточно прав для редактирования");
+                return "redirect:/profile/" + userId;
+            }
+
+            if (bindingResult.hasErrors()) {
                 UserResponse user = userService.getUserById(userId);
                 model.addAttribute("user", user);
-                model.addAttribute("updateProfileDto", updateProfileDto);
-
-                // Не забываем добавить настройки валидации при ошибках
-                model.addAttribute("maxFileSize", imageValidator.getMaxFileSizeMB());
-                model.addAttribute("allowedFormats", imageValidator.getAllowedExtensions());
-                model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());
-
-
+                model.addAttribute("currentUserId", currentUser.getId());
                 return "profile/edit";
-            } catch (RuntimeException e) {
-                model.addAttribute("error", "Пользователь не найден");
-                return "error/404";
             }
-        }
 
-        try {
-            userService.updateProfile(userId, updateProfileDto);
-            redirectAttributes.addFlashAttribute("successMessage", "Профиль успешно обновлен!");
+            userService.updateProfile(userId, updateDto);
+            redirectAttributes.addFlashAttribute("successMessage", "Профиль успешно обновлен");
+
             return "redirect:/profile/" + userId;
-        } catch (RuntimeException e) {
-            log.error("Ошибка при обновлении профиля {}: {}", userId, e.getMessage());
-            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при обновлении профиля: " + e.getMessage());
+
+        } catch (Exception e) {
+            log.error("Ошибка при обновлении профиля {}: {}", userId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Не удалось обновить профиль");
             return "redirect:/profile/" + userId + "/edit";
         }
     }
@@ -263,28 +309,4 @@ public class UserProfileController {
         model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());
     }
 
-
-
-
-//    // Для AJAX запросов
-//    @PostMapping("/api/users/{userId}/follow")
-//    @ResponseBody
-//    public Map<String, Object> followUser(@PathVariable Long userId) {
-//        // Логика подписки
-//        return Map.of("success", true, "message", "Вы подписались на пользователя");
-//    }
-//
-//    @PostMapping("/api/users/{userId}/unfollow")
-//    @ResponseBody
-//    public Map<String, Object> unfollowUser(@PathVariable Long userId) {
-//        // Логика отписки
-//        return Map.of("success", true, "message", "Вы отписались от пользователя");
-//    }
-//
-//    @PostMapping("/api/users/{userId}/block")
-//    @ResponseBody
-//    public Map<String, Object> blockUser(@PathVariable Long userId) {
-//        // Логика блокировки
-//        return Map.of("success", true, "message", "Пользователь заблокирован");
-//    }
 }

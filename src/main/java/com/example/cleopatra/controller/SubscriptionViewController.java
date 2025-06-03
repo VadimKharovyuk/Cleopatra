@@ -54,6 +54,7 @@ public class SubscriptionViewController {
                 model.addAttribute("currentUser", currentUser);
             }
 
+
             return "subscriptions/followers";
 
         } catch (Exception e) {
