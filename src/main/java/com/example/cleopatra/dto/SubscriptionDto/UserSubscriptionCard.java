@@ -21,7 +21,6 @@ public class UserSubscriptionCard {
 ///todu
     private Boolean isOnline;
 
-    public String getFullName() {
-        return firstName + " " + lastName;
-    }
+
+
 }

@@ -6,6 +6,7 @@ import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.maper.UserMapper;
 import com.example.cleopatra.model.User;
+import com.example.cleopatra.repository.SubscriptionRepository;
 import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.service.ImageValidator;
 import com.example.cleopatra.service.StorageService;
@@ -29,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final ImageValidator imageValidator;
     private final StorageService storageService;
+    private final SubscriptionRepository subscriptionRepository;
 
 
     @Override
@@ -104,30 +106,22 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("Пользователь с ID " + userId + " не найден"));
 
         UserResponse userResponse = userMapper.toResponse(user);
-        Random random = new Random();
-        userResponse.setFollowersCount((long) random.nextInt(1000) + 50);  // 50-1050
-        userResponse.setFollowingCount((long) random.nextInt(500) + 20);   // 20-520
-        userResponse.setPostsCount((long) random.nextInt(200) + 5);
-
+        getFollowersCount(userId);
+        getFollowingCount(userId);
 
         return userResponse;
     }
 
+
     // Вспомогательные методы для получения статистики
     private Long getFollowersCount(Long userId) {
-        // TODO: когда будет готов Follow entity
-        // return followRepository.countByFolloweeId(userId);
 
-        // Временная заглушка для демонстрации
-        return 125L; // можете поставить любое число для теста
+        return subscriptionRepository.countBySubscriberId(userId);
+
     }
 
     private Long getFollowingCount(Long userId) {
-        // TODO: когда будет готов Follow entity
-        // return followRepository.countByFollowerId(userId);
-
-        // Временная заглушка
-        return 89L;
+      return   subscriptionRepository.countBySubscriberId(userId);
     }
 
     private Long getPostsCount(Long userId) {
@@ -165,6 +159,7 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.toResponse(user);
     }
+
     @Override
     public UserResponse uploadBackgroundImage(Long userId, MultipartFile file) {
         log.info("Начинаем загрузку фонового изображения для пользователя с ID: {}", userId);
@@ -198,6 +193,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Ошибка при загрузке фонового изображения: " + e.getMessage(), e);
         }
     }
+
     @Override
     public UserResponse deleteBackgroundImage(Long userId) {
         log.info("Удаляем фоновое изображение для пользователя с ID: {}", userId);

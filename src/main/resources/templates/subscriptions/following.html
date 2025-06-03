@@ -1,10 +1,724 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${user.firstName + ' ' + user.lastName + ' - Подписки - Cleopatra'}">Подписки - Cleopatra</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- ПОДКЛЮЧЕНИЕ ФРАГМЕНТА СТИЛЕЙ -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            margin-left: 280px;
+            margin-right: 0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .default-avatar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .header-info h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            margin: 0 0 1rem 0;
+        }
+
+        .stats-info {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .back-btn {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border-secondary);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Following Container */
+        .following-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-secondary);
+            overflow: hidden;
+        }
+
+        .container-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid var(--border-secondary);
+            background: var(--surface-elevated);
+        }
+
+        .container-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .following-count {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* User Cards */
+        .following-list {
+            padding: 1rem 0;
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-secondary);
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .user-card:last-child {
+            border-bottom: none;
+        }
+
+        .user-card:hover {
+            background: var(--bg-accent);
+        }
+
+        .user-card-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .user-card-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-card-avatar .default-avatar {
+            font-size: 1.5rem;
+        }
+
+        .online-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-success);
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin: 0 0 0.25rem 0;
+            text-decoration: none;
+        }
+
+        .user-name:hover {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        .user-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .user-location {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .user-date {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn-unfollow {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            border: 1px solid var(--border-secondary);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-unfollow:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #dc2626;
+        }
+
+        .btn-follow {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-follow:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+        }
+
+        .btn-message {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-secondary);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-message:hover {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--bg-accent), #f1f5f9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--text-muted);
+            font-size: 2rem;
+        }
+
+        .empty-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .empty-description {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            padding: 2rem;
+            border-top: 1px solid var(--border-secondary);
+            background: var(--surface-elevated);
+        }
+
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .pagination-btn {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border-secondary);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pagination-btn:hover {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .pagination-btn:disabled,
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Error Message */
+        .alert-luxury {
+            border: none;
+            border-radius: var(--radius-md);
+            margin: 0 0 2rem 0;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .alert-danger-luxury {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(248, 113, 113, 0.1));
+            color: #dc2626;
+            border-left: 4px solid #dc2626;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                margin-top: 60px;
+                padding: 1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .stats-info {
+                justify-content: center;
+            }
+
+            .user-card {
+                padding: 1rem;
+            }
+
+            .user-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+
+            .user-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
 </head>
-<body>
+<body th:data-current-user-id="${currentUserId}">
+
+<!-- ПОДКЛЮЧЕНИЕ МОБИЛЬНОГО ХЕДЕРА -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+
+<!-- ПОДКЛЮЧЕНИЕ SIDEBAR -->
+<th:block th:replace="~{fragments/sidebar :: sidebar('profile')}"></th:block>
+
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Error Message -->
+    <div th:if="${errorMessage}" class="alert-luxury alert-danger-luxury">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${errorMessage}">Ошибка</span>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="user-avatar">
+                <img th:if="${user.imageUrl}" th:src="${user.imageUrl}" th:alt="${user.firstName + ' ' + user.lastName}">
+                <div th:unless="${user.imageUrl}" class="default-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+
+            <div class="header-info">
+                <h1>
+                    <th:block th:if="${!#strings.isEmpty(user.firstName) or !#strings.isEmpty(user.lastName)}">
+                        <span th:if="${user.firstName}" th:text="${user.firstName}"></span>
+                        <span th:if="${user.lastName}" th:text="' ' + ${user.lastName}"></span>
+                    </th:block>
+                    <span th:if="${#strings.isEmpty(user.firstName) and #strings.isEmpty(user.lastName)}">Пользователь</span>
+                </h1>
+                <p class="header-subtitle">Подписки</p>
+
+                <div class="stats-info">
+                    <div class="stat">
+                        <span class="stat-number" th:text="${user.followingCount ?: 0}">0</span>
+                        <span class="stat-label">Подписок</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" th:text="${user.followersCount ?: 0}">0</span>
+                        <span class="stat-label">Подписчиков</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" th:text="${user.postsCount ?: 0}">0</span>
+                        <span class="stat-label">Постов</span>
+                    </div>
+                </div>
+            </div>
+
+            <a th:href="@{/profile/{userId}(userId=${user.id})}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                <span>Назад к профилю</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Following Container -->
+    <div class="following-container">
+        <div class="container-header">
+            <h2 class="container-title">Подписки</h2>
+            <p class="following-count" th:if="${followingDto.subscriptions != null and !#lists.isEmpty(followingDto.subscriptions)}">
+                <span th:text="${#lists.size(followingDto.subscriptions)}">0</span>
+                <span th:if="${followingDto.hasNext == true}">из многих</span>
+                <span th:if="${followingDto.hasNext != true}">всего</span>
+            </p>
+        </div>
+
+        <!-- Following List -->
+        <div th:if="${followingDto.subscriptions != null and !#lists.isEmpty(followingDto.subscriptions)}" class="following-list">
+            <div th:each="following : ${followingDto.subscriptions}" class="user-card">
+                <a th:href="@{/profile/{userId}(userId=${following.id})}" class="user-card-avatar">
+                    <img th:if="${following.imageUrl}"
+                         th:src="${following.imageUrl}"
+                         th:alt="${following.firstName + ' ' + following.lastName}">
+                    <div th:unless="${following.imageUrl}" class="default-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div th:if="${following.isOnline == true}" class="online-indicator"></div>
+                </a>
+
+                <div class="user-info">
+                    <a th:href="@{/profile/{userId}(userId=${following.id})}" class="user-name">
+                        <th:block th:if="${!#strings.isEmpty(following.firstName) or !#strings.isEmpty(following.lastName)}">
+                            <span th:if="${following.firstName}" th:text="${following.firstName}"></span>
+                            <span th:if="${following.lastName}" th:text="' ' + ${following.lastName}"></span>
+                        </th:block>
+                        <span th:if="${#strings.isEmpty(following.firstName) and #strings.isEmpty(following.lastName)}">Пользователь</span>
+                    </a>
+
+                    <div class="user-meta">
+                        <div th:if="${following.city}" class="user-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span th:text="${following.city}"></span>
+                        </div>
+                        <div th:if="${following.subscribedAt}" class="user-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span th:text="'Подписался ' + ${#temporals.format(following.subscribedAt, 'dd.MM.yyyy')}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions (только для авторизованных пользователей) -->
+                <div th:if="${currentUser != null}" class="user-actions">
+                    <!-- Если это текущий пользователь смотрит свои подписки, показываем "Отписаться" -->
+                    <button th:if="${currentUser.id == user.id}"
+                            class="btn-unfollow"
+                            th:data-user-id="${following.id}"
+                            onclick="toggleFollow(this)">
+                        Отписаться
+                    </button>
+
+                    <!-- Если это другой пользователь, показываем "Подписаться" (если еще не подписан) -->
+                    <button th:if="${currentUser.id != user.id and currentUser.id != following.id}"
+                            class="btn-follow"
+                            th:data-user-id="${following.id}"
+                            onclick="toggleFollow(this)">
+                        Подписаться
+                    </button>
+
+                    <!-- Кнопка сообщения (для всех кроме себя) -->
+                    <button th:if="${currentUser.id != following.id}"
+                            class="btn-message"
+                            th:onclick="'sendMessage(' + ${following.id} + ')'"
+                            title="Написать сообщение">
+                        <i class="fas fa-envelope"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${followingDto.subscriptions == null or #lists.isEmpty(followingDto.subscriptions)}" class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-user-friends"></i>
+            </div>
+            <h3 class="empty-title">Пока нет подписок</h3>
+            <p class="empty-description" th:if="${currentUser != null and currentUser.id == user.id}">
+                Начните подписываться на интересных людей, чтобы видеть их контент
+            </p>
+            <p class="empty-description" th:if="${currentUser == null or currentUser.id != user.id}">
+                Этот пользователь пока ни на кого не подписан
+            </p>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${followingDto.hasPrevious == true or followingDto.hasNext == true}" class="pagination-container">
+            <div class="pagination-wrapper">
+                <a th:if="${followingDto.hasPrevious == true}"
+                   th:href="@{/subscriptions/{userId}/following(userId=${user.id}, page=${followingDto.previousPage})}"
+                   class="pagination-btn">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Предыдущая</span>
+                </a>
+
+                <span th:if="${followingDto.hasPrevious != true}" class="pagination-btn disabled">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Предыдущая</span>
+                </span>
+
+                <div class="pagination-info">
+                    Страница <span th:text="${followingDto.currentPage + 1}">1</span>
+                </div>
+
+                <a th:if="${followingDto.hasNext == true}"
+                   th:href="@{/subscriptions/{userId}/following(userId=${user.id}, page=${followingDto.nextPage})}"
+                   class="pagination-btn">
+                    <span>Следующая</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+
+                <span th:if="${followingDto.hasNext != true}" class="pagination-btn disabled">
+                    <span>Следующая</span>
+                    <i class="fas fa-chevron-right"></i>
+                </span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<script>
+    // Функция для подписки/отписки
+    async function toggleFollow(button) {
+        const userId = button.dataset.userId;
+        const currentUserId = document.body.dataset.currentUserId;
+
+        if (!currentUserId) {
+            window.location.href = '/login';
+            return;
+        }
+
+        const originalText = button.textContent;
+        const isUnfollow = button.classList.contains('btn-unfollow');
+
+        button.disabled = true;
+        button.textContent = 'Загрузка...';
+
+        try {
+            const response = await fetch('/api/subscriptions/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    subscribedToId: parseInt(userId)
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (isUnfollow && !result.isSubscribed) {
+                    // Если это была отписка и она успешна, удаляем элемент из списка
+                    const userCard = button.closest('.user-card');
+                    userCard.style.opacity = '0';
+                    userCard.style.transform = 'translateX(-100%)';
+                    setTimeout(() => {
+                        userCard.remove();
+
+                        // Проверяем, остались ли элементы в списке
+                        const remainingCards = document.querySelectorAll('.user-card');
+                        if (remainingCards.length === 0) {
+                            location.reload(); // Перезагружаем страницу чтобы показать empty state
+                        }
+                    }, 300);
+                } else {
+                    // Обновляем состояние кнопки
+                    if (result.isSubscribed) {
+                        button.textContent = 'Отписаться';
+                        button.classList.remove('btn-follow');
+                        button.classList.add('btn-unfollow');
+                    } else {
+                        button.textContent = 'Подписаться';
+                        button.classList.remove('btn-unfollow');
+                        button.classList.add('btn-follow');
+                    }
+                }
+            } else {
+                button.textContent = originalText;
+                console.error('Ошибка подписки:', result.message);
+            }
+        } catch (error) {
+            button.textContent = originalText;
+            console.error('Ошибка:', error);
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    // Функция для отправки сообщения
+    function sendMessage(userId) {
+        console.log('Отправка сообщения пользователю:', userId);
+        // TODO: Реализовать логику отправки сообщения
+        alert('Функция сообщений в разработке');
+    }
+
+    // Анимации при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        // Плавное появление карточек
+        const cards = document.querySelectorAll('.user-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
 
 </body>
 </html>

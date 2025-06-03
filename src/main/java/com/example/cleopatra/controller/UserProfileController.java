@@ -98,32 +98,27 @@ public class UserProfileController {
     }
 
     @GetMapping("/{userId}/edit")
-    public String editProfile(@PathVariable Long userId,
-                              Model model,
-                              Authentication authentication) {
+    public String showEditProfile(@PathVariable Long userId, Model model) {
         try {
-            if (authentication == null || !authentication.isAuthenticated()) {
-                return "redirect:/login";
-            }
-
-            UserResponse currentUser = userService.getUserByEmail(authentication.getName());
-
-            // Проверяем, что пользователь редактирует свой профиль
-            if (!currentUser.getId().equals(userId)) {
-                log.warn("Пользователь {} пытается редактировать чужой профиль {}",
-                        currentUser.getId(), userId);
-                return "redirect:/profile/" + currentUser.getId();
-            }
-
             UserResponse user = userService.getUserById(userId);
+
+            // Заполняем DTO текущими данными
+            UpdateProfileDto dto = new UpdateProfileDto();
+            dto.setFirstName(user.getFirstName());
+            dto.setLastName(user.getLastName());
+
             model.addAttribute("user", user);
-            model.addAttribute("currentUserId", currentUser.getId());
+            model.addAttribute("updateProfileDto", dto);
+
+            model.addAttribute("maxFileSize", imageValidator.getMaxFileSizeMB());
+            model.addAttribute("allowedFormats", imageValidator.getAllowedExtensions());
+            model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());
 
             return "profile/edit";
-
-        } catch (Exception e) {
-            log.error("Ошибка при переходе к редактированию профиля {}: {}", userId, e.getMessage(), e);
-            return "redirect:/profile/" + userId;
+        } catch (RuntimeException e) {
+            log.error("Ошибка при загрузке страницы редактирования профиля {}: {}", userId, e.getMessage());
+            model.addAttribute("error", "Пользователь не найден");
+            return "error/404";
         }
     }
 
