@@ -2,6 +2,7 @@ package com.example.cleopatra.service.impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.example.cleopatra.service.ImageConverterService;
 import com.example.cleopatra.service.StorageService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -112,6 +113,52 @@ public class CloudinaryStorageService implements StorageService {
             log.error("Ошибка при удалении изображения из Cloudinary. Public ID: {}, Ошибка: {}",
                     imageId, e.getMessage());
             return false;
+        }
+    }
+
+    @Override
+    public StorageResult uploadProcessedImage(ImageConverterService.ProcessedImage processedImage) throws IOException {
+        // Создаем временный MultipartFile из ProcessedImage для совместимости
+        MultipartFile convertedFile = new ProcessedImageMultipartFile(processedImage);
+
+        // Используем существующую логику загрузки
+        return uploadImage(convertedFile);
+    }
+
+    // Wrapper класс для совместимости
+    private static class ProcessedImageMultipartFile implements MultipartFile {
+        private final ImageConverterService.ProcessedImage processedImage;
+
+        public ProcessedImageMultipartFile(ImageConverterService.ProcessedImage processedImage) {
+            this.processedImage = processedImage;
+        }
+
+        @Override
+        public String getName() { return "avatar"; }
+
+        @Override
+        public String getOriginalFilename() { return processedImage.getFileName(); }
+
+        @Override
+        public String getContentType() { return processedImage.getContentType(); }
+
+        @Override
+        public boolean isEmpty() { return processedImage.getBytes() == null || processedImage.getBytes().length == 0; }
+
+        @Override
+        public long getSize() { return processedImage.getBytes().length; }
+
+        @Override
+        public byte[] getBytes() { return processedImage.getBytes(); }
+
+        @Override
+        public InputStream getInputStream() { return new ByteArrayInputStream(processedImage.getBytes()); }
+
+        @Override
+        public void transferTo(File dest) throws IOException, IllegalStateException {
+            try (FileOutputStream fos = new FileOutputStream(dest)) {
+                fos.write(processedImage.getBytes());
+            }
         }
     }
 

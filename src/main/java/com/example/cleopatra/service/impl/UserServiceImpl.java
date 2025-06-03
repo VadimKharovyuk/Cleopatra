@@ -8,6 +8,7 @@ import com.example.cleopatra.maper.UserMapper;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.repository.SubscriptionRepository;
 import com.example.cleopatra.repository.UserRepository;
+import com.example.cleopatra.service.ImageConverterService;
 import com.example.cleopatra.service.ImageValidator;
 import com.example.cleopatra.service.StorageService;
 import com.example.cleopatra.service.UserService;
@@ -53,22 +54,32 @@ public class UserServiceImpl implements UserService {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Пользователь с ID " + userId + " не найден"));
 
-            imageValidator.validateImage(file);
+            // ✅ ИЗМЕНЕНИЕ: Используем validateAndProcess вместо validateImage
+            ImageConverterService.ProcessedImage processedImage = imageValidator.validateAndProcess(file);
+
+            // Логируем информацию о конвертации
+            if (!processedImage.getContentType().equals(file.getContentType())) {
+                log.info("Файл {} был конвертирован из {} в {}",
+                        file.getOriginalFilename(),
+                        file.getContentType(),
+                        processedImage.getContentType());
+            }
 
             if (user.getImgId() != null && !user.getImgId().isEmpty()) {
                 log.debug("Удаляем старый аватар с ID: {}", user.getImgId());
                 storageService.deleteImage(user.getImgId());
             }
 
-            StorageService.StorageResult uploadResult = storageService.uploadImage(file);
+            // ✅ ИЗМЕНЕНИЕ: Передаем обработанное изображение в storage
+            StorageService.StorageResult uploadResult = storageService.uploadProcessedImage(processedImage);
 
             user.setImageUrl(uploadResult.getUrl());
             user.setImgId(uploadResult.getImageId());
 
             User savedUser = userRepository.save(user);
 
-            log.info("Аватар успешно загружен для пользователя с ID: {}. URL: {}",
-                    userId, uploadResult.getUrl());
+            log.info("Аватар успешно загружен для пользователя с ID: {}. URL: {}, финальный формат: {}",
+                    userId, uploadResult.getUrl(), processedImage.getContentType());
 
             return userMapper.toResponse(savedUser);
 
@@ -113,9 +124,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    // Вспомогательные методы для получения статистики
     private Long getFollowersCount(Long userId) {
-
         return subscriptionRepository.countBySubscriberId(userId);
 
     }

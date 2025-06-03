@@ -15,6 +15,10 @@ public interface StorageService {
      */
     boolean deleteImage(String imageId);
 
+    // ✅ НОВЫЙ метод для обработанных изображений
+    StorageResult uploadProcessedImage(ImageConverterService.ProcessedImage processedImage) throws IOException;
+
+
     /**
      * Получает информацию об изображении
      */
