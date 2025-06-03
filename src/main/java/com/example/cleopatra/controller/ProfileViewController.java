@@ -73,6 +73,7 @@ public class ProfileViewController {
             LocalDateTime to = LocalDateTime.now();
             LocalDateTime from = to.minusDays(days);
 
+
             // Получаем уникальных посетителей за период
             List<VisitDtoCard> visitors;
             try {

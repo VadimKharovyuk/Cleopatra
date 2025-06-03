@@ -32,8 +32,12 @@ public class VisitMapper {
                     .visitorLastName(visitor != null ? visitor.getLastName() : null)
                     .visitorImageUrl(visitor != null ? visitor.getImageUrl() : null)
                     .visitorCity(visitor != null ? visitor.getCity() : null)
-//                    .visitorIsOnline(visitor != null ? visitor.getIsOnline() : false)
                     .visitedAt(visit.getVisitedAt())
+                    .userAgent(visit.getUserAgent())
+
+//                    .visitorIsOnline(visitor != null ? visitor.getIsOnline() : false)
+
+
                     .build();
 
         } catch (Exception e) {
