@@ -1,5 +1,6 @@
 package com.example.cleopatra.controller;
 
+import com.example.cleopatra.dto.Post.PostCreateDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.service.UserService;
@@ -19,8 +20,10 @@ import java.nio.file.attribute.UserPrincipal;
 public class DashboardController {
 
 
+
     @GetMapping
-    public String dashboard() {
+    public String dashboard(Model model) {
+        model.addAttribute("postCreateDto", new PostCreateDto());
 
         return "user/dashboard";
     }

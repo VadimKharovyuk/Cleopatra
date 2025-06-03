@@ -25,9 +25,7 @@ public class PostController {
     private final PostService postService;
     private final UserService userService;
 
-    /**
-     * Показать форму создания поста
-     */
+
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("postCreateDto", new PostCreateDto());

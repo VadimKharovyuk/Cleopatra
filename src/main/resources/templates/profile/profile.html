@@ -898,6 +898,10 @@
             </div>
         </div>
 
+
+
+
+
         <!-- Content Area -->
         <!-- Content Area - заменить существующий блок -->
         <div class="content-area">
@@ -907,6 +911,7 @@
 
                 <!-- Список постов -->
                 <div class="posts-container">
+                    <!-- Обновленная статья поста с навигацией -->
                     <article class="post-card" th:each="post : ${posts.posts}">
 
                         <!-- Заголовок поста с автором -->
@@ -931,7 +936,10 @@
                                         <span th:text="${post.author.firstName + ' ' + post.author.lastName}">Имя Автора</span>
                                     </a>
                                     <span class="author-handle" th:text="'@' + ${post.author.firstName?.toLowerCase()}">@автор</span>
-                                    <span class="post-date" th:text="${#temporals.format(post.createdAt, 'dd MMM', new java.util.Locale('ru'))}">1 янв</span>
+                                    <!-- Дата теперь ссылка на пост -->
+                                    <a th:href="@{/posts/{id}(id=${post.id})}" class="post-date-link">
+                                        <span class="post-date" th:text="${#temporals.format(post.createdAt, 'dd MMM', new java.util.Locale('ru'))}">1 янв</span>
+                                    </a>
                                 </div>
                             </div>
 
@@ -941,8 +949,12 @@
                                     <i class="fas fa-ellipsis-h"></i>
                                 </button>
                                 <div class="post-menu-dropdown">
-                                    <a href="#" class="menu-item">
+                                    <a th:href="@{/posts/{id}(id=${post.id})}" class="menu-item">
                                         <i class="fas fa-link"></i>
+                                        Перейти к посту
+                                    </a>
+                                    <a href="#" class="menu-item" onclick="copyPostLink(this)" th:data-post-id="${post.id}">
+                                        <i class="fas fa-copy"></i>
                                         Копировать ссылку
                                     </a>
                                     <a href="#" class="menu-item" th:if="${isOwnProfile}">
@@ -957,23 +969,23 @@
                             </div>
                         </div>
 
-                        <!-- Содержимое поста -->
-                        <div class="post-content">
+                        <!-- Содержимое поста - теперь кликабельное -->
+                        <div class="post-content" onclick="navigateToPost(event, this)" th:data-post-id="${post.id}">
                             <!-- Текст поста -->
                             <div class="post-text" th:if="${post.content != null and !#strings.isEmpty(post.content)}">
                                 <p th:text="${post.content}">Текст поста...</p>
                                 <span th:if="${post.isLongContent}" class="read-more-link">
-                            <a th:href="@{/posts/{id}(id=${post.id})}">Читать далее</a>
-                        </span>
+                <a th:href="@{/posts/{id}(id=${post.id})}">Читать далее</a>
+            </span>
                             </div>
 
                             <!-- Изображение поста -->
                             <div class="post-media" th:if="${post.hasImage}">
-                                <a th:href="@{/posts/{id}(id=${post.id})}" class="media-link">
+                                <div class="media-container">
                                     <img th:src="${post.imageUrl}"
                                          alt="Изображение поста"
                                          class="post-image">
-                                </a>
+                                </div>
                             </div>
                         </div>
 
@@ -997,13 +1009,116 @@
                             </button>
 
                             <div class="action-stats">
-                        <span class="views-count">
-                            <i class="far fa-eye"></i>
-                            <span th:text="${post.viewsCount}">0</span>
-                        </span>
+            <span class="views-count">
+                <i class="far fa-eye"></i>
+                <span th:text="${post.viewsCount}">0</span>
+            </span>
                             </div>
                         </div>
                     </article>
+
+                    <style>
+                        /* Дополнительные стили для навигации */
+                        .post-content {
+                            cursor: pointer;
+                            transition: background-color 0.2s ease;
+                        }
+
+                        .post-content:hover {
+                            background-color: rgba(0, 0, 0, 0.02);
+                        }
+
+                        .post-date-link {
+                            text-decoration: none;
+                            color: inherit;
+                            transition: color 0.2s ease;
+                        }
+
+                        .post-date-link:hover {
+                            color: var(--accent-primary, #2563eb);
+                        }
+
+                        .post-date-link:hover .post-date {
+                            text-decoration: underline;
+                        }
+
+                        .media-container {
+                            display: block;
+                            cursor: pointer;
+                        }
+
+                        /* Отключаем pointer events для вложенных интерактивных элементов при клике на контент */
+                        .post-content .read-more-link {
+                            pointer-events: auto;
+                            position: relative;
+                            z-index: 2;
+                        }
+                    </style>
+
+                    <script>
+                        // Навигация к посту при клике на контент
+                        function navigateToPost(event, element) {
+                            // Не переходим если кликнули на ссылку "Читать далее"
+                            if (event.target.closest('.read-more-link')) {
+                                return;
+                            }
+
+                            // Не переходим если кликнули на изображение (оно уже кликабельно)
+                            if (event.target.closest('.post-image')) {
+                                return;
+                            }
+
+                            const postId = element.dataset.postId;
+                            if (postId) {
+                                window.location.href = `/posts/${postId}`;
+                            }
+                        }
+
+                        // Копирование ссылки на пост
+                        function copyPostLink(element) {
+                            const postId = element.dataset.postId;
+                            const postUrl = `${window.location.origin}/posts/${postId}`;
+
+                            navigator.clipboard.writeText(postUrl).then(() => {
+                                // Показываем уведомление (если у вас есть функция showNotification)
+                                if (typeof showNotification === 'function') {
+                                    showNotification('Ссылка на пост скопирована!', 'success');
+                                } else {
+                                    alert('Ссылка скопирована в буфер обмена!');
+                                }
+                            }).catch(err => {
+                                console.error('Ошибка при копировании: ', err);
+                                alert('Не удалось скопировать ссылку');
+                            });
+                        }
+
+                        // Обновленная функция открытия комментариев - переход к посту
+                        function openComments(btn) {
+                            const postId = btn.dataset.postId;
+                            window.location.href = `/posts/${postId}#comments`;
+                        }
+
+                        // Обновленная функция для кнопки поделиться
+                        function sharePost(btn) {
+                            const postId = btn.dataset.postId;
+                            const postUrl = `${window.location.origin}/posts/${postId}`;
+
+                            if (navigator.share) {
+                                navigator.share({
+                                    title: 'Пост',
+                                    url: postUrl
+                                });
+                            } else {
+                                navigator.clipboard.writeText(postUrl).then(() => {
+                                    if (typeof showNotification === 'function') {
+                                        showNotification('Ссылка на пост скопирована!', 'success');
+                                    } else {
+                                        alert('Ссылка скопирована в буфер обмена!');
+                                    }
+                                });
+                            }
+                        }
+                    </script>
                 </div>
 
                 <!-- Пагинация -->
