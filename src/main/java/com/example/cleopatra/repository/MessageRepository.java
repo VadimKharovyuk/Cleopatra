@@ -18,14 +18,14 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    // Получить сообщения между двумя пользователями
-    @Query("SELECT m FROM Message m WHERE " +
-            "((m.sender.id = :userId1 AND m.recipient.id = :userId2 AND m.deletedBySender = false) OR " +
-            "(m.sender.id = :userId2 AND m.recipient.id = :userId1 AND m.deletedByRecipient = false)) " +
-            "ORDER BY m.createdAt DESC")
-    Page<Message> findConversation(@Param("userId1") Long userId1,
-                                   @Param("userId2") Long userId2,
-                                   Pageable pageable);
+//    // Получить сообщения между двумя пользователями
+//    @Query("SELECT m FROM Message m WHERE " +
+//            "((m.sender.id = :userId1 AND m.recipient.id = :userId2 AND m.deletedBySender = false) OR " +
+//            "(m.sender.id = :userId2 AND m.recipient.id = :userId1 AND m.deletedByRecipient = false)) " +
+//            "ORDER BY m.createdAt DESC")
+//    Page<Message> findConversation(@Param("userId1") Long userId1,
+//                                   @Param("userId2") Long userId2,
+//                                   Pageable pageable);
 
     // Получить непрочитанные сообщения от конкретного отправителя
     @Query("SELECT m FROM Message m WHERE m.recipient.id = :recipientId " +
@@ -111,4 +111,15 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Query("SELECT m FROM Message m WHERE m.recipient.id = :userId AND m.isRead = false " +
             "AND m.deletedByRecipient = false ORDER BY m.createdAt DESC")
     List<Message> findRecentUnreadMessages(@Param("userId") Long userId, Pageable pageable);
+
+
+
+    // В MessageRepository измените ORDER BY с DESC на ASC
+    @Query("SELECT m FROM Message m WHERE " +
+            "((m.sender.id = :userId AND m.recipient.id = :otherUserId AND m.deletedBySender = false) OR " +
+            "(m.sender.id = :otherUserId AND m.recipient.id = :userId AND m.deletedByRecipient = false)) " +
+            "ORDER BY m.createdAt ASC") // ASC вместо DESC!
+    Page<Message> findConversation(@Param("userId") Long userId,
+                                   @Param("otherUserId") Long otherUserId,
+                                   Pageable pageable);
     }

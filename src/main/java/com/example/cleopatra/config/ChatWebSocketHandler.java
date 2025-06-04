@@ -1,322 +1,147 @@
 package com.example.cleopatra.config;
 
-import com.example.cleopatra.dto.ChatMessage.ChatMessage;
-
-import com.example.cleopatra.service.UserOnlineStatusService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.*;
 
+import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class ChatWebSocketHandler extends TextWebSocketHandler {
+public class ChatWebSocketHandler implements WebSocketHandler {
 
-    private final ObjectMapper objectMapper;
-    private final UserOnlineStatusService onlineStatusService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // Храним активные сессии пользователей
-    private final ConcurrentHashMap<Long, CopyOnWriteArraySet<WebSocketSession>> userSessions = new ConcurrentHashMap<>();
-
-    // Сопоставление сессия -> userId
-    private final ConcurrentHashMap<WebSocketSession, Long> sessionToUserId = new ConcurrentHashMap<>();
-
-    @Autowired
-    public ChatWebSocketHandler(UserOnlineStatusService onlineStatusService) {
-        this.onlineStatusService = onlineStatusService;
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule());
-    }
-
+    // Храним сессии пользователей
+    private final Map<Long, WebSocketSession> userSessions = new ConcurrentHashMap<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        log.info("WebSocket connection established: {}", session.getId());
+        log.info("🔌 WebSocket connection established: {}", session.getId());
 
-        Long userId = getUserIdFromSession(session);
-        if (userId != null) {
-            userSessions.computeIfAbsent(userId, k -> new CopyOnWriteArraySet<>()).add(session);
-            sessionToUserId.put(session, userId);
-
-            // Обновляем статус пользователя на "онлайн"
-            onlineStatusService.updateOnlineStatus(userId, true, getClientInfo(session));
-
-            // Уведомляем контакты о том, что пользователь онлайн
-            notifyContactsAboutStatusChange(userId, true);
-
-            log.info("User {} connected via WebSocket", userId);
-        } else {
-            log.warn("Cannot establish connection - userId not found in session");
-            session.close();
-        }
+        // Отправляем подтверждение подключения
+        sendMessage(session, Map.of(
+                "action", "CONNECT_ACK",
+                "message", "Connected successfully"
+        ));
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         try {
-            ChatMessage chatMessage = objectMapper.readValue(message.getPayload(), ChatMessage.class);
-            Long senderId = sessionToUserId.get(session);
+            String payload = message.getPayload().toString();
+            log.debug("📨 Received WebSocket message: {}", payload);
 
-            if (senderId == null) {
-                log.warn("Message from unidentified session: {}", session.getId());
-                return;
-            }
+            Map<String, Object> data = objectMapper.readValue(payload, Map.class);
+            String type = (String) data.get("type");
+            String action = (String) data.get("action");
 
-            log.info("Received message from user {}: {}", senderId, chatMessage.getAction());
+            if ("IDENTITY".equals(type) && "CONNECT".equals(action)) {
+                Object userIdObj = data.get("userId");
+                if (userIdObj != null) {
+                    Long userId = Long.valueOf(userIdObj.toString());
+                    userSessions.put(userId, session);
+                    session.getAttributes().put("userId", userId);
+                    log.info("✅ User {} connected via WebSocket", userId);
 
-            // Обрабатываем различные типы сообщений
-            switch (chatMessage.getAction()) {
-                case "TYPING_START":
-                case "TYPING_STOP":
-                    handleTypingNotification(chatMessage);
-                    break;
-                case "MESSAGE_READ":
-                    handleMessageRead(chatMessage);
-                    break;
-                case "PING":
-                    handlePing(session, senderId);
-                    break;
-                default:
-                    // Обычное сообщение - пересылаем получателю
-                    sendToUser(chatMessage.getRecipientId(), chatMessage);
+                    // Отправляем подтверждение
+                    sendMessage(session, Map.of(
+                            "action", "IDENTITY_ACK",
+                            "userId", userId,
+                            "message", "Identity confirmed"
+                    ));
+                }
             }
 
         } catch (Exception e) {
-            log.error("Error handling WebSocket message: ", e);
-            session.sendMessage(new TextMessage(
-                    "{\"error\":\"Ошибка обработки сообщения\",\"code\":\"PROCESSING_ERROR\"}"
-            ));
-        }
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        Long userId = sessionToUserId.remove(session);
-        if (userId != null) {
-            CopyOnWriteArraySet<WebSocketSession> sessions = userSessions.get(userId);
-            if (sessions != null) {
-                sessions.remove(session);
-                if (sessions.isEmpty()) {
-                    userSessions.remove(userId);
-
-                    // Обновляем статус пользователя на "оффлайн"
-                    onlineStatusService.updateOnlineStatus(userId, false, null);
-
-                    // Уведомляем контакты о том, что пользователь офлайн
-                    notifyContactsAboutStatusChange(userId, false);
-                }
-            }
-            log.info("User {} disconnected from WebSocket, status: {}", userId, status);
+            log.error("❌ Error handling WebSocket message: {}", e.getMessage(), e);
         }
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        log.error("WebSocket transport error for session {}: ", session.getId(), exception);
-        sessionToUserId.remove(session);
+        log.error("❌ WebSocket transport error for session {}: {}", session.getId(), exception.getMessage());
+    }
 
-        for (CopyOnWriteArraySet<WebSocketSession> sessions : userSessions.values()) {
-            sessions.remove(session);
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+        Long userId = (Long) session.getAttributes().get("userId");
+        if (userId != null) {
+            userSessions.remove(userId);
+            log.info("🔌 User {} disconnected from WebSocket", userId);
         }
+        log.info("🔌 WebSocket connection closed: {} - {}", session.getId(), closeStatus.toString());
+    }
 
-        session.close(); // Закрываем соединение
+    @Override
+    public boolean supportsPartialMessages() {
+        return false;
     }
 
     /**
      * Отправить сообщение конкретному пользователю
      */
-    public void sendToUser(Long userId, ChatMessage message) {
-        CopyOnWriteArraySet<WebSocketSession> sessions = userSessions.get(userId);
-        if (sessions != null && !sessions.isEmpty()) {
-            String messageJson;
+    public void sendToUser(Long userId, Object message) {
+        WebSocketSession session = userSessions.get(userId);
+        if (session != null && session.isOpen()) {
             try {
-                messageJson = objectMapper.writeValueAsString(message);
+                sendMessage(session, message);
+                log.debug("📤 Message sent to user {}: {}", userId, message);
             } catch (Exception e) {
-                log.error("Error serializing message: ", e);
-                return;
+                log.error("❌ Error sending message to user {}: {}", userId, e.getMessage());
+                // Удаляем неработающую сессию
+                userSessions.remove(userId);
             }
-
-            sessions.forEach(session -> {
-                try {
-                    if (session.isOpen()) {
-                        session.sendMessage(new TextMessage(messageJson));
-                        log.debug("Message sent to user {} via session {}", userId, session.getId());
-                    } else {
-                        // Удаляем закрытые сессии
-                        sessions.remove(session);
-                        sessionToUserId.remove(session);
-                    }
-                } catch (Exception e) {
-                    log.error("Error sending message to user {} via session {}: ",
-                            userId, session.getId(), e);
-                    // Удаляем проблемную сессию
-                    sessions.remove(session);
-                    sessionToUserId.remove(session);
-                }
-            });
         } else {
-            log.debug("User {} is not connected via WebSocket", userId);
+            log.debug("👤 User {} is not connected via WebSocket", userId);
         }
     }
 
     /**
      * Отправить сообщение всем подключенным пользователям
      */
-    public void broadcast(ChatMessage message) {
-        String messageJson;
-        try {
-            messageJson = objectMapper.writeValueAsString(message);
-        } catch (Exception e) {
-            log.error("Error serializing broadcast message: ", e);
-            return;
-        }
-
-        userSessions.values().forEach(sessions ->
-                sessions.forEach(session -> {
-                    try {
-                        if (session.isOpen()) {
-                            session.sendMessage(new TextMessage(messageJson));
-                        }
-                    } catch (Exception e) {
-                        log.error("Error broadcasting message: ", e);
-                    }
-                })
-        );
+    public void sendToAll(Object message) {
+        userSessions.forEach((userId, session) -> {
+            if (session.isOpen()) {
+                try {
+                    sendMessage(session, message);
+                } catch (Exception e) {
+                    log.error("❌ Error sending broadcast message to user {}: {}", userId, e.getMessage());
+                    userSessions.remove(userId);
+                }
+            } else {
+                userSessions.remove(userId);
+            }
+        });
     }
 
     /**
      * Проверить, подключен ли пользователь
      */
-    public boolean isUserOnline(Long userId) {
-        CopyOnWriteArraySet<WebSocketSession> sessions = userSessions.get(userId);
-        return sessions != null && !sessions.isEmpty() &&
-                sessions.stream().anyMatch(WebSocketSession::isOpen);
+    public boolean isUserConnected(Long userId) {
+        WebSocketSession session = userSessions.get(userId);
+        return session != null && session.isOpen();
     }
 
     /**
-     * Получить количество активных подключений пользователя
+     * Получить количество подключенных пользователей
      */
-    public int getActiveConnectionsCount(Long userId) {
-        CopyOnWriteArraySet<WebSocketSession> sessions = userSessions.get(userId);
-        if (sessions == null) return 0;
-        return (int) sessions.stream().filter(WebSocketSession::isOpen).count();
+    public int getConnectedUsersCount() {
+        return (int) userSessions.values().stream()
+                .filter(WebSocketSession::isOpen)
+                .count();
     }
 
     /**
-     * Получить общее количество активных подключений
+     * Отправить JSON сообщение в сессию
      */
-    public int getTotalActiveConnections() {
-        return userSessions.values().stream()
-                .mapToInt(sessions -> (int) sessions.stream()
-                        .filter(WebSocketSession::isOpen).count())
-                .sum();
+    private void sendMessage(WebSocketSession session, Object message) throws IOException {
+        String json = objectMapper.writeValueAsString(message);
+        session.sendMessage(new TextMessage(json));
     }
-
-    // Приватные методы
-
-    private Long getUserIdFromSession(WebSocketSession session) {
-        try {
-            // Способ 1: Из query параметров
-            String query = session.getUri().getQuery();
-            if (query != null && query.contains("userId=")) {
-                String userIdStr = query.split("userId=")[1].split("&")[0];
-                return Long.parseLong(userIdStr);
-            }
-
-            // Способ 2: Из JWT токена (если используется)
-            String token = extractTokenFromSession(session);
-            if (token != null) {
-                return extractUserIdFromToken(token);
-            }
-
-            // Способ 3: Из заголовков
-            Object userIdHeader = session.getAttributes().get("userId");
-            if (userIdHeader != null) {
-                return Long.parseLong(userIdHeader.toString());
-            }
-
-        } catch (Exception e) {
-            log.error("Error extracting userId from session: ", e);
-        }
-        return null;
-    }
-
-    private String extractTokenFromSession(WebSocketSession session) {
-        // Извлечение токена из заголовков или параметров
-        String query = session.getUri().getQuery();
-        if (query != null && query.contains("token=")) {
-            return query.split("token=")[1].split("&")[0];
-        }
-        return null;
-    }
-
-    private Long extractUserIdFromToken(String token) {
-        // Здесь должна быть логика декодирования JWT токена
-        // Для примера возвращаем null
-        return null;
-    }
-
-    private String getClientInfo(WebSocketSession session) {
-        String userAgent = (String) session.getAttributes().get("User-Agent");
-        String remoteAddress = session.getRemoteAddress() != null ?
-                session.getRemoteAddress().toString() : "unknown";
-
-        return String.format("UserAgent: %s, IP: %s",
-                userAgent != null ? userAgent : "unknown",
-                remoteAddress);
-    }
-
-    private void handleTypingNotification(ChatMessage message) {
-        sendToUser(message.getRecipientId(), message);
-    }
-
-    private void handleMessageRead(ChatMessage message) {
-        sendToUser(message.getSenderId(), message);
-    }
-
-    private void handlePing(WebSocketSession session, Long userId) {
-        try {
-            ChatMessage pong = ChatMessage.builder()
-                    .action("PONG")
-                    .senderId(userId)
-                    .timestamp(java.time.LocalDateTime.now())
-                    .build();
-
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(pong)));
-
-            // Обновляем статус активности
-            onlineStatusService.updateLastSeen(userId);
-
-        } catch (Exception e) {
-            log.error("Error handling ping: ", e);
-        }
-    }
-
-    private void notifyContactsAboutStatusChange(Long userId, boolean isOnline) {
-        // Получаем список контактов пользователя и уведомляем их об изменении статуса
-        // Это можно реализовать через сервис контактов
-        ChatMessage statusMessage = ChatMessage.builder()
-                .action(isOnline ? "USER_ONLINE" : "USER_OFFLINE")
-                .senderId(userId)
-                .timestamp(java.time.LocalDateTime.now())
-                .build();
-
-        // Отправляем уведомление всем контактам (здесь упрощенная версия)
-        // В реальном приложении нужно получить список друзей/контактов
-        log.info("User {} status changed to: {}", userId, isOnline ? "ONLINE" : "OFFLINE");
-    }
-
-
 }

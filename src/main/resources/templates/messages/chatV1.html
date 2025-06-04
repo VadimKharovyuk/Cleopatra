@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="|Чат с ${otherUser?.displayName ?: 'пользователем'} - Cleopatra|">Чат - Cleopatra</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <!-- SockJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+
+  <!-- Подключение стилей sidebar -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+  <!-- Chat Specific Styles -->
+  <style>
+    /* Основные переменные для чата */
+    :root {
+      --chat-message-font-size: 1rem;
+      --chat-header-height: 80px;
+      --chat-input-height: 80px;
+      --chat-bubble-padding: 1rem 1.25rem;
+    }
+
+    /* Chat Container */
+    .chat-container {
+      margin-left: 280px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-primary);
+      font-family: 'Inter', sans-serif;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Chat Header - увеличенный */
+    .chat-header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-primary);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: var(--chat-header-height);
+      box-shadow: var(--shadow-sm);
+      z-index: 10;
+    }
+
+    .chat-user-info {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .chat-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 1.4rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+    }
+
+    .chat-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .chat-user-details h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .chat-user-status {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-success);
+      box-shadow: 0 0 0 2px var(--bg-secondary);
+    }
+
+    .status-indicator.offline {
+      background: var(--text-muted);
+    }
+
+    .status-text {
+      font-size: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .typing-indicator {
+      font-size: 1rem;
+      color: var(--accent-primary);
+      font-style: italic;
+      display: none;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .chat-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .chat-action-btn {
+      background: none;
+      border: none;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1.25rem;
+    }
+
+    .chat-action-btn:hover {
+      background: var(--bg-accent);
+      color: var(--text-primary);
+      transform: scale(1.05);
+    }
+
+    /* Messages Area */
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      height: calc(100vh - var(--chat-header-height) - var(--chat-input-height));
+    }
+
+    .messages-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-height: min-content;
+    }
+
+    /* Message Bubble - улучшенный дизайн */
+    .message {
+      max-width: 75%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      animation: messageAppear 0.3s ease-out;
+    }
+
+    @keyframes messageAppear {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.sent {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .message.received {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+
+    .message-bubble {
+      padding: var(--chat-bubble-padding);
+      border-radius: var(--radius-lg);
+      position: relative;
+      word-wrap: break-word;
+      box-shadow: var(--shadow-sm);
+      font-size: var(--chat-message-font-size);
+      line-height: 1.6;
+      transition: all 0.2s ease;
+    }
+
+    .message-bubble:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .message.sent .message-bubble {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border-bottom-right-radius: var(--radius-sm);
+    }
+
+    .message.received .message-bubble {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      color: var(--text-primary);
+      border-bottom-left-radius: var(--radius-sm);
+    }
+
+    .message-content {
+      margin: 0;
+      line-height: 1.6;
+      font-size: var(--chat-message-font-size);
+      word-break: break-word;
+    }
+
+    .message-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    .message.sent .message-meta {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .message-time {
+      font-size: 0.875rem;
+    }
+
+    .message-status {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .message-actions {
+      display: none;
+      position: absolute;
+      top: -12px;
+      right: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      padding: 0.5rem;
+      box-shadow: var(--shadow-lg);
+      z-index: 10;
+    }
+
+    .message:hover .message-actions {
+      display: flex;
+    }
+
+    .message-action {
+      background: none;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .message-action:hover {
+      background: var(--bg-accent);
+      color: var(--text-primary);
+    }
+
+    /* Reply Message */
+    .reply-to {
+      background: rgba(0, 0, 0, 0.1);
+      padding: 0.75rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.75rem;
+      border-left: 3px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .message.received .reply-to {
+      background: var(--bg-accent);
+      border-left-color: var(--accent-primary);
+    }
+
+    .reply-to-author {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .reply-to-content {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* Message Input - переделанный контейнер */
+    .message-input-container {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-primary);
+      padding: 1.5rem 2rem;
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .message-input-wrapper {
+      display: flex;
+      align-items: end;
+      gap: 1rem;
+      max-width: 100%;
+      position: relative;
+    }
+
+    .message-input {
+      flex: 1;
+      min-height: 48px;
+      max-height: 120px;
+      padding: 1rem 1.25rem;
+      border: 2px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      resize: none;
+      overflow-y: auto;
+      transition: all 0.2s;
+      line-height: 1.5;
+    }
+
+    .message-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .message-input::placeholder {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: var(--shadow-md);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .send-btn:active {
+      transform: scale(0.95);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Load More Button */
+    .load-more-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-align: center;
+      margin: 1rem auto;
+      transition: all 0.2s;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .load-more-btn:hover {
+      background: var(--bg-accent);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Empty State */
+    .empty-chat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    .empty-chat-icon {
+      width: 100px;
+      height: 100px;
+      background: var(--bg-accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-chat h3 {
+      margin: 0 0 0.75rem;
+      color: var(--text-primary);
+      font-size: 1.5rem;
+    }
+
+    .empty-chat p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    /* Reply Preview */
+    .reply-preview {
+      background: var(--bg-accent);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .reply-preview-content strong {
+      color: var(--accent-primary);
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .reply-preview-content p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .reply-cancel {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 1.1rem;
+    }
+
+    .reply-cancel:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .chat-container {
+        margin-left: 80px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .chat-container {
+        margin-left: 0;
+        margin-top: 60px;
+        height: calc(100vh - 60px);
+      }
+
+      .chat-header {
+        padding: 1rem;
+        min-height: 70px;
+      }
+
+      .chat-user-details h2 {
+        font-size: 1.25rem;
+      }
+
+      .messages-container {
+        padding: 1rem;
+        height: calc(100vh - 130px - 80px);
+      }
+
+      .message {
+        max-width: 90%;
+      }
+
+      .message-input-container {
+        padding: 1rem;
+      }
+
+      .chat-avatar {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+      }
+    }
+
+    /* Исправляем z-index для sidebar */
+    @media (min-width: 769px) {
+      .sidebar {
+        z-index: 100;
+      }
+
+      .chat-container {
+        z-index: 1;
+      }
+    }
+
+    /* Loading Animation */
+    .loading-messages {
+      display: flex;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .loading-spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--border-primary);
+      border-top: 3px solid var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Scrollbar */
+    .messages-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .messages-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb {
+      background: var(--border-primary);
+      border-radius: 4px;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* Toast уведомления */
+    .error-toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #ef4444;
+      color: white;
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius-md);
+      z-index: 10000;
+      animation: slideInRight 0.3s ease;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- ПОДКЛЮЧЕНИЕ МОБИЛЬНОГО ХЕДЕРА ИЗ ФРАГМЕНТА -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+
+<!-- ПОДКЛЮЧЕНИЕ SIDEBAR ИЗ ФРАГМЕНТА -->
+<th:block th:replace="~{fragments/sidebar :: sidebar('messages')}"></th:block>
+
+<!-- Chat Container -->
+<div class="chat-container">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="chat-user-info">
+      <div class="chat-avatar">
+        <img th:if="${otherUser?.imageUrl}"
+             th:src="${otherUser.imageUrl}"
+             th:alt="${otherUser.displayName}">
+        <span th:unless="${otherUser?.imageUrl}"
+              th:text="${otherUser?.initials ?: '?'}">JD</span>
+      </div>
+
+      <div class="chat-user-details">
+        <h2 th:text="${otherUser?.displayName ?: 'Пользователь'}">Пользователь</h2>
+        <div class="chat-user-status">
+          <div class="status-indicator"
+               th:classappend="${otherUser?.isOnline} ? '' : 'offline'"></div>
+          <span class="status-text"
+                th:text="${otherUser?.lastSeenText ?: 'был недавно'}">в сети</span>
+          <div class="typing-indicator" id="typingIndicator">печатает...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-actions">
+      <button class="chat-action-btn" onclick="searchInChat()" title="Поиск в чате">
+        <i class="fas fa-search"></i>
+      </button>
+      <button class="chat-action-btn" onclick="openChatInfo()" title="Информация о чате">
+        <i class="fas fa-info-circle"></i>
+      </button>
+      <a th:href="@{/messages}" class="chat-action-btn" title="Назад к чатам">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Messages Container -->
+  <div class="messages-container" id="messagesContainer">
+    <!-- Load More Button -->
+    <div th:if="${conversation?.hasNext}" class="text-center">
+      <button class="load-more-btn" onclick="loadMoreMessages()" id="loadMoreBtn">
+        <i class="fas fa-chevron-up"></i> Загрузить предыдущие сообщения
+      </button>
+    </div>
+
+    <!-- Messages List -->
+    <div class="messages-list" id="messagesList" th:if="${hasMessages}">
+      <div th:each="message : ${conversation.messages}"
+           class="message"
+           th:classappend="${message.isOwnMessage} ? 'sent' : 'received'"
+           th:data-message-id="${message.id}">
+
+        <!-- Reply To Message -->
+        <div th:if="${message.replyToMessage}" class="reply-to">
+          <div class="reply-to-author" th:text="${message.replyToMessage.sender.displayName}">
+            Иван Петров
+          </div>
+          <div class="reply-to-content" th:text="${message.replyToMessage.shortContent}">
+            Это сообщение на которое отвечаем...
+          </div>
+        </div>
+
+        <div class="message-bubble">
+          <p class="message-content" th:text="${message.content}">
+            Привет! Как дела?
+          </p>
+
+          <!-- Message Actions -->
+          <div class="message-actions">
+            <button class="message-action" onclick="replyToMessage(this)" title="Ответить">
+              <i class="fas fa-reply"></i>
+            </button>
+            <button th:if="${message.canEdit}" class="message-action" onclick="editMessage(this)" title="Редактировать">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button th:if="${message.canDelete}" class="message-action" onclick="deleteMessage(this)" title="Удалить">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="message-meta">
+          <span class="message-time" th:text="${message.timeAgo}">5 мин назад</span>
+          <div th:if="${message.isOwnMessage}" class="message-status">
+            <i th:if="${message.deliveryStatus.name() == 'SENT'}" class="fas fa-check" title="Отправлено"></i>
+            <i th:if="${message.deliveryStatus.name() == 'DELIVERED'}" class="fas fa-check-double" title="Доставлено"></i>
+            <i th:if="${message.deliveryStatus.name() == 'READ'}" class="fas fa-check-double" style="color: var(--accent-primary);" title="Прочитано"></i>
+          </div>
+          <span th:if="${message.isEdited}" class="edited-indicator" title="Отредактировано">
+                            <i class="fas fa-edit"></i>
+                        </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty Chat State -->
+    <div th:unless="${hasMessages}" class="empty-chat" id="emptyChatState">
+      <div class="empty-chat-icon">
+        <i class="fas fa-comments"></i>
+      </div>
+      <h3>Начните общение</h3>
+      <p th:text="|Напишите первое сообщение ${otherUser?.firstName ?: 'пользователю'}|">
+        Напишите первое сообщение пользователю
+      </p>
+    </div>
+
+    <!-- Loading Animation -->
+    <div id="loadingMessages" class="loading-messages" style="display: none;">
+      <div class="loading-spinner"></div>
+    </div>
+  </div>
+
+  <!-- Message Input -->
+  <div class="message-input-container">
+    <!-- Reply Preview -->
+    <div id="replyPreview" class="reply-preview" style="display: none;">
+      <div class="reply-preview-content">
+        <strong id="replyAuthor">Иван Петров</strong>
+        <p id="replyContent">Сообщение на которое отвечаем...</p>
+      </div>
+      <button class="reply-cancel" onclick="cancelReply()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="message-input-wrapper">
+                <textarea id="messageInput"
+                          class="message-input"
+                          placeholder="Напишите сообщение..."
+                          rows="1"
+                          maxlength="5000"></textarea>
+      <button id="sendBtn" class="send-btn" onclick="sendMessage()">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<!-- Chat Scripts -->
+<script>
+  // Global variables
+  let currentPage = /*[[${conversation?.currentPage ?: 0}]]*/ 0;
+  let isLoading = false;
+  let currentUserId = /*[[${currentUserId}]]*/ 1;
+  let otherUserId = /*[[${otherUserId}]]*/ 2;
+  let replyToMessageId = null;
+  let typingTimer = null;
+  let socket = null;
+
+  // Получаем otherUserId из URL для точности
+  const pathParts = window.location.pathname.split('/');
+  const urlOtherUserId = pathParts[pathParts.length - 1];
+  if (urlOtherUserId && !isNaN(urlOtherUserId)) {
+    otherUserId = parseInt(urlOtherUserId);
+  }
+
+  console.log('🚀 Chat initialized with:', {
+    currentUserId: currentUserId,
+    otherUserId: otherUserId,
+    currentPage: currentPage,
+    url: window.location.pathname,
+    extractedUserId: urlOtherUserId
+  });
+
+  // Initialize chat when page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeChat();
+    initializeWebSocket();
+    autoResizeTextarea();
+    scrollToBottom();
+
+    // Mark messages as read when page loads
+    setTimeout(() => {
+      markAsRead();
+    }, 1000);
+  });
+
+  /**
+   * Initialize chat functionality
+   */
+  function initializeChat() {
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    if (!messageInput || !sendBtn) {
+      console.error('❌ Chat elements not found');
+      return;
+    }
+
+    // Handle Enter key
+    messageInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Handle typing indicators
+    messageInput.addEventListener('input', function() {
+      handleTyping();
+      updateSendButtonState();
+    });
+
+    // Auto-resize textarea
+    messageInput.addEventListener('input', autoResizeTextarea);
+
+    // Initial button state
+    updateSendButtonState();
+
+    console.log('💬 Chat initialized successfully');
+  }
+
+  /**
+   * Update send button state
+   */
+  function updateSendButtonState() {
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    if (messageInput && sendBtn) {
+      const hasContent = messageInput.value.trim().length > 0;
+      sendBtn.disabled = !hasContent;
+      sendBtn.style.opacity = hasContent ? '1' : '0.5';
+    }
+  }
+
+  /**
+   * Send message
+   */
+  async function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const content = messageInput.value.trim();
+
+    if (!content) {
+      console.warn('⚠️ Empty message content');
+      return;
+    }
+
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.disabled = true;
+
+    // Create message data
+    const messageData = {
+      recipientId: otherUserId,
+      content: content,
+      replyToMessageId: replyToMessageId
+    };
+
+    console.log('📤 Sending message data:', messageData);
+    console.log('📤 Current user ID:', currentUserId);
+    console.log('📤 Other user ID:', otherUserId);
+
+    try {
+      console.log('📤 Making fetch request to /messages/send');
+
+      const response = await fetch('/messages/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(messageData)
+      });
+
+      console.log('📨 Response status:', response.status);
+      console.log('📨 Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ HTTP Error:', response.status, errorText);
+        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('📨 Send response:', result);
+
+      if (result.success) {
+        console.log('✅ Message sent successfully, data:', result.data);
+
+        messageInput.value = '';
+        autoResizeTextarea();
+        cancelReply();
+        updateSendButtonState();
+
+        // Добавляем сообщение в UI сразу, если WebSocket не сработал
+        if (result.data) {
+          console.log('➕ Adding message to UI:', result.data);
+          // Проверяем, что сообщение еще не добавлено
+          if (!document.querySelector(`[data-message-id="${result.data.id}"]`)) {
+            addMessageToUI(result.data);
+            scrollToBottom();
+          } else {
+            console.warn('⚠️ Message already exists in UI');
+          }
+        } else {
+          console.warn('⚠️ No message data in response');
+        }
+
+      } else {
+        console.error('❌ Server returned error:', result);
+        showError('Ошибка отправки сообщения: ' + (result.message || 'Неизвестная ошибка'));
+      }
+    } catch (error) {
+      console.error('❌ Error sending message:', error);
+      showError('Ошибка отправки сообщения. Проверьте подключение к интернету.');
+    } finally {
+      sendBtn.disabled = false;
+      updateSendButtonState();
+    }
+  }
+
+  /**
+   * Load more messages
+   */
+  async function loadMoreMessages() {
+    if (isLoading) return;
+
+    isLoading = true;
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const loadingMessages = document.getElementById('loadingMessages');
+
+    if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+    if (loadingMessages) loadingMessages.style.display = 'flex';
+
+    try {
+      currentPage += 1;
+      const response = await fetch(`/messages/chat/${otherUserId}/load-more?page=${currentPage}&size=50`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.messages && result.messages.length > 0) {
+        prependMessagesToUI(result.messages);
+        console.log(`📥 Loaded ${result.messages.length} more messages`);
+      }
+
+      if (!result.hasNext) {
+        if (loadMoreBtn) loadMoreBtn.remove();
+      } else {
+        if (loadMoreBtn) loadMoreBtn.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('❌ Error loading more messages:', error);
+      showError('Ошибка загрузки сообщений');
+      if (loadMoreBtn) loadMoreBtn.style.display = 'block';
+    } finally {
+      if (loadingMessages) loadingMessages.style.display = 'none';
+      isLoading = false;
+    }
+  }
+
+  /**
+   * Handle typing indicator
+   */
+  function handleTyping() {
+    // Send typing start notification
+    sendTypingNotification(true);
+
+    // Clear existing timer
+    if (typingTimer) {
+      clearTimeout(typingTimer);
+    }
+
+    // Set timer to send typing stop
+    typingTimer = setTimeout(() => {
+      sendTypingNotification(false);
+    }, 1000);
+  }
+
+  /**
+   * Send typing notification
+   */
+  async function sendTypingNotification(isTyping) {
+    try {
+      await fetch(`/messages/typing/${otherUserId}?isTyping=${isTyping}`, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error sending typing notification:', error);
+    }
+  }
+
+  /**
+   * Auto-resize textarea
+   */
+  function autoResizeTextarea() {
+    const textarea = document.getElementById('messageInput');
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    }
+  }
+
+  /**
+   * Reply to message
+   */
+  function replyToMessage(button) {
+    const message = button.closest('.message');
+    const messageId = message.dataset.messageId;
+    const content = message.querySelector('.message-content').textContent;
+    const author = message.classList.contains('sent') ? 'Вы' : /*[[${otherUser?.displayName}]]*/ 'Пользователь';
+
+    replyToMessageId = messageId;
+
+    const replyAuthor = document.getElementById('replyAuthor');
+    const replyContent = document.getElementById('replyContent');
+    const replyPreview = document.getElementById('replyPreview');
+
+    if (replyAuthor) replyAuthor.textContent = author;
+    if (replyContent) replyContent.textContent = content.length > 50 ? content.substring(0, 50) + '...' : content;
+    if (replyPreview) replyPreview.style.display = 'block';
+
+    const messageInput = document.getElementById('messageInput');
+    if (messageInput) messageInput.focus();
+
+    console.log('💬 Replying to message:', messageId);
+  }
+
+  /**
+   * Cancel reply
+   */
+  function cancelReply() {
+    replyToMessageId = null;
+    const replyPreview = document.getElementById('replyPreview');
+    if (replyPreview) {
+      replyPreview.style.display = 'none';
+    }
+    console.log('❌ Reply cancelled');
+  }
+
+  /**
+   * Edit message
+   */
+  function editMessage(button) {
+    const message = button.closest('.message');
+    const messageId = message.dataset.messageId;
+    const content = message.querySelector('.message-content').textContent;
+
+    const newContent = prompt('Редактировать сообщение:', content);
+    if (newContent && newContent !== content && newContent.trim()) {
+      updateMessage(messageId, newContent.trim());
+    }
+  }
+
+  /**
+   * Delete message
+   */
+  function deleteMessage(button) {
+    const message = button.closest('.message');
+    const messageId = message.dataset.messageId;
+
+    if (confirm('Удалить сообщение?')) {
+      removeMessage(messageId);
+    }
+  }
+
+  /**
+   * Update message
+   */
+  async function updateMessage(messageId, newContent) {
+    try {
+      const response = await fetch(`/messages/edit/${messageId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+          content: newContent
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update message in UI
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (messageElement) {
+          const contentElement = messageElement.querySelector('.message-content');
+          if (contentElement) {
+            contentElement.textContent = newContent;
+          }
+
+          // Add edited indicator if not present
+          if (!messageElement.querySelector('.edited-indicator')) {
+            const metaElement = messageElement.querySelector('.message-meta');
+            if (metaElement) {
+              metaElement.insertAdjacentHTML('beforeend', '<span class="edited-indicator" title="Отредактировано"><i class="fas fa-edit"></i></span>');
+            }
+          }
+        }
+        console.log('✅ Message updated successfully');
+      } else {
+        showError('Ошибка редактирования: ' + (result.message || 'Неизвестная ошибка'));
+      }
+    } catch (error) {
+      console.error('❌ Error updating message:', error);
+      showError('Ошибка редактирования сообщения');
+    }
+  }
+
+  /**
+   * Remove message
+   */
+  async function removeMessage(messageId) {
+    try {
+      const response = await fetch(`/messages/delete/${messageId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Remove message from UI
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (messageElement) {
+          messageElement.style.animation = 'messageDisappear 0.3s ease-out forwards';
+          setTimeout(() => {
+            messageElement.remove();
+          }, 300);
+        }
+        console.log('✅ Message deleted successfully');
+      } else {
+        showError('Ошибка удаления: ' + (result.message || 'Неизвестная ошибка'));
+      }
+    } catch (error) {
+      console.error('❌ Error deleting message:', error);
+      showError('Ошибка удаления сообщения');
+    }
+  }
+
+  /**
+   * Add message to UI
+   */
+  function addMessageToUI(message) {
+    console.log('🎯 addMessageToUI called with:', message);
+
+    let messagesList = document.getElementById('messagesList');
+    const messagesContainer = document.getElementById('messagesContainer');
+
+    if (!messagesContainer) {
+      console.error('❌ Messages container not found');
+      return;
+    }
+
+    // Remove empty state if present
+    const emptyChat = document.querySelector('.empty-chat');
+    if (emptyChat) {
+      console.log('🗑️ Removing empty chat state');
+      emptyChat.remove();
+    }
+
+    // Create messagesList if it doesn't exist
+    if (!messagesList) {
+      console.log('📝 Creating messages list');
+      const messagesListHtml = '<div class="messages-list" id="messagesList"></div>';
+      messagesContainer.insertAdjacentHTML('beforeend', messagesListHtml);
+      messagesList = document.getElementById('messagesList');
+    }
+
+    if (!messagesList) {
+      console.error('❌ Could not create or find messages list');
+      return;
+    }
+
+    // Check if message already exists
+    const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
+    if (existingMessage) {
+      console.warn('⚠️ Message already exists in UI:', message.id);
+      return;
+    }
+
+    const messageHtml = createMessageHtml(message);
+    console.log('📝 Generated message HTML:', messageHtml);
+
+    messagesList.insertAdjacentHTML('beforeend', messageHtml);
+
+    console.log('✅ Message added to UI successfully:', message.id);
+
+    // Scroll to bottom after adding message
+    setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+  }
+
+  /**
+   * Prepend messages to UI
+   */
+  function prependMessagesToUI(messages) {
+    const messagesList = document.getElementById('messagesList');
+    if (!messagesList) {
+      console.error('❌ Messages list not found');
+      return;
+    }
+
+    const messagesHtml = messages.reverse().map(createMessageHtml).join('');
+    messagesList.insertAdjacentHTML('afterbegin', messagesHtml);
+
+    console.log(`➕ ${messages.length} messages prepended to UI`);
+  }
+
+  /**
+   * Create message HTML
+   */
+  function createMessageHtml(message) {
+    console.log('🏗️ Creating message HTML for:', message);
+
+    if (!message || !message.id) {
+      console.error('❌ Invalid message data:', message);
+      return '';
+    }
+
+    const isOwn = message.isOwnMessage;
+    const messageClass = isOwn ? 'sent' : 'received';
+
+    const html = `
+                <div class="message ${messageClass}" data-message-id="${message.id}">
+                    ${message.replyToMessage ? `
+                        <div class="reply-to">
+                            <div class="reply-to-author">${escapeHtml(message.replyToMessage.sender.displayName || 'Пользователь')}</div>
+                            <div class="reply-to-content">${escapeHtml(message.replyToMessage.shortContent || '')}</div>
+                        </div>
+                    ` : ''}
+                    <div class="message-bubble">
+                        <p class="message-content">${escapeHtml(message.content || '')}</p>
+
+                        <div class="message-actions">
+                            <button class="message-action" onclick="replyToMessage(this)" title="Ответить">
+                                <i class="fas fa-reply"></i>
+                            </button>
+                            ${message.canEdit ? `
+                                <button class="message-action" onclick="editMessage(this)" title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            ` : ''}
+                            ${message.canDelete ? `
+                                <button class="message-action" onclick="deleteMessage(this)" title="Удалить">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <div class="message-meta">
+                        <span class="message-time">${escapeHtml(message.timeAgo || 'только что')}</span>
+                        ${isOwn ? `
+                            <div class="message-status">
+                                ${getDeliveryStatusIcon(message.deliveryStatus)}
+                            </div>
+                        ` : ''}
+                        ${message.isEdited ? `
+                            <span class="edited-indicator" title="Отредактировано">
+                                <i class="fas fa-edit"></i>
+                            </span>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+    console.log('🏗️ Generated HTML length:', html.length);
+    return html;
+  }
+
+  /**
+   * Get delivery status icon
+   */
+  function getDeliveryStatusIcon(status) {
+    switch(status) {
+      case 'SENT':
+        return '<i class="fas fa-check" title="Отправлено"></i>';
+      case 'DELIVERED':
+        return '<i class="fas fa-check-double" title="Доставлено"></i>';
+      case 'READ':
+        return '<i class="fas fa-check-double" style="color: var(--accent-primary);" title="Прочитано"></i>';
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Escape HTML
+   */
+  function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  /**
+   * Scroll to bottom
+   */
+  function scrollToBottom(smooth = true) {
+    const container = document.getElementById('messagesContainer');
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto'
+      });
+    }
+  }
+
+  /**
+   * Initialize WebSocket connection
+   */
+  function initializeWebSocket() {
+    try {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws/chat`;
+
+      socket = new WebSocket(wsUrl);
+
+      socket.onopen = function() {
+        console.log('🔌 WebSocket connected');
+      };
+
+      socket.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          handleWebSocketMessage(data);
+        } catch (error) {
+          console.error('❌ Error parsing WebSocket message:', error);
+        }
+      };
+
+      socket.onclose = function() {
+        console.log('🔌 WebSocket disconnected');
+        // Attempt to reconnect after 3 seconds
+        setTimeout(initializeWebSocket, 3000);
+      };
+
+      socket.onerror = function(error) {
+        console.error('❌ WebSocket error:', error);
+      };
+
+    } catch (error) {
+      console.error('❌ Error initializing WebSocket:', error);
+    }
+  }
+
+  /**
+   * Handle WebSocket messages
+   */
+  function handleWebSocketMessage(data) {
+    console.log('📨 WebSocket message received:', data);
+
+    switch(data.action) {
+      case 'NEW_MESSAGE':
+        // Добавляем сообщение если оно от другого пользователя или это эхо нашего сообщения
+        if (data.senderId === otherUserId || data.senderId === currentUserId) {
+          // Преобразуем WebSocket данные в формат MessageResponseDto
+          const messageData = {
+            id: data.id,
+            content: data.content,
+            isOwnMessage: data.senderId === currentUserId,
+            deliveryStatus: 'DELIVERED',
+            timeAgo: 'только что',
+            canEdit: data.senderId === currentUserId,
+            canDelete: data.senderId === currentUserId,
+            isEdited: false,
+            sender: {
+              displayName: data.senderName || (data.senderId === currentUserId ? 'Вы' : 'Пользователь')
+            }
+          };
+
+          // Проверяем, что сообщение еще не добавлено
+          if (!document.querySelector(`[data-message-id="${data.id}"]`)) {
+            addMessageToUI(messageData);
+            scrollToBottom();
+          }
+
+          if (data.senderId === otherUserId) {
+            markAsRead();
+          }
+        }
+        break;
+
+      case 'MESSAGE_EDITED':
+        if (data.senderId === otherUserId) {
+          updateMessageInUI(data);
+        }
+        break;
+
+      case 'MESSAGE_DELETED':
+        removeMessageFromUI(data.id);
+        break;
+
+      case 'MESSAGES_READ':
+        if (data.senderId === otherUserId) {
+          updateMessagesReadStatus();
+        }
+        break;
+
+      case 'TYPING_START':
+        if (data.senderId === otherUserId) {
+          showTypingIndicator();
+        }
+        break;
+
+      case 'TYPING_STOP':
+        if (data.senderId === otherUserId) {
+          hideTypingIndicator();
+        }
+        break;
+
+      case 'CONNECT_ACK':
+        console.log('✅ WebSocket connection acknowledged');
+        break;
+
+      default:
+        console.log('❓ Unknown WebSocket action:', data.action);
+    }
+  }
+
+  /**
+   * Update message in UI
+   */
+  function updateMessageInUI(data) {
+    const messageElement = document.querySelector(`[data-message-id="${data.id}"]`);
+    if (messageElement) {
+      const contentElement = messageElement.querySelector('.message-content');
+      if (contentElement) {
+        contentElement.textContent = data.content;
+      }
+
+      // Add edited indicator if not present
+      if (!messageElement.querySelector('.edited-indicator')) {
+        const metaElement = messageElement.querySelector('.message-meta');
+        if (metaElement) {
+          metaElement.insertAdjacentHTML('beforeend', '<span class="edited-indicator" title="Отредактировано"><i class="fas fa-edit"></i></span>');
+        }
+      }
+    }
+  }
+
+  /**
+   * Remove message from UI
+   */
+  function removeMessageFromUI(messageId) {
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (messageElement) {
+      messageElement.style.animation = 'messageDisappear 0.3s ease-out forwards';
+      setTimeout(() => {
+        messageElement.remove();
+      }, 300);
+    }
+  }
+
+  /**
+   * Update messages read status
+   */
+  function updateMessagesReadStatus() {
+    const sentMessages = document.querySelectorAll('.message.sent');
+    sentMessages.forEach(message => {
+      const statusElement = message.querySelector('.message-status i');
+      if (statusElement) {
+        statusElement.className = 'fas fa-check-double';
+        statusElement.style.color = 'var(--accent-primary)';
+        statusElement.title = 'Прочитано';
+      }
+    });
+  }
+
+  /**
+   * Show typing indicator
+   */
+  function showTypingIndicator() {
+    const indicator = document.getElementById('typingIndicator');
+    const statusText = indicator?.previousElementSibling;
+
+    if (statusText) statusText.style.display = 'none';
+    if (indicator) indicator.style.display = 'block';
+  }
+
+  /**
+   * Hide typing indicator
+   */
+  function hideTypingIndicator() {
+    const indicator = document.getElementById('typingIndicator');
+    const statusText = indicator?.previousElementSibling;
+
+    if (indicator) indicator.style.display = 'none';
+    if (statusText) statusText.style.display = 'block';
+  }
+
+  /**
+   * Mark messages as read
+   */
+  async function markAsRead() {
+    try {
+      await fetch(`/messages/mark-read/${otherUserId}`, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+      console.log('✅ Messages marked as read');
+    } catch (error) {
+      console.error('❌ Error marking messages as read:', error);
+    }
+  }
+
+  /**
+   * Search in chat
+   */
+  function searchInChat() {
+    const query = prompt('Поиск в чате:');
+    if (query) {
+      console.log('🔍 Searching for:', query);
+      // TODO: Implement search functionality
+      showError('Функция поиска будет добавлена в ближайшее время');
+    }
+  }
+
+  /**
+   * Open chat info
+   */
+  function openChatInfo() {
+    console.log('ℹ️ Opening chat info for user:', otherUserId);
+    // TODO: Implement chat info modal or page
+    showError('Информация о чате будет добавлена в ближайшее время');
+  }
+
+  /**
+   * Show error message
+   */
+  function showError(message) {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.error-toast');
+    existingToasts.forEach(toast => toast.remove());
+
+    // Create new toast
+    const toast = document.createElement('div');
+    toast.className = 'error-toast';
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.remove();
+      }
+    }, 5000);
+  }
+
+  // Auto-mark messages as read when page becomes visible
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      markAsRead();
+    }
+  });
+
+  // Handle page unload
+  window.addEventListener('beforeunload', function() {
+    if (socket) {
+      socket.close();
+    }
+  });
+
+  // Add CSS for message disappear animation
+  const style = document.createElement('style');
+  style.textContent = `
+            @keyframes messageDisappear {
+                from {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateX(100px);
+                }
+            }
+        `;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>
