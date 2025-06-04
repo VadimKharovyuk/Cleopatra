@@ -110,6 +110,7 @@ public class MessagesController {
             return "messages/error";
         }
 
+
         return "messages/chat";
     }
 

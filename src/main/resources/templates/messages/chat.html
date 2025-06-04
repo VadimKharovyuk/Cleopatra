@@ -3,128 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${otherUser.displayName + ' - Чат'}">Чат - Cleopatra</title>
+    <title th:text="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName + ' - Чат'} : 'Чат'">Чат</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            line-height: 1.5;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background-color: #252525;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .back-btn {
+            color: #1e90ff;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+
+        .chat-user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .user-details h3 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .messages-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+        }
+
+        .no-messages {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            max-width: 70%;
+        }
+
+        .message.own {
+            margin-left: auto;
+        }
+
+        .message.other {
+            margin-right: auto;
+        }
+
+        .message-content {
+            background-color: #333;
+            padding: 10px 15px;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .message.own .message-content {
+            background-color: #1e90ff;
+            color: #fff;
+        }
+
+        .message-text {
+            font-size: 16px;
+            word-break: break-word;
+        }
+
+        .message-info {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .message.own .message-info {
+            justify-content: flex-end;
+            color: #ddd;
+        }
+
+        .message-input-container {
+            padding: 15px;
+            background-color: #252525;
+            border-top: 1px solid #333;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex-grow: 1;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 20px;
+            padding: 10px 15px;
+            color: #e0e0e0;
+            font-size: 16px;
+            outline: none;
+        }
+
+        #messageInput:focus {
+            border-color: #1e90ff;
+        }
+
+        #sendButton {
+            background-color: #1e90ff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #sendButton:hover {
+            background-color: #1c86ee;
+        }
+
+        .error-message {
+            background-color: #ff4444;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            margin: 10px;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
 <div class="chat-container">
     <header class="chat-header">
         <a href="/messages" class="back-btn">← Назад</a>
-
         <div class="chat-user-info">
             <div class="avatar">
-                <img th:if="${otherUser.imageUrl}"
+                <img th:if="${otherUser != null and otherUser.imageUrl != null}"
                      th:src="${otherUser.imageUrl}"
-                     th:alt="${otherUser.displayName}">
-                <div th:unless="${otherUser.imageUrl}"
+                     th:alt="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName} : 'Пользователь'">
+                <div th:unless="${otherUser != null and otherUser.imageUrl != null}"
                      class="avatar-placeholder"
-                     th:text="${otherUser.initials}">АА</div>
-                <div th:if="${otherUser.isOnline}" class="online-indicator"></div>
+                     th:text="${otherUser != null and otherUser.initials != null} ? ${otherUser.initials} : 'АА'">АА</div>
             </div>
-
             <div class="user-details">
-                <h3 th:text="${otherUser.displayName}">Имя пользователя</h3>
-                <span class="status" th:text="${otherUser.lastSeenText}">в сети</span>
+                <h3 th:text="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName} : 'Пользователь'">Пользователь</h3>
             </div>
-        </div>
-
-        <div class="chat-actions">
-            <button onclick="searchInChat()" title="Поиск">🔍</button>
-            <button onclick="showChatInfo()" title="Информация">ℹ️</button>
         </div>
     </header>
 
-    <div th:if="${error}" class="error-message">
+    <div th:if="${error != null}" class="error-message">
         <p th:text="${error}">Сообщение об ошибке</p>
     </div>
 
     <div class="messages-container" id="messagesContainer">
-        <div th:if="${!hasMessages}" class="no-messages">
+        <div th:if="${conversation != null and conversation.messages != null and !conversation.messages.isEmpty() == false}" class="no-messages">
             <p>Сообщений пока нет. Начните разговор!</p>
         </div>
 
-        <div th:if="${canLoadMore}" class="load-more-messages">
-            <button onclick="loadMoreMessages()">Загрузить предыдущие сообщения</button>
-        </div>
-
         <div class="messages-list" id="messagesList">
-            <div th:each="message : ${conversation.messages}"
+            <div th:each="message : ${conversation != null and conversation.messages != null ? conversation.messages : {}}"
+                 th:if="${message != null}"
                  class="message"
-                 th:classappend="${message.isOwnMessage ? 'own' : 'other'}"
-                 th:data-message-id="${message.id}">
-
+                 th:classappend="${message.isOwnMessage != null and message.isOwnMessage} ? 'own' : 'other'"
+                 th:data-message-id="${message.id != null} ? ${message.id} : ''">
                 <div class="message-content">
-                    <div th:if="${message.replyToMessage}" class="reply-to">
-                        <div class="reply-line"></div>
-                        <div class="reply-content">
-                            <span class="reply-author" th:text="${message.replyToMessage.sender.displayName}">Автор</span>
-                            <span class="reply-text" th:text="${message.replyToMessage.shortContent}">Текст ответа</span>
-                        </div>
-                    </div>
-
                     <div class="message-body">
-                        <span class="message-text" th:text="${message.content}">Текст сообщения</span>
-
+                        <span class="message-text" th:text="${message.content != null} ? ${message.content} : ''">Текст сообщения</span>
                         <div class="message-info">
-                            <span class="time" th:text="${message.timeAgo}">5 мин назад</span>
-                            <span th:if="${message.isEdited}" class="edited">изменено</span>
-
-                            <div th:if="${message.isOwnMessage}" class="message-status">
-                                    <span th:switch="${message.deliveryStatus.name()}">
-                                        <span th:case="'SENT'">✓</span>
-                                        <span th:case="'DELIVERED'">✓✓</span>
-                                        <span th:case="'READ'">✓✓</span>
-                                    </span>
-                            </div>
+                            <span class="time" th:text="${message.timeAgo != null} ? ${message.timeAgo} : ''"></span>
                         </div>
-                    </div>
-
-                    <div th:if="${message.canEdit or message.canDelete}" class="message-actions">
-                        <button th:if="${message.canEdit}"
-                                th:onclick="'editMessage(' + ${message.id} + ')'"
-                                title="Редактировать">✏️</button>
-                        <button onclick="replyToMessage([[${message.id}]])" title="Ответить">↩️</button>
-                        <button th:if="${message.canDelete}"
-                                th:onclick="'deleteMessage(' + ${message.id} + ')'"
-                                title="Удалить">🗑️</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="typing-indicator" id="typingIndicator" style="display: none;">
-        <span th:text="${otherUser.displayName}">Пользователь</span> печатает...
-    </div>
-
     <div class="message-input-container">
-        <div id="replyPreview" class="reply-preview" style="display: none;">
-            <div class="reply-content">
-                <span class="reply-to-text">Ответ на сообщение:</span>
-                <span id="replyText"></span>
-            </div>
-            <button onclick="cancelReply()">✕</button>
-        </div>
-
         <div class="input-group">
             <input type="text"
                    id="messageInput"
                    placeholder="Напишите сообщение..."
-                   onkeypress="handleKeyPress(event)"
-                   oninput="handleTyping()">
+                   onkeypress="handleKeyPress(event)">
             <button id="sendButton" onclick="sendMessage()">Отправить</button>
         </div>
     </div>
 </div>
 
 <script>
-    const currentUserId = [[${currentUserId}]];
-    const otherUserId = [[${otherUserId}]];
-    let currentPage = [[${conversation.currentPage}]];
-    let replyToMessageId = null;
-    let typingTimer = null;
-    let isTyping = false;
+    const currentUserId = [[${currentUserId != null ? currentUserId : 0}]];
+    const otherUserId = [[${otherUserId != null ? otherUserId : 0}]];
 
-    // WebSocket подключение
     let socket = null;
 
     function initWebSocket() {
@@ -142,35 +265,14 @@
 
         socket.onclose = function() {
             console.log('WebSocket отключен');
-            // Попробовать переподключиться через 5 секунд
             setTimeout(initWebSocket, 5000);
         };
     }
 
     function handleWebSocketMessage(message) {
-        switch(message.action) {
-            case 'NEW_MESSAGE':
-                if (message.senderId == otherUserId) {
-                    addMessageToChat(message, false);
-                    markMessagesAsRead();
-                }
-                break;
-            case 'TYPING_START':
-                if (message.senderId == otherUserId) {
-                    showTypingIndicator(true);
-                }
-                break;
-            case 'TYPING_STOP':
-                if (message.senderId == otherUserId) {
-                    showTypingIndicator(false);
-                }
-                break;
-            case 'MESSAGE_EDITED':
-                updateMessage(message);
-                break;
-            case 'MESSAGE_DELETED':
-                removeMessage(message.id);
-                break;
+        if (!message || !message.action) return;
+        if (message.action === 'NEW_MESSAGE' && message.senderId == otherUserId) {
+            addMessageToChat(message, false);
         }
     }
 
@@ -182,8 +284,7 @@
 
         const messageData = {
             recipientId: otherUserId,
-            content: content,
-            replyToMessageId: replyToMessageId
+            content: content
         };
 
         fetch('/messages/send', {
@@ -195,13 +296,11 @@
         })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                if (data.success && data.message) {
                     addMessageToChat(data.message, true);
                     input.value = '';
-                    cancelReply();
-                    stopTyping();
                 } else {
-                    alert('Ошибка отправки: ' + data.error);
+                    alert('Ошибка отправки: ' + (data.error || 'Неизвестная ошибка'));
                 }
             })
             .catch(error => {
@@ -211,6 +310,7 @@
     }
 
     function addMessageToChat(message, isOwn) {
+        if (!message) return;
         const messagesList = document.getElementById('messagesList');
         const messageHtml = createMessageHtml(message, isOwn);
         messagesList.insertAdjacentHTML('beforeend', messageHtml);
@@ -219,37 +319,17 @@
 
     function createMessageHtml(message, isOwn) {
         return `
-                <div class="message ${isOwn ? 'own' : 'other'}" data-message-id="${message.id}">
-                    <div class="message-content">
-                        ${message.replyToMessage ? `
-                            <div class="reply-to">
-                                <div class="reply-line"></div>
-                                <div class="reply-content">
-                                    <span class="reply-author">${message.replyToMessage.sender.displayName}</span>
-                                    <span class="reply-text">${message.replyToMessage.shortContent}</span>
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        <div class="message-body">
-                            <span class="message-text">${message.content}</span>
-                            <div class="message-info">
-                                <span class="time">${message.timeAgo}</span>
-                                ${message.isEdited ? '<span class="edited">изменено</span>' : ''}
-                                ${isOwn ? `<div class="message-status">${getStatusIcon(message.deliveryStatus)}</div>` : ''}
-                            </div>
+            <div class="message ${isOwn ? 'own' : 'other'}" data-message-id="${message.id || ''}">
+                <div class="message-content">
+                    <div class="message-body">
+                        <span class="message-text">${message.content || ''}</span>
+                        <div class="message-info">
+                            <span class="time">${message.timeAgo || ''}</span>
                         </div>
-
-                        ${(message.canEdit || message.canDelete) ? `
-                            <div class="message-actions">
-                                ${message.canEdit ? `<button onclick="editMessage(${message.id})" title="Редактировать">✏️</button>` : ''}
-                                <button onclick="replyToMessage(${message.id})" title="Ответить">↩️</button>
-                                ${message.canDelete ? `<button onclick="deleteMessage(${message.id})" title="Удалить">🗑️</button>` : ''}
-                            </div>
-                        ` : ''}
                     </div>
                 </div>
-            `;
+            </div>
+        `;
     }
 
     function handleKeyPress(event) {
@@ -258,173 +338,13 @@
         }
     }
 
-    function handleTyping() {
-        if (!isTyping) {
-            isTyping = true;
-            sendTypingNotification(true);
-        }
-
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => {
-            stopTyping();
-        }, 3000);
-    }
-
-    function stopTyping() {
-        if (isTyping) {
-            isTyping = false;
-            sendTypingNotification(false);
-        }
-    }
-
-    function sendTypingNotification(typing) {
-        fetch(`/messages/typing/${otherUserId}?isTyping=${typing}`, {
-            method: 'POST'
-        });
-    }
-
-    function showTypingIndicator(show) {
-        const indicator = document.getElementById('typingIndicator');
-        indicator.style.display = show ? 'block' : 'none';
-        if (show) {
-            scrollToBottom();
-        }
-    }
-
-    function replyToMessage(messageId) {
-        // Найти сообщение и показать превью ответа
-        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
-        const messageText = messageElement.querySelector('.message-text').textContent;
-
-        replyToMessageId = messageId;
-
-        const replyPreview = document.getElementById('replyPreview');
-        const replyText = document.getElementById('replyText');
-
-        replyText.textContent = messageText.length > 50 ? messageText.substring(0, 50) + '...' : messageText;
-        replyPreview.style.display = 'block';
-
-        document.getElementById('messageInput').focus();
-    }
-
-    function cancelReply() {
-        replyToMessageId = null;
-        document.getElementById('replyPreview').style.display = 'none';
-    }
-
-    function editMessage(messageId) {
-        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
-        const messageText = messageElement.querySelector('.message-text').textContent;
-
-        const newText = prompt('Редактировать сообщение:', messageText);
-        if (newText && newText !== messageText) {
-            fetch(`/messages/edit/${messageId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ content: newText })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateMessage(data.message);
-                    } else {
-                        alert('Ошибка редактирования: ' + data.error);
-                    }
-                });
-        }
-    }
-
-    function deleteMessage(messageId) {
-        if (confirm('Удалить сообщение?')) {
-            const deleteForEveryone = confirm('Удалить для всех?');
-
-            fetch(`/messages/delete/${messageId}?deleteForEveryone=${deleteForEveryone}`, {
-                method: 'DELETE'
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        removeMessage(messageId);
-                    } else {
-                        alert('Ошибка удаления: ' + data.error);
-                    }
-                });
-        }
-    }
-
-    function updateMessage(message) {
-        const messageElement = document.querySelector(`[data-message-id="${message.id}"]`);
-        if (messageElement) {
-            const textElement = messageElement.querySelector('.message-text');
-            textElement.textContent = message.content;
-
-            const infoElement = messageElement.querySelector('.message-info');
-            if (!infoElement.querySelector('.edited')) {
-                infoElement.insertAdjacentHTML('afterbegin', '<span class="edited">изменено</span>');
-            }
-        }
-    }
-
-    function removeMessage(messageId) {
-        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
-        if (messageElement) {
-            messageElement.remove();
-        }
-    }
-
-    function markMessagesAsRead() {
-        fetch(`/messages/mark-read/${otherUserId}`, {
-            method: 'POST'
-        });
-    }
-
     function scrollToBottom() {
         const container = document.getElementById('messagesContainer');
         container.scrollTop = container.scrollHeight;
     }
 
-    function getStatusIcon(status) {
-        switch(status) {
-            case 'SENT': return '✓';
-            case 'DELIVERED': return '✓✓';
-            case 'READ': return '✓✓';
-            default: return '';
-        }
-    }
-
-    function loadMoreMessages() {
-        fetch(`/messages/chat/${otherUserId}/load-more?page=${currentPage + 1}`)
-            .then(response => response.json())
-            .then(data => {
-                // Добавить сообщения в начало списка
-                prependMessages(data.messages);
-                currentPage++;
-
-                if (!data.hasNext) {
-                    document.querySelector('.load-more-messages').style.display = 'none';
-                }
-            });
-    }
-
-    function prependMessages(messages) {
-        const messagesList = document.getElementById('messagesList');
-        const fragment = document.createDocumentFragment();
-
-        messages.reverse().forEach(message => {
-            const div = document.createElement('div');
-            div.innerHTML = createMessageHtml(message, message.isOwnMessage);
-            fragment.appendChild(div.firstChild);
-        });
-
-        messagesList.insertBefore(fragment, messagesList.firstChild);
-    }
-
-    // Инициализация
     document.addEventListener('DOMContentLoaded', function() {
         initWebSocket();
-        markMessagesAsRead();
         scrollToBottom();
     });
 </script>
