@@ -1,3 +1,432 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">-->
+<!--    <title th:text="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName + ' - Чат'} : 'Чат'">Чат</title>-->
+<!--    <style>-->
+<!--        * {-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            box-sizing: border-box;-->
+<!--        }-->
+
+<!--        body {-->
+<!--            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;-->
+<!--            background-color: #1a1a1a;-->
+<!--            color: #e0e0e0;-->
+<!--            line-height: 1.5;-->
+<!--        }-->
+
+<!--        .chat-container {-->
+<!--            max-width: 800px;-->
+<!--            margin: 0 auto;-->
+<!--            height: 100vh;-->
+<!--            display: flex;-->
+<!--            flex-direction: column;-->
+<!--        }-->
+
+<!--        .chat-header {-->
+<!--            background-color: #252525;-->
+<!--            padding: 15px;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 15px;-->
+<!--            border-bottom: 1px solid #333;-->
+<!--        }-->
+
+<!--        .back-btn {-->
+<!--            color: #1e90ff;-->
+<!--            text-decoration: none;-->
+<!--            font-size: 16px;-->
+<!--        }-->
+
+<!--        .back-btn:hover {-->
+<!--            text-decoration: underline;-->
+<!--        }-->
+
+<!--        .chat-user-info {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 10px;-->
+<!--            flex-grow: 1;-->
+<!--        }-->
+
+<!--        .avatar {-->
+<!--            width: 40px;-->
+<!--            height: 40px;-->
+<!--        }-->
+
+<!--        .avatar img {-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            border-radius: 50%;-->
+<!--            object-fit: cover;-->
+<!--        }-->
+
+<!--        .avatar-placeholder {-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            border-radius: 50%;-->
+<!--            background-color: #444;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            font-size: 16px;-->
+<!--        }-->
+
+<!--        .user-details h3 {-->
+<!--            font-size: 18px;-->
+<!--            font-weight: 500;-->
+<!--        }-->
+
+<!--        .messages-container {-->
+<!--            flex-grow: 1;-->
+<!--            overflow-y: auto;-->
+<!--            padding: 20px;-->
+<!--            background-color: #1e1e1e;-->
+<!--        }-->
+
+<!--        .no-messages {-->
+<!--            text-align: center;-->
+<!--            color: #888;-->
+<!--            padding: 20px;-->
+<!--        }-->
+
+<!--        .message {-->
+<!--            margin-bottom: 15px;-->
+<!--            max-width: 70%;-->
+<!--            position: relative;-->
+<!--        }-->
+
+<!--        .message.own {-->
+<!--            margin-left: auto;-->
+<!--        }-->
+
+<!--        .message.other {-->
+<!--            margin-right: auto;-->
+<!--        }-->
+
+<!--        .message-content {-->
+<!--            background-color: #333;-->
+<!--            padding: 10px 15px;-->
+<!--            border-radius: 12px;-->
+<!--            position: relative;-->
+<!--        }-->
+
+<!--        .市场的 {-->
+<!--            background-color: #1e90ff;-->
+<!--            color: #fff;-->
+<!--        }-->
+
+<!--        .message-text {-->
+<!--            font-size: 16px;-->
+<!--            word-break: break-word;-->
+<!--        }-->
+
+<!--        .message-info {-->
+<!--            font-size: 12px;-->
+<!--            color: #888;-->
+<!--            margin-top: 5px;-->
+<!--            display: flex;-->
+<!--            gap: 5px;-->
+<!--            align-items: center;-->
+<!--        }-->
+
+<!--        .message.own .message-info {-->
+<!--            justify-content: flex-end;-->
+<!--            color: #ddd;-->
+<!--        }-->
+
+<!--        .message-actions {-->
+<!--            position: absolute;-->
+<!--            top: 10px;-->
+<!--            right: 10px;-->
+<!--            display: flex;-->
+<!--            gap: 5px;-->
+<!--        }-->
+
+<!--        .message-actions button {-->
+<!--            background: none;-->
+<!--            border: none;-->
+<!--            color: #e0e0e0;-->
+<!--            cursor: pointer;-->
+<!--            font-size: 14px;-->
+<!--        }-->
+
+<!--        .message-actions button:hover {-->
+<!--            color: #1e90ff;-->
+<!--        }-->
+
+<!--        .message-input-container {-->
+<!--            padding: 15px;-->
+<!--            background-color: #252525;-->
+<!--            border-top: 1px solid #333;-->
+<!--        }-->
+
+<!--        .input-group {-->
+<!--            display: flex;-->
+<!--            gap: 10px;-->
+<!--        }-->
+
+<!--        #messageInput {-->
+<!--            flex-grow: 1;-->
+<!--            background-color: #333;-->
+<!--            border: 1px solid #444;-->
+<!--            border-radius: 20px;-->
+<!--            padding: 10px 15px;-->
+<!--            color: #e0e0e0;-->
+<!--            font-size: 16px;-->
+<!--            outline: none;-->
+<!--        }-->
+
+<!--        #messageInput:focus {-->
+<!--            border-color: #1e90ff;-->
+<!--        }-->
+
+<!--        #sendButton {-->
+<!--            background-color: #1e90ff;-->
+<!--            color: #fff;-->
+<!--            border: none;-->
+<!--            padding: 10px 20px;-->
+<!--            border-radius: 20px;-->
+<!--            cursor: pointer;-->
+<!--            font-size: 16px;-->
+<!--        }-->
+
+<!--        #sendButton:hover {-->
+<!--            background-color: #1c86ee;-->
+<!--        }-->
+
+<!--        .error-message {-->
+<!--            background-color: #ff4444;-->
+<!--            color: #fff;-->
+<!--            padding: 10px;-->
+<!--            text-align: center;-->
+<!--            margin: 10px;-->
+<!--            border-radius: 4px;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="chat-container">-->
+<!--    <header class="chat-header">-->
+<!--        <a href="/messages" class="back-btn">← Назад</a>-->
+<!--        <div class="chat-user-info">-->
+<!--            <div class="avatar">-->
+<!--                <img th:if="${otherUser != null and otherUser.imageUrl != null}"-->
+<!--                     th:src="${otherUser.imageUrl}"-->
+<!--                     th:alt="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName} : 'Пользователь'">-->
+<!--                <div th:unless="${otherUser != null and otherUser.imageUrl != null}"-->
+<!--                     class="avatar-placeholder"-->
+<!--                     th:text="${otherUser != null and otherUser.initials != null} ? ${otherUser.initials} : 'АА'">АА</div>-->
+<!--            </div>-->
+<!--            <div class="user-details">-->
+<!--                <h3 th:text="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName} : 'Пользователь'">Пользователь</h3>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--    </header>-->
+
+<!--    <div th:if="${error != null}" class="error-message">-->
+<!--        <p th:text="${error}">Сообщение об ошибке</p>-->
+<!--    </div>-->
+
+<!--    <div class="messages-container" id="messagesContainer">-->
+<!--        <div th:if="${conversation != null and conversation.messages != null and !conversation.messages.isEmpty() == false}" class="no-messages">-->
+<!--            <p>Сообщений пока нет. Начните разговор!</p>-->
+<!--        </div>-->
+
+<!--        <div class="messages-list" id="messagesList">-->
+<!--            <div th:each="message : ${conversation != null and conversation.messages != null ? conversation.messages : {}}"-->
+<!--                 th:if="${message != null}"-->
+<!--                 class="message"-->
+<!--                 th:classappend="${message.isOwnMessage != null and message.isOwnMessage} ? 'own' : 'other'"-->
+<!--                 th:data-message-id="${message.id != null} ? ${message.id} : ''">-->
+<!--                <div class="message-content">-->
+<!--                    <div class="message-body">-->
+<!--                        <span class="message-text" th:text="${message.content != null} ? ${message.content} : ''">Текст сообщения</span>-->
+<!--                        <div class="message-info">-->
+<!--                            <span class="time" th:text="${message.timeAgo != null} ? ${message.timeAgo} : ''"></span>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div th:if="${message.isOwnMessage != null and message.isOwnMessage}" class="message-actions">-->
+<!--                        <button th:onclick="'editMessage(\'' + ${message.id != null ? message.id : ''} + '\')'" title="Редактировать">✏️</button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <div class="message-input-container">-->
+<!--        <div class="input-group">-->
+<!--            <input type="text"-->
+<!--                   id="messageInput"-->
+<!--                   placeholder="Напишите сообщение..."-->
+<!--                   onkeypress="handleKeyPress(event)">-->
+<!--            <button id="sendButton" onclick="sendMessage()">Отправить</button>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--    const currentUserId = [[${currentUserId != null ? currentUserId : 0}]];-->
+<!--    const otherUserId = [[${otherUserId != null ? otherUserId : 0}]];-->
+
+<!--    let socket = null;-->
+
+<!--    function initWebSocket() {-->
+<!--        const wsUrl = `ws://localhost:2027/chat?userId=${currentUserId}`;-->
+<!--        socket = new WebSocket(wsUrl);-->
+
+<!--        socket.onopen = function() {-->
+<!--            console.log('WebSocket подключен');-->
+<!--        };-->
+
+<!--        socket.onmessage = function(event) {-->
+<!--            const message = JSON.parse(event.data);-->
+<!--            handleWebSocketMessage(message);-->
+<!--        };-->
+
+<!--        socket.onclose = function() {-->
+<!--            console.log('WebSocket отключен');-->
+<!--            setTimeout(initWebSocket, 5000);-->
+<!--        };-->
+<!--    }-->
+
+<!--    function handleWebSocketMessage(message) {-->
+<!--        if (!message || !message.action) return;-->
+<!--        if (message.action === 'NEW_MESSAGE' && message.senderId == otherUserId) {-->
+<!--            addMessageToChat(message, false);-->
+<!--        } else if (message.action === 'MESSAGE_EDITED') {-->
+<!--            updateMessage(message);-->
+<!--        }-->
+<!--    }-->
+
+<!--    function sendMessage() {-->
+<!--        const input = document.getElementById('messageInput');-->
+<!--        const content = input.value.trim();-->
+
+<!--        if (!content) return;-->
+
+<!--        const messageData = {-->
+<!--            recipientId: otherUserId,-->
+<!--            content: content-->
+<!--        };-->
+
+<!--        fetch('/messages/send', {-->
+<!--            method: 'POST',-->
+<!--            headers: {-->
+<!--                'Content-Type': 'application/json',-->
+<!--            },-->
+<!--            body: JSON.stringify(messageData)-->
+<!--        })-->
+<!--            .then(response => response.json())-->
+<!--            .then(data => {-->
+<!--                if (data.success && data.message) {-->
+<!--                    addMessageToChat(data.message, true);-->
+<!--                    input.value = '';-->
+<!--                } else {-->
+<!--                    alert('Ошибка отправки: ' + (data.error || 'Неизвестная ошибка'));-->
+<!--                }-->
+<!--            })-->
+<!--            .catch(error => {-->
+<!--                console.error('Ошибка:', error);-->
+<!--                alert('Ошибка отправки сообщения');-->
+<!--            });-->
+<!--    }-->
+
+<!--    function editMessage(messageId) {-->
+<!--        if (!messageId) return;-->
+<!--        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);-->
+<!--        if (!messageElement) return;-->
+
+<!--        const messageText = messageElement.querySelector('.message-text').textContent;-->
+<!--        const newText = prompt('Редактировать сообщение:', messageText);-->
+
+<!--        if (newText && newText !== messageText) {-->
+<!--            fetch(`/messages/edit/${messageId}`, {-->
+<!--                method: 'PUT',-->
+<!--                headers: {-->
+<!--                    'Content-Type': 'application/json',-->
+<!--                },-->
+<!--                body: JSON.stringify({ content: newText })-->
+<!--            })-->
+<!--                .then(response => response.json())-->
+<!--                .then(data => {-->
+<!--                    if (data.success && data.message) {-->
+<!--                        updateMessage(data.message);-->
+<!--                    } else {-->
+<!--                        alert('Ошибка редактирования: ' + (data.error || 'Неизвестная ошибка'));-->
+<!--                    }-->
+<!--                })-->
+<!--                .catch(error => {-->
+<!--                    console.error('Ошибка:', error);-->
+<!--                    alert('Ошибка редактирования сообщения');-->
+<!--                });-->
+<!--        }-->
+<!--    }-->
+
+<!--    function updateMessage(message) {-->
+<!--        if (!message || !message.id) return;-->
+<!--        const messageElement = document.querySelector(`[data-message-id="${message.id}"]`);-->
+<!--        if (messageElement) {-->
+<!--            const textElement = messageElement.querySelector('.message-text');-->
+<!--            textElement.textContent = message.content || '';-->
+<!--            const timeElement = messageElement.querySelector('.time');-->
+<!--            timeElement.textContent = message.timeAgo || '';-->
+<!--        }-->
+<!--    }-->
+
+<!--    function addMessageToChat(message, isOwn) {-->
+<!--        if (!message) return;-->
+<!--        const messagesList = document.getElementById('messagesList');-->
+<!--        const messageHtml = createMessageHtml(message, isOwn);-->
+<!--        messagesList.insertAdjacentHTML('beforeend', messageHtml);-->
+<!--        scrollToBottom();-->
+<!--    }-->
+
+<!--    function createMessageHtml(message, isOwn) {-->
+<!--        return `-->
+<!--            <div class="message ${isOwn ? 'own' : 'other'}" data-message-id="${message.id || ''}">-->
+<!--                <div class="message-content">-->
+<!--                    <div class="message-body">-->
+<!--                        <span class="message-text">${message.content || ''}</span>-->
+<!--                        <div class="message-info">-->
+<!--                            <span class="time">${message.timeAgo || ''}</span>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    ${isOwn ? `-->
+<!--                        <div class="message-actions">-->
+<!--                            <button onclick="editMessage('${message.id || ''}')" title="Редактировать">✏️</button>-->
+<!--                        </div>-->
+<!--                    ` : ''}-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        `;-->
+<!--    }-->
+
+<!--    function handleKeyPress(event) {-->
+<!--        if (event.key === 'Enter') {-->
+<!--            sendMessage();-->
+<!--        }-->
+<!--    }-->
+
+<!--    function scrollToBottom() {-->
+<!--        const container = document.getElementById('messagesContainer');-->
+<!--        container.scrollTop = container.scrollHeight;-->
+<!--    }-->
+
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        initWebSocket();-->
+<!--        scrollToBottom();-->
+<!--    });-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -57,6 +486,12 @@
         .avatar {
             width: 40px;
             height: 40px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            transform: scale(1.05);
         }
 
         .avatar img {
@@ -87,26 +522,37 @@
             overflow-y: auto;
             padding: 20px;
             background-color: #1e1e1e;
+            display: flex;
+            flex-direction: column;
         }
 
         .no-messages {
             text-align: center;
             color: #888;
             padding: 20px;
+            margin: auto;
+        }
+
+        .messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 100%;
+            justify-content: flex-start;
         }
 
         .message {
-            margin-bottom: 15px;
             max-width: 70%;
             position: relative;
+            align-self: flex-start;
         }
 
         .message.own {
-            margin-left: auto;
+            align-self: flex-end;
         }
 
         .message.other {
-            margin-right: auto;
+            align-self: flex-start;
         }
 
         .message-content {
@@ -116,7 +562,7 @@
             position: relative;
         }
 
-        .市场的 {
+        .message.own .message-content {
             background-color: #1e90ff;
             color: #fff;
         }
@@ -158,6 +604,14 @@
 
         .message-actions button:hover {
             color: #1e90ff;
+        }
+
+        .message.own .message-actions button {
+            color: #fff;
+        }
+
+        .message.own .message-actions button:hover {
+            color: #ccc;
         }
 
         .message-input-container {
@@ -215,7 +669,7 @@
     <header class="chat-header">
         <a href="/messages" class="back-btn">← Назад</a>
         <div class="chat-user-info">
-            <div class="avatar">
+            <div class="avatar" onclick="goToUserProfile()">
                 <img th:if="${otherUser != null and otherUser.imageUrl != null}"
                      th:src="${otherUser.imageUrl}"
                      th:alt="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName} : 'Пользователь'">
@@ -227,7 +681,6 @@
                 <h3 th:text="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName} : 'Пользователь'">Пользователь</h3>
             </div>
         </div>
-
     </header>
 
     <div th:if="${error != null}" class="error-message">
@@ -235,7 +688,7 @@
     </div>
 
     <div class="messages-container" id="messagesContainer">
-        <div th:if="${conversation != null and conversation.messages != null and !conversation.messages.isEmpty() == false}" class="no-messages">
+        <div th:if="${conversation == null or conversation.messages == null or conversation.messages.isEmpty()}" class="no-messages">
             <p>Сообщений пока нет. Начните разговор!</p>
         </div>
 
@@ -382,6 +835,13 @@
 
     function addMessageToChat(message, isOwn) {
         if (!message) return;
+
+        // Удаляем сообщение "нет сообщений" если оно есть
+        const noMessagesDiv = document.querySelector('.no-messages');
+        if (noMessagesDiv) {
+            noMessagesDiv.style.display = 'none';
+        }
+
         const messagesList = document.getElementById('messagesList');
         const messageHtml = createMessageHtml(message, isOwn);
         messagesList.insertAdjacentHTML('beforeend', messageHtml);
@@ -419,9 +879,34 @@
         container.scrollTop = container.scrollHeight;
     }
 
+    function goToUserProfile() {
+        if (otherUserId) {
+            window.location.href = `/profile/${otherUserId}`;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         initWebSocket();
+
+        // Переворачиваем порядок сообщений при загрузке
+        const messagesList = document.getElementById('messagesList');
+        const messages = Array.from(messagesList.children);
+
+        // Очищаем контейнер
+        messagesList.innerHTML = '';
+
+        // Добавляем сообщения в обратном порядке (от старых к новым)
+        messages.reverse().forEach(message => {
+            messagesList.appendChild(message);
+        });
+
         scrollToBottom();
+
+        // Скрываем сообщение "нет сообщений" если есть сообщения
+        const noMessagesDiv = document.querySelector('.no-messages');
+        if (messagesList.children.length > 0 && noMessagesDiv) {
+            noMessagesDiv.style.display = 'none';
+        }
     });
 </script>
 </body>
