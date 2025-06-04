@@ -813,10 +813,11 @@
                 <!-- Кнопки для ЧУЖОГО профиля -->
                 <th:block th:if="${currentUserId != null and currentUserId != user.id}">
 
-                    <a href="#" class="btn-luxury btn-secondary-luxury" onclick="sendMessage()">
+                    <a th:href="@{/messages/chat/{userId}(userId=${user.id})}" class="btn-luxury btn-secondary-luxury">
                         <i class="fas fa-envelope"></i>
                         <span>Сообщение</span>
                     </a>
+
 
                     <!-- ПРОСТАЯ кнопка подписки -->
                     <button type="button"
