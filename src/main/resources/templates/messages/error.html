@@ -1,0 +1,23 @@
+<!-- 4. messages/error.html - Страница ошибки -->
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ошибка - Cleopatra</title>
+</head>
+<body>
+<div class="container">
+    <div class="error-page">
+        <h1>Что-то пошло не так</h1>
+        <p th:if="${error}" th:text="${error}">Произошла ошибка при загрузке страницы.</p>
+        <p th:unless="${error}">Произошла неожиданная ошибка.</p>
+
+        <div class="error-actions">
+            <a href="/messages" class="btn">Вернуться к сообщениям</a>
+            <button onclick="window.location.reload()" class="btn secondary">Обновить страницу</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

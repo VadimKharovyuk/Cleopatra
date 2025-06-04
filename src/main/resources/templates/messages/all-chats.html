@@ -1,0 +1,1187 @@
+<!--&lt;!&ndash; messages/all-chats.html &ndash;&gt;-->
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Сообщения - Cleopatra</title>-->
+
+<!--    &lt;!&ndash; External CSS &ndash;&gt;-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+
+<!--    &lt;!&ndash; Sidebar Styles &ndash;&gt;-->
+<!--    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>-->
+
+<!--    <style>-->
+<!--        body {-->
+<!--            background: var(&#45;&#45;bg-primary);-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            min-height: 100vh;-->
+<!--        }-->
+
+<!--        .main-content {-->
+<!--            margin-left: 280px;-->
+<!--            min-height: 100vh;-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            padding: 0;-->
+<!--        }-->
+
+<!--        .messages-header {-->
+<!--            padding: 2rem 2rem 1rem;-->
+<!--            border-bottom: 1px solid var(&#45;&#45;border-primary);-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            position: sticky;-->
+<!--            top: 0;-->
+<!--            z-index: 100;-->
+<!--        }-->
+
+<!--        .header-content {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--            margin-bottom: 1rem;-->
+<!--        }-->
+
+<!--        .header-title {-->
+<!--            font-family: 'Playfair Display', serif;-->
+<!--            font-size: 2rem;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            margin: 0;-->
+<!--        }-->
+
+<!--        .header-stats {-->
+<!--            display: flex;-->
+<!--            gap: 1rem;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            font-size: 0.875rem;-->
+<!--        }-->
+
+<!--        .unread-badge {-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--            color: white;-->
+<!--            padding: 0.25rem 0.75rem;-->
+<!--            border-radius: 12px;-->
+<!--            font-size: 0.75rem;-->
+<!--            font-weight: 600;-->
+<!--        }-->
+
+<!--        .conversations-container {-->
+<!--            padding: 0;-->
+<!--        }-->
+
+<!--        .conversation-item {-->
+<!--            padding: 1.5rem 2rem;-->
+<!--            border-bottom: 1px solid var(&#45;&#45;border-secondary);-->
+<!--            transition: all 0.2s ease;-->
+<!--            cursor: pointer;-->
+<!--            text-decoration: none;-->
+<!--            color: inherit;-->
+<!--            display: block;-->
+<!--        }-->
+
+<!--        .conversation-item:hover {-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--            text-decoration: none;-->
+<!--            color: inherit;-->
+<!--            transform: translateX(4px);-->
+<!--        }-->
+
+<!--        .conversation-content {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 1rem;-->
+<!--        }-->
+
+<!--        .conversation-avatar {-->
+<!--            position: relative;-->
+<!--            flex-shrink: 0;-->
+<!--        }-->
+
+<!--        .avatar-img {-->
+<!--            width: 50px;-->
+<!--            height: 50px;-->
+<!--            border-radius: 50%;-->
+<!--            object-fit: cover;-->
+<!--            border: 2px solid var(&#45;&#45;border-secondary);-->
+<!--        }-->
+
+<!--        .default-avatar {-->
+<!--            width: 50px;-->
+<!--            height: 50px;-->
+<!--            border-radius: 50%;-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            color: white;-->
+<!--            font-weight: 600;-->
+<!--            font-size: 1.125rem;-->
+<!--        }-->
+
+<!--        .online-indicator {-->
+<!--            position: absolute;-->
+<!--            bottom: 2px;-->
+<!--            right: 2px;-->
+<!--            width: 12px;-->
+<!--            height: 12px;-->
+<!--            background: var(&#45;&#45;accent-success);-->
+<!--            border-radius: 50%;-->
+<!--            border: 2px solid white;-->
+<!--        }-->
+
+<!--        .conversation-info {-->
+<!--            flex: 1;-->
+<!--            min-width: 0;-->
+<!--        }-->
+
+<!--        .conversation-header {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: baseline;-->
+<!--            margin-bottom: 0.5rem;-->
+<!--        }-->
+
+<!--        .user-name {-->
+<!--            font-size: 1rem;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            margin: 0;-->
+<!--        }-->
+
+<!--        .last-message-time {-->
+<!--            font-size: 0.8125rem;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            flex-shrink: 0;-->
+<!--        }-->
+
+<!--        .conversation-preview {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--            align-items: center;-->
+<!--        }-->
+
+<!--        .last-message {-->
+<!--            font-size: 0.875rem;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            margin: 0;-->
+<!--            overflow: hidden;-->
+<!--            text-overflow: ellipsis;-->
+<!--            white-space: nowrap;-->
+<!--            max-width: 300px;-->
+<!--        }-->
+
+<!--        .unread-count {-->
+<!--            background: var(&#45;&#45;accent-primary);-->
+<!--            color: white;-->
+<!--            padding: 0.25rem 0.5rem;-->
+<!--            border-radius: 10px;-->
+<!--            font-size: 0.75rem;-->
+<!--            font-weight: 600;-->
+<!--            min-width: 20px;-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        .empty-conversations {-->
+<!--            text-align: center;-->
+<!--            padding: 4rem 2rem;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--        }-->
+
+<!--        .empty-icon {-->
+<!--            font-size: 4rem;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--            opacity: 0.5;-->
+<!--        }-->
+
+<!--        .empty-title {-->
+<!--            font-size: 1.5rem;-->
+<!--            font-weight: 600;-->
+<!--            margin-bottom: 1rem;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--        }-->
+
+<!--        .empty-description {-->
+<!--            font-size: 1rem;-->
+<!--            line-height: 1.6;-->
+<!--            margin-bottom: 2rem;-->
+<!--            max-width: 400px;-->
+<!--            margin-left: auto;-->
+<!--            margin-right: auto;-->
+<!--        }-->
+
+<!--        .btn-primary {-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--            color: white;-->
+<!--            text-decoration: none;-->
+<!--            padding: 0.75rem 1.5rem;-->
+<!--            border-radius: 12px;-->
+<!--            font-weight: 500;-->
+<!--            transition: all 0.2s;-->
+<!--            display: inline-flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--        }-->
+
+<!--        .btn-primary:hover {-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            text-decoration: none;-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .load-more-container {-->
+<!--            text-align: center;-->
+<!--            padding: 2rem;-->
+<!--            border-top: 1px solid var(&#45;&#45;border-secondary);-->
+<!--        }-->
+
+<!--        .btn-secondary {-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            border: 1px solid var(&#45;&#45;border-primary);-->
+<!--            padding: 0.75rem 1.5rem;-->
+<!--            border-radius: 12px;-->
+<!--            font-weight: 500;-->
+<!--            transition: all 0.2s;-->
+<!--            text-decoration: none;-->
+<!--            display: inline-flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--        }-->
+
+<!--        .btn-secondary:hover {-->
+<!--            background: var(&#45;&#45;bg-primary);-->
+<!--            transform: translateY(-1px);-->
+<!--            text-decoration: none;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--        }-->
+
+<!--        .error-message {-->
+<!--            background: rgba(239, 68, 68, 0.1);-->
+<!--            color: #dc2626;-->
+<!--            padding: 1rem 2rem;-->
+<!--            border-left: 4px solid #dc2626;-->
+<!--            margin: 1rem 2rem;-->
+<!--            border-radius: 0 8px 8px 0;-->
+<!--        }-->
+
+<!--        /* Responsive */-->
+<!--        @media (max-width: 1024px) {-->
+<!--            .main-content {-->
+<!--                margin-left: 80px;-->
+<!--            }-->
+<!--        }-->
+
+<!--        @media (max-width: 768px) {-->
+<!--            .main-content {-->
+<!--                margin-left: 0;-->
+<!--                margin-top: 60px;-->
+<!--            }-->
+
+<!--            .messages-header {-->
+<!--                padding: 1rem;-->
+<!--            }-->
+
+<!--            .header-title {-->
+<!--                font-size: 1.5rem;-->
+<!--            }-->
+
+<!--            .conversation-item {-->
+<!--                padding: 1rem;-->
+<!--            }-->
+
+<!--            .last-message {-->
+<!--                max-width: 200px;-->
+<!--            }-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--&lt;!&ndash; Mobile Header &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>-->
+
+<!--&lt;!&ndash; Sidebar &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar(${activeSection})}"></th:block>-->
+
+<!--<div class="main-content">-->
+<!--    &lt;!&ndash; Header &ndash;&gt;-->
+<!--    <div class="messages-header">-->
+<!--        <div class="header-content">-->
+<!--            <h1 class="header-title">Сообщения</h1>-->
+<!--            <div class="header-stats">-->
+<!--                    <span th:if="${totalConversations > 0}">-->
+<!--                        <i class="fas fa-comments"></i>-->
+<!--                        <span th:text="${totalConversations}">5</span> чатов-->
+<!--                    </span>-->
+<!--                <span th:if="${totalUnread > 0}" class="unread-badge">-->
+<!--                        <i class="fas fa-envelope"></i>-->
+<!--                        <span th:text="${totalUnread}">3</span> непрочитанных-->
+<!--                    </span>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Error Message &ndash;&gt;-->
+<!--    <div th:if="${error}" class="error-message">-->
+<!--        <i class="fas fa-exclamation-triangle"></i>-->
+<!--        <span th:text="${error}">Ошибка загрузки</span>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Conversations List &ndash;&gt;-->
+<!--    <div class="conversations-container">-->
+<!--        &lt;!&ndash; If has conversations &ndash;&gt;-->
+<!--        <div th:if="${hasConversations}">-->
+<!--            <a th:each="conversation : ${conversations.conversations}"-->
+<!--               th:href="@{/chat/{id}(id=${conversation.otherUser.id})}"-->
+<!--               class="conversation-item">-->
+
+<!--                <div class="conversation-content">-->
+<!--                    &lt;!&ndash; Avatar &ndash;&gt;-->
+<!--                    <div class="conversation-avatar">-->
+<!--                        <img th:if="${conversation.otherUser.imageUrl}"-->
+<!--                             th:src="${conversation.otherUser.imageUrl}"-->
+<!--                             th:alt="${conversation.otherUser.fullName}"-->
+<!--                             class="avatar-img">-->
+<!--                        <div th:unless="${conversation.otherUser.imageUrl}" class="default-avatar">-->
+<!--                            <span th:text="${conversation.otherUser.initials}">AB</span>-->
+<!--                        </div>-->
+<!--                        &lt;!&ndash; Online indicator &ndash;&gt;-->
+<!--                        <div class="online-indicator" th:if="${conversation.isOtherUserOnline}"></div>-->
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; Conversation info &ndash;&gt;-->
+<!--                    <div class="conversation-info">-->
+<!--                        <div class="conversation-header">-->
+<!--                            <h3 class="user-name" th:text="${conversation.otherUser.fullName}">Имя Пользователя</h3>-->
+<!--                            <span class="last-message-time"-->
+<!--                                  th:if="${conversation.lastMessage}"-->
+<!--                                  th:text="${conversation.lastMessage.timeAgo}">5 мин. назад</span>-->
+<!--                        </div>-->
+
+<!--                        <div class="conversation-preview">-->
+<!--                            <p class="last-message"-->
+<!--                               th:if="${conversation.lastMessage}"-->
+<!--                               th:text="${conversation.lastMessage.content}">-->
+<!--                                Последнее сообщение в чате-->
+<!--                            </p>-->
+<!--                            <p th:unless="${conversation.lastMessage}" class="last-message">-->
+<!--                                Нет сообщений-->
+<!--                            </p>-->
+
+<!--                            &lt;!&ndash; Unread count &ndash;&gt;-->
+<!--                            <span class="unread-count"-->
+<!--                                  th:if="${conversation.unreadCount > 0}"-->
+<!--                                  th:text="${conversation.unreadCount}">3</span>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </a>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; If no conversations &ndash;&gt;-->
+<!--        <div th:unless="${hasConversations}" class="empty-conversations">-->
+<!--            <div class="empty-icon">-->
+<!--                <i class="fas fa-comments"></i>-->
+<!--            </div>-->
+<!--            <h3 class="empty-title">Нет активных чатов</h3>-->
+<!--            <p class="empty-description">-->
+<!--                Начните общение с друзьями! Найдите интересных людей и отправьте им сообщение.-->
+<!--            </p>-->
+<!--            <a href="/recommendations" class="btn-primary">-->
+<!--                <i class="fas fa-search"></i>-->
+<!--                Найти собеседника-->
+<!--            </a>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Load More Button &ndash;&gt;-->
+<!--    <div class="load-more-container" th:if="${conversations.hasNext}">-->
+<!--        <button class="btn-secondary" onclick="loadMoreConversations()">-->
+<!--            <i class="fas fa-plus"></i>-->
+<!--            Загрузить еще чаты-->
+<!--        </button>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Sidebar Scripts &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>-->
+
+<!--&lt;!&ndash; WebSocket and Chat Scripts &ndash;&gt;-->
+<!--<script th:inline="javascript">-->
+<!--    /*<![CDATA[*/-->
+<!--    const currentUserId = /*[[${currentUserId}]]*/ 0;-->
+<!--    let currentPage = /*[[${conversations.currentPage}]]*/ 0;-->
+
+<!--    // WebSocket connection-->
+<!--    let socket = null;-->
+
+<!--    function initializeWebSocket() {-->
+<!--        try {-->
+<!--            socket = new WebSocket(`ws://localhost:2027/chat?userId=${currentUserId}`);-->
+
+<!--            socket.onopen = function(event) {-->
+<!--                console.log('📱 Подключен к чату WebSocket');-->
+<!--            };-->
+
+<!--            socket.onmessage = function(event) {-->
+<!--                const data = JSON.parse(event.data);-->
+<!--                console.log('📩 Получено WebSocket сообщение:', data);-->
+
+<!--                if (data.type === 'MESSAGE') {-->
+<!--                    handleNewMessage(data.data);-->
+<!--                } else if (data.type === 'STATUS_UPDATE') {-->
+<!--                    handleStatusUpdate(data.data);-->
+<!--                }-->
+<!--            };-->
+
+<!--            socket.onclose = function(event) {-->
+<!--                console.log('📱 WebSocket соединение закрыто');-->
+<!--                // Попытка переподключения через 5 секунд-->
+<!--                setTimeout(initializeWebSocket, 5000);-->
+<!--            };-->
+
+<!--            socket.onerror = function(error) {-->
+<!--                console.error('❌ Ошибка WebSocket:', error);-->
+<!--            };-->
+
+<!--        } catch (error) {-->
+<!--            console.error('❌ Ошибка инициализации WebSocket:', error);-->
+<!--        }-->
+<!--    }-->
+
+<!--    function handleNewMessage(message) {-->
+<!--        // Обновить счетчик непрочитанных для отправителя-->
+<!--        updateUnreadCount(message.senderId);-->
+
+<!--        // Обновить превью последнего сообщения-->
+<!--        updateLastMessage(message.senderId, message.content, message.timeAgo);-->
+
+<!--        // Переместить конверсацию наверх-->
+<!--        moveConversationToTop(message.senderId);-->
+<!--    }-->
+
+<!--    function handleStatusUpdate(status) {-->
+<!--        // Обновить онлайн статус пользователя-->
+<!--        updateUserOnlineStatus(status.userId, status.status === 'ONLINE');-->
+<!--    }-->
+
+<!--    function updateUnreadCount(userId) {-->
+<!--        const conversation = document.querySelector(`a[href="/chat/${userId}"]`);-->
+<!--        if (conversation) {-->
+<!--            let unreadBadge = conversation.querySelector('.unread-count');-->
+<!--            if (unreadBadge) {-->
+<!--                const currentCount = parseInt(unreadBadge.textContent) || 0;-->
+<!--                unreadBadge.textContent = currentCount + 1;-->
+<!--            } else {-->
+<!--                // Создать новый badge-->
+<!--                const preview = conversation.querySelector('.conversation-preview');-->
+<!--                unreadBadge = document.createElement('span');-->
+<!--                unreadBadge.className = 'unread-count';-->
+<!--                unreadBadge.textContent = '1';-->
+<!--                preview.appendChild(unreadBadge);-->
+<!--            }-->
+<!--        }-->
+<!--    }-->
+
+<!--    function updateLastMessage(userId, content, timeAgo) {-->
+<!--        const conversation = document.querySelector(`a[href="/chat/${userId}"]`);-->
+<!--        if (conversation) {-->
+<!--            const lastMessageEl = conversation.querySelector('.last-message');-->
+<!--            const timeEl = conversation.querySelector('.last-message-time');-->
+
+<!--            if (lastMessageEl) {-->
+<!--                lastMessageEl.textContent = content.length > 50 ?-->
+<!--                    content.substring(0, 50) + '...' : content;-->
+<!--            }-->
+
+<!--            if (timeEl) {-->
+<!--                timeEl.textContent = 'только что';-->
+<!--            }-->
+<!--        }-->
+<!--    }-->
+
+<!--    function updateUserOnlineStatus(userId, isOnline) {-->
+<!--        const conversation = document.querySelector(`a[href="/chat/${userId}"]`);-->
+<!--        if (conversation) {-->
+<!--            const indicator = conversation.querySelector('.online-indicator');-->
+<!--            if (isOnline) {-->
+<!--                if (!indicator) {-->
+<!--                    const avatar = conversation.querySelector('.conversation-avatar');-->
+<!--                    const newIndicator = document.createElement('div');-->
+<!--                    newIndicator.className = 'online-indicator';-->
+<!--                    avatar.appendChild(newIndicator);-->
+<!--                }-->
+<!--            } else {-->
+<!--                if (indicator) {-->
+<!--                    indicator.remove();-->
+<!--                }-->
+<!--            }-->
+<!--        }-->
+<!--    }-->
+
+<!--    function moveConversationToTop(userId) {-->
+<!--        const conversation = document.querySelector(`a[href="/chat/${userId}"]`);-->
+<!--        const container = document.querySelector('.conversations-container > div');-->
+
+<!--        if (conversation && container) {-->
+<!--            container.insertBefore(conversation, container.firstChild);-->
+<!--        }-->
+<!--    }-->
+
+<!--    function loadMoreConversations() {-->
+<!--        const button = event.target;-->
+<!--        const originalText = button.innerHTML;-->
+
+<!--        button.disabled = true;-->
+<!--        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...';-->
+
+<!--        fetch(`/messages/load-more?page=${currentPage + 1}`)-->
+<!--            .then(response => response.json())-->
+<!--            .then(data => {-->
+<!--                if (data.conversations && data.conversations.length > 0) {-->
+<!--                    appendConversations(data.conversations);-->
+<!--                    currentPage++;-->
+
+<!--                    if (!data.hasNext) {-->
+<!--                        button.style.display = 'none';-->
+<!--                    }-->
+<!--                } else {-->
+<!--                    button.style.display = 'none';-->
+<!--                }-->
+<!--            })-->
+<!--            .catch(error => {-->
+<!--                console.error('Ошибка загрузки чатов:', error);-->
+<!--                alert('Ошибка загрузки чатов');-->
+<!--            })-->
+<!--            .finally(() => {-->
+<!--                button.disabled = false;-->
+<!--                button.innerHTML = originalText;-->
+<!--            });-->
+<!--    }-->
+
+<!--    function appendConversations(conversations) {-->
+<!--        const container = document.querySelector('.conversations-container > div');-->
+<!--        // TODO: Реализовать добавление новых конверсаций в DOM-->
+<!--        // Сейчас просто перезагружаем страницу-->
+<!--        location.reload();-->
+<!--    }-->
+
+<!--    // Инициализация при загрузке-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        initializeWebSocket();-->
+<!--        console.log('💬 Страница сообщений инициализирована');-->
+<!--    });-->
+
+<!--    // Очистка при уходе со страницы-->
+<!--    window.addEventListener('beforeunload', function() {-->
+<!--        if (socket) {-->
+<!--            socket.close();-->
+<!--        }-->
+<!--    });-->
+<!--    /*]]>*/-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!-- 1. Исправленный all-chats.html с правильным роутингом -->
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сообщения - Cleopatra</title>
+
+    <!-- External CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Sidebar Styles -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+    <style>
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* ✅ ИСПРАВЛЕННЫЕ ОТСТУПЫ ДЛЯ SIDEBAR */
+        .main-content {
+            margin-left: 300px; /* Увеличен отступ */
+            min-height: 100vh;
+            background: var(--bg-secondary);
+            padding: 0;
+            transition: margin-left 0.3s ease; /* Плавный переход */
+        }
+
+        .messages-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid var(--border-primary);
+            background: var(--bg-secondary);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Тень для четкости */
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .header-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .unread-badge {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .conversations-container {
+            padding: 0;
+        }
+
+        .conversation-item {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-secondary);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .conversation-item:hover {
+            background: var(--bg-accent);
+            text-decoration: none;
+            color: inherit;
+            transform: translateX(4px);
+        }
+
+        .conversation-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .conversation-avatar {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .avatar-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-secondary);
+        }
+
+        .default-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .online-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-success);
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .conversation-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .conversation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .last-message-time {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .conversation-preview {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .last-message {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 300px;
+        }
+
+        .unread-count {
+            background: var(--accent-primary);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .empty-conversations {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .empty-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            text-decoration: none;
+            color: white;
+        }
+
+        .load-more-container {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border-secondary);
+        }
+
+        .btn-secondary {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-primary);
+            transform: translateY(-1px);
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            padding: 1rem 2rem;
+            border-left: 4px solid #dc2626;
+            margin: 1rem 2rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* ✅ УЛУЧШЕННЫЕ RESPONSIVE ОТСТУПЫ */
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 100px; /* Отступ для collapsed sidebar */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                margin-top: 70px; /* Отступ для mobile header */
+            }
+
+            .messages-header {
+                padding: 1rem;
+            }
+
+            .header-title {
+                font-size: 1.5rem;
+            }
+
+            .conversation-item {
+                padding: 1rem;
+            }
+
+            .last-message {
+                max-width: 200px;
+            }
+        }
+
+        /* ✅ ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ ЧЕТКОСТИ */
+        .sidebar-open .main-content {
+            margin-left: 300px;
+        }
+
+        .sidebar-collapsed .main-content {
+            margin-left: 100px;
+        }
+    </style>
+</head>
+<body>
+<!-- Mobile Header -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+
+<!-- Sidebar -->
+<th:block th:replace="~{fragments/sidebar :: sidebar(${activeSection})}"></th:block>
+
+<div class="main-content">
+    <!-- Header -->
+    <div class="messages-header">
+        <div class="header-content">
+            <h1 class="header-title">Сообщения</h1>
+            <div class="header-stats">
+                <span th:if="${totalConversations > 0}">
+                    <i class="fas fa-comments"></i>
+                    <span th:text="${totalConversations}">5</span> чатов
+                </span>
+                <span th:if="${totalUnread > 0}" class="unread-badge">
+                    <i class="fas fa-envelope"></i>
+                    <span th:text="${totalUnread}">3</span> непрочитанных
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div th:if="${error}" class="error-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span th:text="${error}">Ошибка загрузки</span>
+    </div>
+
+    <!-- Conversations List -->
+    <div class="conversations-container">
+        <!-- If has conversations -->
+        <div th:if="${hasConversations}">
+            <!-- ✅ ИСПРАВЛЕННАЯ ССЫЛКА НА ЧАТ -->
+            <a th:each="conversation : ${conversations.conversations}"
+               th:href="@{/messages/chat/{id}(id=${conversation.otherUser.id})}"
+               class="conversation-item">
+
+                <div class="conversation-content">
+                    <!-- Avatar -->
+                    <div class="conversation-avatar">
+                        <img th:if="${conversation.otherUser.imageUrl}"
+                             th:src="${conversation.otherUser.imageUrl}"
+                             th:alt="${conversation.otherUser.fullName}"
+                             class="avatar-img">
+                        <div th:unless="${conversation.otherUser.imageUrl}" class="default-avatar">
+                            <span th:text="${conversation.otherUser.initials}">AB</span>
+                        </div>
+                        <!-- Online indicator -->
+                        <div class="online-indicator" th:if="${conversation.isOtherUserOnline}"></div>
+                    </div>
+
+                    <!-- Conversation info -->
+                    <div class="conversation-info">
+                        <div class="conversation-header">
+                            <h3 class="user-name" th:text="${conversation.otherUser.fullName}">Имя Пользователя</h3>
+                            <span class="last-message-time"
+                                  th:if="${conversation.lastMessage}"
+                                  th:text="${conversation.lastMessage.timeAgo}">5 мин. назад</span>
+                        </div>
+
+                        <div class="conversation-preview">
+                            <p class="last-message"
+                               th:if="${conversation.lastMessage}"
+                               th:text="${conversation.lastMessage.content}">
+                                Последнее сообщение в чате
+                            </p>
+                            <p th:unless="${conversation.lastMessage}" class="last-message">
+                                Нет сообщений
+                            </p>
+
+                            <!-- Unread count -->
+                            <span class="unread-count"
+                                  th:if="${conversation.unreadCount > 0}"
+                                  th:text="${conversation.unreadCount}">3</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- If no conversations -->
+        <div th:unless="${hasConversations}" class="empty-conversations">
+            <div class="empty-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h3 class="empty-title">Нет активных чатов</h3>
+            <p class="empty-description">
+                Начните общение с друзьями! Найдите интересных людей и отправьте им сообщение.
+            </p>
+            <a href="/recommendations" class="btn-primary">
+                <i class="fas fa-search"></i>
+                Найти собеседника
+            </a>
+        </div>
+    </div>
+
+    <!-- Load More Button -->
+    <div class="load-more-container" th:if="${conversations.hasNext}">
+        <button class="btn-secondary" onclick="loadMoreConversations()">
+            <i class="fas fa-plus"></i>
+            Загрузить еще чаты
+        </button>
+    </div>
+</div>
+
+<!-- Sidebar Scripts -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<!-- WebSocket and Chat Scripts -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const currentUserId = /*[[${currentUserId}]]*/ 0;
+    let currentPage = /*[[${conversations.currentPage}]]*/ 0;
+
+    // WebSocket connection
+    let socket = null;
+
+    function initializeWebSocket() {
+        try {
+            socket = new WebSocket(`ws://localhost:2027/chat?userId=${currentUserId}`);
+
+            socket.onopen = function(event) {
+                console.log('📱 Подключен к чату WebSocket');
+            };
+
+            socket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                console.log('📩 Получено WebSocket сообщение:', data);
+
+                if (data.type === 'MESSAGE') {
+                    handleNewMessage(data.data);
+                } else if (data.type === 'STATUS_UPDATE') {
+                    handleStatusUpdate(data.data);
+                }
+            };
+
+            socket.onclose = function(event) {
+                console.log('📱 WebSocket соединение закрыто');
+                setTimeout(initializeWebSocket, 5000);
+            };
+
+            socket.onerror = function(error) {
+                console.error('❌ Ошибка WebSocket:', error);
+            };
+
+        } catch (error) {
+            console.error('❌ Ошибка инициализации WebSocket:', error);
+        }
+    }
+
+    function handleNewMessage(message) {
+        updateUnreadCount(message.senderId);
+        updateLastMessage(message.senderId, message.content, message.timeAgo);
+        moveConversationToTop(message.senderId);
+    }
+
+    function handleStatusUpdate(status) {
+        updateUserOnlineStatus(status.userId, status.status === 'ONLINE');
+    }
+
+    function updateUnreadCount(userId) {
+        // ✅ ИСПРАВЛЕННЫЙ СЕЛЕКТОР
+        const conversation = document.querySelector(`a[href="/messages/chat/${userId}"]`);
+        if (conversation) {
+            let unreadBadge = conversation.querySelector('.unread-count');
+            if (unreadBadge) {
+                const currentCount = parseInt(unreadBadge.textContent) || 0;
+                unreadBadge.textContent = currentCount + 1;
+            } else {
+                const preview = conversation.querySelector('.conversation-preview');
+                unreadBadge = document.createElement('span');
+                unreadBadge.className = 'unread-count';
+                unreadBadge.textContent = '1';
+                preview.appendChild(unreadBadge);
+            }
+        }
+    }
+
+    function updateLastMessage(userId, content, timeAgo) {
+        // ✅ ИСПРАВЛЕННЫЙ СЕЛЕКТОР
+        const conversation = document.querySelector(`a[href="/messages/chat/${userId}"]`);
+        if (conversation) {
+            const lastMessageEl = conversation.querySelector('.last-message');
+            const timeEl = conversation.querySelector('.last-message-time');
+
+            if (lastMessageEl) {
+                lastMessageEl.textContent = content.length > 50 ?
+                    content.substring(0, 50) + '...' : content;
+            }
+
+            if (timeEl) {
+                timeEl.textContent = 'только что';
+            }
+        }
+    }
+
+    function updateUserOnlineStatus(userId, isOnline) {
+        // ✅ ИСПРАВЛЕННЫЙ СЕЛЕКТОР
+        const conversation = document.querySelector(`a[href="/messages/chat/${userId}"]`);
+        if (conversation) {
+            const indicator = conversation.querySelector('.online-indicator');
+            if (isOnline) {
+                if (!indicator) {
+                    const avatar = conversation.querySelector('.conversation-avatar');
+                    const newIndicator = document.createElement('div');
+                    newIndicator.className = 'online-indicator';
+                    avatar.appendChild(newIndicator);
+                }
+            } else {
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+        }
+    }
+
+    function moveConversationToTop(userId) {
+        // ✅ ИСПРАВЛЕННЫЙ СЕЛЕКТОР
+        const conversation = document.querySelector(`a[href="/messages/chat/${userId}"]`);
+        const container = document.querySelector('.conversations-container > div');
+
+        if (conversation && container) {
+            container.insertBefore(conversation, container.firstChild);
+        }
+    }
+
+    function loadMoreConversations() {
+        const button = event.target;
+        const originalText = button.innerHTML;
+
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...';
+
+        fetch(`/messages/load-more?page=${currentPage + 1}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.conversations && data.conversations.length > 0) {
+                    appendConversations(data.conversations);
+                    currentPage++;
+
+                    if (!data.hasNext) {
+                        button.style.display = 'none';
+                    }
+                } else {
+                    button.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки чатов:', error);
+                alert('Ошибка загрузки чатов');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+    }
+
+    function appendConversations(conversations) {
+        // TODO: Реализовать добавление новых конверсаций в DOM
+        location.reload();
+    }
+
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeWebSocket();
+        console.log('💬 Страница сообщений инициализирована');
+    });
+
+    // Очистка при уходе со страницы
+    window.addEventListener('beforeunload', function() {
+        if (socket) {
+            socket.close();
+        }
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

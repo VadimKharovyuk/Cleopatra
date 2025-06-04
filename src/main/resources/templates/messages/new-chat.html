@@ -1,0 +1,59 @@
+!-- 3. messages/new-chat.html - Страница создания нового чата -->
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новый чат - Cleopatra</title>
+</head>
+<body>
+<div class="container">
+    <header>
+        <a href="/messages" class="back-btn">← Назад к сообщениям</a>
+        <h1>Новый чат</h1>
+    </header>
+
+    <div th:if="${error}" class="error-message">
+        <p th:text="${error}">Сообщение об ошибке</p>
+    </div>
+
+    <div class="search-users">
+        <input type="text" id="userSearch" placeholder="Найти пользователя..." oninput="searchUsers()">
+        <div id="searchResults" class="search-results"></div>
+    </div>
+
+    <div class="recent-contacts">
+        <h3>Недавние контакты</h3>
+        <div id="recentContacts" class="contacts-list">
+            <!-- Здесь будут отображаться недавние контакты -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function searchUsers() {
+        const query = document.getElementById('userSearch').value.trim();
+
+        if (query.length < 2) {
+            document.getElementById('searchResults').innerHTML = '';
+            return;
+        }
+
+        // Здесь можно добавить AJAX запрос для поиска пользователей
+        // Пока что показываем заглушку
+        document.getElementById('searchResults').innerHTML = `
+                <div class="search-result">
+                    <div class="user-info">
+                        <div class="avatar-placeholder">П</div>
+                        <span>Пользователь не найден</span>
+                    </div>
+                </div>
+            `;
+    }
+
+    function startChat(userId) {
+        window.location.href = '/messages/chat/' + userId;
+    }
+</script>
+</body>
+</html>

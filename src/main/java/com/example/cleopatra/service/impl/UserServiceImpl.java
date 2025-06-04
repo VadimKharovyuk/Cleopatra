@@ -1,13 +1,16 @@
 package com.example.cleopatra.service.impl;
 
 import com.example.cleopatra.ExistsException.UserAlreadyExistsException;
+import com.example.cleopatra.dto.ChatMessage.UserBriefDto;
 import com.example.cleopatra.dto.user.RegisterDto;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.maper.UserMapper;
 import com.example.cleopatra.model.User;
+import com.example.cleopatra.model.UserOnlineStatus;
 import com.example.cleopatra.repository.PostRepository;
 import com.example.cleopatra.repository.SubscriptionRepository;
+import com.example.cleopatra.repository.UserOnlineStatusRepository;
 import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.service.ImageConverterService;
 import com.example.cleopatra.service.ImageValidator;
@@ -20,9 +23,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -37,6 +44,7 @@ public class UserServiceImpl implements UserService {
     private final StorageService storageService;
     private final SubscriptionRepository subscriptionRepository;
     private final PostRepository postRepository;
+    private final UserOnlineStatusRepository onlineStatusRepository;
 
 
     @Override
@@ -263,5 +271,120 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
     }
 
+    @Override
+    public User getCurrentUserEntity(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Пользователь не авторизован");
+        }
+
+        String email = authentication.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + email));
+    }
+
+    @Override
+    @Transactional
+    public void updateOnlineStatus(Long userId, boolean isOnline) {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+
+            // Пытаемся обновить существующую запись
+            int updatedRows = onlineStatusRepository.updateOnlineStatus(userId, isOnline, now);
+
+            if (updatedRows == 0) {
+                // Если записи нет, создаем новую
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + userId));
+
+                UserOnlineStatus status = UserOnlineStatus.builder()
+                        .userId(userId)
+                        .user(user)
+                        .isOnline(isOnline)
+                        .lastSeen(now)
+                        .deviceType("WEB") // Можно передавать как параметр
+                        .build();
+
+                onlineStatusRepository.save(status);
+                log.info("Создан новый онлайн статус для пользователя {}: {}", userId, isOnline);
+            } else {
+                log.debug("Обновлен онлайн статус для пользователя {}: {}", userId, isOnline);
+            }
+
+        } catch (Exception e) {
+            log.error("Ошибка при обновлении онлайн статуса для пользователя {}: {}", userId, e.getMessage());
+            // Не пробрасываем исключение, чтобы не сломать основную логику
+        }
+    }
+    /**
+     * Получить онлайн статус пользователя
+     */
+    public boolean isUserOnline(Long userId) {
+        return onlineStatusRepository.findByUserId(userId)
+                .map(status -> status.getIsOnline() != null && status.getIsOnline())
+                .orElse(false);
+    }
+
+    /**
+     * Получить текст статуса пользователя
+     */
+    public String getUserStatusText(Long userId) {
+        return onlineStatusRepository.findByUserId(userId)
+                .map(UserOnlineStatus::getOnlineStatusText)
+                .orElse("статус неизвестен");
+    }
+
+
+
+
+    @Transactional(readOnly = true)
+    public UserBriefDto convertToUserBriefDto(User user) {
+        if (user == null) return null;
+
+        // Получаем статус онлайн
+        UserOnlineStatus onlineStatus = onlineStatusRepository.findByUserId(user.getId())
+                .orElse(null);
+
+        boolean isOnline = onlineStatus != null && onlineStatus.getIsOnline();
+        String lastSeenText = onlineStatus != null ? onlineStatus.getOnlineStatusText() : "давно не был(а) в сети";
+
+        return UserBriefDto.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .fullName(user.getFirstName() + " " + user.getLastName())
+                .imageUrl(user.getImageUrl())
+                .isOnline(isOnline)
+                .lastSeenText(lastSeenText)
+                .lastSeen(onlineStatus != null ? onlineStatus.getLastSeen() : null)
+                .username(user.getFirstName())
+
+                .isTyping(false) // Определяется динамически
+                .isBlocked(false) // TODO: реализовать логику блокировки
+                .hasBlockedMe(false) // TODO: реализовать логику блокировки
+                .isFriend(false) // TODO: реализовать логику друзей
+                .isFollowing(false) // TODO: реализовать логику подписок
+                .isFollower(false) // TODO: реализовать логику подписок
+                .postsCount(0L) // TODO: подсчитать посты
+                .followersCount(0L) // TODO: подсчитать подписчиков
+                .followingCount(0L) // TODO: подсчитать подписки
+                .role(user.getRole().name())
+                .displayLetter(getDisplayLetter(user))
+                .build();
+    }
+
+    private String getDisplayLetter(User user) {
+        if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
+            return user.getFirstName().substring(0, 1).toUpperCase();
+        }
+        if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
+            return user.getFirstName().substring(0, 1).toUpperCase();
+        }
+        return "?";
+    }
+
+
 
 }
+
+
+
