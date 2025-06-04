@@ -64,7 +64,7 @@ public class MessageControllerAdvice {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericError(Exception e) {
-        log.error("Внутренняя ошибка сервера: {}", e.getMessage(), e);
+//        log.error("Внутренняя ошибка сервера: {}", e.getMessage(), e);
 
         Map<String, Object> response = new HashMap<>();
         response.put("error", "INTERNAL_SERVER_ERROR");

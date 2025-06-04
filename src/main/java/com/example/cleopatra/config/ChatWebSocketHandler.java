@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -124,7 +125,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         log.error("WebSocket transport error for session {}: ", session.getId(), exception);
-        super.handleTransportError(session, exception);
+        sessionToUserId.remove(session);
+
+        for (CopyOnWriteArraySet<WebSocketSession> sessions : userSessions.values()) {
+            sessions.remove(session);
+        }
+
+        session.close(); // Закрываем соединение
     }
 
     /**
@@ -310,4 +317,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         // В реальном приложении нужно получить список друзей/контактов
         log.info("User {} status changed to: {}", userId, isOnline ? "ONLINE" : "OFFLINE");
     }
+
+
 }
