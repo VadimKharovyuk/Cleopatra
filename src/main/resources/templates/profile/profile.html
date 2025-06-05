@@ -920,10 +920,12 @@
                                 <div class="author-avatar">
                                     <img th:if="${post.author.imageUrl}"
                                          th:src="${post.author.imageUrl}"
-                                         th:alt="${post.author.firstName + ' ' + post.author.lastName}"
+                                         th:alt="${post.author.firstName + ' ' + (post.author.lastName ?: '')}"
                                          class="avatar-img">
                                     <div th:unless="${post.author.imageUrl}" class="default-avatar-small">
-                                        <span th:text="${#strings.substring(post.author.firstName, 0, 1) + #strings.substring(post.author.lastName, 0, 1)}">AB</span>
+                                        <span th:text="${#strings.substring(post.author.firstName, 0, 1)}">A</span>
+                                        <span th:if="${post.author.lastName != null and !#strings.isEmpty(post.author.lastName)}"
+                                              th:text="${#strings.substring(post.author.lastName, 0, 1)}"></span>
                                     </div>
                                 </div>
                             </a>
@@ -932,13 +934,15 @@
                             <div class="author-info">
                                 <div class="author-main">
                                     <a th:href="@{/profile/{userId}(userId=${post.author.id})}" class="author-name">
-                                        <span th:text="${post.author.firstName + ' ' + post.author.lastName}">Имя Автора</span>
+                                        <span th:text="${post.author.firstName}">Имя</span>
+                                        <span th:if="${post.author.lastName != null and !#strings.isEmpty(post.author.lastName)}"
+                                              th:text="' ' + ${post.author.lastName}"> Фамилия</span>
                                     </a>
                                     <span class="author-handle" th:text="'@' + ${post.author.firstName?.toLowerCase()}">@автор</span>
                                     <!-- Дата теперь ссылка на пост -->
                                     <a th:href="@{/posts/{id}(id=${post.id})}" class="post-date-link">
-                                        <span class="post-date"
-                                              th:text="${#temporals.format(post.createdAt, 'dd MMM', new java.util.Locale('ru'))}">1 янв</span>
+                                <span class="post-date"
+                                      th:text="${#temporals.format(post.createdAt, 'dd MMM', new java.util.Locale('ru'))}">1 янв</span>
                                     </a>
                                 </div>
                             </div>
@@ -967,288 +971,6 @@
                                         <i class="fas fa-trash"></i>
                                         Удалить
                                     </a>
-                                    <!-- Модальное окно подтверждения -->
-                                    <div id="deleteConfirmModal" class="modal-overlay" style="display: none;">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h3>Удалить пост?</h3>
-                                                <button class="modal-close" onclick="closeDeleteModal()">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Это действие нельзя отменить. Пост будет удален навсегда.</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button class="btn-secondary" onclick="closeDeleteModal()">
-                                                    Отмена
-                                                </button>
-                                                <button class="btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">
-                                                    <span class="btn-text">Удалить</span>
-                                                    <i class="fas fa-spinner fa-spin btn-spinner" style="display: none;"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <style>
-                                        /* Стили для модального окна */
-                                        .modal-overlay {
-                                            position: fixed;
-                                            top: 0;
-                                            left: 0;
-                                            right: 0;
-                                            bottom: 0;
-                                            background: rgba(0, 0, 0, 0.5);
-                                            display: flex;
-                                            align-items: center;
-                                            justify-content: center;
-                                            z-index: 1000;
-                                            backdrop-filter: blur(4px);
-                                        }
-
-                                        .modal-content {
-                                            background: white;
-                                            border-radius: 12px;
-                                            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-                                            max-width: 400px;
-                                            width: 90%;
-                                            max-height: 90vh;
-                                            overflow: hidden;
-                                        }
-
-                                        .modal-header {
-                                            padding: 1.5rem;
-                                            border-bottom: 1px solid #e5e7eb;
-                                            display: flex;
-                                            justify-content: space-between;
-                                            align-items: center;
-                                        }
-
-                                        .modal-header h3 {
-                                            margin: 0;
-                                            font-size: 1.125rem;
-                                            font-weight: 600;
-                                            color: #111827;
-                                        }
-
-                                        .modal-close {
-                                            background: none;
-                                            border: none;
-                                            color: #6b7280;
-                                            cursor: pointer;
-                                            padding: 0.5rem;
-                                            border-radius: 6px;
-                                            transition: all 0.2s;
-                                        }
-
-                                        .modal-close:hover {
-                                            background: #f3f4f6;
-                                            color: #374151;
-                                        }
-
-                                        .modal-body {
-                                            padding: 1.5rem;
-                                            color: #6b7280;
-                                            line-height: 1.6;
-                                        }
-
-                                        .modal-footer {
-                                            padding: 1.5rem;
-                                            border-top: 1px solid #e5e7eb;
-                                            display: flex;
-                                            gap: 0.75rem;
-                                            justify-content: flex-end;
-                                        }
-
-                                        .btn-secondary {
-                                            background: #f3f4f6;
-                                            color: #374151;
-                                            border: none;
-                                            padding: 0.5rem 1rem;
-                                            border-radius: 6px;
-                                            font-weight: 500;
-                                            cursor: pointer;
-                                            transition: all 0.2s;
-                                        }
-
-                                        .btn-secondary:hover {
-                                            background: #e5e7eb;
-                                        }
-
-                                        .btn-danger {
-                                            background: #dc2626;
-                                            color: white;
-                                            border: none;
-                                            padding: 0.5rem 1rem;
-                                            border-radius: 6px;
-                                            font-weight: 500;
-                                            cursor: pointer;
-                                            transition: all 0.2s;
-                                            position: relative;
-                                            min-width: 80px;
-                                        }
-
-                                        .btn-danger:hover {
-                                            background: #b91c1c;
-                                        }
-
-                                        .btn-danger:disabled {
-                                            opacity: 0.5;
-                                            cursor: not-allowed;
-                                        }
-
-                                        .btn-danger .btn-spinner {
-                                            position: absolute;
-                                            left: 50%;
-                                            top: 50%;
-                                            transform: translate(-50%, -50%);
-                                        }
-
-                                        .btn-danger:disabled .btn-text {
-                                            opacity: 0;
-                                        }
-                                    </style>
-
-                                    <script>
-                                        let postToDelete = null;
-
-                                        // Функция для инициации удаления поста
-                                        function deletePost(event, element) {
-                                            event.preventDefault();
-                                            event.stopPropagation();
-
-                                            const postId = element.getAttribute('data-post-id');
-                                            if (!postId) {
-                                                console.error('ID поста не найден');
-                                                return;
-                                            }
-
-                                            // Сохраняем ID поста для подтверждения
-                                            postToDelete = postId;
-
-                                            // Показываем модальное окно
-                                            const modal = document.getElementById('deleteConfirmModal');
-                                            if (modal) {
-                                                modal.style.display = 'flex';
-                                                document.body.style.overflow = 'hidden'; // Блокируем скролл
-                                            }
-                                        }
-
-                                        // Закрытие модального окна
-                                        function closeDeleteModal() {
-                                            const modal = document.getElementById('deleteConfirmModal');
-                                            if (modal) {
-                                                modal.style.display = 'none';
-                                                document.body.style.overflow = ''; // Восстанавливаем скролл
-                                            }
-                                            postToDelete = null;
-                                        }
-
-                                        // Подтверждение удаления
-                                        async function confirmDelete() {
-                                            if (!postToDelete) {
-                                                console.error('ID поста для удаления не найден');
-                                                return;
-                                            }
-
-                                            const confirmBtn = document.getElementById('confirmDeleteBtn');
-                                            const btnText = confirmBtn.querySelector('.btn-text');
-                                            const btnSpinner = confirmBtn.querySelector('.btn-spinner');
-
-                                            // Показываем состояние загрузки
-                                            confirmBtn.disabled = true;
-                                            if (btnText) btnText.style.opacity = '0';
-                                            if (btnSpinner) btnSpinner.style.display = 'inline-block';
-
-                                            try {
-                                                console.log('Удаляем пост:', postToDelete);
-
-                                                const response = await fetch(`/api/posts/${postToDelete}`, {
-                                                    method: 'DELETE',
-                                                    headers: {
-                                                        'Content-Type': 'application/json'
-                                                    }
-                                                });
-
-                                                const result = await response.json();
-
-                                                if (response.ok && result.success) {
-                                                    console.log('Пост успешно удален');
-
-                                                    // Показываем уведомление об успехе
-                                                    if (typeof showNotification === 'function') {
-                                                        showNotification('Пост успешно удален', 'success');
-                                                    }
-
-                                                    // Удаляем элемент поста из DOM
-                                                    const postElement = document.querySelector(`[data-post-id="${postToDelete}"]`);
-                                                    if (postElement) {
-                                                        // Находим родительский элемент поста (article.post-card)
-                                                        const postCard = postElement.closest('article.post-card');
-                                                        if (postCard) {
-                                                            // Анимация исчезновения
-                                                            postCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                                                            postCard.style.opacity = '0';
-                                                            postCard.style.transform = 'translateY(-20px)';
-
-                                                            setTimeout(() => {
-                                                                postCard.remove();
-
-                                                                // Проверяем, остались ли посты
-                                                                const remainingPosts = document.querySelectorAll('article.post-card');
-                                                                if (remainingPosts.length === 0) {
-                                                                    // Перезагружаем страницу для показа empty state
-                                                                    window.location.reload();
-                                                                }
-                                                            }, 300);
-                                                        }
-                                                    }
-
-                                                    // Закрываем модальное окно
-                                                    closeDeleteModal();
-
-                                                } else {
-                                                    // Показываем ошибку
-                                                    const errorMessage = result.error || 'Произошла ошибка при удалении поста';
-                                                    if (typeof showNotification === 'function') {
-                                                        showNotification(errorMessage, 'error');
-                                                    } else {
-                                                        alert(errorMessage);
-                                                    }
-                                                }
-
-                                            } catch (error) {
-                                                console.error('Ошибка при удалении поста:', error);
-                                                if (typeof showNotification === 'function') {
-                                                    showNotification('Произошла ошибка при удалении поста', 'error');
-                                                } else {
-                                                    alert('Произошла ошибка при удалении поста');
-                                                }
-                                            } finally {
-                                                // Восстанавливаем состояние кнопки
-                                                confirmBtn.disabled = false;
-                                                if (btnText) btnText.style.opacity = '1';
-                                                if (btnSpinner) btnSpinner.style.display = 'none';
-                                            }
-                                        }
-
-                                        // Закрытие модального окна по клику вне его
-                                        document.addEventListener('click', function(event) {
-                                            const modal = document.getElementById('deleteConfirmModal');
-                                            if (event.target === modal) {
-                                                closeDeleteModal();
-                                            }
-                                        });
-
-                                        // Закрытие модального окна по нажатию Escape
-                                        document.addEventListener('keydown', function(event) {
-                                            if (event.key === 'Escape') {
-                                                closeDeleteModal();
-                                            }
-                                        });
-                                    </script>
-
-
                                 </div>
                             </div>
                         </div>
@@ -1259,8 +981,8 @@
                             <div class="post-text" th:if="${post.content != null and !#strings.isEmpty(post.content)}">
                                 <p th:text="${post.content}">Текст поста...</p>
                                 <span th:if="${post.isLongContent}" class="read-more-link">
-                <a th:href="@{/posts/{id}(id=${post.id})}">Читать далее</a>
-            </span>
+                            <a th:href="@{/posts/{id}(id=${post.id})}">Читать далее</a>
+                        </span>
                             </div>
 
                             <!-- Изображение поста -->
@@ -1273,6 +995,46 @@
                             </div>
                         </div>
 
+                        <!-- Информация о лайках (новый блок) -->
+                        <div class="post-likes-info" th:if="${post.recentLikes != null and !post.recentLikes.empty and post.likesCount > 0}">
+                            <div class="likes-avatars">
+                                <!-- Показываем аватары последних пользователей, которые лайкнули -->
+                                <div class="like-avatar" th:each="likeUser, iterStat : ${post.recentLikes}"
+                                     th:if="${iterStat.index < 3}">
+                                    <img th:if="${likeUser.imageUrl}"
+                                         th:src="${likeUser.imageUrl}"
+                                         th:alt="${likeUser.fullName}"
+                                         th:title="${likeUser.fullName}"
+                                         class="like-avatar-img">
+                                    <div th:unless="${likeUser.imageUrl}"
+                                         class="like-avatar-default"
+                                         th:title="${likeUser.fullName}">
+                                        <span th:text="${#strings.substring(likeUser.firstName, 0, 1)}">A</span>
+                                    </div>
+                                </div>
+
+                                <!-- Если лайков больше 3, показываем "+N" -->
+                                <div class="like-more" th:if="${post.likesCount > 3}">
+                                    <span th:text="'+' + ${post.likesCount - 3}">+5</span>
+                                </div>
+                            </div>
+
+                            <!-- Текст с информацией о лайках -->
+                            <div class="likes-text">
+                        <span th:if="${post.likesCount == 1}">
+                            Нравится <strong th:text="${post.recentLikes[0].fullName}">пользователю</strong>
+                        </span>
+                                <span th:if="${post.likesCount == 2}">
+                            Нравится <strong th:text="${post.recentLikes[0].fullName}">пользователю 1</strong>
+                            и <strong th:text="${post.recentLikes[1].fullName}">пользователю 2</strong>
+                        </span>
+                                <span th:if="${post.likesCount > 2}">
+                            Нравится <strong th:text="${post.recentLikes[0].fullName}">пользователю 1</strong>
+                            и еще <strong th:text="${post.likesCount - 1}">N</strong> пользователям
+                        </span>
+                            </div>
+                        </div>
+
                         <!-- Действия с постом -->
                         <div class="post-actions">
                             <button class="action-btn comment-btn" onclick="openComments(this)"
@@ -1281,9 +1043,12 @@
                                 <span th:text="${post.commentsCount}">0</span>
                             </button>
 
-                            <button class="action-btn like-btn" onclick="toggleLike(this)"
-                                    th:data-post-id="${post.id}">
-                                <i class="far fa-heart"></i>
+                            <!-- Обновленная кнопка лайка -->
+                            <button class="action-btn like-btn"
+                                    onclick="toggleLike(this)"
+                                    th:data-post-id="${post.id}"
+                                    th:classappend="${post.isLikedByCurrentUser ? 'liked' : ''}">
+                                <i th:class="${post.isLikedByCurrentUser ? 'fas fa-heart' : 'far fa-heart'}"></i>
                                 <span th:text="${post.likesCount}">0</span>
                             </button>
 
@@ -1293,118 +1058,14 @@
                             </button>
 
                             <div class="action-stats">
-            <span class="views-count">
-                <i class="far fa-eye"></i>
-                <span th:text="${post.viewsCount}">0</span>
-            </span>
+                        <span class="views-count">
+                            <i class="far fa-eye"></i>
+                            <span th:text="${post.viewsCount}">0</span>
+                        </span>
                             </div>
                         </div>
 
                     </article>
-
-
-                    <style>
-                        /* Дополнительные стили для навигации */
-                        .post-content {
-                            cursor: pointer;
-                            transition: background-color 0.2s ease;
-                        }
-
-                        .post-content:hover {
-                            background-color: rgba(0, 0, 0, 0.02);
-                        }
-
-                        .post-date-link {
-                            text-decoration: none;
-                            color: inherit;
-                            transition: color 0.2s ease;
-                        }
-
-                        .post-date-link:hover {
-                            color: var(--accent-primary, #2563eb);
-                        }
-
-                        .post-date-link:hover .post-date {
-                            text-decoration: underline;
-                        }
-
-                        .media-container {
-                            display: block;
-                            cursor: pointer;
-                        }
-
-                        /* Отключаем pointer events для вложенных интерактивных элементов при клике на контент */
-                        .post-content .read-more-link {
-                            pointer-events: auto;
-                            position: relative;
-                            z-index: 2;
-                        }
-                    </style>
-
-                    <script>
-                        // Навигация к посту при клике на контент
-                        function navigateToPost(event, element) {
-                            // Не переходим если кликнули на ссылку "Читать далее"
-                            if (event.target.closest('.read-more-link')) {
-                                return;
-                            }
-
-                            // Не переходим если кликнули на изображение (оно уже кликабельно)
-                            if (event.target.closest('.post-image')) {
-                                return;
-                            }
-
-                            const postId = element.dataset.postId;
-                            if (postId) {
-                                window.location.href = `/posts/${postId}`;
-                            }
-                        }
-
-                        // Копирование ссылки на пост
-                        function copyPostLink(element) {
-                            const postId = element.dataset.postId;
-                            const postUrl = `${window.location.origin}/posts/${postId}`;
-
-                            navigator.clipboard.writeText(postUrl).then(() => {
-                                // Показываем уведомление (если у вас есть функция showNotification)
-                                if (typeof showNotification === 'function') {
-                                    showNotification('Ссылка на пост скопирована!', 'success');
-                                } else {
-                                    alert('Ссылка скопирована в буфер обмена!');
-                                }
-                            }).catch(err => {
-                                console.error('Ошибка при копировании: ', err);
-                                alert('Не удалось скопировать ссылку');
-                            });
-                        }
-
-                        // Обновленная функция открытия комментариев - переход к посту
-                        function openComments(btn) {
-                            const postId = btn.dataset.postId;
-                            window.location.href = `/posts/${postId}#comments`;
-                        }
-
-                        // Обновленная функция для кнопки поделиться
-                        function sharePost(btn) {
-                            const postId = btn.dataset.postId;
-                            const postUrl = `${window.location.origin}/posts/${postId}`;
-
-                            if (navigator.share) {
-                                navigator.share({
-                                    title: 'Пост',
-                                    url: postUrl
-                                });
-                            } else {
-                                navigator.clipboard.writeText(postUrl).then(() => {
-                                    if (typeof showNotification === 'function') {
-                                        showNotification('Ссылка на пост скопирована!', 'success');
-                                    } else {
-                                        alert('Ссылка скопирована в буфер обмена!');
-                                    }
-                                });
-                            }
-                        }
-                    </script>
                 </div>
 
                 <!-- Пагинация -->
@@ -1460,7 +1121,58 @@
             </div>
         </div>
 
+        <!-- Модальное окно подтверждения удаления -->
+        <div id="deleteConfirmModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Удалить пост?</h3>
+                    <button class="modal-close" onclick="closeDeleteModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Это действие нельзя отменить. Пост будет удален навсегда.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeDeleteModal()">
+                        Отмена
+                    </button>
+                    <button class="btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">
+                        <span class="btn-text">Удалить</span>
+                        <i class="fas fa-spinner fa-spin btn-spinner" style="display: none;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Уведомления -->
+        <div id="notification" class="notification" style="display: none;">
+            <div class="notification-content">
+                <i class="notification-icon"></i>
+                <span class="notification-text"></span>
+            </div>
+        </div>
+
         <style>
+            :root {
+                --bg-primary: #ffffff;
+                --bg-secondary: #f8fafc;
+                --bg-accent: #f1f5f9;
+                --border-primary: #e2e8f0;
+                --border-secondary: #f1f5f9;
+                --text-primary: #1e293b;
+                --text-secondary: #64748b;
+                --text-muted: #94a3b8;
+                --accent-primary: #3b82f6;
+                --accent-secondary: #8b5cf6;
+                --radius-sm: 4px;
+                --radius-md: 8px;
+                --radius-lg: 12px;
+                --radius-xl: 16px;
+                --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }
+
             /* Стили для постов */
             .posts-container {
                 display: flex;
@@ -1570,6 +1282,20 @@
                 color: var(--text-muted);
             }
 
+            .post-date-link {
+                text-decoration: none;
+                color: inherit;
+                transition: color 0.2s ease;
+            }
+
+            .post-date-link:hover {
+                color: var(--accent-primary);
+            }
+
+            .post-date-link:hover .post-date {
+                text-decoration: underline;
+            }
+
             /* Меню поста */
             .post-menu {
                 position: relative;
@@ -1594,7 +1320,7 @@
                 position: absolute;
                 top: 100%;
                 right: 0;
-                background: var(--bg-secondary);
+                background: var(--bg-primary);
                 border: 1px solid var(--border-primary);
                 border-radius: var(--radius-md);
                 box-shadow: var(--shadow-lg);
@@ -1635,6 +1361,14 @@
             /* Содержимое поста */
             .post-content {
                 margin-bottom: 1rem;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+                padding: 0.5rem;
+                border-radius: var(--radius-md);
+            }
+
+            .post-content:hover {
+                background-color: rgba(0, 0, 0, 0.02);
             }
 
             .post-text {
@@ -1652,6 +1386,9 @@
             .read-more-link {
                 color: var(--accent-primary);
                 font-size: 0.875rem;
+                pointer-events: auto;
+                position: relative;
+                z-index: 2;
             }
 
             .read-more-link a {
@@ -1671,9 +1408,9 @@
                 border: 1px solid var(--border-primary);
             }
 
-            .media-link {
+            .media-container {
                 display: block;
-                text-decoration: none;
+                cursor: pointer;
             }
 
             .post-image {
@@ -1685,6 +1422,76 @@
 
             .post-image:hover {
                 transform: scale(1.02);
+            }
+
+            /* Информация о лайках */
+            .post-likes-info {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.75rem 0;
+                margin-bottom: 0.75rem;
+                border-bottom: 1px solid var(--border-secondary);
+            }
+
+            .likes-avatars {
+                display: flex;
+                align-items: center;
+            }
+
+            .like-avatar {
+                position: relative;
+                z-index: 1;
+            }
+
+            .like-avatar:not(:first-child) {
+                margin-left: -0.5rem;
+            }
+
+            .like-avatar-img, .like-avatar-default {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                border: 2px solid var(--bg-secondary);
+            }
+
+            .like-avatar-img {
+                object-fit: cover;
+            }
+
+            .like-avatar-default {
+                background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+
+            .like-more {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: var(--bg-accent);
+                border: 2px solid var(--bg-secondary);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: var(--text-muted);
+                margin-left: -0.5rem;
+            }
+
+            .likes-text {
+                font-size: 0.875rem;
+                color: var(--text-secondary);
+            }
+
+            .likes-text strong {
+                color: var(--text-primary);
+                font-weight: 600;
             }
 
             /* Действия с постом */
@@ -1708,11 +1515,17 @@
                 font-size: 0.875rem;
                 transition: all 0.2s ease;
                 cursor: pointer;
+                position: relative;
             }
 
             .action-btn:hover {
                 background: var(--bg-accent);
                 color: var(--text-primary);
+            }
+
+            .action-btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
             }
 
             .comment-btn:hover {
@@ -1731,6 +1544,23 @@
 
             .like-btn.liked i {
                 color: #ef4444;
+            }
+
+            .like-btn.loading::after {
+                content: '';
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                border: 2px solid transparent;
+                border-top: 2px solid currentColor;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-left: 0.5rem;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
             }
 
             .share-btn:hover {
@@ -1778,6 +1608,229 @@
                 max-width: 300px;
             }
 
+            /* Кнопки */
+            .btn-luxury {
+                padding: 0.75rem 1.5rem;
+                border-radius: var(--radius-md);
+                font-weight: 600;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                transition: all 0.2s ease;
+                border: none;
+                cursor: pointer;
+            }
+
+            .btn-primary-luxury {
+                background: var(--accent-primary);
+                color: white;
+            }
+
+            .btn-primary-luxury:hover {
+                background: #2563eb;
+                transform: translateY(-1px);
+            }
+
+            .btn-secondary-luxury {
+                background: var(--bg-accent);
+                color: var(--text-primary);
+                border: 1px solid var(--border-primary);
+            }
+
+            .btn-secondary-luxury:hover {
+                background: var(--bg-secondary);
+            }
+
+            /* Empty state */
+            .empty-state {
+                text-align: center;
+                padding: 4rem 2rem;
+                color: var(--text-secondary);
+            }
+
+            .empty-icon {
+                font-size: 4rem;
+                color: var(--text-muted);
+                margin-bottom: 1.5rem;
+            }
+
+            .empty-title {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: 0.5rem;
+            }
+
+            .empty-description {
+                margin-bottom: 2rem;
+                line-height: 1.6;
+            }
+
+            /* Модальное окно */
+            .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                backdrop-filter: blur(4px);
+            }
+
+            .modal-content {
+                background: white;
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow-lg);
+                max-width: 400px;
+                width: 90%;
+                max-height: 90vh;
+                overflow: hidden;
+            }
+
+            .modal-header {
+                padding: 1.5rem;
+                border-bottom: 1px solid var(--border-primary);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .modal-header h3 {
+                margin: 0;
+                font-size: 1.125rem;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .modal-close {
+                background: none;
+                border: none;
+                color: var(--text-muted);
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: var(--radius-sm);
+                transition: all 0.2s;
+            }
+
+            .modal-close:hover {
+                background: var(--bg-accent);
+                color: var(--text-primary);
+            }
+
+            .modal-body {
+                padding: 1.5rem;
+                color: var(--text-secondary);
+                line-height: 1.6;
+            }
+
+            .modal-footer {
+                padding: 1.5rem;
+                border-top: 1px solid var(--border-primary);
+                display: flex;
+                gap: 0.75rem;
+                justify-content: flex-end;
+            }
+
+            .btn-secondary {
+                background: var(--bg-accent);
+                color: var(--text-primary);
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: var(--radius-sm);
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .btn-secondary:hover {
+                background: var(--border-primary);
+            }
+
+            .btn-danger {
+                background: #dc2626;
+                color: white;
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: var(--radius-sm);
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+                position: relative;
+                min-width: 80px;
+            }
+
+            .btn-danger:hover {
+                background: #b91c1c;
+            }
+
+            .btn-danger:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .btn-danger .btn-spinner {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .btn-danger:disabled .btn-text {
+                opacity: 0;
+            }
+
+            /* Уведомления */
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                border: 1px solid var(--border-primary);
+                border-radius: var(--radius-md);
+                box-shadow: var(--shadow-lg);
+                padding: 1rem 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                z-index: 1001;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            }
+
+            .notification.show {
+                transform: translateX(0);
+            }
+
+            .notification.success {
+                border-left: 4px solid #10b981;
+            }
+
+            .notification.error {
+                border-left: 4px solid #ef4444;
+            }
+
+            .notification-icon {
+                font-size: 1.125rem;
+            }
+
+            .notification.success .notification-icon {
+                color: #10b981;
+            }
+
+            .notification.error .notification-icon {
+                color: #ef4444;
+            }
+
+            .notification-text {
+                color: var(--text-primary);
+                font-weight: 500;
+            }
+
             /* Мобильная адаптация */
             @media (max-width: 768px) {
                 .post-card {
@@ -1808,10 +1861,73 @@
                     flex-direction: column;
                     gap: 1rem;
                 }
+
+                .likes-text {
+                    font-size: 0.8125rem;
+                }
+
+                .post-likes-info {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 0.5rem;
+                }
             }
         </style>
 
         <script>
+            // Функция для показа уведомлений
+            function showNotification(message, type = 'success') {
+                // Создаем элемент уведомления если его нет
+                let notification = document.getElementById('notification');
+                if (!notification) {
+                    notification = document.createElement('div');
+                    notification.id = 'notification';
+                    notification.className = 'notification';
+                    notification.style.display = 'none';
+
+                    notification.innerHTML = `
+                <i class="notification-icon"></i>
+                <span class="notification-text"></span>
+            `;
+
+                    document.body.appendChild(notification);
+                }
+
+                const icon = notification.querySelector('.notification-icon');
+                const text = notification.querySelector('.notification-text');
+
+                // Устанавливаем стили в зависимости от типа
+                if (type === 'success') {
+                    icon.className = 'notification-icon fas fa-check-circle';
+                    notification.className = 'notification success';
+                } else if (type === 'error') {
+                    icon.className = 'notification-icon fas fa-exclamation-circle';
+                    notification.className = 'notification error';
+                }
+
+                text.textContent = message;
+                notification.style.display = 'flex';
+
+                // Показываем уведомление
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 100);
+
+                // Скрываем через 4 секунды
+                setTimeout(() => {
+                    hideNotification();
+                }, 4000);
+            }
+
+            function hideNotification() {
+                const notification = document.getElementById('notification');
+                notification.classList.remove('show');
+
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 300);
+            }
+
             // JavaScript функции для работы с постами
             function togglePostMenu(btn) {
                 const dropdown = btn.nextElementSibling;
@@ -1830,27 +1946,166 @@
 
             function openComments(btn) {
                 const postId = btn.dataset.postId;
-                // TODO: Открыть модальное окно с комментариями или перейти к посту
-                window.location.href = `/posts/${postId}`;
+                window.location.href = `/posts/${postId}#comments`;
             }
 
-            function toggleLike(btn) {
+            // ✅ ОБНОВЛЕННАЯ функция для лайков с AJAX
+            async function toggleLike(btn) {
                 const postId = btn.dataset.postId;
                 const icon = btn.querySelector('i');
                 const count = btn.querySelector('span');
 
-                // TODO: Отправить AJAX запрос для лайка
-                btn.classList.toggle('liked');
+                // Блокируем кнопку во время запроса
+                const originalDisabled = btn.disabled;
+                btn.disabled = true;
+                btn.classList.add('loading');
 
-                if (btn.classList.contains('liked')) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas');
-                    count.textContent = parseInt(count.textContent) + 1;
-                } else {
-                    icon.classList.remove('fas');
-                    icon.classList.add('far');
-                    count.textContent = parseInt(count.textContent) - 1;
+                try {
+                    const response = await fetch(`/api/posts/${postId}/like`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // Добавьте CSRF токен если используете Spring Security
+                            // 'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    // Обновляем UI на основе ответа сервера
+                    updateLikeButton(btn, result.isLiked, result.likesCount);
+
+                    // Обновляем информацию о лайках
+                    await updateLikesInfo(postId);
+
+                    // Показываем уведомление
+                    const message = result.isLiked ? 'Пост добавлен в понравившиеся ❤️' : 'Лайк убран';
+                    showNotification(message, 'success');
+
+                } catch (error) {
+                    console.error('Ошибка при лайке поста:', error);
+                    showNotification('Произошла ошибка. Попробуйте снова.', 'error');
+                } finally {
+                    // Разблокируем кнопку
+                    btn.disabled = originalDisabled;
+                    btn.classList.remove('loading');
                 }
+            }
+
+            // Функция для обновления кнопки лайка
+            function updateLikeButton(btn, isLiked, likesCount) {
+                const icon = btn.querySelector('i');
+                const count = btn.querySelector('span');
+
+                if (isLiked) {
+                    btn.classList.add('liked');
+                    icon.className = 'fas fa-heart';
+                } else {
+                    btn.classList.remove('liked');
+                    icon.className = 'far fa-heart';
+                }
+
+                count.textContent = likesCount;
+
+                // Добавляем небольшую анимацию
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                }, 150);
+            }
+
+            // Функция для обновления информации о лайках
+            async function updateLikesInfo(postId) {
+                try {
+                    const response = await fetch(`/api/posts/${postId}/likes`);
+                    if (!response.ok) return;
+
+                    const likesInfo = await response.json();
+
+                    // Находим карточку поста
+                    const postCard = document.querySelector(`[data-post-id="${postId}"]`)?.closest('.post-card');
+                    if (!postCard) return;
+
+                    let likesInfoBlock = postCard.querySelector('.post-likes-info');
+
+                    if (likesInfo.likesCount > 0 && likesInfo.recentLikes.length > 0) {
+                        if (!likesInfoBlock) {
+                            // Создаем блок с информацией о лайках
+                            likesInfoBlock = createLikesInfoBlock(likesInfo);
+                            const postActions = postCard.querySelector('.post-actions');
+                            if (postActions) {
+                                postActions.parentNode.insertBefore(likesInfoBlock, postActions);
+                            }
+                        } else {
+                            // Обновляем существующий блок
+                            updateLikesInfoBlock(likesInfoBlock, likesInfo);
+                        }
+                    } else if (likesInfoBlock) {
+                        // Удаляем блок если лайков нет
+                        likesInfoBlock.remove();
+                    }
+
+                } catch (error) {
+                    console.error('Ошибка при загрузке информации о лайках:', error);
+                }
+            }
+
+            // Создание блока с информацией о лайках
+            function createLikesInfoBlock(likesInfo) {
+                const block = document.createElement('div');
+                block.className = 'post-likes-info';
+                updateLikesInfoBlock(block, likesInfo);
+                return block;
+            }
+
+            // Обновление блока с информацией о лайках
+            function updateLikesInfoBlock(block, likesInfo) {
+                const maxAvatars = 3; // Для карточек постов показываем меньше аватаров
+                const avatarsHtml = likesInfo.recentLikes.slice(0, maxAvatars).map(user => {
+                    const fullName = user.fullName || `${user.firstName} ${user.lastName || ''}`.trim();
+                    if (user.imageUrl) {
+                        return `<div class="like-avatar">
+                    <img src="${user.imageUrl}" alt="${fullName}" title="${fullName}" class="like-avatar-img">
+                </div>`;
+                    } else {
+                        const initial = user.firstName ? user.firstName.charAt(0).toUpperCase() : '?';
+                        return `<div class="like-avatar">
+                    <div class="like-avatar-default" title="${fullName}">
+                        <span>${initial}</span>
+                    </div>
+                </div>`;
+                    }
+                }).join('');
+
+                const moreCount = likesInfo.likesCount > maxAvatars ? likesInfo.likesCount - maxAvatars : 0;
+                const moreHtml = moreCount > 0 ? `<div class="like-more"><span>+${moreCount}</span></div>` : '';
+
+                let likesText = '';
+                if (likesInfo.likesCount === 1) {
+                    const userName = likesInfo.recentLikes[0].fullName || likesInfo.recentLikes[0].firstName;
+                    likesText = `Нравится <strong>${userName}</strong>`;
+                } else if (likesInfo.likesCount === 2) {
+                    const user1 = likesInfo.recentLikes[0].fullName || likesInfo.recentLikes[0].firstName;
+                    const user2 = likesInfo.recentLikes[1].fullName || likesInfo.recentLikes[1].firstName;
+                    likesText = `Нравится <strong>${user1}</strong> и <strong>${user2}</strong>`;
+                } else {
+                    const user1 = likesInfo.recentLikes[0].fullName || likesInfo.recentLikes[0].firstName;
+                    likesText = `Нравится <strong>${user1}</strong> и еще <strong>${likesInfo.likesCount - 1}</strong> пользователям`;
+                }
+
+                block.innerHTML = `
+            <div class="likes-avatars">
+                ${avatarsHtml}
+                ${moreHtml}
+            </div>
+            <div class="likes-text">
+                <span>${likesText}</span>
+            </div>
+        `;
             }
 
             function sharePost(btn) {
@@ -1861,13 +2116,48 @@
                     navigator.share({
                         title: 'Пост',
                         url: url
+                    }).catch(err => {
+                        console.log('Ошибка при sharing:', err);
                     });
                 } else {
                     navigator.clipboard.writeText(url).then(() => {
-                        // TODO: Показать уведомление
-                        alert('Ссылка скопирована!');
+                        showNotification('Ссылка на пост скопирована! 📋', 'success');
+                    }).catch(err => {
+                        console.error('Ошибка при копировании:', err);
+                        showNotification('Не удалось скопировать ссылку', 'error');
                     });
                 }
+            }
+
+            // Навигация к посту при клике на контент
+            function navigateToPost(event, element) {
+                // Не переходим если кликнули на ссылку "Читать далее"
+                if (event.target.closest('.read-more-link')) {
+                    return;
+                }
+
+                // Не переходим если кликнули на изображение (оно уже кликабельно)
+                if (event.target.closest('.post-image')) {
+                    return;
+                }
+
+                const postId = element.dataset.postId;
+                if (postId) {
+                    window.location.href = `/posts/${postId}`;
+                }
+            }
+
+            // Копирование ссылки на пост
+            function copyPostLink(element) {
+                const postId = element.dataset.postId;
+                const postUrl = `${window.location.origin}/posts/${postId}`;
+
+                navigator.clipboard.writeText(postUrl).then(() => {
+                    showNotification('Ссылка на пост скопирована! 📋', 'success');
+                }).catch(err => {
+                    console.error('Ошибка при копировании: ', err);
+                    showNotification('Не удалось скопировать ссылку', 'error');
+                });
             }
 
             function loadPage(page) {
@@ -1877,17 +2167,135 @@
             }
 
             function loadMorePosts() {
-                // TODO: Реализовать AJAX загрузку дополнительных постов
-                console.log('Загрузка дополнительных постов...');
+                showNotification('Функция загрузки постов в разработке...', 'success');
             }
 
-            // Закрытие меню при клике вне его
-            document.addEventListener('click', function (e) {
-                if (!e.target.closest('.post-menu')) {
-                    document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
-                        menu.classList.remove('show');
-                    });
+            // Функции для удаления поста
+            let postToDelete = null;
+
+            function deletePost(event, element) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const postId = element.getAttribute('data-post-id');
+                if (!postId) {
+                    console.error('ID поста не найден');
+                    return;
                 }
+
+                postToDelete = postId;
+
+                const modal = document.getElementById('deleteConfirmModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            function closeDeleteModal() {
+                const modal = document.getElementById('deleteConfirmModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+                postToDelete = null;
+            }
+
+            async function confirmDelete() {
+                if (!postToDelete) {
+                    console.error('ID поста для удаления не найден');
+                    return;
+                }
+
+                const confirmBtn = document.getElementById('confirmDeleteBtn');
+                const btnText = confirmBtn.querySelector('.btn-text');
+                const btnSpinner = confirmBtn.querySelector('.btn-spinner');
+
+                confirmBtn.disabled = true;
+                if (btnText) btnText.style.opacity = '0';
+                if (btnSpinner) btnSpinner.style.display = 'inline-block';
+
+                try {
+                    const response = await fetch(`/api/posts/${postToDelete}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        showNotification('Пост успешно удален', 'success');
+
+                        const postElement = document.querySelector(`[data-post-id="${postToDelete}"]`);
+                        if (postElement) {
+                            const postCard = postElement.closest('article.post-card');
+                            if (postCard) {
+                                postCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                                postCard.style.opacity = '0';
+                                postCard.style.transform = 'translateY(-20px)';
+
+                                setTimeout(() => {
+                                    postCard.remove();
+
+                                    const remainingPosts = document.querySelectorAll('article.post-card');
+                                    if (remainingPosts.length === 0) {
+                                        window.location.reload();
+                                    }
+                                }, 300);
+                            }
+                        }
+
+                        closeDeleteModal();
+
+                    } else {
+                        const errorMessage = result.error || 'Произошла ошибка при удалении поста';
+                        showNotification(errorMessage, 'error');
+                    }
+
+                } catch (error) {
+                    console.error('Ошибка при удалении поста:', error);
+                    showNotification('Произошла ошибка при удалении поста', 'error');
+                } finally {
+                    confirmBtn.disabled = false;
+                    if (btnText) btnText.style.opacity = '1';
+                    if (btnSpinner) btnSpinner.style.display = 'none';
+                }
+            }
+
+            // Обработчики событий
+            document.addEventListener('DOMContentLoaded', function() {
+                // Закрытие меню при клике вне его
+                document.addEventListener('click', function (e) {
+                    if (!e.target.closest('.post-menu')) {
+                        document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+                            menu.classList.remove('show');
+                        });
+                    }
+                });
+
+                // Закрытие модального окна по клику вне его
+                document.addEventListener('click', function(event) {
+                    const modal = document.getElementById('deleteConfirmModal');
+                    if (event.target === modal) {
+                        closeDeleteModal();
+                    }
+                });
+
+                // Закрытие модального окна по нажатию Escape
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape') {
+                        closeDeleteModal();
+                    }
+                });
+
+                // Закрытие уведомления по клику
+                document.addEventListener('click', function(e) {
+                    if (e.target.closest('#notification')) {
+                        hideNotification();
+                    }
+                });
             });
         </script>
 
