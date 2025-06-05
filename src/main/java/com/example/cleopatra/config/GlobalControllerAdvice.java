@@ -7,13 +7,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Глобальный ControllerAdvice для автоматического добавления
@@ -159,12 +167,37 @@ public class GlobalControllerAdvice {
         return "dashboard";
     }
 
-    @ModelAttribute()
-    public String totalUnread(Model model) {
 
-        Long totalUnread = messageService.getUnreadMessagesCount();
-        model.addAttribute("totalUnread", totalUnread.intValue());
-        return null;
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleAllExceptions(Exception e, HttpServletRequest request) {
+        log.error("❌ GLOBAL EXCEPTION HANDLER");
+        log.error("❌ Request URL: {}", request.getRequestURL());
+        log.error("❌ Exception: {}", e.getMessage(), e);
+
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "INTERNAL_SERVER_ERROR");
+        error.put("message", e.getMessage());
+        error.put("type", e.getClass().getSimpleName());
+        error.put("url", request.getRequestURL().toString());
+        error.put("timestamp", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<Map<String, Object>> handleDatabaseExceptions(DataAccessException e, HttpServletRequest request) {
+        log.error("❌ DATABASE EXCEPTION");
+        log.error("❌ Request URL: {}", request.getRequestURL());
+        log.error("❌ Database Exception: {}", e.getMessage(), e);
+
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "DATABASE_ERROR");
+        error.put("message", "Ошибка подключения к базе данных");
+        error.put("details", e.getMessage());
+        error.put("timestamp", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
 }

@@ -526,14 +526,20 @@ public class MessagesController {
             @Valid @RequestBody MessageCreateDto createDto,
             Authentication authentication) {
 
-        try {
-            log.debug("Отправка сообщения от {} к {}", authentication.getName(), createDto.getRecipientId());
-            MessageResponseDto sentMessage = messageService.sendMessage(createDto);
+        System.out.println("🔍 DEBUG: sendMessage called");
+        System.out.println("🔍 DEBUG: recipientId = " + createDto.getRecipientId());
+        System.out.println("🔍 DEBUG: content = " + createDto.getContent());
 
+        try {
+            MessageResponseDto sentMessage = messageService.sendMessage(createDto);
+            System.out.println("✅ DEBUG: Message sent successfully");
             return ResponseEntity.ok(ApiResponse.success(sentMessage, "Сообщение отправлено"));
+
         } catch (Exception e) {
-            log.error("Ошибка при отправке сообщения: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+            System.out.println("❌ DEBUG: Error occurred: " + e.getMessage());
+            e.printStackTrace(); // Это покажет полный stack trace
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Ошибка: " + e.getMessage()));
         }
     }
 

@@ -809,26 +809,7 @@
                 </div>
             </div>
         </div>
-<!--        <div class="chat-user-info">-->
-<!--            <div class="chat-avatar">-->
-<!--                <img th:if="${otherUser?.imageUrl}"-->
-<!--                     th:src="${otherUser.imageUrl}"-->
-<!--                     th:alt="${otherUser.displayName}">-->
-<!--                <span th:unless="${otherUser?.imageUrl}"-->
-<!--                      th:text="${otherUser?.initials ?: '?'}">JD</span>-->
-<!--            </div>-->
 
-<!--            <div class="chat-user-details">-->
-<!--                <h2 th:text="${otherUser?.displayName ?: 'Пользователь'}">Пользователь</h2>-->
-<!--                <div class="chat-user-status">-->
-<!--                    <div class="status-indicator"-->
-<!--                         th:classappend="${otherUser?.isOnline} ? '' : 'offline'"></div>-->
-<!--                    <span class="status-text"-->
-<!--                          th:text="${otherUser?.lastSeenText ?: 'был недавно'}">в сети</span>-->
-<!--                    <div class="typing-indicator" id="typingIndicator">печатает...</div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
 
         <div class="chat-actions">
             <button class="chat-action-btn" onclick="searchInChat()" title="Поиск в чате">
@@ -946,6 +927,7 @@
         </div>
     </div>
 </div>
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
 <!-- Chat Scripts -->
 <script>
     // Global variables - убрали currentPage

@@ -38,28 +38,35 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public Optional<User> authenticate(String email, String password) {
+        log.info("🔍 === AuthenticationService.authenticate() ===");
+        log.info("🔍 Email: {}", email);
+
         try {
+            // Поиск пользователя
+            log.info("🔍 Поиск пользователя в БД");
             Optional<User> userOpt = userRepository.findByEmail(email);
 
             if (userOpt.isEmpty()) {
-                log.warn("Authentication failed: user not found with email: {}", email);
+                log.warn("👤 Пользователь не найден с email: {}", email);
                 return Optional.empty();
             }
 
             User user = userOpt.get();
+            log.info("✅ Пользователь найден: ID={}", user.getId());
 
-            // Проверяем пароль с помощью passwordEncoder
+            // Проверка пароля
+            log.info("🔍 Проверка пароля");
             if (passwordEncoder.matches(password, user.getPassword())) {
-                log.info("User authenticated successfully: {}", email);
+                log.info("✅ Пароль верный");
                 return Optional.of(user);
+            } else {
+                log.warn("🔒 Неверный пароль для email: {}", email);
+                return Optional.empty();
             }
 
-            log.warn("Authentication failed: incorrect password for user: {}", email);
-            return Optional.empty();
-
         } catch (Exception e) {
-            log.error("Error during authentication for user: {}", email, e);
-            return Optional.empty();
+            log.error("❌ ОШИБКА в authenticate(): {}", e.getMessage(), e);
+            throw new RuntimeException("Ошибка аутентификации: " + e.getMessage(), e);
         }
     }
 }

@@ -1036,6 +1036,14 @@ public class MessageService {
 
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // ✅ ДОБАВИТЬ проверки
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                "anonymousUser".equals(authentication.getName())) {
+            throw new RuntimeException("Пользователь не авторизован");
+        }
+
         String username = authentication.getName();
         return userRepository.findByEmail(username)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));

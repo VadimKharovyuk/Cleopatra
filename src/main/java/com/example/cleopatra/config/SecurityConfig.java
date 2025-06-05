@@ -34,6 +34,8 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .csrf(csrf -> csrf.disable())
+
+
                 .authorizeHttpRequests(authz -> authz
                         // Публичные эндпоинты
                         .requestMatchers("/",
@@ -45,6 +47,7 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/admin/**",
                                 "/job/**",
+                                "/health/**",
                                 "/vacancies/**",
                                 "/devices/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
