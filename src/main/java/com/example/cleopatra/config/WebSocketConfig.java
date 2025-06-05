@@ -1,5 +1,4 @@
-package com.example.cleopatra.config;
-
+package com.example.cleopatra.config;//package com.example.cleopatra.config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -19,15 +18,21 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         log.info("🔌 Registering WebSocket handlers");
 
-        // Основной WebSocket endpoint
-        registry.addHandler(chatWebSocketHandler, "/ws")
-                .setAllowedOriginPatterns("*") // Используем allowedOriginPatterns вместо allowedOrigins
-                .withSockJS();
-
-        // Дополнительный endpoint для совместимости
+        // Основные endpoints с SockJS
         registry.addHandler(chatWebSocketHandler, "/ws/chat")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
+
+        registry.addHandler(chatWebSocketHandler, "/ws")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
+
+        // Прямые WebSocket endpoints (без SockJS)
+        registry.addHandler(chatWebSocketHandler, "/ws/chat/websocket")
+                .setAllowedOriginPatterns("*");
+
+        registry.addHandler(chatWebSocketHandler, "/ws/websocket")
+                .setAllowedOriginPatterns("*");
 
         log.info("✅ WebSocket handlers registered successfully");
     }

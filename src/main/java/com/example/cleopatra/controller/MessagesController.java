@@ -441,9 +441,9 @@ public class MessagesController {
                                Model model,
                                Authentication authentication,
                                @RequestParam(defaultValue = "0") @Min(0) int page,
-                               @RequestParam(defaultValue = "50") @Min(1) @Max(100) int size) {
+                               @RequestParam(defaultValue = "30") @Min(1) @Max(100) int size) {
 
-        log.info("Открытие чата с пользователем {} для {}", userId, authentication.getName());
+        log.info("Открытие чата с пользователем {} для {}", userId, authentication.getName() + size +" размер ");
 
         try {
             User currentUser = getCurrentUser(authentication);
@@ -451,6 +451,7 @@ public class MessagesController {
 
             // Получаем сообщения конверсации
             MessageListDto conversation = messageService.getConversation(userId, page, size);
+
             model.addAttribute("conversation", conversation);
             model.addAttribute("otherUser", conversation.getOtherUser());
             model.addAttribute("otherUserId", userId);
@@ -471,8 +472,8 @@ public class MessagesController {
             return "messages/error";
         }
 
-//        return "messages/chat";
-        return "messages/chatV1";
+        return "messages/chat";
+//        return "messages/chatV1";
     }
 
     /**

@@ -7,15 +7,18 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class WebSocketMonitor {
 
+    public WebSocketMonitor(ChatWebSocketHandler chatWebSocketHandler) {
+        this.chatWebSocketHandler = chatWebSocketHandler;
+    }
+
     private final ChatWebSocketHandler chatWebSocketHandler;
 
-//    @Scheduled(fixedRate = 60000) // каждые 60 секунд
-//    public void logConnectionStats() {
-//        int totalConnections = chatWebSocketHandler.getTotalActiveConnections();
-//        log.info("Total active WebSocket connections: {}", totalConnections);
-//    }
+    @Scheduled(fixedRate = 60000) // каждые 60 секунд
+    public void logConnectionStats() {
+        int totalConnections = chatWebSocketHandler.getConnectedUsersCount();
+        log.info("Total active WebSocket connections: {}", totalConnections);
+    }
 }

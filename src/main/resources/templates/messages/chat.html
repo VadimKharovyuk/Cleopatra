@@ -1,914 +1,1762 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">-->
-<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">-->
-<!--    <title th:text="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName + ' - Чат'} : 'Чат'">Чат</title>-->
-<!--    <style>-->
-<!--        * {-->
-<!--            margin: 0;-->
-<!--            padding: 0;-->
-<!--            box-sizing: border-box;-->
-<!--        }-->
-
-<!--        body {-->
-<!--            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;-->
-<!--            background-color: #1a1a1a;-->
-<!--            color: #e0e0e0;-->
-<!--            line-height: 1.5;-->
-<!--        }-->
-
-<!--        .chat-container {-->
-<!--            max-width: 800px;-->
-<!--            margin: 0 auto;-->
-<!--            height: 100vh;-->
-<!--            display: flex;-->
-<!--            flex-direction: column;-->
-<!--        }-->
-
-<!--        .chat-header {-->
-<!--            background-color: #252525;-->
-<!--            padding: 15px;-->
-<!--            display: flex;-->
-<!--            align-items: center;-->
-<!--            gap: 15px;-->
-<!--            border-bottom: 1px solid #333;-->
-<!--        }-->
-
-<!--        .back-btn {-->
-<!--            color: #1e90ff;-->
-<!--            text-decoration: none;-->
-<!--            font-size: 16px;-->
-<!--        }-->
-
-<!--        .back-btn:hover {-->
-<!--            text-decoration: underline;-->
-<!--        }-->
-
-<!--        .chat-user-info {-->
-<!--            display: flex;-->
-<!--            align-items: center;-->
-<!--            gap: 10px;-->
-<!--            flex-grow: 1;-->
-<!--        }-->
-
-<!--        .avatar {-->
-<!--            width: 40px;-->
-<!--            height: 40px;-->
-<!--        }-->
-
-<!--        .avatar img {-->
-<!--            width: 100%;-->
-<!--            height: 100%;-->
-<!--            border-radius: 50%;-->
-<!--            object-fit: cover;-->
-<!--        }-->
-
-<!--        .avatar-placeholder {-->
-<!--            width: 100%;-->
-<!--            height: 100%;-->
-<!--            border-radius: 50%;-->
-<!--            background-color: #444;-->
-<!--            display: flex;-->
-<!--            align-items: center;-->
-<!--            justify-content: center;-->
-<!--            font-size: 16px;-->
-<!--        }-->
-
-<!--        .user-details h3 {-->
-<!--            font-size: 18px;-->
-<!--            font-weight: 500;-->
-<!--        }-->
-
-<!--        .messages-container {-->
-<!--            flex-grow: 1;-->
-<!--            overflow-y: auto;-->
-<!--            padding: 20px;-->
-<!--            background-color: #1e1e1e;-->
-<!--        }-->
-
-<!--        .no-messages {-->
-<!--            text-align: center;-->
-<!--            color: #888;-->
-<!--            padding: 20px;-->
-<!--        }-->
-
-<!--        .message {-->
-<!--            margin-bottom: 15px;-->
-<!--            max-width: 70%;-->
-<!--            position: relative;-->
-<!--        }-->
-
-<!--        .message.own {-->
-<!--            margin-left: auto;-->
-<!--        }-->
-
-<!--        .message.other {-->
-<!--            margin-right: auto;-->
-<!--        }-->
-
-<!--        .message-content {-->
-<!--            background-color: #333;-->
-<!--            padding: 10px 15px;-->
-<!--            border-radius: 12px;-->
-<!--            position: relative;-->
-<!--        }-->
-
-<!--        .市场的 {-->
-<!--            background-color: #1e90ff;-->
-<!--            color: #fff;-->
-<!--        }-->
-
-<!--        .message-text {-->
-<!--            font-size: 16px;-->
-<!--            word-break: break-word;-->
-<!--        }-->
-
-<!--        .message-info {-->
-<!--            font-size: 12px;-->
-<!--            color: #888;-->
-<!--            margin-top: 5px;-->
-<!--            display: flex;-->
-<!--            gap: 5px;-->
-<!--            align-items: center;-->
-<!--        }-->
-
-<!--        .message.own .message-info {-->
-<!--            justify-content: flex-end;-->
-<!--            color: #ddd;-->
-<!--        }-->
-
-<!--        .message-actions {-->
-<!--            position: absolute;-->
-<!--            top: 10px;-->
-<!--            right: 10px;-->
-<!--            display: flex;-->
-<!--            gap: 5px;-->
-<!--        }-->
-
-<!--        .message-actions button {-->
-<!--            background: none;-->
-<!--            border: none;-->
-<!--            color: #e0e0e0;-->
-<!--            cursor: pointer;-->
-<!--            font-size: 14px;-->
-<!--        }-->
-
-<!--        .message-actions button:hover {-->
-<!--            color: #1e90ff;-->
-<!--        }-->
-
-<!--        .message-input-container {-->
-<!--            padding: 15px;-->
-<!--            background-color: #252525;-->
-<!--            border-top: 1px solid #333;-->
-<!--        }-->
-
-<!--        .input-group {-->
-<!--            display: flex;-->
-<!--            gap: 10px;-->
-<!--        }-->
-
-<!--        #messageInput {-->
-<!--            flex-grow: 1;-->
-<!--            background-color: #333;-->
-<!--            border: 1px solid #444;-->
-<!--            border-radius: 20px;-->
-<!--            padding: 10px 15px;-->
-<!--            color: #e0e0e0;-->
-<!--            font-size: 16px;-->
-<!--            outline: none;-->
-<!--        }-->
-
-<!--        #messageInput:focus {-->
-<!--            border-color: #1e90ff;-->
-<!--        }-->
-
-<!--        #sendButton {-->
-<!--            background-color: #1e90ff;-->
-<!--            color: #fff;-->
-<!--            border: none;-->
-<!--            padding: 10px 20px;-->
-<!--            border-radius: 20px;-->
-<!--            cursor: pointer;-->
-<!--            font-size: 16px;-->
-<!--        }-->
-
-<!--        #sendButton:hover {-->
-<!--            background-color: #1c86ee;-->
-<!--        }-->
-
-<!--        .error-message {-->
-<!--            background-color: #ff4444;-->
-<!--            color: #fff;-->
-<!--            padding: 10px;-->
-<!--            text-align: center;-->
-<!--            margin: 10px;-->
-<!--            border-radius: 4px;-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--<div class="chat-container">-->
-<!--    <header class="chat-header">-->
-<!--        <a href="/messages" class="back-btn">← Назад</a>-->
-<!--        <div class="chat-user-info">-->
-<!--            <div class="avatar">-->
-<!--                <img th:if="${otherUser != null and otherUser.imageUrl != null}"-->
-<!--                     th:src="${otherUser.imageUrl}"-->
-<!--                     th:alt="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName} : 'Пользователь'">-->
-<!--                <div th:unless="${otherUser != null and otherUser.imageUrl != null}"-->
-<!--                     class="avatar-placeholder"-->
-<!--                     th:text="${otherUser != null and otherUser.initials != null} ? ${otherUser.initials} : 'АА'">АА</div>-->
-<!--            </div>-->
-<!--            <div class="user-details">-->
-<!--                <h3 th:text="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName} : 'Пользователь'">Пользователь</h3>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--    </header>-->
-
-<!--    <div th:if="${error != null}" class="error-message">-->
-<!--        <p th:text="${error}">Сообщение об ошибке</p>-->
-<!--    </div>-->
-
-<!--    <div class="messages-container" id="messagesContainer">-->
-<!--        <div th:if="${conversation != null and conversation.messages != null and !conversation.messages.isEmpty() == false}" class="no-messages">-->
-<!--            <p>Сообщений пока нет. Начните разговор!</p>-->
-<!--        </div>-->
-
-<!--        <div class="messages-list" id="messagesList">-->
-<!--            <div th:each="message : ${conversation != null and conversation.messages != null ? conversation.messages : {}}"-->
-<!--                 th:if="${message != null}"-->
-<!--                 class="message"-->
-<!--                 th:classappend="${message.isOwnMessage != null and message.isOwnMessage} ? 'own' : 'other'"-->
-<!--                 th:data-message-id="${message.id != null} ? ${message.id} : ''">-->
-<!--                <div class="message-content">-->
-<!--                    <div class="message-body">-->
-<!--                        <span class="message-text" th:text="${message.content != null} ? ${message.content} : ''">Текст сообщения</span>-->
-<!--                        <div class="message-info">-->
-<!--                            <span class="time" th:text="${message.timeAgo != null} ? ${message.timeAgo} : ''"></span>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div th:if="${message.isOwnMessage != null and message.isOwnMessage}" class="message-actions">-->
-<!--                        <button th:onclick="'editMessage(\'' + ${message.id != null ? message.id : ''} + '\')'" title="Редактировать">✏️</button>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
-<!--    <div class="message-input-container">-->
-<!--        <div class="input-group">-->
-<!--            <input type="text"-->
-<!--                   id="messageInput"-->
-<!--                   placeholder="Напишите сообщение..."-->
-<!--                   onkeypress="handleKeyPress(event)">-->
-<!--            <button id="sendButton" onclick="sendMessage()">Отправить</button>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
-
-<!--<script>-->
-<!--    const currentUserId = [[${currentUserId != null ? currentUserId : 0}]];-->
-<!--    const otherUserId = [[${otherUserId != null ? otherUserId : 0}]];-->
-
-<!--    let socket = null;-->
-
-<!--    function initWebSocket() {-->
-<!--        const wsUrl = `ws://localhost:2027/chat?userId=${currentUserId}`;-->
-<!--        socket = new WebSocket(wsUrl);-->
-
-<!--        socket.onopen = function() {-->
-<!--            console.log('WebSocket подключен');-->
-<!--        };-->
-
-<!--        socket.onmessage = function(event) {-->
-<!--            const message = JSON.parse(event.data);-->
-<!--            handleWebSocketMessage(message);-->
-<!--        };-->
-
-<!--        socket.onclose = function() {-->
-<!--            console.log('WebSocket отключен');-->
-<!--            setTimeout(initWebSocket, 5000);-->
-<!--        };-->
-<!--    }-->
-
-<!--    function handleWebSocketMessage(message) {-->
-<!--        if (!message || !message.action) return;-->
-<!--        if (message.action === 'NEW_MESSAGE' && message.senderId == otherUserId) {-->
-<!--            addMessageToChat(message, false);-->
-<!--        } else if (message.action === 'MESSAGE_EDITED') {-->
-<!--            updateMessage(message);-->
-<!--        }-->
-<!--    }-->
-
-<!--    function sendMessage() {-->
-<!--        const input = document.getElementById('messageInput');-->
-<!--        const content = input.value.trim();-->
-
-<!--        if (!content) return;-->
-
-<!--        const messageData = {-->
-<!--            recipientId: otherUserId,-->
-<!--            content: content-->
-<!--        };-->
-
-<!--        fetch('/messages/send', {-->
-<!--            method: 'POST',-->
-<!--            headers: {-->
-<!--                'Content-Type': 'application/json',-->
-<!--            },-->
-<!--            body: JSON.stringify(messageData)-->
-<!--        })-->
-<!--            .then(response => response.json())-->
-<!--            .then(data => {-->
-<!--                if (data.success && data.message) {-->
-<!--                    addMessageToChat(data.message, true);-->
-<!--                    input.value = '';-->
-<!--                } else {-->
-<!--                    alert('Ошибка отправки: ' + (data.error || 'Неизвестная ошибка'));-->
-<!--                }-->
-<!--            })-->
-<!--            .catch(error => {-->
-<!--                console.error('Ошибка:', error);-->
-<!--                alert('Ошибка отправки сообщения');-->
-<!--            });-->
-<!--    }-->
-
-<!--    function editMessage(messageId) {-->
-<!--        if (!messageId) return;-->
-<!--        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);-->
-<!--        if (!messageElement) return;-->
-
-<!--        const messageText = messageElement.querySelector('.message-text').textContent;-->
-<!--        const newText = prompt('Редактировать сообщение:', messageText);-->
-
-<!--        if (newText && newText !== messageText) {-->
-<!--            fetch(`/messages/edit/${messageId}`, {-->
-<!--                method: 'PUT',-->
-<!--                headers: {-->
-<!--                    'Content-Type': 'application/json',-->
-<!--                },-->
-<!--                body: JSON.stringify({ content: newText })-->
-<!--            })-->
-<!--                .then(response => response.json())-->
-<!--                .then(data => {-->
-<!--                    if (data.success && data.message) {-->
-<!--                        updateMessage(data.message);-->
-<!--                    } else {-->
-<!--                        alert('Ошибка редактирования: ' + (data.error || 'Неизвестная ошибка'));-->
-<!--                    }-->
-<!--                })-->
-<!--                .catch(error => {-->
-<!--                    console.error('Ошибка:', error);-->
-<!--                    alert('Ошибка редактирования сообщения');-->
-<!--                });-->
-<!--        }-->
-<!--    }-->
-
-<!--    function updateMessage(message) {-->
-<!--        if (!message || !message.id) return;-->
-<!--        const messageElement = document.querySelector(`[data-message-id="${message.id}"]`);-->
-<!--        if (messageElement) {-->
-<!--            const textElement = messageElement.querySelector('.message-text');-->
-<!--            textElement.textContent = message.content || '';-->
-<!--            const timeElement = messageElement.querySelector('.time');-->
-<!--            timeElement.textContent = message.timeAgo || '';-->
-<!--        }-->
-<!--    }-->
-
-<!--    function addMessageToChat(message, isOwn) {-->
-<!--        if (!message) return;-->
-<!--        const messagesList = document.getElementById('messagesList');-->
-<!--        const messageHtml = createMessageHtml(message, isOwn);-->
-<!--        messagesList.insertAdjacentHTML('beforeend', messageHtml);-->
-<!--        scrollToBottom();-->
-<!--    }-->
-
-<!--    function createMessageHtml(message, isOwn) {-->
-<!--        return `-->
-<!--            <div class="message ${isOwn ? 'own' : 'other'}" data-message-id="${message.id || ''}">-->
-<!--                <div class="message-content">-->
-<!--                    <div class="message-body">-->
-<!--                        <span class="message-text">${message.content || ''}</span>-->
-<!--                        <div class="message-info">-->
-<!--                            <span class="time">${message.timeAgo || ''}</span>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    ${isOwn ? `-->
-<!--                        <div class="message-actions">-->
-<!--                            <button onclick="editMessage('${message.id || ''}')" title="Редактировать">✏️</button>-->
-<!--                        </div>-->
-<!--                    ` : ''}-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        `;-->
-<!--    }-->
-
-<!--    function handleKeyPress(event) {-->
-<!--        if (event.key === 'Enter') {-->
-<!--            sendMessage();-->
-<!--        }-->
-<!--    }-->
-
-<!--    function scrollToBottom() {-->
-<!--        const container = document.getElementById('messagesContainer');-->
-<!--        container.scrollTop = container.scrollHeight;-->
-<!--    }-->
-
-<!--    document.addEventListener('DOMContentLoaded', function() {-->
-<!--        initWebSocket();-->
-<!--        scrollToBottom();-->
-<!--    });-->
-<!--</script>-->
-<!--</body>-->
-<!--</html>-->
-
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <title th:text="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName + ' - Чат'} : 'Чат'">Чат</title>
+    <title th:text="|Чат с ${otherUser?.displayName ?: 'пользователем'} - Cleopatra|">Чат - Cleopatra</title>
 
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- SockJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+
+    <!-- Подключение стилей sidebar -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+    <!-- Chat Specific Styles -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Основные переменные для чата */
+        :root {
+            --chat-message-font-size: 1rem;
+            --chat-header-height: 80px;
+            --chat-input-height: 80px;
+            --chat-bubble-padding: 1rem 1.25rem;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-            line-height: 1.5;
-        }
-
+        /* Chat Container */
         .chat-container {
-            max-width: 800px;
-            margin: 0 auto;
+            margin-left: 280px;
             height: 100vh;
             display: flex;
             flex-direction: column;
+            background: var(--bg-primary);
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            z-index: 1;
         }
 
+        /* Chat Header - увеличенный */
         .chat-header {
-            background-color: #252525;
-            padding: 15px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
+            padding: 1.5rem 2rem;
             display: flex;
             align-items: center;
-            gap: 15px;
-            border-bottom: 1px solid #333;
-        }
-
-        .back-btn {
-            color: #1e90ff;
-            text-decoration: none;
-            font-size: 16px;
-        }
-
-        .back-btn:hover {
-            text-decoration: underline;
+            justify-content: space-between;
+            min-height: var(--chat-header-height);
+            box-shadow: var(--shadow-sm);
+            z-index: 10;
         }
 
         .chat-user-info {
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex-grow: 1;
+            gap: 1.25rem;
         }
 
-        .avatar {
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
+        .chat-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.4rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
         }
 
-        .avatar:hover {
-            transform: scale(1.05);
-        }
-
-        .avatar img {
+        .chat-avatar img {
             width: 100%;
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
         }
 
-        .avatar-placeholder {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background-color: #444;
+        .chat-user-details h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .chat-user-status {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 16px;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
         }
 
-        .user-details h3 {
-            font-size: 18px;
-            font-weight: 500;
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-success);
+            box-shadow: 0 0 0 2px var(--bg-secondary);
         }
 
+        .status-indicator.offline {
+            background: var(--text-muted);
+        }
+
+        .status-text {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .typing-indicator {
+            font-size: 1rem;
+            color: var(--accent-primary);
+            font-style: italic;
+            display: none;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .chat-action-btn {
+            background: none;
+            border: none;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.25rem;
+        }
+
+        .chat-action-btn:hover {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            transform: scale(1.05);
+        }
+
+        /* Messages Area */
         .messages-container {
-            flex-grow: 1;
+            flex: 1;
             overflow-y: auto;
-            padding: 20px;
-            background-color: #1e1e1e;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
-        }
-
-        .no-messages {
-            text-align: center;
-            color: #888;
-            padding: 20px;
-            margin: auto;
+            gap: 1.25rem;
+            height: calc(100vh - var(--chat-header-height) - var(--chat-input-height));
         }
 
         .messages-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            min-height: 100%;
-            justify-content: flex-start;
+            gap: 1rem;
+            min-height: min-content;
         }
 
+        /* Message Bubble - улучшенный дизайн */
         .message {
-            max-width: 70%;
-            position: relative;
-            align-self: flex-start;
+            max-width: 75%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            animation: messageAppear 0.3s ease-out;
         }
 
-        .message.own {
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.sent {
             align-self: flex-end;
+            align-items: flex-end;
         }
 
-        .message.other {
+        .message.received {
             align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .message-bubble {
+            padding: var(--chat-bubble-padding);
+            border-radius: var(--radius-lg);
+            position: relative;
+            word-wrap: break-word;
+            box-shadow: var(--shadow-sm);
+            font-size: var(--chat-message-font-size);
+            line-height: 1.6;
+            transition: all 0.2s ease;
+        }
+
+        .message-bubble:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .message.sent .message-bubble {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border-bottom-right-radius: var(--radius-sm);
+        }
+
+        .message.received .message-bubble {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            border-bottom-left-radius: var(--radius-sm);
         }
 
         .message-content {
-            background-color: #333;
-            padding: 10px 15px;
-            border-radius: 12px;
-            position: relative;
-        }
-
-        .message.own .message-content {
-            background-color: #1e90ff;
-            color: #fff;
-        }
-
-        .message-text {
-            font-size: 16px;
+            margin: 0;
+            line-height: 1.6;
+            font-size: var(--chat-message-font-size);
             word-break: break-word;
         }
 
-        .message-info {
-            font-size: 12px;
-            color: #888;
-            margin-top: 5px;
+        .message-meta {
             display: flex;
-            gap: 5px;
             align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
         }
 
-        .message.own .message-info {
-            justify-content: flex-end;
-            color: #ddd;
+        .message.sent .message-meta {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .message-time {
+            font-size: 0.875rem;
+        }
+
+        .message-status {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
 
         .message-actions {
+            display: none;
             position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 5px;
+            top: -12px;
+            right: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
         }
 
-        .message-actions button {
+        .message:hover .message-actions {
+            display: flex;
+        }
+
+        .message-action {
             background: none;
             border: none;
-            color: #e0e0e0;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-secondary);
             cursor: pointer;
-            font-size: 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            transition: all 0.2s;
         }
 
-        .message-actions button:hover {
-            color: #1e90ff;
+        .message-action:hover {
+            background: var(--bg-accent);
+            color: var(--text-primary);
         }
 
-        .message.own .message-actions button {
-            color: #fff;
+        /* Reply Message */
+        .reply-to {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.75rem;
+            border-left: 3px solid rgba(255, 255, 255, 0.5);
         }
 
-        .message.own .message-actions button:hover {
-            color: #ccc;
+        .message.received .reply-to {
+            background: var(--bg-accent);
+            border-left-color: var(--accent-primary);
         }
 
+        .reply-to-author {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .reply-to-content {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Message Input - переделанный контейнер */
         .message-input-container {
-            padding: 15px;
-            background-color: #252525;
-            border-top: 1px solid #333;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-primary);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            bottom: 0;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
         }
 
-        .input-group {
+        .message-input-wrapper {
             display: flex;
-            gap: 10px;
+            align-items: end;
+            gap: 1rem;
+            max-width: 100%;
+            position: relative;
         }
 
-        #messageInput {
-            flex-grow: 1;
-            background-color: #333;
-            border: 1px solid #444;
-            border-radius: 20px;
-            padding: 10px 15px;
-            color: #e0e0e0;
-            font-size: 16px;
+        .message-input {
+            flex: 1;
+            min-height: 48px;
+            max-height: 120px;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            resize: none;
+            overflow-y: auto;
+            transition: all 0.2s;
+            line-height: 1.5;
+        }
+
+        .message-input:focus {
             outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
         }
 
-        #messageInput:focus {
-            border-color: #1e90ff;
+        .message-input::placeholder {
+            color: var(--text-muted);
+            font-size: 1rem;
         }
 
-        #sendButton {
-            background-color: #1e90ff;
-            color: #fff;
+        .send-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            color: white;
             cursor: pointer;
-            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-md);
+            font-size: 1.1rem;
+            flex-shrink: 0;
         }
 
-        #sendButton:hover {
-            background-color: #1c86ee;
+        .send-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
         }
 
-        .error-message {
-            background-color: #ff4444;
-            color: #fff;
-            padding: 10px;
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Load More Button */
+        .load-more-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
             text-align: center;
-            margin: 10px;
+            margin: 1rem auto;
+            transition: all 0.2s;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .load-more-btn:hover {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Empty State */
+        .empty-chat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .empty-chat-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--bg-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-chat h3 {
+            margin: 0 0 0.75rem;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+        }
+
+        .empty-chat p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Reply Preview */
+        .reply-preview {
+            background: var(--bg-accent);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reply-preview-content strong {
+            color: var(--accent-primary);
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .reply-preview-content p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .reply-cancel {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 1.1rem;
+        }
+
+        .reply-cancel:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .chat-container {
+                margin-left: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                margin-left: 0;
+                margin-top: 60px;
+                height: calc(100vh - 60px);
+            }
+
+            .chat-header {
+                padding: 1rem;
+                min-height: 70px;
+            }
+
+            .chat-user-details h2 {
+                font-size: 1.25rem;
+            }
+
+            .messages-container {
+                padding: 1rem;
+                height: calc(100vh - 130px - 80px);
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .message-input-container {
+                padding: 1rem;
+            }
+
+            .chat-avatar {
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Исправляем z-index для sidebar */
+        @media (min-width: 769px) {
+            .sidebar {
+                z-index: 100;
+            }
+
+            .chat-container {
+                z-index: 1;
+            }
+        }
+
+        /* Loading Animation */
+        .loading-messages {
+            display: flex;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-primary);
+            border-top: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar */
+        .messages-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: var(--border-primary);
             border-radius: 4px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Toast уведомления */
+        .error-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ef4444;
+            color: white;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-md);
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
+<!-- ПОДКЛЮЧЕНИЕ МОБИЛЬНОГО ХЕДЕРА ИЗ ФРАГМЕНТА -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+
+<!-- ПОДКЛЮЧЕНИЕ SIDEBAR ИЗ ФРАГМЕНТА -->
+<th:block th:replace="~{fragments/sidebar :: sidebar('messages')}"></th:block>
+
+<!-- Chat Container -->
 <div class="chat-container">
-    <header class="chat-header">
-        <a href="/messages" class="back-btn">← Назад</a>
+    <!-- Chat Header -->
+    <div class="chat-header">
         <div class="chat-user-info">
-            <div class="avatar" onclick="goToUserProfile()">
-                <img th:if="${otherUser != null and otherUser.imageUrl != null}"
+            <div class="chat-avatar">
+                <img th:if="${otherUser?.imageUrl}"
                      th:src="${otherUser.imageUrl}"
-                     th:alt="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName} : 'Пользователь'">
-                <div th:unless="${otherUser != null and otherUser.imageUrl != null}"
-                     class="avatar-placeholder"
-                     th:text="${otherUser != null and otherUser.initials != null} ? ${otherUser.initials} : 'АА'">АА</div>
+                     th:alt="${otherUser.displayName}">
+                <span th:unless="${otherUser?.imageUrl}"
+                      th:text="${otherUser?.initials ?: '?'}">JD</span>
             </div>
-            <div class="user-details">
-                <h3 th:text="${otherUser != null and otherUser.displayName != null} ? ${otherUser.displayName} : 'Пользователь'">Пользователь</h3>
-            </div>
-        </div>
-    </header>
 
-    <div th:if="${error != null}" class="error-message">
-        <p th:text="${error}">Сообщение об ошибке</p>
-    </div>
-
-    <div class="messages-container" id="messagesContainer">
-        <div th:if="${conversation == null or conversation.messages == null or conversation.messages.isEmpty()}" class="no-messages">
-            <p>Сообщений пока нет. Начните разговор!</p>
-        </div>
-
-        <div class="messages-list" id="messagesList">
-            <div th:each="message : ${conversation != null and conversation.messages != null ? conversation.messages : {}}"
-                 th:if="${message != null}"
-                 class="message"
-                 th:classappend="${message.isOwnMessage != null and message.isOwnMessage} ? 'own' : 'other'"
-                 th:data-message-id="${message.id != null} ? ${message.id} : ''">
-                <div class="message-content">
-                    <div class="message-body">
-                        <span class="message-text" th:text="${message.content != null} ? ${message.content} : ''">Текст сообщения</span>
-                        <div class="message-info">
-                            <span class="time" th:text="${message.timeAgo != null} ? ${message.timeAgo} : ''"></span>
-                        </div>
-                    </div>
-                    <div th:if="${message.isOwnMessage != null and message.isOwnMessage}" class="message-actions">
-                        <button th:onclick="'editMessage(\'' + ${message.id != null ? message.id : ''} + '\')'" title="Редактировать">✏️</button>
-                    </div>
+            <div class="chat-user-details">
+                <h2 th:text="${otherUser?.displayName ?: 'Пользователь'}">Пользователь</h2>
+                <div class="chat-user-status">
+                    <div class="status-indicator"
+                         th:classappend="${otherUser?.isOnline} ? '' : 'offline'"></div>
+                    <span class="status-text"
+                          th:text="${otherUser?.lastSeenText ?: 'был недавно'}">в сети</span>
+                    <div class="typing-indicator" id="typingIndicator">печатает...</div>
                 </div>
             </div>
         </div>
+
+        <div class="chat-actions">
+            <button class="chat-action-btn" onclick="searchInChat()" title="Поиск в чате">
+                <i class="fas fa-search"></i>
+            </button>
+            <button class="chat-action-btn" onclick="openChatInfo()" title="Информация о чате">
+                <i class="fas fa-info-circle"></i>
+            </button>
+            <a th:href="@{/messages}" class="chat-action-btn" title="Назад к чатам">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
     </div>
 
+    <!-- Messages Container -->
+    <div class="messages-container" id="messagesContainer">
+        <!-- Load More Button -->
+        <div th:if="${conversation?.hasNext}" class="text-center">
+            <button class="load-more-btn" onclick="loadMoreMessages()" id="loadMoreBtn">
+                <i class="fas fa-chevron-up"></i> Загрузить предыдущие сообщения
+            </button>
+        </div>
+
+        <!-- Messages List -->
+        <div class="messages-list" id="messagesList" th:if="${hasMessages}">
+            <div th:each="message : ${conversation.messages}"
+                 class="message"
+                 th:classappend="${message.isOwnMessage} ? 'sent' : 'received'"
+                 th:data-message-id="${message.id}">
+
+                <!-- Reply To Message -->
+                <div th:if="${message.replyToMessage}" class="reply-to">
+                    <div class="reply-to-author" th:text="${message.replyToMessage.sender.displayName}">
+                        Иван Петров
+                    </div>
+                    <div class="reply-to-content" th:text="${message.replyToMessage.shortContent}">
+                        Это сообщение на которое отвечаем...
+                    </div>
+                </div>
+
+                <div class="message-bubble">
+                    <p class="message-content" th:text="${message.content}">
+                        Привет! Как дела?
+                    </p>
+
+                    <!-- Message Actions -->
+                    <div class="message-actions">
+                        <button class="message-action" onclick="replyToMessage(this)" title="Ответить">
+                            <i class="fas fa-reply"></i>
+                        </button>
+                        <button th:if="${message.canEdit}" class="message-action" onclick="editMessage(this)" title="Редактировать">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button th:if="${message.canDelete}" class="message-action" onclick="deleteMessage(this)" title="Удалить">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="message-meta">
+                    <span class="message-time" th:text="${message.timeAgo}">5 мин назад</span>
+                    <div th:if="${message.isOwnMessage}" class="message-status">
+                        <i th:if="${message.deliveryStatus.name() == 'SENT'}" class="fas fa-check" title="Отправлено"></i>
+                        <i th:if="${message.deliveryStatus.name() == 'DELIVERED'}" class="fas fa-check-double" title="Доставлено"></i>
+                        <i th:if="${message.deliveryStatus.name() == 'READ'}" class="fas fa-check-double" style="color: var(--accent-primary);" title="Прочитано"></i>
+                    </div>
+                    <span th:if="${message.isEdited}" class="edited-indicator" title="Отредактировано">
+                            <i class="fas fa-edit"></i>
+                        </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty Chat State -->
+        <div th:unless="${hasMessages}" class="empty-chat" id="emptyChatState">
+            <div class="empty-chat-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h3>Начните общение</h3>
+            <p th:text="|Напишите первое сообщение ${otherUser?.firstName ?: 'пользователю'}|">
+                Напишите первое сообщение пользователю
+            </p>
+        </div>
+
+        <!-- Loading Animation -->
+        <div id="loadingMessages" class="loading-messages" style="display: none;">
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Message Input -->
     <div class="message-input-container">
-        <div class="input-group">
-            <input type="text"
-                   id="messageInput"
-                   placeholder="Напишите сообщение..."
-                   onkeypress="handleKeyPress(event)">
-            <button id="sendButton" onclick="sendMessage()">Отправить</button>
+        <!-- Reply Preview -->
+        <div id="replyPreview" class="reply-preview" style="display: none;">
+            <div class="reply-preview-content">
+                <strong id="replyAuthor">Иван Петров</strong>
+                <p id="replyContent">Сообщение на которое отвечаем...</p>
+            </div>
+            <button class="reply-cancel" onclick="cancelReply()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="message-input-wrapper">
+                <textarea id="messageInput"
+                          class="message-input"
+                          placeholder="Напишите сообщение..."
+                          rows="1"
+                          maxlength="5000"></textarea>
+            <button id="sendBtn" class="send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
     </div>
 </div>
 
+<!-- Chat Scripts -->
 <script>
-    const currentUserId = [[${currentUserId != null ? currentUserId : 0}]];
-    const otherUserId = [[${otherUserId != null ? otherUserId : 0}]];
-
+    // Global variables
+    let currentPage = /*[[${conversation?.currentPage ?: 0}]]*/ 0;
+    let isLoading = false;
+    let currentUserId = /*[[${currentUserId}]]*/ 1;
+    let otherUserId = /*[[${otherUserId}]]*/ 2;
+    let replyToMessageId = null;
+    let typingTimer = null;
     let socket = null;
+    let reconnectAttempts = 0;
+    let maxReconnectAttempts = 5;
 
-    function initWebSocket() {
-        const wsUrl = `ws://localhost:2027/chat?userId=${currentUserId}`;
-        socket = new WebSocket(wsUrl);
-
-        socket.onopen = function() {
-            console.log('WebSocket подключен');
-        };
-
-        socket.onmessage = function(event) {
-            const message = JSON.parse(event.data);
-            handleWebSocketMessage(message);
-        };
-
-        socket.onclose = function() {
-            console.log('WebSocket отключен');
-            setTimeout(initWebSocket, 5000);
-        };
+    // Получаем otherUserId из URL для точности
+    const pathParts = window.location.pathname.split('/');
+    const urlOtherUserId = pathParts[pathParts.length - 1];
+    if (urlOtherUserId && !isNaN(urlOtherUserId)) {
+        otherUserId = parseInt(urlOtherUserId);
     }
 
-    function handleWebSocketMessage(message) {
-        if (!message || !message.action) return;
-        if (message.action === 'NEW_MESSAGE' && message.senderId == otherUserId) {
-            addMessageToChat(message, false);
-        } else if (message.action === 'MESSAGE_EDITED') {
-            updateMessage(message);
+    console.log('🚀 Chat initialized with:', {
+        currentUserId: currentUserId,
+        otherUserId: otherUserId,
+        currentPage: currentPage,
+        url: window.location.pathname,
+        extractedUserId: urlOtherUserId
+    });
+
+    // Initialize chat when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeChat();
+        initializeWebSocket();
+        autoResizeTextarea();
+        scrollToBottom();
+
+        // Mark messages as read when page loads
+        setTimeout(() => {
+            markAsRead();
+        }, 1000);
+    });
+
+    /**
+     * Initialize chat functionality
+     */
+    function initializeChat() {
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        if (!messageInput || !sendBtn) {
+            console.error('❌ Chat elements not found');
+            return;
+        }
+
+        // Handle Enter key
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Handle typing indicators
+        messageInput.addEventListener('input', function() {
+            handleTyping();
+            updateSendButtonState();
+        });
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', autoResizeTextarea);
+
+        // Initial button state
+        updateSendButtonState();
+
+        console.log('💬 Chat initialized successfully');
+    }
+
+    /**
+     * Update send button state
+     */
+    function updateSendButtonState() {
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        if (messageInput && sendBtn) {
+            const hasContent = messageInput.value.trim().length > 0;
+            sendBtn.disabled = !hasContent;
+            sendBtn.style.opacity = hasContent ? '1' : '0.5';
         }
     }
 
-    function sendMessage() {
-        const input = document.getElementById('messageInput');
-        const content = input.value.trim();
+    /**
+     * Send message
+     */
+    async function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const content = messageInput.value.trim();
 
-        if (!content) return;
+        if (!content) {
+            console.warn('⚠️ Empty message content');
+            return;
+        }
 
+        const sendBtn = document.getElementById('sendBtn');
+        sendBtn.disabled = true;
+
+        // Create message data
         const messageData = {
             recipientId: otherUserId,
-            content: content
+            content: content,
+            replyToMessageId: replyToMessageId
         };
 
-        fetch('/messages/send', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(messageData)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.message) {
-                    addMessageToChat(data.message, true);
-                    input.value = '';
-                } else {
-                    alert('Ошибка отправки: ' + (data.error || 'Неизвестная ошибка'));
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                alert('Ошибка отправки сообщения');
+        console.log('📤 Sending message data:', messageData);
+
+        try {
+            const response = await fetch('/messages/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(messageData)
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ HTTP Error:', response.status, errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('📨 Send response:', result);
+
+            if (result.success) {
+                console.log('✅ Message sent successfully');
+
+                messageInput.value = '';
+                autoResizeTextarea();
+                cancelReply();
+                updateSendButtonState();
+
+                // Добавляем сообщение в UI, если WebSocket не сработал
+                if (result.data && !document.querySelector(`[data-message-id="${result.data.id}"]`)) {
+                    addMessageToUI(result.data);
+                    scrollToBottom();
+                }
+            } else {
+                console.error('❌ Server returned error:', result);
+                showError('Ошибка отправки сообщения: ' + (result.message || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('❌ Error sending message:', error);
+            showError('Ошибка отправки сообщения. Проверьте подключение к интернету.');
+        } finally {
+            sendBtn.disabled = false;
+            updateSendButtonState();
+        }
     }
 
-    function editMessage(messageId) {
-        if (!messageId) return;
-        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
-        if (!messageElement) return;
+    /**
+     * Load more messages
+     */
+    async function loadMoreMessages() {
+        if (isLoading) return;
 
-        const messageText = messageElement.querySelector('.message-text').textContent;
-        const newText = prompt('Редактировать сообщение:', messageText);
+        isLoading = true;
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const loadingMessages = document.getElementById('loadingMessages');
 
-        if (newText && newText !== messageText) {
-            fetch(`/messages/edit/${messageId}`, {
+        if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+        if (loadingMessages) loadingMessages.style.display = 'flex';
+
+        try {
+            currentPage += 1;
+            const response = await fetch(`/messages/chat/${otherUserId}/load-more?page=${currentPage}&size=50`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.messages && result.messages.length > 0) {
+                prependMessagesToUI(result.messages);
+                console.log(`📥 Loaded ${result.messages.length} more messages`);
+            }
+
+            if (!result.hasNext) {
+                if (loadMoreBtn) loadMoreBtn.remove();
+            } else {
+                if (loadMoreBtn) loadMoreBtn.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('❌ Error loading more messages:', error);
+            showError('Ошибка загрузки сообщений');
+            if (loadMoreBtn) loadMoreBtn.style.display = 'block';
+        } finally {
+            if (loadingMessages) loadingMessages.style.display = 'none';
+            isLoading = false;
+        }
+    }
+
+    /**
+     * Handle typing indicator
+     */
+    function handleTyping() {
+        // Send typing start notification
+        sendTypingNotification(true);
+
+        // Clear existing timer
+        if (typingTimer) {
+            clearTimeout(typingTimer);
+        }
+
+        // Set timer to send typing stop
+        typingTimer = setTimeout(() => {
+            sendTypingNotification(false);
+        }, 1000);
+    }
+
+    /**
+     * Enhanced send typing notification with WebSocket
+     */
+    async function sendTypingNotification(isTyping) {
+        try {
+            // Send through WebSocket if available
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                sendWebSocketMessage({
+                    action: isTyping ? 'TYPING_START' : 'TYPING_STOP',
+                    senderId: currentUserId,
+                    recipientId: otherUserId
+                });
+            }
+
+            // Also send HTTP request as fallback
+            await fetch(`/messages/typing/${otherUserId}?isTyping=${isTyping}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+        } catch (error) {
+            console.error('❌ Error sending typing notification:', error);
+        }
+    }
+
+    /**
+     * Auto-resize textarea
+     */
+    function autoResizeTextarea() {
+        const textarea = document.getElementById('messageInput');
+        if (textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+    }
+
+    /**
+     * Reply to message
+     */
+    function replyToMessage(button) {
+        const message = button.closest('.message');
+        const messageId = message.dataset.messageId;
+        const content = message.querySelector('.message-content').textContent;
+        const author = message.classList.contains('sent') ? 'Вы' : /*[[${otherUser?.displayName}]]*/ 'Пользователь';
+
+        replyToMessageId = messageId;
+
+        const replyAuthor = document.getElementById('replyAuthor');
+        const replyContent = document.getElementById('replyContent');
+        const replyPreview = document.getElementById('replyPreview');
+
+        if (replyAuthor) replyAuthor.textContent = author;
+        if (replyContent) replyContent.textContent = content.length > 50 ? content.substring(0, 50) + '...' : content;
+        if (replyPreview) replyPreview.style.display = 'block';
+
+        const messageInput = document.getElementById('messageInput');
+        if (messageInput) messageInput.focus();
+
+        console.log('💬 Replying to message:', messageId);
+    }
+
+    /**
+     * Cancel reply
+     */
+    function cancelReply() {
+        replyToMessageId = null;
+        const replyPreview = document.getElementById('replyPreview');
+        if (replyPreview) {
+            replyPreview.style.display = 'none';
+        }
+        console.log('❌ Reply cancelled');
+    }
+
+    /**
+     * Edit message
+     */
+    function editMessage(button) {
+        const message = button.closest('.message');
+        const messageId = message.dataset.messageId;
+        const content = message.querySelector('.message-content').textContent;
+
+        const newContent = prompt('Редактировать сообщение:', content);
+        if (newContent && newContent !== content && newContent.trim()) {
+            updateMessage(messageId, newContent.trim());
+        }
+    }
+
+    /**
+     * Delete message
+     */
+    function deleteMessage(button) {
+        const message = button.closest('.message');
+        const messageId = message.dataset.messageId;
+
+        if (confirm('Удалить сообщение?')) {
+            removeMessage(messageId);
+        }
+    }
+
+    /**
+     * Update message
+     */
+    async function updateMessage(messageId, newContent) {
+        try {
+            const response = await fetch(`/messages/edit/${messageId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({ content: newText })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.message) {
-                        updateMessage(data.message);
-                    } else {
-                        alert('Ошибка редактирования: ' + (data.error || 'Неизвестная ошибка'));
-                    }
+                body: JSON.stringify({
+                    content: newContent
                 })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    alert('Ошибка редактирования сообщения');
-                });
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Update message in UI
+                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    const contentElement = messageElement.querySelector('.message-content');
+                    if (contentElement) {
+                        contentElement.textContent = newContent;
+                    }
+
+                    // Add edited indicator if not present
+                    if (!messageElement.querySelector('.edited-indicator')) {
+                        const metaElement = messageElement.querySelector('.message-meta');
+                        if (metaElement) {
+                            metaElement.insertAdjacentHTML('beforeend', '<span class="edited-indicator" title="Отредактировано"><i class="fas fa-edit"></i></span>');
+                        }
+                    }
+                }
+                console.log('✅ Message updated successfully');
+            } else {
+                showError('Ошибка редактирования: ' + (result.message || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('❌ Error updating message:', error);
+            showError('Ошибка редактирования сообщения');
         }
     }
 
-    function updateMessage(message) {
-        if (!message || !message.id) return;
-        const messageElement = document.querySelector(`[data-message-id="${message.id}"]`);
-        if (messageElement) {
-            const textElement = messageElement.querySelector('.message-text');
-            textElement.textContent = message.content || '';
-            const timeElement = messageElement.querySelector('.time');
-            timeElement.textContent = message.timeAgo || '';
+    /**
+     * Remove message
+     */
+    async function removeMessage(messageId) {
+        try {
+            const response = await fetch(`/messages/delete/${messageId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Remove message from UI
+                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    messageElement.style.animation = 'messageDisappear 0.3s ease-out forwards';
+                    setTimeout(() => {
+                        messageElement.remove();
+                    }, 300);
+                }
+                console.log('✅ Message deleted successfully');
+            } else {
+                showError('Ошибка удаления: ' + (result.message || 'Неизвестная ошибка'));
+            }
+        } catch (error) {
+            console.error('❌ Error deleting message:', error);
+            showError('Ошибка удаления сообщения');
         }
     }
 
-    function addMessageToChat(message, isOwn) {
-        if (!message) return;
+    /**
+     * Add message to UI
+     */
+    function addMessageToUI(message) {
+        console.log('🎯 addMessageToUI called with:', message);
 
-        // Удаляем сообщение "нет сообщений" если оно есть
-        const noMessagesDiv = document.querySelector('.no-messages');
-        if (noMessagesDiv) {
-            noMessagesDiv.style.display = 'none';
+        let messagesList = document.getElementById('messagesList');
+        const messagesContainer = document.getElementById('messagesContainer');
+
+        if (!messagesContainer) {
+            console.error('❌ Messages container not found');
+            return;
         }
 
-        const messagesList = document.getElementById('messagesList');
-        const messageHtml = createMessageHtml(message, isOwn);
+        // Remove empty state if present
+        const emptyChat = document.querySelector('.empty-chat');
+        if (emptyChat) {
+            console.log('🗑️ Removing empty chat state');
+            emptyChat.remove();
+        }
+
+        // Create messagesList if it doesn't exist
+        if (!messagesList) {
+            console.log('📝 Creating messages list');
+            const messagesListHtml = '<div class="messages-list" id="messagesList"></div>';
+            messagesContainer.insertAdjacentHTML('beforeend', messagesListHtml);
+            messagesList = document.getElementById('messagesList');
+        }
+
+        if (!messagesList) {
+            console.error('❌ Could not create or find messages list');
+            return;
+        }
+
+        // Check if message already exists
+        const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
+        if (existingMessage) {
+            console.warn('⚠️ Message already exists in UI:', message.id);
+            return;
+        }
+
+        const messageHtml = createMessageHtml(message);
         messagesList.insertAdjacentHTML('beforeend', messageHtml);
-        scrollToBottom();
+
+        console.log('✅ Message added to UI successfully:', message.id);
+
+        // Scroll to bottom after adding message
+        setTimeout(() => {
+            scrollToBottom();
+        }, 100);
     }
 
-    function createMessageHtml(message, isOwn) {
+    /**
+     * Prepend messages to UI
+     */
+    function prependMessagesToUI(messages) {
+        const messagesList = document.getElementById('messagesList');
+        if (!messagesList) {
+            console.error('❌ Messages list not found');
+            return;
+        }
+
+        const messagesHtml = messages.reverse().map(createMessageHtml).join('');
+        messagesList.insertAdjacentHTML('afterbegin', messagesHtml);
+
+        console.log(`➕ ${messages.length} messages prepended to UI`);
+    }
+
+    /**
+     * Create message HTML
+     */
+    function createMessageHtml(message) {
+        if (!message || !message.id) {
+            console.error('❌ Invalid message data:', message);
+            return '';
+        }
+
+        const isOwn = message.isOwnMessage;
+        const messageClass = isOwn ? 'sent' : 'received';
+
         return `
-            <div class="message ${isOwn ? 'own' : 'other'}" data-message-id="${message.id || ''}">
-                <div class="message-content">
-                    <div class="message-body">
-                        <span class="message-text">${message.content || ''}</span>
-                        <div class="message-info">
-                            <span class="time">${message.timeAgo || ''}</span>
-                        </div>
+            <div class="message ${messageClass}" data-message-id="${message.id}">
+                ${message.replyToMessage ? `
+                    <div class="reply-to">
+                        <div class="reply-to-author">${escapeHtml(message.replyToMessage.sender.displayName || 'Пользователь')}</div>
+                        <div class="reply-to-content">${escapeHtml(message.replyToMessage.shortContent || '')}</div>
                     </div>
+                ` : ''}
+                <div class="message-bubble">
+                    <p class="message-content">${escapeHtml(message.content || '')}</p>
+
+                    <div class="message-actions">
+                        <button class="message-action" onclick="replyToMessage(this)" title="Ответить">
+                            <i class="fas fa-reply"></i>
+                        </button>
+                        ${message.canEdit ? `
+                            <button class="message-action" onclick="editMessage(this)" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        ` : ''}
+                        ${message.canDelete ? `
+                            <button class="message-action" onclick="deleteMessage(this)" title="Удалить">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div class="message-meta">
+                    <span class="message-time">${escapeHtml(message.timeAgo || 'только что')}</span>
                     ${isOwn ? `
-                        <div class="message-actions">
-                            <button onclick="editMessage('${message.id || ''}')" title="Редактировать">✏️</button>
+                        <div class="message-status">
+                            ${getDeliveryStatusIcon(message.deliveryStatus)}
                         </div>
+                    ` : ''}
+                    ${message.isEdited ? `
+                        <span class="edited-indicator" title="Отредактировано">
+                            <i class="fas fa-edit"></i>
+                        </span>
                     ` : ''}
                 </div>
             </div>
         `;
     }
 
-    function handleKeyPress(event) {
-        if (event.key === 'Enter') {
-            sendMessage();
+    /**
+     * Get delivery status icon
+     */
+    function getDeliveryStatusIcon(status) {
+        switch(status) {
+            case 'SENT':
+                return '<i class="fas fa-check" title="Отправлено"></i>';
+            case 'DELIVERED':
+                return '<i class="fas fa-check-double" title="Доставлено"></i>';
+            case 'READ':
+                return '<i class="fas fa-check-double" style="color: var(--accent-primary);" title="Прочитано"></i>';
+            default:
+                return '';
         }
     }
 
-    function scrollToBottom() {
+    /**
+     * Escape HTML
+     */
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    /**
+     * Scroll to bottom
+     */
+    function scrollToBottom(smooth = true) {
         const container = document.getElementById('messagesContainer');
-        container.scrollTop = container.scrollHeight;
-    }
-
-    function goToUserProfile() {
-        if (otherUserId) {
-            window.location.href = `/profile/${otherUserId}`;
+        if (container) {
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: smooth ? 'smooth' : 'auto'
+            });
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        initWebSocket();
+    /**
+     * Initialize WebSocket connection with SockJS fallback
+     */
+    function initializeWebSocket() {
+        try {
+            console.log('🔌 Initializing WebSocket connection...');
 
-        // Переворачиваем порядок сообщений при загрузке
-        const messagesList = document.getElementById('messagesList');
-        const messages = Array.from(messagesList.children);
+            // Use SockJS for better compatibility and fallback support
+            const sockJSUrl = `${window.location.origin}/ws/chat`;
+            console.log('🔗 Connecting to:', sockJSUrl);
 
-        // Очищаем контейнер
-        messagesList.innerHTML = '';
+            // Create SockJS connection
+            socket = new SockJS(sockJSUrl);
 
-        // Добавляем сообщения в обратном порядке (от старых к новым)
-        messages.reverse().forEach(message => {
-            messagesList.appendChild(message);
+            socket.onopen = function() {
+                console.log('🔌 WebSocket connected successfully');
+                reconnectAttempts = 0; // Reset reconnect attempts
+
+                // Send connection acknowledgment
+                sendWebSocketMessage({
+                    action: 'CONNECT',
+                    userId: currentUserId,
+                    chatUserId: otherUserId
+                });
+            };
+
+            socket.onmessage = function(event) {
+                try {
+                    console.log('📨 Raw WebSocket message:', event.data);
+                    const data = JSON.parse(event.data);
+                    handleWebSocketMessage(data);
+                } catch (error) {
+                    console.error('❌ Error parsing WebSocket message:', error, event.data);
+                }
+            };
+
+            socket.onclose = function(event) {
+                console.log('🔌 WebSocket disconnected:', event.code, event.reason);
+
+                // Attempt to reconnect if not a normal closure and under attempt limit
+                if (event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000); // Exponential backoff
+                    console.log(`🔄 Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts}) in ${delay}ms...`);
+                    setTimeout(() => {
+                        initializeWebSocket();
+                    }, delay);
+                } else if (reconnectAttempts >= maxReconnectAttempts) {
+                    console.log('❌ Max reconnection attempts reached. Trying direct WebSocket...');
+                    initializeDirectWebSocket();
+                }
+            };
+
+            socket.onerror = function(error) {
+                console.error('❌ WebSocket error:', error);
+            };
+
+        } catch (error) {
+            console.error('❌ Error initializing WebSocket:', error);
+            // Fallback: try direct WebSocket connection
+            console.log('🔄 Trying direct WebSocket connection...');
+            initializeDirectWebSocket();
+        }
+    }
+
+    /**
+     * Fallback to direct WebSocket connection
+     */
+    function initializeDirectWebSocket() {
+        try {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/chat/websocket`;
+
+            console.log('🔗 Direct WebSocket URL:', wsUrl);
+
+            socket = new WebSocket(wsUrl);
+
+            socket.onopen = function() {
+                console.log('🔌 Direct WebSocket connected');
+                reconnectAttempts = 0;
+
+                // Send connection acknowledgment
+                sendWebSocketMessage({
+                    action: 'CONNECT',
+                    userId: currentUserId,
+                    chatUserId: otherUserId
+                });
+            };
+
+            socket.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleWebSocketMessage(data);
+                } catch (error) {
+                    console.error('❌ Error parsing WebSocket message:', error);
+                }
+            };
+
+            socket.onclose = function(event) {
+                console.log('🔌 Direct WebSocket disconnected:', event.code, event.reason);
+            };
+
+            socket.onerror = function(error) {
+                console.error('❌ Direct WebSocket error:', error);
+                console.log('⚠️ All WebSocket connections failed, chat will work without real-time updates');
+            };
+
+        } catch (error) {
+            console.error('❌ Error with direct WebSocket:', error);
+            console.log('⚠️ All WebSocket connections failed, chat will work without real-time updates');
+        }
+    }
+
+    /**
+     * Send message through WebSocket
+     */
+    function sendWebSocketMessage(message) {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            try {
+                const messageStr = JSON.stringify(message);
+                socket.send(messageStr);
+                console.log('📤 WebSocket message sent:', message);
+            } catch (error) {
+                console.error('❌ Error sending WebSocket message:', error);
+            }
+        } else {
+            console.warn('⚠️ WebSocket not connected, cannot send message:', message);
+        }
+    }
+
+    /**
+     * Enhanced handle WebSocket messages with better error handling
+     */
+    function handleWebSocketMessage(data) {
+        console.log('📨 WebSocket message received:', data);
+
+        try {
+            switch(data.action) {
+                case 'NEW_MESSAGE':
+                    handleNewMessage(data);
+                    break;
+
+                case 'MESSAGE_EDITED':
+                    if (data.senderId === otherUserId) {
+                        updateMessageInUI(data);
+                    }
+                    break;
+
+                case 'MESSAGE_DELETED':
+                    removeMessageFromUI(data.id);
+                    break;
+
+                case 'MESSAGES_READ':
+                    if (data.senderId === otherUserId) {
+                        updateMessagesReadStatus();
+                    }
+                    break;
+
+                case 'TYPING_START':
+                    if (data.senderId === otherUserId) {
+                        showTypingIndicator();
+                    }
+                    break;
+
+                case 'TYPING_STOP':
+                    if (data.senderId === otherUserId) {
+                        hideTypingIndicator();
+                    }
+                    break;
+
+                case 'CONNECT_ACK':
+                    console.log('✅ WebSocket connection acknowledged');
+                    break;
+
+                case 'ERROR':
+                    console.error('❌ WebSocket error from server:', data.message);
+                    showError(data.message || 'Ошибка соединения');
+                    break;
+
+                default:
+                    console.log('❓ Unknown WebSocket action:', data.action);
+            }
+        } catch (error) {
+            console.error('❌ Error handling WebSocket message:', error, data);
+        }
+    }
+
+    /**
+     * Handle new message from WebSocket
+     */
+    function handleNewMessage(data) {
+        // Only process messages relevant to current chat
+        if ((data.senderId === otherUserId && data.recipientId === currentUserId) ||
+            (data.senderId === currentUserId && data.recipientId === otherUserId)) {
+
+            // Transform WebSocket data to MessageResponseDto format
+            const messageData = {
+                id: data.id,
+                content: data.content,
+                isOwnMessage: data.senderId === currentUserId,
+                deliveryStatus: 'DELIVERED',
+                timeAgo: 'только что',
+                canEdit: data.senderId === currentUserId,
+                canDelete: data.senderId === currentUserId,
+                isEdited: false,
+                sender: {
+                    displayName: data.senderName || (data.senderId === currentUserId ? 'Вы' : 'Пользователь')
+                },
+                replyToMessage: data.replyToMessage ? {
+                    sender: { displayName: data.replyToMessage.senderName },
+                    shortContent: data.replyToMessage.content
+                } : null
+            };
+
+            // Check if message already exists
+            if (!document.querySelector(`[data-message-id="${data.id}"]`)) {
+                addMessageToUI(messageData);
+                scrollToBottom();
+
+                // Mark as read if it's from other user
+                if (data.senderId === otherUserId) {
+                    setTimeout(() => markAsRead(), 500);
+                }
+            } else {
+                console.log('⚠️ Message already exists in UI:', data.id);
+            }
+        }
+    }
+
+    /**
+     * Update message in UI
+     */
+    function updateMessageInUI(data) {
+        const messageElement = document.querySelector(`[data-message-id="${data.id}"]`);
+        if (messageElement) {
+            const contentElement = messageElement.querySelector('.message-content');
+            if (contentElement) {
+                contentElement.textContent = data.content;
+            }
+
+            // Add edited indicator if not present
+            if (!messageElement.querySelector('.edited-indicator')) {
+                const metaElement = messageElement.querySelector('.message-meta');
+                if (metaElement) {
+                    metaElement.insertAdjacentHTML('beforeend', '<span class="edited-indicator" title="Отредактировано"><i class="fas fa-edit"></i></span>');
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove message from UI
+     */
+    function removeMessageFromUI(messageId) {
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (messageElement) {
+            messageElement.style.animation = 'messageDisappear 0.3s ease-out forwards';
+            setTimeout(() => {
+                messageElement.remove();
+            }, 300);
+        }
+    }
+
+    /**
+     * Update messages read status
+     */
+    function updateMessagesReadStatus() {
+        const sentMessages = document.querySelectorAll('.message.sent');
+        sentMessages.forEach(message => {
+            const statusElement = message.querySelector('.message-status i');
+            if (statusElement) {
+                statusElement.className = 'fas fa-check-double';
+                statusElement.style.color = 'var(--accent-primary)';
+                statusElement.title = 'Прочитано';
+            }
         });
+    }
 
-        scrollToBottom();
+    /**
+     * Show typing indicator
+     */
+    function showTypingIndicator() {
+        const indicator = document.getElementById('typingIndicator');
+        const statusText = indicator?.previousElementSibling;
 
-        // Скрываем сообщение "нет сообщений" если есть сообщения
-        const noMessagesDiv = document.querySelector('.no-messages');
-        if (messagesList.children.length > 0 && noMessagesDiv) {
-            noMessagesDiv.style.display = 'none';
+        if (statusText) statusText.style.display = 'none';
+        if (indicator) indicator.style.display = 'block';
+    }
+
+    /**
+     * Hide typing indicator
+     */
+    function hideTypingIndicator() {
+        const indicator = document.getElementById('typingIndicator');
+        const statusText = indicator?.previousElementSibling;
+
+        if (indicator) indicator.style.display = 'none';
+        if (statusText) statusText.style.display = 'block';
+    }
+
+    /**
+     * Mark messages as read
+     */
+    async function markAsRead() {
+        try {
+            await fetch(`/messages/mark-read/${otherUserId}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            console.log('✅ Messages marked as read');
+        } catch (error) {
+            console.error('❌ Error marking messages as read:', error);
+        }
+    }
+
+    /**
+     * Search in chat
+     */
+    function searchInChat() {
+        const query = prompt('Поиск в чате:');
+        if (query) {
+            console.log('🔍 Searching for:', query);
+            // TODO: Implement search functionality
+            showError('Функция поиска будет добавлена в ближайшее время');
+        }
+    }
+
+    /**
+     * Open chat info
+     */
+    function openChatInfo() {
+        console.log('ℹ️ Opening chat info for user:', otherUserId);
+        // TODO: Implement chat info modal or page
+        showError('Информация о чате будет добавлена в ближайшее время');
+    }
+
+    /**
+     * Show error message
+     */
+    function showError(message) {
+        // Remove existing toasts
+        const existingToasts = document.querySelectorAll('.error-toast');
+        existingToasts.forEach(toast => toast.remove());
+
+        // Create new toast
+        const toast = document.createElement('div');
+        toast.className = 'error-toast';
+        toast.textContent = message;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 5000);
+    }
+
+    /**
+     * Check WebSocket connection status
+     */
+    function getWebSocketStatus() {
+        if (!socket) return 'Not initialized';
+
+        switch(socket.readyState) {
+            case WebSocket.CONNECTING: return 'Connecting';
+            case WebSocket.OPEN: return 'Connected';
+            case WebSocket.CLOSING: return 'Closing';
+            case WebSocket.CLOSED: return 'Closed';
+            default: return 'Unknown';
+        }
+    }
+
+    /**
+     * Update connection status indicator
+     */
+    function updateConnectionStatus() {
+        const status = getWebSocketStatus();
+        console.log('🔌 WebSocket status:', status);
+
+        // You can add a visual indicator in the UI here
+        // For example, change header color or show connection status
+    }
+
+    // Auto-mark messages as read when page becomes visible
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            markAsRead();
         }
     });
+
+    // Handle page unload
+    window.addEventListener('beforeunload', function() {
+        if (socket) {
+            socket.close();
+        }
+    });
+
+    // Check connection status periodically
+    setInterval(updateConnectionStatus, 10000); // Every 10 seconds
+
+    // Add CSS for message disappear animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes messageDisappear {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 </body>
 </html>
