@@ -1,9 +1,7 @@
 package com.example.cleopatra.service.impl;
 
 import com.example.cleopatra.ExistsException.PostNotFoundException;
-import com.example.cleopatra.dto.Post.PostCreateDto;
-import com.example.cleopatra.dto.Post.PostListDto;
-import com.example.cleopatra.dto.Post.PostResponseDto;
+import com.example.cleopatra.dto.Post.*;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.maper.PostMapper;
 import com.example.cleopatra.model.Post;
@@ -24,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,29 +37,24 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final UserRepository userRepository;
     private final SubscriptionService subscriptionService;
+    // ✅ ДОБАВИТЬ новый сервис для лайков
+    private final PostLikeService postLikeService;
 
     @Override
     public PostResponseDto createPost(PostCreateDto postCreateDto) {
         log.info("Создание нового поста");
 
-        // Получаем текущего пользователя
         User currentUser = getCurrentUser();
-
-        // Создаем пост через маппер
         Post post = postMapper.toEntity(postCreateDto, currentUser);
 
-        // Обрабатываем изображение, если оно есть
         if (postCreateDto.getImage() != null && !postCreateDto.getImage().isEmpty()) {
             try {
-                // Валидация и обработка изображения
                 ImageConverterService.ProcessedImage processedImage =
                         imageValidator.validateAndProcess(postCreateDto.getImage());
 
-                // Загрузка в хранилище
                 StorageService.StorageResult storageResult =
                         storageService.uploadProcessedImage(processedImage);
 
-                // Устанавливаем URL и ID изображения
                 post.setImageUrl(storageResult.getUrl());
                 post.setImgId(storageResult.getImageId());
 
@@ -73,15 +66,17 @@ public class PostServiceImpl implements PostService {
             }
         }
 
-        // Сохраняем пост
         Post savedPost = postRepository.save(post);
-
-        // Сохраняем изменения пользователя
         userRepository.save(currentUser);
 
         log.info("Пост успешно создан с ID: {}", savedPost.getId());
 
-        return postMapper.toResponseDto(savedPost);
+        // ✅ ОБНОВЛЕННЫЙ ВЫЗОВ с логикой лайков
+        Boolean isLiked = postLikeService.isPostLikedByUser(savedPost, currentUser.getId());
+        List<PostResponseDto.LikeUserDto> recentLikes =
+                postLikeService.getRecentLikes(savedPost, 5);
+
+        return postMapper.toResponseDto(savedPost, isLiked, recentLikes);
     }
 
     @Override
@@ -95,34 +90,35 @@ public class PostServiceImpl implements PostService {
         post.setViewsCount(post.getViewsCount() + 1);
         postRepository.save(post);
 
+        User currentUser = getCurrentUser();
+
         log.info("Пост найден: {}", post.getContent().substring(0, Math.min(50, post.getContent().length())));
 
-        return postMapper.toResponseDto(post);
+        // ✅ ОБНОВЛЕННЫЙ ВЫЗОВ с логикой лайков
+        Boolean isLiked = postLikeService.isPostLikedByUser(post, currentUser.getId());
+        List<PostResponseDto.LikeUserDto> recentLikes =
+                postLikeService.getRecentLikes(post, 5);
+
+        return postMapper.toResponseDto(post, isLiked, recentLikes);
     }
 
     @Override
     public PostListDto getUserPosts(Long userId, int page, int size) {
         log.info("Получение постов пользователя с ID: {}, страница: {}, размер: {}", userId, page, size);
 
-        // Проверяем существование пользователя
         if (!userService.userExists(userId)) {
             throw new RuntimeException("Пользователь с ID " + userId + " не найден");
         }
 
-        // Создаем Pageable для сортировки по дате создания (новые сначала)
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-        // Получаем посты пользователя (только неудаленные)
         Slice<Post> postSlice = postRepository.findByAuthor_IdAndIsDeletedFalse(userId, pageable);
 
         log.info("Найдено {} постов для пользователя {}", postSlice.getNumberOfElements(), userId);
 
-        return postMapper.toListDtoFromSlice(postSlice);
+        // ✅ ОБНОВЛЕННЫЙ МЕТОД с логикой лайков
+        return convertPostSliceToListDto(postSlice, page);
     }
 
-    /**
-     * Получить посты текущего пользователя
-     */
     @Override
     public PostListDto getMyPosts(int page, int size) {
         log.info("Получение собственных постов, страница: {}, размер: {}", page, size);
@@ -134,7 +130,6 @@ public class PostServiceImpl implements PostService {
     public PostListDto getFeedPosts(Long userId, int page, int size) {
         log.info("Получение ленты новостей для пользователя: {}, страница: {}, размер: {}", userId, page, size);
 
-        // Получаем ID пользователей, на которых подписан текущий пользователь
         List<Long> subscriptionIds = subscriptionService.getSubscriptionIds(userId);
 
         if (subscriptionIds.isEmpty()) {
@@ -142,15 +137,13 @@ public class PostServiceImpl implements PostService {
             return getRecommendedPosts(userId, page, size);
         }
 
-        // Создаем Pageable с сортировкой по дате (новые сначала)
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-        // Получаем посты от пользователей из подписок
         Slice<Post> postSlice = postRepository.findByAuthor_IdInAndIsDeletedFalse(subscriptionIds, pageable);
 
         log.info("Найдено {} постов в ленте для пользователя {}", postSlice.getNumberOfElements(), userId);
 
-        return postMapper.toListDtoFromSlice(postSlice);
+        // ✅ ОБНОВЛЕННЫЙ МЕТОД с логикой лайков
+        return convertPostSliceToListDto(postSlice, page);
     }
 
     @Override
@@ -158,11 +151,67 @@ public class PostServiceImpl implements PostService {
         log.info("Получение рекомендованных постов для пользователя: {}", userId);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-        // Показываем популярные посты (можно добавить другую логику)
         Slice<Post> postSlice = postRepository.findByIsDeletedFalseOrderByLikesCountDescCreatedAtDesc(pageable);
 
-        return postMapper.toListDtoFromSlice(postSlice);
+        // ✅ ОБНОВЛЕННЫЙ МЕТОД с логикой лайков
+        return convertPostSliceToListDto(postSlice, page);
+    }
+
+    // ✅ НОВЫЕ МЕТОДЫ для работы с лайками
+
+    /**
+     * Лайкнуть/убрать лайк с поста
+     */
+    @Override
+    public PostLikeResponseDto toggleLike(Long postId) {
+        User currentUser = getCurrentUser();
+        return postLikeService.toggleLike(postId, currentUser.getId());
+    }
+
+    /**
+     * Получить информацию о лайках поста
+     */
+    @Override
+    public PostLikeInfoDto getLikeInfo(Long postId) {
+        User currentUser = getCurrentUser();
+        Post post = findById(postId);
+
+        Boolean isLiked = postLikeService.isPostLikedByUser(post, currentUser.getId());
+        List<PostResponseDto.LikeUserDto> recentLikes =
+                postLikeService.getRecentLikes(post, 10);
+
+        return PostLikeInfoDto.builder()
+                .postId(postId)
+                .likesCount(post.getLikesCount())
+                .isLikedByCurrentUser(isLiked)
+                .recentLikes(recentLikes)
+                .build();
+    }
+
+    // ✅ ПРИВАТНЫЕ ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+
+    /**
+     * Конвертирует Slice<Post> в PostListDto с логикой лайков
+     */
+    private PostListDto convertPostSliceToListDto(Slice<Post> postSlice, int page) {
+        User currentUser = getCurrentUser();
+
+        List<PostCardDto> postCards = postSlice.getContent().stream()
+                .map(post -> {
+                    Boolean isLiked = postLikeService.isPostLikedByUser(post, currentUser.getId());
+                    List<PostCardDto.LikeUserDto> recentLikes =
+                            postLikeService.getRecentLikesForCard(post, 3);
+
+                    return postMapper.toCardDto(post, isLiked, recentLikes);
+                })
+                .collect(Collectors.toList());
+
+        return postMapper.toListDto(
+                postCards,
+                page,
+                postSlice.hasNext(),
+                postSlice.getSize()
+        );
     }
 
     @Override
@@ -173,13 +222,11 @@ public class PostServiceImpl implements PostService {
 
         log.info("🗑️ Удаляем пост {} пользователя {}", postId, userId);
 
-        // Логируем ДО удаления
         Long countBefore = postRepository.countByAuthorId(userId);
         log.info("📊 Количество постов ДО удаления: {}", countBefore);
 
         postRepository.deleteById(postId);
 
-        // Логируем ПОСЛЕ удаления
         Long countAfter = postRepository.countByAuthorId(userId);
         log.info("📊 Количество постов ПОСЛЕ удаления: {}", countAfter);
     }

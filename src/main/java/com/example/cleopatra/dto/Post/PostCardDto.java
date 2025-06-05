@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -26,6 +27,10 @@ public class PostCardDto {
     private Boolean hasImage;
     private Boolean isLongContent; // true если контент обрезан
 
+    // ✅ ДОБАВИТЬ поля для лайков
+    private Boolean isLikedByCurrentUser; // Лайкнул ли текущий пользователь
+    private List<LikeUserDto> recentLikes; // Последние 2-3 пользователя для карточки
+
     @Data
     @Builder
     @AllArgsConstructor
@@ -37,6 +42,22 @@ public class PostCardDto {
         private String imageUrl;
 
         // Полное имя для удобства
+        public String getFullName() {
+            return firstName + " " + lastName;
+        }
+    }
+
+    // ✅ ДОБАВИТЬ DTO для пользователей, которые лайкнули
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class LikeUserDto {
+        private Long id;
+        private String firstName;
+        private String lastName;
+        private String imageUrl;
+
         public String getFullName() {
             return firstName + " " + lastName;
         }

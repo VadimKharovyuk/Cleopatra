@@ -1,8 +1,6 @@
 package com.example.cleopatra.service;
 
-import com.example.cleopatra.dto.Post.PostCreateDto;
-import com.example.cleopatra.dto.Post.PostListDto;
-import com.example.cleopatra.dto.Post.PostResponseDto;
+import com.example.cleopatra.dto.Post.*;
 import com.example.cleopatra.model.Post;
 
 public interface PostService {
@@ -30,4 +28,7 @@ public interface PostService {
 
 
     Post findById(Long postId);
+    // ✅ НОВЫЕ МЕТОДЫ для лайков
+    PostLikeResponseDto toggleLike(Long postId);
+    PostLikeInfoDto getLikeInfo(Long postId);
 }
