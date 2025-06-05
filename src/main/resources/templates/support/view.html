@@ -1,60 +1,647 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Просмотр заявки</title>
   <meta charset="UTF-8">
-  <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'Заявка #' + ${request.id} + ' - ' + ${request.title}">Просмотр заявки</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f0f0f;
+      --bg-secondary: #1a1a1a;
+      --bg-accent: #2a2a2a;
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3b3;
+      --text-muted: #666666;
+      --accent-primary: #d4af37;
+      --accent-secondary: #b8941f;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --accent-info: #3b82f6;
+      --border-color: #333333;
+      --border-primary: rgba(255, 255, 255, 0.1);
+      --border-secondary: rgba(255, 255, 255, 0.05);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --surface-elevated: rgba(26, 26, 26, 0.95);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      background-image:
+              radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 40% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      color: var(--text-secondary);
+      text-decoration: none;
+      margin-bottom: 2rem;
+      gap: 0.5rem;
+      transition: color 0.3s ease;
+      font-weight: 500;
+    }
+
+    .back-link:hover {
+      color: var(--accent-primary);
+    }
+
+    .request-header {
+      background: var(--surface-elevated);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .request-title-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+
+    .title-content h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .request-id {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .status-badge {
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-open {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--accent-danger);
+      border: 2px solid var(--accent-danger);
+    }
+
+    .status-in-progress {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--accent-warning);
+      border: 2px solid var(--accent-warning);
+    }
+
+    .status-resolved {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent-success);
+      border: 2px solid var(--accent-success);
+    }
+
+    .status-closed {
+      background: rgba(107, 114, 128, 0.2);
+      color: var(--text-muted);
+      border: 2px solid var(--text-muted);
+    }
+
+    .request-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      padding: 1.5rem;
+      background: var(--bg-accent);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .meta-label {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .meta-value {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .category-badge {
+      background: var(--bg-secondary);
+      color: var(--accent-primary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      border: 1px solid var(--accent-primary);
+      display: inline-block;
+    }
+
+    .content-section {
+      background: var(--surface-elevated);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title i {
+      color: var(--accent-primary);
+    }
+
+    .description-content {
+      background: var(--bg-secondary);
+      padding: 1.5rem;
+      border-radius: var(--radius-md);
+      border-left: 4px solid var(--accent-info);
+      color: var(--text-primary);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .admin-response {
+      background: var(--bg-secondary);
+      padding: 1.5rem;
+      border-radius: var(--radius-md);
+      border-left: 4px solid var(--accent-success);
+      color: var(--text-primary);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .admin-response-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      color: var(--accent-success);
+      font-weight: 600;
+    }
+
+    .timeline {
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border-color);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 60px;
+      margin-bottom: 2rem;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 8px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      border: 3px solid var(--bg-primary);
+    }
+
+    .timeline-date {
+      color: var(--accent-primary);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-content {
+      color: var(--text-secondary);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.875rem 1.5rem;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: var(--bg-primary);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: var(--bg-accent);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border-color);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--bg-accent);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      margin-top: 1rem;
+    }
+
+    .status-icon {
+      font-size: 1.5rem;
+    }
+
+    .status-icon.open { color: var(--accent-danger); }
+    .status-icon.in-progress { color: var(--accent-warning); }
+    .status-icon.resolved { color: var(--accent-success); }
+    .status-icon.closed { color: var(--text-muted); }
+
+    .status-text {
+      flex: 1;
+    }
+
+    .status-text h4 {
+      margin-bottom: 0.25rem;
+      color: var(--text-primary);
+    }
+
+    .status-text p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      margin: 2rem 0;
+      position: relative;
+    }
+
+    .progress-steps::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--border-color);
+      z-index: 1;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      flex: 1;
+    }
+
+    .step-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      border: 3px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-muted);
+    }
+
+    .step.active .step-circle {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: var(--bg-primary);
+    }
+
+    .step.completed .step-circle {
+      background: var(--accent-success);
+      border-color: var(--accent-success);
+      color: var(--text-primary);
+    }
+
+    .step-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      max-width: 80px;
+    }
+
+    .step.active .step-label,
+    .step.completed .step-label {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .request-title-section {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .request-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .progress-steps {
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .step {
+        min-width: 80px;
+      }
+    }
+  </style>
 </head>
 <body>
+<div class="container">
+  <!-- Back Link -->
+  <a th:href="@{/support/list/{userId}(userId=${request.user.id})}" class="back-link">
+    <i class="fas fa-arrow-left"></i>
+    Назад к списку заявок
+  </a>
 
-<h1>Заявка №<span th:text="${request.id}"></span></h1>
+  <!-- Request Header -->
+  <div class="request-header">
+    <div class="request-title-section">
+      <div class="title-content">
+        <h1 th:text="${request.title}">Request Title</h1>
+        <div class="request-id">Заявка #<span th:text="${request.id}">123</span></div>
+      </div>
+      <div class="status-badge"
+           th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(request.status.name(), '_', '-'))}">
+        <i class="fas fa-circle"></i>
+        <span th:text="${request.status.displayName}">Status</span>
+      </div>
+    </div>
 
-<div>
-  <strong>Заголовок:</strong>
-  <span th:text="${request.title}"></span>
+    <div class="request-meta">
+      <div class="meta-item">
+        <div class="meta-label">Категория</div>
+        <div class="meta-value">
+          <span class="category-badge" th:text="${request.category.displayName}">Category</span>
+        </div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Создано</div>
+        <div class="meta-value" th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy в HH:mm')}">01.01.2024 в 12:00</div>
+      </div>
+      <div class="meta-item" th:if="${request.updatedAt != null}">
+        <div class="meta-label">Последнее обновление</div>
+        <div class="meta-value" th:text="${#temporals.format(request.updatedAt, 'dd.MM.yyyy в HH:mm')}">01.01.2024 в 12:00</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Автор</div>
+        <div class="meta-value" th:text="${request.user.getLastName() + ' ' + request.user.getFirstName()}">John Doe</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Steps -->
+  <div class="content-section">
+    <h3 class="section-title">
+      <i class="fas fa-route"></i>
+      Статус обработки
+    </h3>
+
+    <div class="progress-steps">
+      <div class="step completed">
+        <div class="step-circle">
+          <i class="fas fa-plus"></i>
+        </div>
+        <div class="step-label">Создана</div>
+      </div>
+      <div class="step" th:classappend="${request.status.name() == 'IN_PROGRESS' or request.status.name() == 'RESOLVED' or request.status.name() == 'CLOSED'} ? 'completed' : (${request.status.name() == 'OPEN'} ? 'active' : '')">
+        <div class="step-circle">
+          <i class="fas fa-eye"></i>
+        </div>
+        <div class="step-label">Принята</div>
+      </div>
+      <div class="step" th:classappend="${request.status.name() == 'RESOLVED' or request.status.name() == 'CLOSED'} ? 'completed' : (${request.status.name() == 'IN_PROGRESS'} ? 'active' : '')">
+        <div class="step-circle">
+          <i class="fas fa-cog"></i>
+        </div>
+        <div class="step-label">В работе</div>
+      </div>
+      <div class="step" th:classappend="${request.status.name() == 'CLOSED'} ? 'completed' : (${request.status.name() == 'RESOLVED'} ? 'active' : '')">
+        <div class="step-circle">
+          <i class="fas fa-check"></i>
+        </div>
+        <div class="step-label">Решена</div>
+      </div>
+    </div>
+
+    <!-- Status Indicator -->
+    <div class="status-indicator">
+      <div class="status-icon" th:classappend="${#strings.toLowerCase(#strings.replace(request.status.name(), '_', '-'))}">
+        <i th:class="${request.status.name() == 'OPEN'} ? 'fas fa-folder-open' :
+                                 (${request.status.name() == 'IN_PROGRESS'} ? 'fas fa-cog fa-spin' :
+                                 (${request.status.name() == 'RESOLVED'} ? 'fas fa-check-circle' : 'fas fa-times-circle'))"></i>
+      </div>
+      <div class="status-text">
+        <h4 th:text="${request.status.displayName}">Status</h4>
+        <p th:switch="${request.status.name()}">
+          <span th:case="'OPEN'">Ваша заявка получена и ожидает рассмотрения специалистом</span>
+          <span th:case="'IN_PROGRESS'">Специалист работает над решением вашей проблемы</span>
+          <span th:case="'RESOLVED'">Проблема решена, ожидается подтверждение закрытия</span>
+          <span th:case="'CLOSED'">Заявка успешно закрыта</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Description Section -->
+  <div class="content-section">
+    <h3 class="section-title">
+      <i class="fas fa-file-alt"></i>
+      Описание проблемы
+    </h3>
+    <div class="description-content" th:text="${request.description}">
+      Request description will be displayed here...
+    </div>
+  </div>
+
+  <!-- Admin Response Section -->
+  <div th:if="${request.adminResponse != null and !#strings.isEmpty(request.adminResponse)}" class="content-section">
+    <h3 class="section-title">
+      <i class="fas fa-comment-dots"></i>
+      Ответ службы поддержки
+    </h3>
+    <div class="admin-response">
+      <div class="admin-response-header">
+        <i class="fas fa-user-tie"></i>
+        <span>Ответ специалиста:</span>
+      </div>
+      <div th:text="${request.adminResponse}">
+        Admin response will be displayed here...
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline Section -->
+  <div class="content-section">
+    <h3 class="section-title">
+      <i class="fas fa-history"></i>
+      История изменений
+    </h3>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-date" th:text="${#temporals.format(request.createdAt, 'dd MMMM yyyy, HH:mm')}">01 января 2024, 12:00</div>
+        <div class="timeline-content">
+          <strong>Заявка создана</strong><br>
+          Пользователь <span th:text="${request.user.getFirstName() + ' ' + request.user.getLastName()}">John Doe</span> создал заявку
+        </div>
+      </div>
+
+      <div th:if="${request.updatedAt != null}" class="timeline-item">
+        <div class="timeline-date" th:text="${#temporals.format(request.updatedAt, 'dd MMMM yyyy, HH:mm')}">01 января 2024, 14:00</div>
+        <div class="timeline-content">
+          <strong>Статус изменен</strong><br>
+          Статус заявки изменен на "<span th:text="${request.status.displayName}">Статус</span>"
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <a th:href="@{/support/list/{userId}(userId=${request.user.id})}" class="btn btn-secondary">
+      <i class="fas fa-list"></i>
+      Все мои заявки
+    </a>
+    <a th:href="@{/support/create/{userId}(userId=${request.user.id})}" class="btn btn-primary">
+      <i class="fas fa-plus"></i>
+      Создать новую заявку
+    </a>
+  </div>
 </div>
 
-<div>
-  <strong>Описание:</strong>
-  <p th:text="${request.description}"></p>
-</div>
+<script>
+  // Smooth animations on load
+  document.addEventListener('DOMContentLoaded', function() {
+    const sections = document.querySelectorAll('.content-section, .request-header');
 
-<div>
-  <strong>Категория:</strong>
-  <span th:text="${request.category.displayName}"></span>
-</div>
+    sections.forEach((section, index) => {
+      section.style.opacity = '0';
+      section.style.transform = 'translateY(20px)';
+      section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
 
-<div>
-  <strong>Статус:</strong>
-  <span th:text="${request.status}"></span>
-</div>
+      setTimeout(() => {
+        section.style.opacity = '1';
+        section.style.transform = 'translateY(0)';
+      }, index * 150);
+    });
+  });
 
-<div>
-  <strong>Пользователь:</strong>
-  <span th:text="${request.user.fullName}">Имя пользователя</span>
-</div>
+  // Add pulse animation to active status
+  const activeSteps = document.querySelectorAll('.step.active .step-circle');
+  activeSteps.forEach(step => {
+    step.style.animation = 'pulse 2s infinite';
+  });
 
-<div>
-  <strong>Создано:</strong>
-  <span th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy HH:mm')}"></span>
-</div>
-
-<div th:if="${request.updatedAt != null}">
-  <strong>Обновлено:</strong>
-  <span th:text="${#temporals.format(request.updatedAt, 'dd.MM.yyyy HH:mm')}"></span>
-</div>
-
-<div th:if="${request.resolvedAt != null}">
-  <strong>Решено:</strong>
-  <span th:text="${#temporals.format(request.resolvedAt, 'dd.MM.yyyy HH:mm')}"></span>
-</div>
-
-<div th:if="${request.adminResponse}">
-  <h3>Ответ администратора</h3>
-  <p th:text="${request.adminResponse}"></p>
-</div>
-
-<a th:href="@{/support/list}">← Назад к списку</a>
-
+  // Add CSS animation
+  const style = document.createElement('style');
+  style.textContent = `
+            @keyframes pulse {
+                0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+                70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+            }
+        `;
+  document.head.appendChild(style);
+</script>
 </body>
 </html>

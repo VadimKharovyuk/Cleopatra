@@ -59,7 +59,7 @@ public class SupportRequestServiceImpl implements SupportRequestService {
 
     @Override
     public List<SupportRequest> getActiveRequests() {
-        return List.of();
+        return supportRequestRepository.findActiveRequests();
     }
 
 

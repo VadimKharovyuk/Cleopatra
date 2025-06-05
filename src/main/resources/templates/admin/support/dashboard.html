@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ панель - Поддержка</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .status-badge {
+      font-size: 0.8em;
+      padding: 0.4em 0.8em;
+    }
+    .status-open {
+      background-color: #dc3545;
+      color: white;
+    }
+    .status-in-progress {
+      background-color: #ffc107;
+      color: black;
+    }
+    .status-resolved {
+      background-color: #28a745;
+      color: white;
+    }
+    .status-closed {
+      background-color: #6c757d;
+      color: white;
+    }
+    .stats-card {
+      transition: transform 0.2s;
+    }
+    .stats-card:hover {
+      transform: translateY(-2px);
+    }
+    .priority-high {
+      border-left: 4px solid #dc3545;
+    }
+    .table th {
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">
+            <i class="fas fa-headset me-2"></i>
+            Админ панель поддержки
+          </a>
+          <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/dashboard">
+              <i class="fas fa-home"></i> Главная
+            </a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Flash Messages -->
+  <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    <span th:text="${successMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <span th:text="${errorMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card stats-card text-center bg-primary text-white">
+        <div class="card-body">
+          <i class="fas fa-ticket-alt fa-2x mb-2"></i>
+          <h4 th:text="${stats.totalRequests}">0</h4>
+          <p class="mb-0">Всего заявок</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stats-card text-center bg-danger text-white">
+        <div class="card-body">
+          <i class="fas fa-folder-open fa-2x mb-2"></i>
+          <h4 th:text="${stats.openRequests}">0</h4>
+          <p class="mb-0">Открытых</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stats-card text-center bg-warning text-dark">
+        <div class="card-body">
+          <i class="fas fa-cog fa-spin fa-2x mb-2"></i>
+          <h4 th:text="${stats.inProgressRequests}">0</h4>
+          <p class="mb-0">В работе</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stats-card text-center bg-success text-white">
+        <div class="card-body">
+          <i class="fas fa-check-circle fa-2x mb-2"></i>
+          <h4 th:text="${stats.resolvedRequests + stats.closedRequests}">0</h4>
+          <p class="mb-0">Завершенных</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Requests Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-list me-2"></i>
+            Активные заявки
+          </h5>
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshData()">
+              <i class="fas fa-sync-alt"></i> Обновить
+            </button>
+            <a href="/support/admin/statistics" class="btn btn-outline-info btn-sm">
+              <i class="fas fa-chart-bar"></i> Статистика
+            </a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div th:if="${#lists.isEmpty(activeRequests)}" class="text-center py-4">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Нет активных заявок</h5>
+            <p class="text-muted">Все заявки обработаны!</p>
+          </div>
+
+          <div th:unless="${#lists.isEmpty(activeRequests)}" class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Заголовок</th>
+                <th scope="col">Пользователь</th>
+                <th scope="col">Категория</th>
+                <th scope="col">Статус</th>
+                <th scope="col">Создано</th>
+                <th scope="col">Действия</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="request : ${activeRequests}"
+                  th:class="${request.status.name() == 'OPEN'} ? 'priority-high' : ''">
+                <td>
+                  <strong th:text="'#' + ${request.id}"></strong>
+                </td>
+                <td>
+                  <div>
+                    <strong th:text="${request.title}"></strong>
+                    <br>
+                    <small class="text-muted" th:text="${#strings.abbreviate(request.description, 50)}"></small>
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    <i class="fas fa-user me-1"></i>
+                    <span th:text="${request.user.firstName + ' ' + request.user.lastName}"></span>
+                    <br>
+                    <small class="text-muted" th:text="${request.user.email}"></small>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-secondary" th:text="${request.category.displayName}"></span>
+                </td>
+                <td>
+                                            <span class="badge status-badge"
+                                                  th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(request.status.name(), '_', '-'))}"
+                                                  th:text="${request.status.displayName}">
+                                            </span>
+                </td>
+                <td>
+                  <small th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy HH:mm')}"></small>
+                </td>
+                <td>
+                  <div class="btn-group" role="group">
+                    <!-- Быстрые действия -->
+                    <form th:if="${request.status.name() == 'OPEN'}"
+                          th:action="@{/support/admin/take/{id}(id=${request.id})}"
+                          method="post" class="d-inline">
+                      <button type="submit" class="btn btn-warning btn-sm" title="Взять в работу">
+                        <i class="fas fa-play"></i>
+                      </button>
+                    </form>
+
+                    <!-- Модальное окно для обновления статуса -->
+                    <button type="button" class="btn btn-primary btn-sm"
+                            data-bs-toggle="modal"
+                            th:data-bs-target="'#updateModal' + ${request.id}"
+                            title="Изменить статус">
+                      <i class="fas fa-edit"></i>
+                    </button>
+
+                    <a th:href="@{/support/admin/request/{id}(id=${request.id})}"
+                       class="btn btn-info btn-sm" title="Подробности">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                  </div>
+
+                  <!-- Модальное окно для обновления статуса -->
+                  <div class="modal fade" th:id="'updateModal' + ${request.id}" tabindex="-1">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">
+                            Обновить заявку #<span th:text="${request.id}"></span>
+                          </h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form th:action="@{/support/admin/update-status}" method="post">
+                          <div class="modal-body">
+                            <input type="hidden" name="requestId" th:value="${request.id}">
+
+                            <div class="mb-3">
+                              <label class="form-label">Новый статус:</label>
+                              <select name="status" class="form-select" required>
+                                <option th:each="status : ${statuses}"
+                                        th:value="${status.name()}"
+                                        th:text="${status.displayName}"
+                                        th:selected="${status == request.status}">
+                                </option>
+                              </select>
+                            </div>
+
+                            <div class="mb-3">
+                              <label class="form-label">Комментарий админа:</label>
+                              <textarea name="adminResponse" class="form-control" rows="3"
+                                        placeholder="Дополнительная информация (необязательно)"></textarea>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                              Отмена
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                              <i class="fas fa-save me-1"></i>
+                              Сохранить
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+  function refreshData() {
+    location.reload();
+  }
+
+  // Автообновление каждые 30 секунд
+  setInterval(function() {
+    // Можно добавить AJAX обновление вместо полной перезагрузки
+    console.log('Auto refresh check...');
+  }, 30000);
+</script>
+</body>
+</html>

@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Table(name = "support_request")
 public class SupportRequest {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

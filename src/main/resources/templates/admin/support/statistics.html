@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Статистика заявок - Админ панель</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    .stats-card {
+      transition: all 0.3s ease;
+      border: none;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+    }
+    .chart-container {
+      position: relative;
+      height: 400px;
+    }
+    .chart-container-small {
+      position: relative;
+      height: 300px;
+    }
+    .gradient-bg-1 {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .gradient-bg-2 {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    .gradient-bg-3 {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    .gradient-bg-4 {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    .gradient-bg-5 {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    .metric-icon {
+      font-size: 2.5rem;
+      opacity: 0.8;
+    }
+    .section-header {
+      border-left: 4px solid #0d6efd;
+      padding-left: 1rem;
+      margin-bottom: 2rem;
+    }
+    .progress-custom {
+      height: 8px;
+      border-radius: 10px;
+    }
+    .kpi-card {
+      border-radius: 15px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-light">
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/support/admin">
+            <i class="fas fa-headset me-2"></i>
+            Админ панель поддержки
+          </a>
+          <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/support/admin">
+              <i class="fas fa-arrow-left"></i> Назад к панели
+            </a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/support/admin">
+          <i class="fas fa-home"></i> Админ панель
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        <i class="fas fa-chart-bar me-1"></i>
+        Статистика
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="section-header">
+    <h2>
+      <i class="fas fa-chart-line me-3"></i>
+      Статистика заявок поддержки
+    </h2>
+    <p class="text-muted mb-0">Аналитика и показатели работы службы поддержки</p>
+  </div>
+
+  <!-- Main KPI Cards -->
+  <div class="row mb-5">
+    <div class="col-lg-3 col-md-6 mb-4">
+      <div class="card stats-card kpi-card gradient-bg-1 text-white">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-8">
+              <h6 class="text-uppercase fw-bold mb-1" style="font-size: 0.8rem;">Всего заявок</h6>
+              <h2 class="mb-0 fw-bold" th:text="${stats.totalRequests}">0</h2>
+              <small class="opacity-75">За все время</small>
+            </div>
+            <div class="col-4 text-end">
+              <i class="fas fa-ticket-alt metric-icon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+      <div class="card stats-card kpi-card gradient-bg-2 text-white">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-8">
+              <h6 class="text-uppercase fw-bold mb-1" style="font-size: 0.8rem;">Открытых</h6>
+              <h2 class="mb-0 fw-bold" th:text="${stats.openRequests}">0</h2>
+              <small class="opacity-75">Требуют внимания</small>
+            </div>
+            <div class="col-4 text-end">
+              <i class="fas fa-folder-open metric-icon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+      <div class="card stats-card kpi-card gradient-bg-3 text-white">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-8">
+              <h6 class="text-uppercase fw-bold mb-1" style="font-size: 0.8rem;">В работе</h6>
+              <h2 class="mb-0 fw-bold" th:text="${stats.inProgressRequests}">0</h2>
+              <small class="opacity-75">Обрабатываются</small>
+            </div>
+            <div class="col-4 text-end">
+              <i class="fas fa-cog fa-spin metric-icon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+      <div class="card stats-card kpi-card gradient-bg-4 text-white">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-8">
+              <h6 class="text-uppercase fw-bold mb-1" style="font-size: 0.8rem;">Завершенных</h6>
+              <h2 class="mb-0 fw-bold" th:text="${stats.resolvedRequests + stats.closedRequests}">0</h2>
+              <small class="opacity-75">Решено + Закрыто</small>
+            </div>
+            <div class="col-4 text-end">
+              <i class="fas fa-check-circle metric-icon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="row mb-5">
+    <!-- Status Distribution Chart -->
+    <div class="col-lg-6 mb-4">
+      <div class="card stats-card">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">
+            <i class="fas fa-pie-chart me-2 text-primary"></i>
+            Распределение по статусам
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="statusChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Chart -->
+    <div class="col-lg-6 mb-4">
+      <div class="card stats-card">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">
+            <i class="fas fa-chart-bar me-2 text-primary"></i>
+            Сравнение статусов
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="comparisonChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Statistics -->
+  <div class="row mb-5">
+    <div class="col-lg-8">
+      <div class="card stats-card">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">
+            <i class="fas fa-list me-2 text-primary"></i>
+            Детальная статистика
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <h6 class="text-primary mb-3">
+                <i class="fas fa-folder-open me-2"></i>
+                Открытые заявки
+              </h6>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Количество:</span>
+                <strong th:text="${stats.openRequests}">0</strong>
+              </div>
+              <div class="progress progress-custom mb-3">
+                <div class="progress-bar bg-danger"
+                     th:style="'width: ' + ${stats.totalRequests > 0 ? (stats.openRequests * 100.0 / stats.totalRequests) : 0} + '%'">
+                </div>
+              </div>
+              <small class="text-muted">
+                <span th:text="${stats.totalRequests > 0 ? #numbers.formatDecimal((stats.openRequests * 100.0 / stats.totalRequests), 1, 1) : 0}">0</span>% от общего числа
+              </small>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <h6 class="text-warning mb-3">
+                <i class="fas fa-cog me-2"></i>
+                В работе
+              </h6>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Количество:</span>
+                <strong th:text="${stats.inProgressRequests}">0</strong>
+              </div>
+              <div class="progress progress-custom mb-3">
+                <div class="progress-bar bg-warning"
+                     th:style="'width: ' + ${stats.totalRequests > 0 ? (stats.inProgressRequests * 100.0 / stats.totalRequests) : 0} + '%'">
+                </div>
+              </div>
+              <small class="text-muted">
+                <span th:text="${stats.totalRequests > 0 ? #numbers.formatDecimal((stats.inProgressRequests * 100.0 / stats.totalRequests), 1, 1) : 0}">0</span>% от общего числа
+              </small>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <h6 class="text-success mb-3">
+                <i class="fas fa-check me-2"></i>
+                Решенные
+              </h6>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Количество:</span>
+                <strong th:text="${stats.resolvedRequests}">0</strong>
+              </div>
+              <div class="progress progress-custom mb-3">
+                <div class="progress-bar bg-success"
+                     th:style="'width: ' + ${stats.totalRequests > 0 ? (stats.resolvedRequests * 100.0 / stats.totalRequests) : 0} + '%'">
+                </div>
+              </div>
+              <small class="text-muted">
+                <span th:text="${stats.totalRequests > 0 ? #numbers.formatDecimal((stats.resolvedRequests * 100.0 / stats.totalRequests), 1, 1) : 0}">0</span>% от общего числа
+              </small>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <h6 class="text-secondary mb-3">
+                <i class="fas fa-times me-2"></i>
+                Закрытые
+              </h6>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Количество:</span>
+                <strong th:text="${stats.closedRequests}">0</strong>
+              </div>
+              <div class="progress progress-custom mb-3">
+                <div class="progress-bar bg-secondary"
+                     th:style="'width: ' + ${stats.totalRequests > 0 ? (stats.closedRequests * 100.0 / stats.totalRequests) : 0} + '%'">
+                </div>
+              </div>
+              <small class="text-muted">
+                <span th:text="${stats.totalRequests > 0 ? #numbers.formatDecimal((stats.closedRequests * 100.0 / stats.totalRequests), 1, 1) : 0}">0</span>% от общего числа
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="col-lg-4">
+      <div class="card stats-card gradient-bg-5 text-white">
+        <div class="card-header bg-transparent border-0">
+          <h5 class="mb-0 text-white">
+            <i class="fas fa-trophy me-2"></i>
+            Показатели эффективности
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-4">
+            <h6 class="text-uppercase mb-2" style="font-size: 0.8rem; opacity: 0.8;">Коэффициент решения</h6>
+            <h3 class="mb-1">
+              <span th:text="${stats.totalRequests > 0 ? #numbers.formatDecimal(((stats.resolvedRequests + stats.closedRequests) * 100.0 / stats.totalRequests), 1, 1) : 0}">0</span>%
+            </h3>
+            <small class="opacity-75">завершенных заявок</small>
+          </div>
+
+          <div class="mb-4">
+            <h6 class="text-uppercase mb-2" style="font-size: 0.8rem; opacity: 0.8;">Активных заявок</h6>
+            <h3 class="mb-1" th:text="${stats.openRequests + stats.inProgressRequests}">0</h3>
+            <small class="opacity-75">требуют обработки</small>
+          </div>
+
+          <div>
+            <h6 class="text-uppercase mb-2" style="font-size: 0.8rem; opacity: 0.8;">Общая нагрузка</h6>
+            <div class="progress progress-custom bg-white bg-opacity-25 mb-2">
+              <div class="progress-bar bg-white"
+                   th:style="'width: ' + ${stats.totalRequests > 0 ? ((stats.openRequests + stats.inProgressRequests) * 100.0 / stats.totalRequests) : 0} + '%'">
+              </div>
+            </div>
+            <small class="opacity-75">
+              <span th:text="${stats.totalRequests > 0 ? #numbers.formatDecimal(((stats.openRequests + stats.inProgressRequests) * 100.0 / stats.totalRequests), 1, 1) : 0}">0</span>%
+              от общего объема
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card stats-card">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h5 class="mb-2">
+                <i class="fas fa-rocket me-2 text-primary"></i>
+                Быстрые действия
+              </h5>
+              <p class="text-muted mb-0">Перейти к работе с заявками</p>
+            </div>
+            <div class="col-md-4 text-end">
+              <div class="btn-group" role="group">
+                <a href="/support/admin" class="btn btn-primary">
+                  <i class="fas fa-home me-1"></i>
+                  Панель управления
+                </a>
+                <a href="/support/admin/status/open" class="btn btn-danger">
+                  <i class="fas fa-folder-open me-1"></i>
+                  Открытые заявки
+                </a>
+                <button type="button" class="btn btn-outline-primary" onclick="window.location.reload()">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+  // Получаем данные из Thymeleaf
+  const statsData = {
+    open: /*[[${stats.openRequests}]]*/ 0,
+    inProgress: /*[[${stats.inProgressRequests}]]*/ 0,
+    resolved: /*[[${stats.resolvedRequests}]]*/ 0,
+    closed: /*[[${stats.closedRequests}]]*/ 0,
+    total: /*[[${stats.totalRequests}]]*/ 0
+  };
+
+  // Pie Chart - Status Distribution
+  const statusCtx = document.getElementById('statusChart').getContext('2d');
+  new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Открытые', 'В работе', 'Решенные', 'Закрытые'],
+      datasets: [{
+        data: [statsData.open, statsData.inProgress, statsData.resolved, statsData.closed],
+        backgroundColor: [
+          '#dc3545', // Красный для открытых
+          '#ffc107', // Желтый для в работе
+          '#28a745', // Зеленый для решенных
+          '#6c757d'  // Серый для закрытых
+        ],
+        borderWidth: 3,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed;
+              const percentage = statsData.total > 0 ? ((value / statsData.total) * 100).toFixed(1) : 0;
+              return `${label}: ${value} (${percentage}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Bar Chart - Comparison
+  const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+  new Chart(comparisonCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Открытые', 'В работе', 'Решенные', 'Закрытые'],
+      datasets: [{
+        label: 'Количество заявок',
+        data: [statsData.open, statsData.inProgress, statsData.resolved, statsData.closed],
+        backgroundColor: [
+          'rgba(220, 53, 69, 0.8)',
+          'rgba(255, 193, 7, 0.8)',
+          'rgba(40, 167, 69, 0.8)',
+          'rgba(108, 117, 125, 0.8)'
+        ],
+        borderColor: [
+          '#dc3545',
+          '#ffc107',
+          '#28a745',
+          '#6c757d'
+        ],
+        borderWidth: 2,
+        borderRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      }
+    }
+  });
+
+  // Анимация появления карточек
+  document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.stats-card');
+    cards.forEach((card, index) => {
+      setTimeout(() => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.5s ease';
+
+        setTimeout(() => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, 100);
+      }, index * 100);
+    });
+  });
+</script>
+</body>
+</html>

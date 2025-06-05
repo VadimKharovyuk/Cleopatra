@@ -1,44 +1,643 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Мои заявки</title>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои заявки в поддержку</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-accent: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-muted: #666666;
+            --accent-primary: #d4af37;
+            --accent-secondary: #b8941f;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-info: #3b82f6;
+            --border-color: #333333;
+            --border-primary: rgba(255, 255, 255, 0.1);
+            --border-secondary: rgba(255, 255, 255, 0.05);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --surface-elevated: rgba(26, 26, 26, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image:
+                    radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+        }
+
+        .header-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-content p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .user-info {
+            background: var(--surface-elevated);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-primary);
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .user-details h2 {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .user-details p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--surface-elevated);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon.open { color: var(--accent-danger); }
+        .stat-icon.in-progress { color: var(--accent-warning); }
+        .stat-icon.resolved { color: var(--accent-success); }
+        .stat-icon.closed { color: var(--text-muted); }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .requests-section {
+            background: var(--surface-elevated);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-text {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .request-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .request-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .request-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .request-id {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-open {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-danger);
+            border: 1px solid var(--accent-danger);
+        }
+
+        .status-in-progress {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-warning);
+            border: 1px solid var(--accent-warning);
+        }
+
+        .status-resolved {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-success);
+            border: 1px solid var(--accent-success);
+        }
+
+        .status-closed {
+            background: rgba(107, 114, 128, 0.2);
+            color: var(--text-muted);
+            border: 1px solid var(--text-muted);
+        }
+
+        .request-meta {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .request-description {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .category-badge {
+            background: var(--bg-accent);
+            color: var(--text-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--accent-success);
+            color: var(--accent-success);
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--accent-danger);
+            color: var(--accent-danger);
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0.7;
+            margin-left: auto;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .request-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .request-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .request-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
+<div class="container">
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'">&times;</button>
+    </div>
 
-<h1>Заявки пользователя <span th:text="${user.firstName}"></span></h1>
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'">&times;</button>
+    </div>
 
-<div th:if="${requests.isEmpty()}">
-  <p>У вас пока нет заявок.</p>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <h1>
+                <i class="fas fa-headset"></i>
+                Мои заявки
+            </h1>
+            <p>Управляйте своими обращениями в службу поддержки</p>
+        </div>
+        <div class="header-actions">
+            <a th:href="@{/support/create/{userId}(userId=${user.id})}" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Создать заявку
+            </a>
+            <button onclick="window.location.reload()" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i>
+                Обновить
+            </button>
+        </div>
+    </div>
+
+    <!-- User Info -->
+    <div class="user-info">
+
+        <div class="user-details">
+            <h2 th:text="${user.getLastName() + ' ' + user.getFirstName()}">John Doe</h2>
+            <p th:text="${user.email}">john.doe@example.com</p>
+            <p>ID: <span th:text="${user.id}">1</span></p>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <div class="stat-number" th:text="${#lists.size(requests)}">0</div>
+            <div class="stat-label">Всего заявок</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon open">
+                <i class="fas fa-folder-open"></i>
+            </div>
+            <div class="stat-number">
+                <span th:text="${#aggregates.sum(requests.![status.name() == 'OPEN' ? 1 : 0])}">0</span>
+            </div>
+            <div class="stat-label">Открытых</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon in-progress">
+                <i class="fas fa-cog"></i>
+            </div>
+            <div class="stat-number">
+                <span th:text="${#aggregates.sum(requests.![status.name() == 'IN_PROGRESS' ? 1 : 0])}">0</span>
+            </div>
+            <div class="stat-label">В работе</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon resolved">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-number">
+                <span th:text="${#aggregates.sum(requests.![status.name() == 'RESOLVED' or status.name() == 'CLOSED' ? 1 : 0])}">0</span>
+            </div>
+            <div class="stat-label">Завершённых</div>
+        </div>
+    </div>
+
+    <!-- Requests Section -->
+    <div class="requests-section">
+        <div class="section-header">
+            <h3 class="section-title">
+                <i class="fas fa-list me-2"></i>
+                История заявок
+            </h3>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(requests)}" class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <h3 class="empty-title">У вас пока нет заявок</h3>
+            <p class="empty-text">
+                Создайте свою первую заявку, если у вас возникли вопросы или проблемы.
+                Наша служба поддержки поможет вам быстро решить любые вопросы.
+            </p>
+            <a th:href="@{/support/create/{userId}(userId=${user.id})}" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Создать первую заявку
+            </a>
+        </div>
+
+        <!-- Requests List -->
+        <div th:unless="${#lists.isEmpty(requests)}" class="requests-list">
+            <div th:each="request : ${requests}" class="request-card" th:onclick="'window.location.href=\'/support/view/' + ${request.id} + '\''">
+                <div class="request-header">
+                    <div>
+                        <h4 class="request-title" th:text="${request.title}">Request Title</h4>
+                        <div class="request-id">#<span th:text="${request.id}">123</span></div>
+                    </div>
+                    <div class="status-badge"
+                         th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(request.status.name(), '_', '-'))}"
+                         th:text="${request.status.displayName}">
+                        Status
+                    </div>
+                </div>
+
+                <div class="request-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-tag"></i>
+                        <span class="category-badge" th:text="${request.category.displayName}">Category</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2024 12:00</span>
+                    </div>
+                    <div th:if="${request.updatedAt != null}" class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Обновлено: <span th:text="${#temporals.format(request.updatedAt, 'dd.MM.yyyy HH:mm')}">01.01.2024 12:00</span></span>
+                    </div>
+                </div>
+
+                <div class="request-description" th:text="${#strings.abbreviate(request.description, 150)}">
+                    Request description will be shown here...
+                </div>
+
+                <div class="request-actions" onclick="event.stopPropagation()">
+                    <a th:href="@{/support/view/{id}(id=${request.id})}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-eye"></i>
+                        Подробности
+                    </a>
+                    <div th:if="${request.status.name() == 'OPEN'}" class="meta-item">
+                        <i class="fas fa-info-circle" style="color: var(--accent-info);"></i>
+                        <span style="color: var(--accent-info); font-size: 0.85rem;">Ожидает ответа</span>
+                    </div>
+                    <div th:if="${request.status.name() == 'IN_PROGRESS'}" class="meta-item">
+                        <i class="fas fa-spinner fa-spin" style="color: var(--accent-warning);"></i>
+                        <span style="color: var(--accent-warning); font-size: 0.85rem;">Обрабатывается</span>
+                    </div>
+                    <div th:if="${request.status.name() == 'RESOLVED'}" class="meta-item">
+                        <i class="fas fa-check" style="color: var(--accent-success);"></i>
+                        <span style="color: var(--accent-success); font-size: 0.85rem;">Решено</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<table th:if="${!requests.isEmpty()}">
-  <thead>
-  <tr>
-    <th>ID</th>
-    <th>Заголовок</th>
-    <th>Категория</th>
-    <th>Статус</th>
-    <th>Создано</th>
-    <th>Действия</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr th:each="req : ${requests}">
-    <td th:text="${req.id}"></td>
-    <td th:text="${req.title}"></td>
-    <td th:text="${req.category.displayName}"></td>
-    <td th:text="${req.status}"></td>
-    <td th:text="${#temporals.format(req.createdAt, 'dd.MM.yyyy HH:mm')}"></td>
-    <td>
-      <a th:href="@{/support/view/{id}(id=${req.id})}">Просмотр</a>
-    </td>
-  </tr>
-  </tbody>
-</table>
+<script>
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(alert => {
+            alert.style.display = 'none';
+        });
+    }, 5000);
 
-<a th:href="@{/support/create/{userId}(userId=${user.id})}">+ Создать новую заявку</a>
+    // Add loading animation to refresh button
+    document.querySelector('.btn-secondary').addEventListener('click', function() {
+        const icon = this.querySelector('i');
+        icon.classList.add('fa-spin');
 
+        setTimeout(() => {
+            icon.classList.remove('fa-spin');
+        }, 1000);
+    });
+
+    // Smooth scroll animations for cards
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe all cards
+    document.querySelectorAll('.request-card, .stat-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+</script>
 </body>
 </html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'Заявка #' + ${request.id} + ' - Детали'">Детали заявки</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .status-badge {
+      font-size: 0.9em;
+      padding: 0.5em 1em;
+    }
+    .status-open {
+      background-color: #dc3545;
+      color: white;
+    }
+    .status-in-progress {
+      background-color: #ffc107;
+      color: black;
+    }
+    .status-resolved {
+      background-color: #28a745;
+      color: white;
+    }
+    .status-closed {
+      background-color: #6c757d;
+      color: white;
+    }
+    .info-card {
+      border-left: 4px solid #0d6efd;
+    }
+    .user-avatar {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(45deg, #007bff, #6610f2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .timeline-item {
+      border-left: 2px solid #dee2e6;
+      padding-left: 1rem;
+      margin-left: 0.5rem;
+      position: relative;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 0;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #0d6efd;
+    }
+    .timeline-item:last-child {
+      border-left: none;
+    }
+    .description-box {
+      background-color: #f8f9fa;
+      border-left: 4px solid #17a2b8;
+      padding: 1rem;
+      border-radius: 0.25rem;
+    }
+    .admin-response-box {
+      background-color: #e8f5e8;
+      border-left: 4px solid #28a745;
+      padding: 1rem;
+      border-radius: 0.25rem;
+    }
+    .quick-actions {
+      position: sticky;
+      top: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/support/admin">
+            <i class="fas fa-headset me-2"></i>
+            Админ панель поддержки
+          </a>
+          <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/support/admin">
+              <i class="fas fa-arrow-left"></i> Назад к панели
+            </a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="/support/admin">
+          <i class="fas fa-home"></i> Админ панель
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        <i class="fas fa-ticket-alt me-1"></i>
+        <span th:text="'Заявка #' + ${request.id}"></span>
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Flash Messages -->
+  <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    <span th:text="${successMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <span th:text="${errorMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <!-- Request Header Card -->
+      <div class="card info-card mb-4">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <div class="d-flex align-items-center mb-3">
+                <h3 class="me-3 mb-0" th:text="'Заявка #' + ${request.id}"></h3>
+                <span class="badge status-badge"
+                      th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(request.status.name(), '_', '-'))}"
+                      th:text="${request.status.displayName}">
+                                    </span>
+              </div>
+              <h5 th:text="${request.title}" class="text-primary mb-2"></h5>
+              <div class="text-muted">
+                <i class="fas fa-clock me-1"></i>
+                Создано: <span th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy HH:mm')}"></span>
+                <span th:if="${request.updatedAt != null}">
+                                        | Обновлено: <span th:text="${#temporals.format(request.updatedAt, 'dd.MM.yyyy HH:mm')}"></span>
+                                    </span>
+              </div>
+            </div>
+            <div class="col-md-4 text-end">
+              <span class="badge bg-info fs-6" th:text="${request.category.displayName}"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Information Card -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fas fa-user me-2"></i>
+            Информация о пользователе
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-auto">
+<!--              <div class="user-avatar" th:text="${(request.user.lastName != null and !#strings.isEmpty(request.user.lastName) ? #strings.substring(request.user.firstname, 0, 1) : '?') + (request.user.lastName != null and !#strings.isEmpty(request.user.lastname) ? #strings.substring(request.user.lastName, 0, 1) : '?')}">-->
+<!--              </div>-->
+            </div>
+            <div class="col">
+              <h6 class="mb-1" th:text="${request.user.firstName + ' ' + request.user.lastName}"></h6>
+              <p class="text-muted mb-1">
+                <i class="fas fa-envelope me-1"></i>
+                <a th:href="'mailto:' + ${request.user.email}" th:text="${request.user.email}"></a>
+              </p>
+              <p class="text-muted mb-0">
+                <i class="fas fa-id-card me-1"></i>
+                ID: <span th:text="${request.user.id}"></span>
+              </p>
+            </div>
+            <div class="col-auto">
+              <a th:href="@{/support/user/{userId}(userId=${request.user.id})}"
+                 class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-history me-1"></i>
+                История заявок
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description Card -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fas fa-file-alt me-2"></i>
+            Описание проблемы
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="description-box">
+            <p th:text="${request.description}" class="mb-0"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Response Card -->
+      <div th:if="${request.adminResponse != null and !#strings.isEmpty(request.adminResponse)}" class="card mb-4">
+        <div class="card-header bg-success text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-comment-dots me-2"></i>
+            Ответ администратора
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="admin-response-box">
+            <p th:text="${request.adminResponse}" class="mb-0"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Card -->
+      <div class="card">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="fas fa-history me-2"></i>
+            История изменений
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="timeline-item mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="mb-1">Заявка создана</h6>
+                <p class="text-muted mb-0">
+                  Пользователь <strong th:text="${request.user.firstName + ' ' + request.user.lastName}"></strong>
+                  создал заявку
+                </p>
+              </div>
+              <small class="text-muted" th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy HH:mm')}"></small>
+            </div>
+          </div>
+
+          <div th:if="${request.updatedAt != null}" class="timeline-item">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="mb-1">Статус изменен</h6>
+                <p class="text-muted mb-0">
+                  Статус изменен на
+                  <span class="badge status-badge"
+                        th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(request.status.name(), '_', '-'))}"
+                        th:text="${request.status.displayName}">
+                                        </span>
+                </p>
+              </div>
+              <small class="text-muted" th:text="${#temporals.format(request.updatedAt, 'dd.MM.yyyy HH:mm')}"></small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar with Quick Actions -->
+    <div class="col-lg-4">
+      <div class="quick-actions">
+        <!-- Quick Actions Card -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h6 class="mb-0">
+              <i class="fas fa-bolt me-2"></i>
+              Быстрые действия
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <!-- Actions based on current status -->
+              <div th:switch="${request.status.name()}">
+                <!-- OPEN status actions -->
+                <div th:case="'OPEN'">
+                  <form th:action="@{/support/admin/take/{id}(id=${request.id})}" method="post">
+                    <button type="submit" class="btn btn-warning w-100">
+                      <i class="fas fa-play me-2"></i>
+                      Взять в работу
+                    </button>
+                  </form>
+                </div>
+
+                <!-- IN_PROGRESS status actions -->
+                <div th:case="'IN_PROGRESS'">
+                  <button type="button" class="btn btn-success w-100"
+                          data-bs-toggle="modal" data-bs-target="#resolveModal">
+                    <i class="fas fa-check me-2"></i>
+                    Решить заявку
+                  </button>
+                </div>
+
+                <!-- RESOLVED status actions -->
+                <div th:case="'RESOLVED'">
+                  <form th:action="@{/support/admin/close/{id}(id=${request.id})}" method="post">
+                    <button type="submit" class="btn btn-secondary w-100">
+                      <i class="fas fa-times me-2"></i>
+                      Закрыть заявку
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Universal actions -->
+              <button type="button" class="btn btn-primary w-100"
+                      data-bs-toggle="modal" data-bs-target="#updateStatusModal">
+                <i class="fas fa-edit me-2"></i>
+                Изменить статус
+              </button>
+
+              <a th:href="@{/support/admin/status/{status}(status=${#strings.toLowerCase(request.status.name())})}"
+                 class="btn btn-outline-info w-100">
+                <i class="fas fa-filter me-2"></i>
+                Все заявки с этим статусом
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Request Info Card -->
+        <div class="card">
+          <div class="card-header">
+            <h6 class="mb-0">
+              <i class="fas fa-info-circle me-2"></i>
+              Информация о заявке
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="row mb-2">
+              <div class="col-6"><strong>ID:</strong></div>
+              <div class="col-6" th:text="${request.id}"></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6"><strong>Статус:</strong></div>
+              <div class="col-6">
+                                    <span class="badge status-badge"
+                                          th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(request.status.name(), '_', '-'))}"
+                                          th:text="${request.status.displayName}">
+                                    </span>
+              </div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6"><strong>Категория:</strong></div>
+              <div class="col-6" th:text="${request.category.displayName}"></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6"><strong>Создано:</strong></div>
+              <div class="col-6">
+                <small th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy HH:mm')}"></small>
+              </div>
+            </div>
+            <div th:if="${request.updatedAt != null}" class="row">
+              <div class="col-6"><strong>Обновлено:</strong></div>
+              <div class="col-6">
+                <small th:text="${#temporals.format(request.updatedAt, 'dd.MM.yyyy HH:mm')}"></small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Quick Resolve (IN_PROGRESS only) -->
+<div th:if="${request.status.name() == 'IN_PROGRESS'}"
+     class="modal fade" id="resolveModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-check me-2"></i>
+          Решить заявку #<span th:text="${request.id}"></span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form th:action="@{/support/admin/update-status}" method="post">
+        <div class="modal-body">
+          <input type="hidden" name="requestId" th:value="${request.id}">
+          <input type="hidden" name="status" value="RESOLVED">
+
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Заявка:</strong> <span th:text="${request.title}"></span>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label"><strong>Решение проблемы:</strong></label>
+            <textarea name="adminResponse" class="form-control" rows="5"
+                      placeholder="Подробно опишите, как была решена проблема и какие действия были предприняты..."
+                      required></textarea>
+            <div class="form-text">Это сообщение будет отправлено пользователю</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Отмена
+          </button>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-check me-1"></i>
+            Пометить как решенную
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Status Update -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-edit me-2"></i>
+          Изменить статус заявки #<span th:text="${request.id}"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form th:action="@{/support/admin/update-status}" method="post">
+        <div class="modal-body">
+          <input type="hidden" name="requestId" th:value="${request.id}">
+
+          <div class="alert alert-light border">
+            <div class="row">
+              <div class="col-6">
+                <strong>Текущий статус:</strong>
+              </div>
+              <div class="col-6">
+                                    <span class="badge status-badge"
+                                          th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(request.status.name(), '_', '-'))}"
+                                          th:text="${request.status.displayName}">
+                                    </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Новый статус:</label>
+            <select name="status" class="form-select" required>
+              <option th:each="status : ${statuses}"
+                      th:value="${status.name()}"
+                      th:text="${status.displayName}"
+                      th:selected="${status == request.status}">
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Комментарий:</label>
+            <textarea name="adminResponse" class="form-control" rows="4"
+                      placeholder="Дополнительная информация для пользователя (необязательно)"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Отмена
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i>
+            Сохранить изменения
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Подтверждение критических действий
+  document.querySelectorAll('form[action*="/take/"], form[action*="/close/"]').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      const action = this.action.includes('/take/') ? 'взять в работу' : 'закрыть';
+      if (!confirm(`Вы уверены, что хотите ${action} эту заявку?`)) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  // Фокус на textarea при открытии модального окна
+  document.getElementById('resolveModal')?.addEventListener('shown.bs.modal', function () {
+    this.querySelector('textarea[name="adminResponse"]')?.focus();
+  });
+</script>
+</body>
+</html>

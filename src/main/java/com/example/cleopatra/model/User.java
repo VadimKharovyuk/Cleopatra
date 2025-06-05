@@ -127,7 +127,7 @@ public class User {
 
 
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserOnlineStatus onlineStatus;
 
 

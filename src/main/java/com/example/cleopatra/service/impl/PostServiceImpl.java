@@ -227,6 +227,7 @@ public class PostServiceImpl implements PostService {
 
         postRepository.deleteById(postId);
 
+
         Long countAfter = postRepository.countByAuthorId(userId);
         log.info("📊 Количество постов ПОСЛЕ удаления: {}", countAfter);
     }
