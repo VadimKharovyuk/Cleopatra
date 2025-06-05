@@ -770,11 +770,9 @@
         </div>
     </div>
 </div>
-
 <!-- Chat Scripts -->
 <script>
-    // Global variables
-    let currentPage = /*[[${conversation?.currentPage ?: 0}]]*/ 0;
+    // Global variables - убрали currentPage
     let isLoading = false;
     let currentUserId = /*[[${currentUserId}]]*/ 1;
     let otherUserId = /*[[${otherUserId}]]*/ 2;
@@ -791,10 +789,10 @@
         otherUserId = parseInt(urlOtherUserId);
     }
 
+    // Обновленное логирование без currentPage
     console.log('🚀 Chat initialized with:', {
         currentUserId: currentUserId,
         otherUserId: otherUserId,
-        currentPage: currentPage,
         url: window.location.pathname,
         extractedUserId: urlOtherUserId
     });
@@ -810,7 +808,30 @@
         setTimeout(() => {
             markAsRead();
         }, 1000);
+
+        // Добавляем обработчик скролла
+        const messagesContainer = document.getElementById('messagesContainer');
+        if (messagesContainer) {
+            messagesContainer.addEventListener('scroll',
+                debounce(handleScroll, 200)
+            );
+        }
     });
+
+    /**
+     * Utility функция debounce
+     */
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
     /**
      * Initialize chat functionality
@@ -862,7 +883,7 @@
     }
 
     /**
-     * Send message
+     * ИСПРАВЛЕННАЯ функция Send message - всегда скроллим вниз после отправки своего сообщения
      */
     async function sendMessage() {
         const messageInput = document.getElementById('messageInput');
@@ -914,8 +935,8 @@
 
                 // Добавляем сообщение в UI, если WebSocket не сработал
                 if (result.data && !document.querySelector(`[data-message-id="${result.data.id}"]`)) {
-                    addMessageToUI(result.data);
-                    scrollToBottom();
+                    // ✅ ИСПРАВЛЕНИЕ: Используем forceScrollToBottom для своих сообщений
+                    addMessageToUI(result.data, true); // true = force scroll
                 }
             } else {
                 console.error('❌ Server returned error:', result);
@@ -930,9 +951,7 @@
         }
     }
 
-    /**
-     * Load more messages
-     */
+
     /**
      * ОБНОВЛЕННАЯ функция Load more messages - использует timestamp вместо page
      */
@@ -947,7 +966,7 @@
         if (loadingMessages) loadingMessages.style.display = 'flex';
 
         try {
-            // ✅ ИЗМЕНЕНИЕ: Получаем timestamp самого старого сообщения
+            // Получаем timestamp самого старого сообщения
             const firstMessage = document.querySelector('.message[data-message-id]');
             const oldestTimestamp = firstMessage?.dataset.timestamp;
 
@@ -959,7 +978,7 @@
 
             console.log('📅 Loading messages before:', oldestTimestamp);
 
-            // ✅ ИЗМЕНЕНИЕ: Используем новый endpoint с timestamp
+            // Используем новый endpoint с timestamp
             const url = `/messages/chat/${otherUserId}/load-more?beforeTimestamp=${encodeURIComponent(oldestTimestamp)}&size=50`;
             const response = await fetch(url);
 
@@ -976,7 +995,7 @@
                 console.log('📭 No more messages to load');
             }
 
-            // ✅ ИЗМЕНЕНИЕ: Проверяем hasNext вместо подсчета страниц
+            // Проверяем hasNext вместо подсчета страниц
             if (!result.hasNext) {
                 if (loadMoreBtn) {
                     loadMoreBtn.remove();
@@ -1200,10 +1219,11 @@
         }
     }
 
+
     /**
-     * Add message to UI
+     * ОБНОВЛЕННАЯ функция Add message to UI с параметром принудительного скролла
      */
-    function addMessageToUI(message) {
+    function addMessageToUI(message, forceScroll = false) {
         console.log('🎯 addMessageToUI called with:', message);
 
         let messagesList = document.getElementById('messagesList');
@@ -1246,9 +1266,17 @@
 
         console.log('✅ Message added to UI successfully:', message.id);
 
-        // Scroll to bottom after adding message
+        // ✅ ИСПРАВЛЕНИЕ: Выбираем тип скролла
         setTimeout(() => {
-            scrollToBottom();
+            if (forceScroll || message.isOwnMessage) {
+                // Для своих сообщений всегда скроллим вниз
+                scrollToBottom(true);
+                console.log('📜 Force scrolled to bottom for own message');
+            } else {
+                // Для чужих сообщений используем умный скролл
+                safeScrollToBottom(true);
+                console.log('📜 Safe scrolled to bottom');
+            }
         }, 100);
     }
 
@@ -1269,7 +1297,7 @@
     }
 
     /**
-     * Create message HTML
+     * ОБНОВЛЕННАЯ функция Create message HTML - добавляем timestamp
      */
     function createMessageHtml(message) {
         if (!message || !message.id) {
@@ -1280,54 +1308,54 @@
         const isOwn = message.isOwnMessage;
         const messageClass = isOwn ? 'sent' : 'received';
 
-        // ✅ ДОБАВЛЕНИЕ: Создаем timestamp для data-timestamp
-        const timestamp = message.createdAt || message.timestamp || new Date().toISOString();
+        // Создаем timestamp для data-timestamp
+        const timestamp = getMessageTimestamp(message);
 
         return `
-        <div class="message ${messageClass}"
-             data-message-id="${message.id}"
-             data-timestamp="${timestamp}">
-            ${message.replyToMessage ? `
-                <div class="reply-to">
-                    <div class="reply-to-author">${escapeHtml(message.replyToMessage.sender?.displayName || 'Пользователь')}</div>
-                    <div class="reply-to-content">${escapeHtml(message.replyToMessage.shortContent || '')}</div>
-                </div>
-            ` : ''}
-            <div class="message-bubble">
-                <p class="message-content">${escapeHtml(message.content || '')}</p>
-
-                <div class="message-actions">
-                    <button class="message-action" onclick="replyToMessage(this)" title="Ответить">
-                        <i class="fas fa-reply"></i>
-                    </button>
-                    ${message.canEdit ? `
-                        <button class="message-action" onclick="editMessage(this)" title="Редактировать">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    ` : ''}
-                    ${message.canDelete ? `
-                        <button class="message-action" onclick="deleteMessage(this)" title="Удалить">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    ` : ''}
-                </div>
-            </div>
-
-            <div class="message-meta">
-                <span class="message-time">${escapeHtml(message.timeAgo || 'только что')}</span>
-                ${isOwn ? `
-                    <div class="message-status">
-                        ${getDeliveryStatusIcon(message.deliveryStatus)}
+            <div class="message ${messageClass}"
+                 data-message-id="${message.id}"
+                 data-timestamp="${timestamp}">
+                ${message.replyToMessage ? `
+                    <div class="reply-to">
+                        <div class="reply-to-author">${escapeHtml(message.replyToMessage.sender?.displayName || 'Пользователь')}</div>
+                        <div class="reply-to-content">${escapeHtml(message.replyToMessage.shortContent || '')}</div>
                     </div>
                 ` : ''}
-                ${message.isEdited ? `
-                    <span class="edited-indicator" title="Отредактировано">
-                        <i class="fas fa-edit"></i>
-                    </span>
-                ` : ''}
+                <div class="message-bubble">
+                    <p class="message-content">${escapeHtml(message.content || '')}</p>
+
+                    <div class="message-actions">
+                        <button class="message-action" onclick="replyToMessage(this)" title="Ответить">
+                            <i class="fas fa-reply"></i>
+                        </button>
+                        ${message.canEdit ? `
+                            <button class="message-action" onclick="editMessage(this)" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        ` : ''}
+                        ${message.canDelete ? `
+                            <button class="message-action" onclick="deleteMessage(this)" title="Удалить">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div class="message-meta">
+                    <span class="message-time">${escapeHtml(message.timeAgo || 'только что')}</span>
+                    ${isOwn ? `
+                        <div class="message-status">
+                            ${getDeliveryStatusIcon(message.deliveryStatus)}
+                        </div>
+                    ` : ''}
+                    ${message.isEdited ? `
+                        <span class="edited-indicator" title="Отредактировано">
+                            <i class="fas fa-edit"></i>
+                        </span>
+                    ` : ''}
+                </div>
             </div>
-        </div>
-    `;
+        `;
     }
 
     /**
@@ -1366,6 +1394,28 @@
                 top: container.scrollHeight,
                 behavior: smooth ? 'smooth' : 'auto'
             });
+        }
+    }
+
+    /**
+     * ДОБАВЛЕНИЕ: Функция для безопасного скролла
+     */
+    function safeScrollToBottom(smooth = true) {
+        try {
+            const container = document.getElementById('messagesContainer');
+            if (container) {
+                // Проверяем, что пользователь не прокручивал вверх
+                const isNearBottom = container.scrollTop >= (container.scrollHeight - container.clientHeight - 100);
+
+                if (isNearBottom) {
+                    container.scrollTo({
+                        top: container.scrollHeight,
+                        behavior: smooth ? 'smooth' : 'auto'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error scrolling to bottom:', error);
         }
     }
 
@@ -1500,7 +1550,7 @@
     }
 
     /**
-     * Enhanced handle WebSocket messages with better error handling
+     * ОБНОВЛЕННАЯ Enhanced handle WebSocket messages with better error handling
      */
     function handleWebSocketMessage(data) {
         console.log('📨 WebSocket message received:', data);
@@ -1548,6 +1598,13 @@
                     showError(data.message || 'Ошибка соединения');
                     break;
 
+                case 'UNREAD_COUNT_UPDATE':
+                    // Прямое обновление badge от сервера
+                    if (data.count !== undefined) {
+                        updateUnreadBadge(data.count);
+                    }
+                    break;
+
                 default:
                     console.log('❓ Unknown WebSocket action:', data.action);
             }
@@ -1556,8 +1613,9 @@
         }
     }
 
+
     /**
-     * ОБНОВЛЕННАЯ функция Handle new message - правильно обрабатываем timestamp
+     * ОБНОВЛЕННАЯ функция Handle new message - правильный скролл для разных типов сообщений
      */
     function handleNewMessage(data) {
         // Only process messages relevant to current chat
@@ -1574,7 +1632,6 @@
                 canEdit: data.senderId === currentUserId,
                 canDelete: data.senderId === currentUserId,
                 isEdited: false,
-                // ✅ ДОБАВЛЕНИЕ: Добавляем timestamp
                 createdAt: data.timestamp || new Date().toISOString(),
                 timestamp: data.timestamp || new Date().toISOString(),
                 sender: {
@@ -1588,8 +1645,9 @@
 
             // Check if message already exists
             if (!document.querySelector(`[data-message-id="${data.id}"]`)) {
-                addMessageToUI(messageData);
-                scrollToBottom();
+                // ✅ ИСПРАВЛЕНИЕ: Передаем информацию о том, чье это сообщение
+                const isOwnMessage = data.senderId === currentUserId;
+                addMessageToUI(messageData, isOwnMessage); // force scroll для своих сообщений
 
                 // Mark as read if it's from other user
                 if (data.senderId === otherUserId) {
@@ -1597,6 +1655,17 @@
                 }
             } else {
                 console.log('⚠️ Message already exists in UI:', data.id);
+            }
+
+            // Обновляем badge только если сообщение не от текущего пользователя
+            if (data.senderId !== currentUserId) {
+                const currentPath = window.location.pathname;
+                const isOnChatPage = currentPath.includes('/messages/chat/');
+                const isCurrentChat = currentPath.includes(`/messages/chat/${data.senderId}`);
+
+                if (!isOnChatPage || !isCurrentChat) {
+                    setTimeout(() => updateUnreadCount(), 100);
+                }
             }
         }
     }
@@ -1753,10 +1822,177 @@
     function updateConnectionStatus() {
         const status = getWebSocketStatus();
         console.log('🔌 WebSocket status:', status);
-
-        // You can add a visual indicator in the UI here
-        // For example, change header color or show connection status
     }
+
+    // ===== НОВЫЕ ДОБАВЛЕННЫЕ ФУНКЦИИ =====
+
+    /**
+     * ДОБАВЛЕНИЕ: Функция проверки корректности timestamp
+     */
+    function validateTimestamp(timestamp) {
+        if (!timestamp) return false;
+
+        try {
+            const date = new Date(timestamp);
+            return !isNaN(date.getTime());
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * УЛУЧШЕНИЕ: Функция получения корректного timestamp
+     */
+    function getMessageTimestamp(message) {
+        // Пробуем разные форматы timestamp
+        const possibleTimestamps = [
+            message.createdAt,
+            message.timestamp,
+            message.dataset?.timestamp
+        ];
+
+        for (const ts of possibleTimestamps) {
+            if (validateTimestamp(ts)) {
+                return ts;
+            }
+        }
+
+        // Fallback - текущее время
+        console.warn('⚠️ No valid timestamp found, using current time');
+        return new Date().toISOString();
+    }
+
+
+    /**
+     * ДОБАВЛЕНИЕ: Функция для обновления badge в реальном времени
+     */
+    function updateUnreadBadge(count) {
+        const navBadge = document.querySelector('.nav-badge');
+        const navItem = document.querySelector('a[href="/messages"]');
+
+        if (count > 0) {
+            if (navBadge) {
+                // Обновляем существующий badge
+                navBadge.textContent = count > 99 ? '99+' : count;
+                navBadge.title = `${count} непрочитанных сообщений`;
+            } else if (navItem) {
+                // Создаем новый badge
+                const badge = document.createElement('span');
+                badge.className = 'nav-badge';
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.title = `${count} непрочитанных сообщений`;
+                navItem.appendChild(badge);
+            }
+        } else {
+            // Убираем badge если нет непрочитанных
+            if (navBadge) {
+                navBadge.remove();
+            }
+        }
+    }
+
+    /**
+     * ДОБАВЛЕНИЕ: Функция для получения актуального счетчика непрочитанных
+     */
+    async function updateUnreadCount() {
+        try {
+            const response = await fetch('/messages/api/unread-count', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    updateUnreadBadge(data.count);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Ошибка получения счетчика непрочитанных:', error);
+        }
+    }
+
+    /**
+     * ДОБАВЛЕНИЕ: Функция проверки видимости сообщения
+     */
+    function isMessageVisible(messageElement) {
+        const container = document.getElementById('messagesContainer');
+        if (!container || !messageElement) return false;
+
+        const containerRect = container.getBoundingClientRect();
+        const messageRect = messageElement.getBoundingClientRect();
+
+        return (
+            messageRect.top >= containerRect.top &&
+            messageRect.bottom <= containerRect.bottom
+        );
+    }
+
+    /**
+     * ДОБАВЛЕНИЕ: Функция для отметки видимых сообщений как прочитанных
+     */
+    function markVisibleMessagesAsRead() {
+        const unreadMessages = document.querySelectorAll('.message.received:not(.read)');
+        let hasUnreadVisible = false;
+
+        unreadMessages.forEach(message => {
+            if (isMessageVisible(message)) {
+                message.classList.add('read');
+                hasUnreadVisible = true;
+            }
+        });
+
+        if (hasUnreadVisible) {
+            markAsRead();
+        }
+    }
+
+    /**
+     * ДОБАВЛЕНИЕ: Функция для обработки скролла
+     */
+    function handleScroll() {
+        // Отмечаем видимые сообщения как прочитанные
+        markVisibleMessagesAsRead();
+
+        // Проверяем, нужно ли загрузить больше сообщений
+        const container = document.getElementById('messagesContainer');
+        if (container && container.scrollTop < 100) {
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if (loadMoreBtn && loadMoreBtn.style.display !== 'none') {
+                // Можно автоматически загрузить больше сообщений
+                // loadMoreMessages();
+            }
+        }
+    }
+
+    /**
+     * ДОБАВЛЕНИЕ: Функция для логирования ошибок на сервер (опционально)
+     */
+    async function logErrorToServer(error, context) {
+        try {
+            await fetch('/api/log-error', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    error: error.message,
+                    stack: error.stack,
+                    context: context,
+                    url: window.location.href,
+                    userAgent: navigator.userAgent,
+                    timestamp: new Date().toISOString()
+                })
+            });
+        } catch (e) {
+            // Игнорируем ошибки логирования
+            console.error('Failed to log error to server:', e);
+        }
+    }
+
+    // ===== EVENT LISTENERS =====
 
     // Auto-mark messages as read when page becomes visible
     document.addEventListener('visibilitychange', function() {
@@ -1791,7 +2027,1028 @@
     `;
     document.head.appendChild(style);
 
-
 </script>
+<!-- Chat Scripts -->
+<!--<script>-->
+<!--    // Global variables-->
+<!--    let currentPage = /*[[${conversation?.currentPage ?: 0}]]*/ 0;-->
+<!--    let isLoading = false;-->
+<!--    let currentUserId = /*[[${currentUserId}]]*/ 1;-->
+<!--    let otherUserId = /*[[${otherUserId}]]*/ 2;-->
+<!--    let replyToMessageId = null;-->
+<!--    let typingTimer = null;-->
+<!--    let socket = null;-->
+<!--    let reconnectAttempts = 0;-->
+<!--    let maxReconnectAttempts = 5;-->
+
+<!--    // Получаем otherUserId из URL для точности-->
+<!--    const pathParts = window.location.pathname.split('/');-->
+<!--    const urlOtherUserId = pathParts[pathParts.length - 1];-->
+<!--    if (urlOtherUserId && !isNaN(urlOtherUserId)) {-->
+<!--        otherUserId = parseInt(urlOtherUserId);-->
+<!--    }-->
+
+<!--    console.log('🚀 Chat initialized with:', {-->
+<!--        currentUserId: currentUserId,-->
+<!--        otherUserId: otherUserId,-->
+<!--        currentPage: currentPage,-->
+<!--        url: window.location.pathname,-->
+<!--        extractedUserId: urlOtherUserId-->
+<!--    });-->
+
+<!--    // Initialize chat when page loads-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        initializeChat();-->
+<!--        initializeWebSocket();-->
+<!--        autoResizeTextarea();-->
+<!--        scrollToBottom();-->
+
+<!--        // Mark messages as read when page loads-->
+<!--        setTimeout(() => {-->
+<!--            markAsRead();-->
+<!--        }, 1000);-->
+<!--    });-->
+
+<!--    /**-->
+<!--     * Initialize chat functionality-->
+<!--     */-->
+<!--    function initializeChat() {-->
+<!--        const messageInput = document.getElementById('messageInput');-->
+<!--        const sendBtn = document.getElementById('sendBtn');-->
+
+<!--        if (!messageInput || !sendBtn) {-->
+<!--            console.error('❌ Chat elements not found');-->
+<!--            return;-->
+<!--        }-->
+
+<!--        // Handle Enter key-->
+<!--        messageInput.addEventListener('keydown', function(e) {-->
+<!--            if (e.key === 'Enter' && !e.shiftKey) {-->
+<!--                e.preventDefault();-->
+<!--                sendMessage();-->
+<!--            }-->
+<!--        });-->
+
+<!--        // Handle typing indicators-->
+<!--        messageInput.addEventListener('input', function() {-->
+<!--            handleTyping();-->
+<!--            updateSendButtonState();-->
+<!--        });-->
+
+<!--        // Auto-resize textarea-->
+<!--        messageInput.addEventListener('input', autoResizeTextarea);-->
+
+<!--        // Initial button state-->
+<!--        updateSendButtonState();-->
+
+<!--        console.log('💬 Chat initialized successfully');-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Update send button state-->
+<!--     */-->
+<!--    function updateSendButtonState() {-->
+<!--        const messageInput = document.getElementById('messageInput');-->
+<!--        const sendBtn = document.getElementById('sendBtn');-->
+
+<!--        if (messageInput && sendBtn) {-->
+<!--            const hasContent = messageInput.value.trim().length > 0;-->
+<!--            sendBtn.disabled = !hasContent;-->
+<!--            sendBtn.style.opacity = hasContent ? '1' : '0.5';-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Send message-->
+<!--     */-->
+<!--    async function sendMessage() {-->
+<!--        const messageInput = document.getElementById('messageInput');-->
+<!--        const content = messageInput.value.trim();-->
+
+<!--        if (!content) {-->
+<!--            console.warn('⚠️ Empty message content');-->
+<!--            return;-->
+<!--        }-->
+
+<!--        const sendBtn = document.getElementById('sendBtn');-->
+<!--        sendBtn.disabled = true;-->
+
+<!--        // Create message data-->
+<!--        const messageData = {-->
+<!--            recipientId: otherUserId,-->
+<!--            content: content,-->
+<!--            replyToMessageId: replyToMessageId-->
+<!--        };-->
+
+<!--        console.log('📤 Sending message data:', messageData);-->
+
+<!--        try {-->
+<!--            const response = await fetch('/messages/send', {-->
+<!--                method: 'POST',-->
+<!--                headers: {-->
+<!--                    'Content-Type': 'application/json',-->
+<!--                    'X-Requested-With': 'XMLHttpRequest'-->
+<!--                },-->
+<!--                body: JSON.stringify(messageData)-->
+<!--            });-->
+
+<!--            if (!response.ok) {-->
+<!--                const errorText = await response.text();-->
+<!--                console.error('❌ HTTP Error:', response.status, errorText);-->
+<!--                throw new Error(`HTTP error! status: ${response.status}`);-->
+<!--            }-->
+
+<!--            const result = await response.json();-->
+<!--            console.log('📨 Send response:', result);-->
+
+<!--            if (result.success) {-->
+<!--                console.log('✅ Message sent successfully');-->
+
+<!--                messageInput.value = '';-->
+<!--                autoResizeTextarea();-->
+<!--                cancelReply();-->
+<!--                updateSendButtonState();-->
+
+<!--                // Добавляем сообщение в UI, если WebSocket не сработал-->
+<!--                if (result.data && !document.querySelector(`[data-message-id="${result.data.id}"]`)) {-->
+<!--                    addMessageToUI(result.data);-->
+<!--                    scrollToBottom();-->
+<!--                }-->
+<!--            } else {-->
+<!--                console.error('❌ Server returned error:', result);-->
+<!--                showError('Ошибка отправки сообщения: ' + (result.message || 'Неизвестная ошибка'));-->
+<!--            }-->
+<!--        } catch (error) {-->
+<!--            console.error('❌ Error sending message:', error);-->
+<!--            showError('Ошибка отправки сообщения. Проверьте подключение к интернету.');-->
+<!--        } finally {-->
+<!--            sendBtn.disabled = false;-->
+<!--            updateSendButtonState();-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Load more messages-->
+<!--     */-->
+<!--    /**-->
+<!--     * ОБНОВЛЕННАЯ функция Load more messages - использует timestamp вместо page-->
+<!--     */-->
+<!--    async function loadMoreMessages() {-->
+<!--        if (isLoading) return;-->
+
+<!--        isLoading = true;-->
+<!--        const loadMoreBtn = document.getElementById('loadMoreBtn');-->
+<!--        const loadingMessages = document.getElementById('loadingMessages');-->
+
+<!--        if (loadMoreBtn) loadMoreBtn.style.display = 'none';-->
+<!--        if (loadingMessages) loadingMessages.style.display = 'flex';-->
+
+<!--        try {-->
+<!--            // ✅ ИЗМЕНЕНИЕ: Получаем timestamp самого старого сообщения-->
+<!--            const firstMessage = document.querySelector('.message[data-message-id]');-->
+<!--            const oldestTimestamp = firstMessage?.dataset.timestamp;-->
+
+<!--            if (!oldestTimestamp) {-->
+<!--                console.error('❌ Не найден timestamp для загрузки старых сообщений');-->
+<!--                showError('Ошибка определения времени сообщений');-->
+<!--                return;-->
+<!--            }-->
+
+<!--            console.log('📅 Loading messages before:', oldestTimestamp);-->
+
+<!--            // ✅ ИЗМЕНЕНИЕ: Используем новый endpoint с timestamp-->
+<!--            const url = `/messages/chat/${otherUserId}/load-more?beforeTimestamp=${encodeURIComponent(oldestTimestamp)}&size=50`;-->
+<!--            const response = await fetch(url);-->
+
+<!--            if (!response.ok) {-->
+<!--                throw new Error(`HTTP error! status: ${response.status}`);-->
+<!--            }-->
+
+<!--            const result = await response.json();-->
+
+<!--            if (result.messages && result.messages.length > 0) {-->
+<!--                prependMessagesToUI(result.messages);-->
+<!--                console.log(`📥 Loaded ${result.messages.length} more messages`);-->
+<!--            } else {-->
+<!--                console.log('📭 No more messages to load');-->
+<!--            }-->
+
+<!--            // ✅ ИЗМЕНЕНИЕ: Проверяем hasNext вместо подсчета страниц-->
+<!--            if (!result.hasNext) {-->
+<!--                if (loadMoreBtn) {-->
+<!--                    loadMoreBtn.remove();-->
+<!--                    console.log('🏁 All messages loaded, button removed');-->
+<!--                }-->
+<!--            } else {-->
+<!--                if (loadMoreBtn) loadMoreBtn.style.display = 'block';-->
+<!--            }-->
+
+<!--        } catch (error) {-->
+<!--            console.error('❌ Error loading more messages:', error);-->
+<!--            showError('Ошибка загрузки сообщений');-->
+<!--            if (loadMoreBtn) loadMoreBtn.style.display = 'block';-->
+<!--        } finally {-->
+<!--            if (loadingMessages) loadingMessages.style.display = 'none';-->
+<!--            isLoading = false;-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Handle typing indicator-->
+<!--     */-->
+<!--    function handleTyping() {-->
+<!--        // Send typing start notification-->
+<!--        sendTypingNotification(true);-->
+
+<!--        // Clear existing timer-->
+<!--        if (typingTimer) {-->
+<!--            clearTimeout(typingTimer);-->
+<!--        }-->
+
+<!--        // Set timer to send typing stop-->
+<!--        typingTimer = setTimeout(() => {-->
+<!--            sendTypingNotification(false);-->
+<!--        }, 1000);-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Enhanced send typing notification with WebSocket-->
+<!--     */-->
+<!--    async function sendTypingNotification(isTyping) {-->
+<!--        try {-->
+<!--            // Send through WebSocket if available-->
+<!--            if (socket && socket.readyState === WebSocket.OPEN) {-->
+<!--                sendWebSocketMessage({-->
+<!--                    action: isTyping ? 'TYPING_START' : 'TYPING_STOP',-->
+<!--                    senderId: currentUserId,-->
+<!--                    recipientId: otherUserId-->
+<!--                });-->
+<!--            }-->
+
+<!--            // Also send HTTP request as fallback-->
+<!--            await fetch(`/messages/typing/${otherUserId}?isTyping=${isTyping}`, {-->
+<!--                method: 'POST',-->
+<!--                headers: {-->
+<!--                    'X-Requested-With': 'XMLHttpRequest'-->
+<!--                }-->
+<!--            });-->
+<!--        } catch (error) {-->
+<!--            console.error('❌ Error sending typing notification:', error);-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Auto-resize textarea-->
+<!--     */-->
+<!--    function autoResizeTextarea() {-->
+<!--        const textarea = document.getElementById('messageInput');-->
+<!--        if (textarea) {-->
+<!--            textarea.style.height = 'auto';-->
+<!--            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Reply to message-->
+<!--     */-->
+<!--    function replyToMessage(button) {-->
+<!--        const message = button.closest('.message');-->
+<!--        const messageId = message.dataset.messageId;-->
+<!--        const content = message.querySelector('.message-content').textContent;-->
+<!--        const author = message.classList.contains('sent') ? 'Вы' : /*[[${otherUser?.displayName}]]*/ 'Пользователь';-->
+
+<!--        replyToMessageId = messageId;-->
+
+<!--        const replyAuthor = document.getElementById('replyAuthor');-->
+<!--        const replyContent = document.getElementById('replyContent');-->
+<!--        const replyPreview = document.getElementById('replyPreview');-->
+
+<!--        if (replyAuthor) replyAuthor.textContent = author;-->
+<!--        if (replyContent) replyContent.textContent = content.length > 50 ? content.substring(0, 50) + '...' : content;-->
+<!--        if (replyPreview) replyPreview.style.display = 'block';-->
+
+<!--        const messageInput = document.getElementById('messageInput');-->
+<!--        if (messageInput) messageInput.focus();-->
+
+<!--        console.log('💬 Replying to message:', messageId);-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Cancel reply-->
+<!--     */-->
+<!--    function cancelReply() {-->
+<!--        replyToMessageId = null;-->
+<!--        const replyPreview = document.getElementById('replyPreview');-->
+<!--        if (replyPreview) {-->
+<!--            replyPreview.style.display = 'none';-->
+<!--        }-->
+<!--        console.log('❌ Reply cancelled');-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Edit message-->
+<!--     */-->
+<!--    function editMessage(button) {-->
+<!--        const message = button.closest('.message');-->
+<!--        const messageId = message.dataset.messageId;-->
+<!--        const content = message.querySelector('.message-content').textContent;-->
+
+<!--        const newContent = prompt('Редактировать сообщение:', content);-->
+<!--        if (newContent && newContent !== content && newContent.trim()) {-->
+<!--            updateMessage(messageId, newContent.trim());-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Delete message-->
+<!--     */-->
+<!--    function deleteMessage(button) {-->
+<!--        const message = button.closest('.message');-->
+<!--        const messageId = message.dataset.messageId;-->
+
+<!--        if (confirm('Удалить сообщение?')) {-->
+<!--            removeMessage(messageId);-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Update message-->
+<!--     */-->
+<!--    async function updateMessage(messageId, newContent) {-->
+<!--        try {-->
+<!--            const response = await fetch(`/messages/edit/${messageId}`, {-->
+<!--                method: 'PUT',-->
+<!--                headers: {-->
+<!--                    'Content-Type': 'application/json',-->
+<!--                    'X-Requested-With': 'XMLHttpRequest'-->
+<!--                },-->
+<!--                body: JSON.stringify({-->
+<!--                    content: newContent-->
+<!--                })-->
+<!--            });-->
+
+<!--            if (!response.ok) {-->
+<!--                throw new Error(`HTTP error! status: ${response.status}`);-->
+<!--            }-->
+
+<!--            const result = await response.json();-->
+
+<!--            if (result.success) {-->
+<!--                // Update message in UI-->
+<!--                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);-->
+<!--                if (messageElement) {-->
+<!--                    const contentElement = messageElement.querySelector('.message-content');-->
+<!--                    if (contentElement) {-->
+<!--                        contentElement.textContent = newContent;-->
+<!--                    }-->
+
+<!--                    // Add edited indicator if not present-->
+<!--                    if (!messageElement.querySelector('.edited-indicator')) {-->
+<!--                        const metaElement = messageElement.querySelector('.message-meta');-->
+<!--                        if (metaElement) {-->
+<!--                            metaElement.insertAdjacentHTML('beforeend', '<span class="edited-indicator" title="Отредактировано"><i class="fas fa-edit"></i></span>');-->
+<!--                        }-->
+<!--                    }-->
+<!--                }-->
+<!--                console.log('✅ Message updated successfully');-->
+<!--            } else {-->
+<!--                showError('Ошибка редактирования: ' + (result.message || 'Неизвестная ошибка'));-->
+<!--            }-->
+<!--        } catch (error) {-->
+<!--            console.error('❌ Error updating message:', error);-->
+<!--            showError('Ошибка редактирования сообщения');-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Remove message-->
+<!--     */-->
+<!--    async function removeMessage(messageId) {-->
+<!--        try {-->
+<!--            const response = await fetch(`/messages/delete/${messageId}`, {-->
+<!--                method: 'DELETE',-->
+<!--                headers: {-->
+<!--                    'X-Requested-With': 'XMLHttpRequest'-->
+<!--                }-->
+<!--            });-->
+
+<!--            if (!response.ok) {-->
+<!--                throw new Error(`HTTP error! status: ${response.status}`);-->
+<!--            }-->
+
+<!--            const result = await response.json();-->
+
+<!--            if (result.success) {-->
+<!--                // Remove message from UI-->
+<!--                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);-->
+<!--                if (messageElement) {-->
+<!--                    messageElement.style.animation = 'messageDisappear 0.3s ease-out forwards';-->
+<!--                    setTimeout(() => {-->
+<!--                        messageElement.remove();-->
+<!--                    }, 300);-->
+<!--                }-->
+<!--                console.log('✅ Message deleted successfully');-->
+<!--            } else {-->
+<!--                showError('Ошибка удаления: ' + (result.message || 'Неизвестная ошибка'));-->
+<!--            }-->
+<!--        } catch (error) {-->
+<!--            console.error('❌ Error deleting message:', error);-->
+<!--            showError('Ошибка удаления сообщения');-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Add message to UI-->
+<!--     */-->
+<!--    function addMessageToUI(message) {-->
+<!--        console.log('🎯 addMessageToUI called with:', message);-->
+
+<!--        let messagesList = document.getElementById('messagesList');-->
+<!--        const messagesContainer = document.getElementById('messagesContainer');-->
+
+<!--        if (!messagesContainer) {-->
+<!--            console.error('❌ Messages container not found');-->
+<!--            return;-->
+<!--        }-->
+
+<!--        // Remove empty state if present-->
+<!--        const emptyChat = document.querySelector('.empty-chat');-->
+<!--        if (emptyChat) {-->
+<!--            console.log('🗑️ Removing empty chat state');-->
+<!--            emptyChat.remove();-->
+<!--        }-->
+
+<!--        // Create messagesList if it doesn't exist-->
+<!--        if (!messagesList) {-->
+<!--            console.log('📝 Creating messages list');-->
+<!--            const messagesListHtml = '<div class="messages-list" id="messagesList"></div>';-->
+<!--            messagesContainer.insertAdjacentHTML('beforeend', messagesListHtml);-->
+<!--            messagesList = document.getElementById('messagesList');-->
+<!--        }-->
+
+<!--        if (!messagesList) {-->
+<!--            console.error('❌ Could not create or find messages list');-->
+<!--            return;-->
+<!--        }-->
+
+<!--        // Check if message already exists-->
+<!--        const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);-->
+<!--        if (existingMessage) {-->
+<!--            console.warn('⚠️ Message already exists in UI:', message.id);-->
+<!--            return;-->
+<!--        }-->
+
+<!--        const messageHtml = createMessageHtml(message);-->
+<!--        messagesList.insertAdjacentHTML('beforeend', messageHtml);-->
+
+<!--        console.log('✅ Message added to UI successfully:', message.id);-->
+
+<!--        // Scroll to bottom after adding message-->
+<!--        setTimeout(() => {-->
+<!--            scrollToBottom();-->
+<!--        }, 100);-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Prepend messages to UI-->
+<!--     */-->
+<!--    function prependMessagesToUI(messages) {-->
+<!--        const messagesList = document.getElementById('messagesList');-->
+<!--        if (!messagesList) {-->
+<!--            console.error('❌ Messages list not found');-->
+<!--            return;-->
+<!--        }-->
+
+<!--        const messagesHtml = messages.reverse().map(createMessageHtml).join('');-->
+<!--        messagesList.insertAdjacentHTML('afterbegin', messagesHtml);-->
+
+<!--        console.log(`➕ ${messages.length} messages prepended to UI`);-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Create message HTML-->
+<!--     */-->
+<!--    function createMessageHtml(message) {-->
+<!--        if (!message || !message.id) {-->
+<!--            console.error('❌ Invalid message data:', message);-->
+<!--            return '';-->
+<!--        }-->
+
+<!--        const isOwn = message.isOwnMessage;-->
+<!--        const messageClass = isOwn ? 'sent' : 'received';-->
+
+<!--        // ✅ ДОБАВЛЕНИЕ: Создаем timestamp для data-timestamp-->
+<!--        const timestamp = message.createdAt || message.timestamp || new Date().toISOString();-->
+
+<!--        return `-->
+<!--        <div class="message ${messageClass}"-->
+<!--             data-message-id="${message.id}"-->
+<!--             data-timestamp="${timestamp}">-->
+<!--            ${message.replyToMessage ? `-->
+<!--                <div class="reply-to">-->
+<!--                    <div class="reply-to-author">${escapeHtml(message.replyToMessage.sender?.displayName || 'Пользователь')}</div>-->
+<!--                    <div class="reply-to-content">${escapeHtml(message.replyToMessage.shortContent || '')}</div>-->
+<!--                </div>-->
+<!--            ` : ''}-->
+<!--            <div class="message-bubble">-->
+<!--                <p class="message-content">${escapeHtml(message.content || '')}</p>-->
+
+<!--                <div class="message-actions">-->
+<!--                    <button class="message-action" onclick="replyToMessage(this)" title="Ответить">-->
+<!--                        <i class="fas fa-reply"></i>-->
+<!--                    </button>-->
+<!--                    ${message.canEdit ? `-->
+<!--                        <button class="message-action" onclick="editMessage(this)" title="Редактировать">-->
+<!--                            <i class="fas fa-edit"></i>-->
+<!--                        </button>-->
+<!--                    ` : ''}-->
+<!--                    ${message.canDelete ? `-->
+<!--                        <button class="message-action" onclick="deleteMessage(this)" title="Удалить">-->
+<!--                            <i class="fas fa-trash"></i>-->
+<!--                        </button>-->
+<!--                    ` : ''}-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="message-meta">-->
+<!--                <span class="message-time">${escapeHtml(message.timeAgo || 'только что')}</span>-->
+<!--                ${isOwn ? `-->
+<!--                    <div class="message-status">-->
+<!--                        ${getDeliveryStatusIcon(message.deliveryStatus)}-->
+<!--                    </div>-->
+<!--                ` : ''}-->
+<!--                ${message.isEdited ? `-->
+<!--                    <span class="edited-indicator" title="Отредактировано">-->
+<!--                        <i class="fas fa-edit"></i>-->
+<!--                    </span>-->
+<!--                ` : ''}-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    `;-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Get delivery status icon-->
+<!--     */-->
+<!--    function getDeliveryStatusIcon(status) {-->
+<!--        switch(status) {-->
+<!--            case 'SENT':-->
+<!--                return '<i class="fas fa-check" title="Отправлено"></i>';-->
+<!--            case 'DELIVERED':-->
+<!--                return '<i class="fas fa-check-double" title="Доставлено"></i>';-->
+<!--            case 'READ':-->
+<!--                return '<i class="fas fa-check-double" style="color: var(&#45;&#45;accent-primary);" title="Прочитано"></i>';-->
+<!--            default:-->
+<!--                return '';-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Escape HTML-->
+<!--     */-->
+<!--    function escapeHtml(text) {-->
+<!--        if (!text) return '';-->
+<!--        const div = document.createElement('div');-->
+<!--        div.textContent = text;-->
+<!--        return div.innerHTML;-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Scroll to bottom-->
+<!--     */-->
+<!--    function scrollToBottom(smooth = true) {-->
+<!--        const container = document.getElementById('messagesContainer');-->
+<!--        if (container) {-->
+<!--            container.scrollTo({-->
+<!--                top: container.scrollHeight,-->
+<!--                behavior: smooth ? 'smooth' : 'auto'-->
+<!--            });-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Initialize WebSocket connection with SockJS fallback-->
+<!--     */-->
+<!--    function initializeWebSocket() {-->
+<!--        try {-->
+<!--            console.log('🔌 Initializing WebSocket connection...');-->
+
+<!--            // Use SockJS for better compatibility and fallback support-->
+<!--            const sockJSUrl = `${window.location.origin}/ws/chat`;-->
+<!--            console.log('🔗 Connecting to:', sockJSUrl);-->
+
+<!--            // Create SockJS connection-->
+<!--            socket = new SockJS(sockJSUrl);-->
+
+<!--            socket.onopen = function() {-->
+<!--                console.log('🔌 WebSocket connected successfully');-->
+<!--                reconnectAttempts = 0; // Reset reconnect attempts-->
+
+<!--                // Send connection acknowledgment-->
+<!--                sendWebSocketMessage({-->
+<!--                    action: 'CONNECT',-->
+<!--                    userId: currentUserId,-->
+<!--                    chatUserId: otherUserId-->
+<!--                });-->
+<!--            };-->
+
+<!--            socket.onmessage = function(event) {-->
+<!--                try {-->
+<!--                    console.log('📨 Raw WebSocket message:', event.data);-->
+<!--                    const data = JSON.parse(event.data);-->
+<!--                    handleWebSocketMessage(data);-->
+<!--                } catch (error) {-->
+<!--                    console.error('❌ Error parsing WebSocket message:', error, event.data);-->
+<!--                }-->
+<!--            };-->
+
+<!--            socket.onclose = function(event) {-->
+<!--                console.log('🔌 WebSocket disconnected:', event.code, event.reason);-->
+
+<!--                // Attempt to reconnect if not a normal closure and under attempt limit-->
+<!--                if (event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {-->
+<!--                    reconnectAttempts++;-->
+<!--                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000); // Exponential backoff-->
+<!--                    console.log(`🔄 Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts}) in ${delay}ms...`);-->
+<!--                    setTimeout(() => {-->
+<!--                        initializeWebSocket();-->
+<!--                    }, delay);-->
+<!--                } else if (reconnectAttempts >= maxReconnectAttempts) {-->
+<!--                    console.log('❌ Max reconnection attempts reached. Trying direct WebSocket...');-->
+<!--                    initializeDirectWebSocket();-->
+<!--                }-->
+<!--            };-->
+
+<!--            socket.onerror = function(error) {-->
+<!--                console.error('❌ WebSocket error:', error);-->
+<!--            };-->
+
+<!--        } catch (error) {-->
+<!--            console.error('❌ Error initializing WebSocket:', error);-->
+<!--            // Fallback: try direct WebSocket connection-->
+<!--            console.log('🔄 Trying direct WebSocket connection...');-->
+<!--            initializeDirectWebSocket();-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Fallback to direct WebSocket connection-->
+<!--     */-->
+<!--    function initializeDirectWebSocket() {-->
+<!--        try {-->
+<!--            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';-->
+<!--            const wsUrl = `${protocol}//${window.location.host}/ws/chat/websocket`;-->
+
+<!--            console.log('🔗 Direct WebSocket URL:', wsUrl);-->
+
+<!--            socket = new WebSocket(wsUrl);-->
+
+<!--            socket.onopen = function() {-->
+<!--                console.log('🔌 Direct WebSocket connected');-->
+<!--                reconnectAttempts = 0;-->
+
+<!--                // Send connection acknowledgment-->
+<!--                sendWebSocketMessage({-->
+<!--                    action: 'CONNECT',-->
+<!--                    userId: currentUserId,-->
+<!--                    chatUserId: otherUserId-->
+<!--                });-->
+<!--            };-->
+
+<!--            socket.onmessage = function(event) {-->
+<!--                try {-->
+<!--                    const data = JSON.parse(event.data);-->
+<!--                    handleWebSocketMessage(data);-->
+<!--                } catch (error) {-->
+<!--                    console.error('❌ Error parsing WebSocket message:', error);-->
+<!--                }-->
+<!--            };-->
+
+<!--            socket.onclose = function(event) {-->
+<!--                console.log('🔌 Direct WebSocket disconnected:', event.code, event.reason);-->
+<!--            };-->
+
+<!--            socket.onerror = function(error) {-->
+<!--                console.error('❌ Direct WebSocket error:', error);-->
+<!--                console.log('⚠️ All WebSocket connections failed, chat will work without real-time updates');-->
+<!--            };-->
+
+<!--        } catch (error) {-->
+<!--            console.error('❌ Error with direct WebSocket:', error);-->
+<!--            console.log('⚠️ All WebSocket connections failed, chat will work without real-time updates');-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Send message through WebSocket-->
+<!--     */-->
+<!--    function sendWebSocketMessage(message) {-->
+<!--        if (socket && socket.readyState === WebSocket.OPEN) {-->
+<!--            try {-->
+<!--                const messageStr = JSON.stringify(message);-->
+<!--                socket.send(messageStr);-->
+<!--                console.log('📤 WebSocket message sent:', message);-->
+<!--            } catch (error) {-->
+<!--                console.error('❌ Error sending WebSocket message:', error);-->
+<!--            }-->
+<!--        } else {-->
+<!--            console.warn('⚠️ WebSocket not connected, cannot send message:', message);-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Enhanced handle WebSocket messages with better error handling-->
+<!--     */-->
+<!--    function handleWebSocketMessage(data) {-->
+<!--        console.log('📨 WebSocket message received:', data);-->
+
+<!--        try {-->
+<!--            switch(data.action) {-->
+<!--                case 'NEW_MESSAGE':-->
+<!--                    handleNewMessage(data);-->
+<!--                    break;-->
+
+<!--                case 'MESSAGE_EDITED':-->
+<!--                    if (data.senderId === otherUserId) {-->
+<!--                        updateMessageInUI(data);-->
+<!--                    }-->
+<!--                    break;-->
+
+<!--                case 'MESSAGE_DELETED':-->
+<!--                    removeMessageFromUI(data.id);-->
+<!--                    break;-->
+
+<!--                case 'MESSAGES_READ':-->
+<!--                    if (data.senderId === otherUserId) {-->
+<!--                        updateMessagesReadStatus();-->
+<!--                    }-->
+<!--                    break;-->
+
+<!--                case 'TYPING_START':-->
+<!--                    if (data.senderId === otherUserId) {-->
+<!--                        showTypingIndicator();-->
+<!--                    }-->
+<!--                    break;-->
+
+<!--                case 'TYPING_STOP':-->
+<!--                    if (data.senderId === otherUserId) {-->
+<!--                        hideTypingIndicator();-->
+<!--                    }-->
+<!--                    break;-->
+
+<!--                case 'CONNECT_ACK':-->
+<!--                    console.log('✅ WebSocket connection acknowledged');-->
+<!--                    break;-->
+
+<!--                case 'ERROR':-->
+<!--                    console.error('❌ WebSocket error from server:', data.message);-->
+<!--                    showError(data.message || 'Ошибка соединения');-->
+<!--                    break;-->
+
+<!--                default:-->
+<!--                    console.log('❓ Unknown WebSocket action:', data.action);-->
+<!--            }-->
+<!--        } catch (error) {-->
+<!--            console.error('❌ Error handling WebSocket message:', error, data);-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * ОБНОВЛЕННАЯ функция Handle new message - правильно обрабатываем timestamp-->
+<!--     */-->
+<!--    function handleNewMessage(data) {-->
+<!--        // Only process messages relevant to current chat-->
+<!--        if ((data.senderId === otherUserId && data.recipientId === currentUserId) ||-->
+<!--            (data.senderId === currentUserId && data.recipientId === otherUserId)) {-->
+
+<!--            // Transform WebSocket data to MessageResponseDto format-->
+<!--            const messageData = {-->
+<!--                id: data.id,-->
+<!--                content: data.content,-->
+<!--                isOwnMessage: data.senderId === currentUserId,-->
+<!--                deliveryStatus: 'DELIVERED',-->
+<!--                timeAgo: 'только что',-->
+<!--                canEdit: data.senderId === currentUserId,-->
+<!--                canDelete: data.senderId === currentUserId,-->
+<!--                isEdited: false,-->
+<!--                // ✅ ДОБАВЛЕНИЕ: Добавляем timestamp-->
+<!--                createdAt: data.timestamp || new Date().toISOString(),-->
+<!--                timestamp: data.timestamp || new Date().toISOString(),-->
+<!--                sender: {-->
+<!--                    displayName: data.senderName || (data.senderId === currentUserId ? 'Вы' : 'Пользователь')-->
+<!--                },-->
+<!--                replyToMessage: data.replyToMessage ? {-->
+<!--                    sender: { displayName: data.replyToMessage.senderName },-->
+<!--                    shortContent: data.replyToMessage.content-->
+<!--                } : null-->
+<!--            };-->
+
+<!--            // Check if message already exists-->
+<!--            if (!document.querySelector(`[data-message-id="${data.id}"]`)) {-->
+<!--                addMessageToUI(messageData);-->
+<!--                scrollToBottom();-->
+
+<!--                // Mark as read if it's from other user-->
+<!--                if (data.senderId === otherUserId) {-->
+<!--                    setTimeout(() => markAsRead(), 500);-->
+<!--                }-->
+<!--            } else {-->
+<!--                console.log('⚠️ Message already exists in UI:', data.id);-->
+<!--            }-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Update message in UI-->
+<!--     */-->
+<!--    function updateMessageInUI(data) {-->
+<!--        const messageElement = document.querySelector(`[data-message-id="${data.id}"]`);-->
+<!--        if (messageElement) {-->
+<!--            const contentElement = messageElement.querySelector('.message-content');-->
+<!--            if (contentElement) {-->
+<!--                contentElement.textContent = data.content;-->
+<!--            }-->
+
+<!--            // Add edited indicator if not present-->
+<!--            if (!messageElement.querySelector('.edited-indicator')) {-->
+<!--                const metaElement = messageElement.querySelector('.message-meta');-->
+<!--                if (metaElement) {-->
+<!--                    metaElement.insertAdjacentHTML('beforeend', '<span class="edited-indicator" title="Отредактировано"><i class="fas fa-edit"></i></span>');-->
+<!--                }-->
+<!--            }-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Remove message from UI-->
+<!--     */-->
+<!--    function removeMessageFromUI(messageId) {-->
+<!--        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);-->
+<!--        if (messageElement) {-->
+<!--            messageElement.style.animation = 'messageDisappear 0.3s ease-out forwards';-->
+<!--            setTimeout(() => {-->
+<!--                messageElement.remove();-->
+<!--            }, 300);-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Update messages read status-->
+<!--     */-->
+<!--    function updateMessagesReadStatus() {-->
+<!--        const sentMessages = document.querySelectorAll('.message.sent');-->
+<!--        sentMessages.forEach(message => {-->
+<!--            const statusElement = message.querySelector('.message-status i');-->
+<!--            if (statusElement) {-->
+<!--                statusElement.className = 'fas fa-check-double';-->
+<!--                statusElement.style.color = 'var(&#45;&#45;accent-primary)';-->
+<!--                statusElement.title = 'Прочитано';-->
+<!--            }-->
+<!--        });-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Show typing indicator-->
+<!--     */-->
+<!--    function showTypingIndicator() {-->
+<!--        const indicator = document.getElementById('typingIndicator');-->
+<!--        const statusText = indicator?.previousElementSibling;-->
+
+<!--        if (statusText) statusText.style.display = 'none';-->
+<!--        if (indicator) indicator.style.display = 'block';-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Hide typing indicator-->
+<!--     */-->
+<!--    function hideTypingIndicator() {-->
+<!--        const indicator = document.getElementById('typingIndicator');-->
+<!--        const statusText = indicator?.previousElementSibling;-->
+
+<!--        if (indicator) indicator.style.display = 'none';-->
+<!--        if (statusText) statusText.style.display = 'block';-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Mark messages as read-->
+<!--     */-->
+<!--    async function markAsRead() {-->
+<!--        try {-->
+<!--            await fetch(`/messages/mark-read/${otherUserId}`, {-->
+<!--                method: 'POST',-->
+<!--                headers: {-->
+<!--                    'X-Requested-With': 'XMLHttpRequest'-->
+<!--                }-->
+<!--            });-->
+<!--            console.log('✅ Messages marked as read');-->
+<!--        } catch (error) {-->
+<!--            console.error('❌ Error marking messages as read:', error);-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Search in chat-->
+<!--     */-->
+<!--    function searchInChat() {-->
+<!--        const query = prompt('Поиск в чате:');-->
+<!--        if (query) {-->
+<!--            console.log('🔍 Searching for:', query);-->
+<!--            // TODO: Implement search functionality-->
+<!--            showError('Функция поиска будет добавлена в ближайшее время');-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Open chat info-->
+<!--     */-->
+<!--    function openChatInfo() {-->
+<!--        console.log('ℹ️ Opening chat info for user:', otherUserId);-->
+<!--        // TODO: Implement chat info modal or page-->
+<!--        showError('Информация о чате будет добавлена в ближайшее время');-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Show error message-->
+<!--     */-->
+<!--    function showError(message) {-->
+<!--        // Remove existing toasts-->
+<!--        const existingToasts = document.querySelectorAll('.error-toast');-->
+<!--        existingToasts.forEach(toast => toast.remove());-->
+
+<!--        // Create new toast-->
+<!--        const toast = document.createElement('div');-->
+<!--        toast.className = 'error-toast';-->
+<!--        toast.textContent = message;-->
+
+<!--        document.body.appendChild(toast);-->
+
+<!--        setTimeout(() => {-->
+<!--            if (toast.parentNode) {-->
+<!--                toast.remove();-->
+<!--            }-->
+<!--        }, 5000);-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Check WebSocket connection status-->
+<!--     */-->
+<!--    function getWebSocketStatus() {-->
+<!--        if (!socket) return 'Not initialized';-->
+
+<!--        switch(socket.readyState) {-->
+<!--            case WebSocket.CONNECTING: return 'Connecting';-->
+<!--            case WebSocket.OPEN: return 'Connected';-->
+<!--            case WebSocket.CLOSING: return 'Closing';-->
+<!--            case WebSocket.CLOSED: return 'Closed';-->
+<!--            default: return 'Unknown';-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Update connection status indicator-->
+<!--     */-->
+<!--    function updateConnectionStatus() {-->
+<!--        const status = getWebSocketStatus();-->
+<!--        console.log('🔌 WebSocket status:', status);-->
+
+<!--        // You can add a visual indicator in the UI here-->
+<!--        // For example, change header color or show connection status-->
+<!--    }-->
+
+<!--    // Auto-mark messages as read when page becomes visible-->
+<!--    document.addEventListener('visibilitychange', function() {-->
+<!--        if (!document.hidden) {-->
+<!--            markAsRead();-->
+<!--        }-->
+<!--    });-->
+
+<!--    // Handle page unload-->
+<!--    window.addEventListener('beforeunload', function() {-->
+<!--        if (socket) {-->
+<!--            socket.close();-->
+<!--        }-->
+<!--    });-->
+
+<!--    // Check connection status periodically-->
+<!--    setInterval(updateConnectionStatus, 10000); // Every 10 seconds-->
+
+<!--    // Add CSS for message disappear animation-->
+<!--    const style = document.createElement('style');-->
+<!--    style.textContent = `-->
+<!--        @keyframes messageDisappear {-->
+<!--            from {-->
+<!--                opacity: 1;-->
+<!--                transform: translateX(0);-->
+<!--            }-->
+<!--            to {-->
+<!--                opacity: 0;-->
+<!--                transform: translateX(100px);-->
+<!--            }-->
+<!--        }-->
+<!--    `;-->
+<!--    document.head.appendChild(style);-->
+
+
+<!--</script>-->
 </body>
 </html>
