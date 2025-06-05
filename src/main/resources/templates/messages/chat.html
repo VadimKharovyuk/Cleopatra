@@ -620,6 +620,150 @@
                 opacity: 1;
             }
         }
+        /* Стили для ссылок на профиль в чате */
+
+        /* Ссылка аватара */
+        .chat-avatar-link {
+            display: block;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-avatar-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .chat-avatar-link:active {
+            transform: scale(0.98);
+        }
+
+        /* Эффект наведения на аватар */
+        .chat-avatar-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 1;
+        }
+
+        .chat-avatar-link:hover::before {
+            opacity: 1;
+        }
+
+        /* Иконка "перейти к профилю" при наведении */
+        .chat-avatar-link::after {
+            content: '\f007'; /* Font Awesome user icon */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 2;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-avatar-link:hover::after {
+            opacity: 1;
+        }
+
+        /* Ссылка имени пользователя */
+        .chat-user-name-link {
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            border-radius: var(--radius-sm);
+            padding: 0.25rem 0.5rem;
+            margin: -0.25rem -0.5rem;
+            display: inline-block;
+        }
+
+        .chat-user-name-link:hover {
+            color: var(--accent-primary);
+            background: rgba(37, 99, 235, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .chat-user-name-link:active {
+            transform: translateY(0);
+        }
+
+        .chat-user-name-link h2 {
+            margin: 0;
+            transition: color 0.2s ease;
+        }
+
+        .chat-user-name-link:hover h2 {
+            color: var(--accent-primary);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .chat-avatar-link:hover {
+                transform: none; /* Убираем трансформации на мобильных */
+            }
+
+            .chat-avatar-link::after {
+                display: none; /* Убираем иконку на мобильных */
+            }
+
+            .chat-user-name-link {
+                padding: 0.5rem;
+                margin: -0.5rem;
+            }
+        }
+
+        /* Темная тема */
+        @media (prefers-color-scheme: dark) {
+            .chat-avatar-link::before {
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            .chat-user-name-link:hover {
+                background: rgba(37, 99, 235, 0.15);
+            }
+        }
+
+        /* Высококонтрастный режим */
+        @media (prefers-contrast: high) {
+            .chat-avatar-link:hover {
+                outline: 2px solid var(--accent-primary);
+            }
+
+            .chat-user-name-link:hover {
+                outline: 1px solid var(--accent-primary);
+            }
+        }
+
+        /* Анимация для loading состояния (опционально) */
+        .chat-avatar-link.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .chat-avatar-link.loading::after {
+            content: '\f110'; /* Font Awesome spinner */
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -633,17 +777,29 @@
 <div class="chat-container">
     <!-- Chat Header -->
     <div class="chat-header">
+
+        <!-- Обновленный блок с аватаром и именем пользователя -->
         <div class="chat-user-info">
-            <div class="chat-avatar">
-                <img th:if="${otherUser?.imageUrl}"
-                     th:src="${otherUser.imageUrl}"
-                     th:alt="${otherUser.displayName}">
-                <span th:unless="${otherUser?.imageUrl}"
-                      th:text="${otherUser?.initials ?: '?'}">JD</span>
-            </div>
+            <!-- Кликабельный аватар с ссылкой на профиль -->
+            <a th:href="@{/profile/{userId}(userId=${otherUser?.id})}"
+               class="chat-avatar-link"
+               th:title="|Перейти к профилю ${otherUser?.displayName}|">
+                <div class="chat-avatar">
+                    <img th:if="${otherUser?.imageUrl}"
+                         th:src="${otherUser.imageUrl}"
+                         th:alt="${otherUser.displayName}">
+                    <span th:unless="${otherUser?.imageUrl}"
+                          th:text="${otherUser?.initials ?: '?'}">JD</span>
+                </div>
+            </a>
 
             <div class="chat-user-details">
-                <h2 th:text="${otherUser?.displayName ?: 'Пользователь'}">Пользователь</h2>
+                <!-- Кликабельное имя пользователя -->
+                <a th:href="@{/profile/{userId}(userId=${otherUser?.id})}"
+                   class="chat-user-name-link">
+                    <h2 th:text="${otherUser?.displayName ?: 'Пользователь'}">Пользователь</h2>
+                </a>
+
                 <div class="chat-user-status">
                     <div class="status-indicator"
                          th:classappend="${otherUser?.isOnline} ? '' : 'offline'"></div>
@@ -653,6 +809,26 @@
                 </div>
             </div>
         </div>
+<!--        <div class="chat-user-info">-->
+<!--            <div class="chat-avatar">-->
+<!--                <img th:if="${otherUser?.imageUrl}"-->
+<!--                     th:src="${otherUser.imageUrl}"-->
+<!--                     th:alt="${otherUser.displayName}">-->
+<!--                <span th:unless="${otherUser?.imageUrl}"-->
+<!--                      th:text="${otherUser?.initials ?: '?'}">JD</span>-->
+<!--            </div>-->
+
+<!--            <div class="chat-user-details">-->
+<!--                <h2 th:text="${otherUser?.displayName ?: 'Пользователь'}">Пользователь</h2>-->
+<!--                <div class="chat-user-status">-->
+<!--                    <div class="status-indicator"-->
+<!--                         th:classappend="${otherUser?.isOnline} ? '' : 'offline'"></div>-->
+<!--                    <span class="status-text"-->
+<!--                          th:text="${otherUser?.lastSeenText ?: 'был недавно'}">в сети</span>-->
+<!--                    <div class="typing-indicator" id="typingIndicator">печатает...</div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
 
         <div class="chat-actions">
             <button class="chat-action-btn" onclick="searchInChat()" title="Поиск в чате">
