@@ -114,12 +114,22 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
 
 
-    // В MessageRepository измените ORDER BY с DESC на ASC
+
     @Query("SELECT m FROM Message m WHERE " +
             "((m.sender.id = :userId AND m.recipient.id = :otherUserId AND m.deletedBySender = false) OR " +
             "(m.sender.id = :otherUserId AND m.recipient.id = :userId AND m.deletedByRecipient = false)) " +
-            "ORDER BY m.createdAt ASC") // ASC вместо DESC!
-    Page<Message> findConversation(@Param("userId") Long userId,
-                                   @Param("otherUserId") Long otherUserId,
-                                   Pageable pageable);
-    }
+            "ORDER BY m.createdAt DESC")
+    Page<Message> findConversationLatest(@Param("userId") Long userId,
+                                         @Param("otherUserId") Long otherUserId,
+                                         Pageable pageable);
+
+    @Query("SELECT m FROM Message m WHERE " +
+            "((m.sender.id = :userId AND m.recipient.id = :otherUserId AND m.deletedBySender = false) OR " +
+            "(m.sender.id = :otherUserId AND m.recipient.id = :userId AND m.deletedByRecipient = false)) " +
+            "AND m.createdAt < :beforeDate " +
+            "ORDER BY m.createdAt DESC")
+    Page<Message> findConversationBefore(@Param("userId") Long userId,
+                                         @Param("otherUserId") Long otherUserId,
+                                         @Param("beforeDate") LocalDateTime beforeDate,
+                                         Pageable pageable);
+}

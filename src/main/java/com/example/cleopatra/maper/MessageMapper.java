@@ -1,6 +1,7 @@
 package com.example.cleopatra.maper;
 
 import com.example.cleopatra.dto.ChatMessage.*;
+import com.example.cleopatra.enums.DeliveryStatus;
 import com.example.cleopatra.model.Message;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.service.UserService;
@@ -11,7 +12,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -64,6 +67,7 @@ public class MessageMapper {
     /**
      * Конвертация Message в MessageBriefDto (для ответов на сообщения)
      */
+    // Исправленный mapper метод
     public MessageBriefDto toMessageBriefDto(Message message) {
         if (message == null) {
             return null;
@@ -75,8 +79,9 @@ public class MessageMapper {
                 .id(message.getId())
                 .sender(senderDto)
                 .content(message.getContent())
-                .shortContent(truncateContent(message.getContent(), 50))
+                .createdAt(message.getCreatedAt())
                 .build();
+
     }
 
     /**
@@ -135,6 +140,99 @@ public class MessageMapper {
                 .senderName(message.getSender().getFirstName() + " " + message.getSender().getLastName())
                 .action(action)
                 .build();
+    }
+
+
+    public ChatMessage toWebSocketMessage(Message message, String action) {
+        if (message == null) {
+            return null;
+        }
+
+        // Получаем имя отправителя (используем доступные поля)
+        String senderName = getSenderDisplayName(message.getSender());
+        String recipientName = getSenderDisplayName(message.getRecipient());
+
+        return ChatMessage.builder()
+                .id(message.getId())
+                .senderId(message.getSender().getId())
+                .recipientId(message.getRecipient().getId())
+                .content(message.getContent())
+                .type(message.getMessageType())
+                .timestamp(message.getCreatedAt())
+                .isRead(message.getIsRead())
+                .senderName(senderName)
+                .recipientName(recipientName)
+                .action(action)
+                .build();
+    }
+
+
+    /**
+     * НОВЫЙ МЕТОД: Создание ChatMessage для нового сообщения с полной информацией
+     */
+    public ChatMessage createNewMessageNotification(Message message) {
+        ChatMessage chatMessage = toWebSocketMessage(message, "NEW_MESSAGE");
+
+        // Можно добавить дополнительную логику здесь
+        return chatMessage;
+    }
+    /**
+     * Вспомогательный метод для получения отображаемого имени пользователя
+     */
+    private String getSenderDisplayName(User user) {
+        if (user == null) return "Неизвестный пользователь";
+
+        // Используем доступные поля User
+        StringBuilder name = new StringBuilder();
+
+        if (user.getFirstName() != null) {
+            name.append(user.getFirstName());
+        }
+
+        if (user.getLastName() != null) {
+            if (name.length() > 0) {
+                name.append(" ");
+            }
+            name.append(user.getLastName());
+        }
+
+        // Если имя пустое, используем username или email
+        if (name.length() == 0) {
+            if (user.getFirstName() != null) {
+                return user.getFirstName();
+            } else if (user.getEmail() != null) {
+                return user.getEmail();
+            } else {
+                return "Пользователь #" + user.getId();
+            }
+        }
+
+        return name.toString();
+    }
+
+
+    public Map<String, Object> createExtendedWebSocketMessage(Message message, String action) {
+        ChatMessage baseMessage = toWebSocketMessage(message, action);
+
+        Map<String, Object> extendedMessage = new HashMap<>();
+        extendedMessage.put("id", baseMessage.getId());
+        extendedMessage.put("senderId", baseMessage.getSenderId());
+        extendedMessage.put("recipientId", baseMessage.getRecipientId());
+        extendedMessage.put("content", baseMessage.getContent());
+        extendedMessage.put("type", baseMessage.getType());
+        extendedMessage.put("timestamp", baseMessage.getTimestamp());
+        extendedMessage.put("isRead", baseMessage.getIsRead());
+        extendedMessage.put("senderName", baseMessage.getSenderName());
+        extendedMessage.put("recipientName", baseMessage.getRecipientName());
+        extendedMessage.put("action", baseMessage.getAction());
+
+        // Добавляем информацию об ответе если есть
+        if (message.getReplyToMessage() != null) {
+            MessageBriefDto replyToDto = toMessageBriefDto(message.getReplyToMessage());
+            extendedMessage.put("replyToMessage", replyToDto);
+        }
+
+        return extendedMessage;
     }
 
     /**
@@ -196,6 +294,18 @@ public class MessageMapper {
     }
 
     /**
+     * НОВЫЙ МЕТОД: Создание уведомления об обновлении счетчика непрочитанных
+     */
+    public ChatMessage createUnreadCountNotification(Long userId, int unreadCount) {
+        return ChatMessage.builder()
+                .recipientId(userId)
+                .action("UNREAD_COUNT_UPDATE")
+                .content(String.valueOf(unreadCount))
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    /**
      * Конвертация списка сообщений
      */
     public List<MessageResponseDto> toMessageResponseDtoList(List<Message> messages, User currentUser) {
@@ -222,6 +332,12 @@ public class MessageMapper {
         if (!message.getSender().getId().equals(currentUser.getId())) {
             return false;
         }
+
+        // Нельзя редактировать удаленные сообщения
+        if (Boolean.TRUE.equals(message.getDeletedBySender())) {
+            return false;
+        }
+
         // Можно редактировать в течение 24 часов
         return message.getCreatedAt().isAfter(LocalDateTime.now().minusHours(24));
     }
@@ -230,8 +346,44 @@ public class MessageMapper {
      * Проверка возможности удаления сообщения
      */
     private boolean canDeleteMessage(Message message, User currentUser) {
-        return message.getSender().getId().equals(currentUser.getId()) ||
-                message.getRecipient().getId().equals(currentUser.getId());
+        // Пользователь может удалить свое сообщение
+        if (message.getSender().getId().equals(currentUser.getId())) {
+            return !Boolean.TRUE.equals(message.getDeletedBySender());
+        }
+
+        // Получатель может удалить сообщение для себя
+        if (message.getRecipient().getId().equals(currentUser.getId())) {
+            return !Boolean.TRUE.equals(message.getDeletedByRecipient());
+        }
+
+        return false;
+    }
+
+    /**
+     * НОВЫЙ МЕТОД: Проверка, видимо ли сообщение для пользователя
+     */
+    public boolean isMessageVisibleForUser(Message message, User user) {
+        if (message.getSender().getId().equals(user.getId())) {
+            return !Boolean.TRUE.equals(message.getDeletedBySender());
+        }
+
+        if (message.getRecipient().getId().equals(user.getId())) {
+            return !Boolean.TRUE.equals(message.getDeletedByRecipient());
+        }
+
+        return false;
+    }
+
+    /**
+     * НОВЫЙ МЕТОД: Получение отображаемого контента сообщения
+     */
+    public String getDisplayContent(Message message, User currentUser) {
+        // Если сообщение удалено, показываем соответствующий текст
+        if (!isMessageVisibleForUser(message, currentUser)) {
+            return "[Сообщение удалено]";
+        }
+
+        return message.getContent();
     }
 
     /**
@@ -263,6 +415,27 @@ public class MessageMapper {
         if (days < 7) return days + " дн. назад";
 
         return dateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+    }
+
+    /**
+     * НОВЫЙ МЕТОД: Получение ISO timestamp для JavaScript
+     */
+    public String getIsoTimestamp(LocalDateTime dateTime) {
+        return dateTime != null ? dateTime.toString() : null;
+    }
+
+    /**
+     * НОВЫЙ МЕТОД: Форматирование статуса доставки
+     */
+    public String formatDeliveryStatus(DeliveryStatus status) {
+        if (status == null) return "неизвестно";
+
+        switch (status) {
+            case SENT: return "отправлено";
+            case DELIVERED: return "доставлено";
+            case READ: return "прочитано";
+            default: return status.toString().toLowerCase();
+        }
     }
 
     /**
@@ -323,5 +496,24 @@ public class MessageMapper {
         if (days < 7) return days + " дн. назад";
 
         return lastSeen.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+    }
+
+    /**
+     * НОВЫЙ МЕТОД: Конвертация для Load More функциональности
+     */
+    public MessageListDto createMessageListDto(List<Message> messages, User currentUser,
+                                               boolean hasNext, boolean hasPrevious,
+                                               int currentPage, int totalPages, long totalElements) {
+
+        List<MessageResponseDto> messageDtos = toMessageResponseDtoList(messages, currentUser);
+
+        return MessageListDto.builder()
+                .messages(messageDtos)
+                .hasNext(hasNext)
+                .hasPrevious(hasPrevious)
+                .currentPage(currentPage)
+                .totalPages(totalPages)
+                .totalElements(totalElements)
+                .build();
     }
 }

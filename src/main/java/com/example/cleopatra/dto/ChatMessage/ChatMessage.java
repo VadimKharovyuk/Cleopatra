@@ -1,5 +1,6 @@
 package com.example.cleopatra.dto.ChatMessage;
 
+import com.example.cleopatra.enums.DeliveryStatus;
 import com.example.cleopatra.enums.MessageType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,13 @@ public class ChatMessage {
     private Boolean isRead;
     private String senderName;
     private String recipientName;
+
+
+    private MessageBriefDto replyToMessage;
+
+    // ДОБАВИТЬ ЭТО ПОЛЕ для дополнительной информации:
+    private DeliveryStatus deliveryStatus;
+    private Boolean isEdited;
 
     // Дополнительные поля для WebSocket
     private String action; // SEND, EDIT, DELETE, TYPING_START, TYPING_STOP

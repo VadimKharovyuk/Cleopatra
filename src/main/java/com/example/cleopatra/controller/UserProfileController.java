@@ -38,6 +38,7 @@ public class UserProfileController {
     private final  IpAddressService ipAddressService;
     private final PostService postService;
 
+
     @GetMapping("/{userId}")
     public String showProfile(@PathVariable Long userId,
                               @RequestParam(defaultValue = "0") int page,
@@ -56,6 +57,8 @@ public class UserProfileController {
             model.addAttribute("posts", userPosts);
             model.addAttribute("currentPage", page);
             model.addAttribute("pageSize", size);
+
+
 
 
             // Обрабатываем данные текущего пользователя

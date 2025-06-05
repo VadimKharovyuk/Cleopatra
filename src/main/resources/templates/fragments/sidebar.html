@@ -285,6 +285,92 @@
         .logout-btn:hover .nav-icon {
             color: #c53030;
         }
+
+
+        /* Badge для уведомлений в навигации */
+        .nav-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+            animation: badgePulse 2s infinite;
+            z-index: 10;
+        }
+
+        /* Анимация пульсации для привлечения внимания */
+        @keyframes badgePulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 4px 8px rgba(239, 68, 68, 0.5);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+            }
+        }
+
+        /* Позиционирование для nav-item */
+        .nav-item {
+            position: relative;
+        }
+
+        /* Стили для темной темы */
+        @media (prefers-color-scheme: dark) {
+            .nav-badge {
+                background: linear-gradient(135deg, #f97316, #ea580c);
+                box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
+            }
+
+            @keyframes badgePulse {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
+                }
+                50% {
+                    transform: scale(1.1);
+                    box-shadow: 0 4px 8px rgba(249, 115, 22, 0.5);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
+                }
+            }
+        }
+
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 768px) {
+            .nav-badge {
+                top: 6px;
+                right: 6px;
+                font-size: 0.7rem;
+                min-width: 16px;
+                height: 16px;
+                padding: 1px 4px;
+            }
+        }
+
+        /* Убираем анимацию если пользователь предпочитает reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .nav-badge {
+                animation: none;
+            }
+        }
     </style>
 </th:block>
 
@@ -347,12 +433,27 @@
 
         <div class="nav-section">
             <div class="nav-section-title">Социальное</div>
+
             <a href="/messages"
                class="nav-item"
                th:classappend="${activeSection == 'messages'} ? 'active' : ''">
                 <i class="fas fa-envelope nav-icon"></i>
                 <span class="nav-text">Сообщения</span>
+                <!-- Badge для непрочитанных сообщений -->
+                <span th:if="${totalUnread != null and totalUnread > 0}"
+                      class="nav-badge"
+                      th:text="${totalUnread > 99 ? '99+' : totalUnread}"
+                      th:title="|${totalUnread} непрочитанных сообщений|">
+        5
+    </span>
             </a>
+
+<!--            <a href="/messages"-->
+<!--               class="nav-item"-->
+<!--               th:classappend="${activeSection == 'messages'} ? 'active' : ''">-->
+<!--                <i class="fas fa-envelope nav-icon"></i>-->
+<!--                <span class="nav-text">Сообщения</span>-->
+<!--            </a>-->
             <a href="/bookmarks"
                class="nav-item"
                th:classappend="${activeSection == 'bookmarks'} ? 'active' : ''">

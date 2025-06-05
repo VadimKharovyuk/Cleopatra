@@ -630,6 +630,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -682,43 +684,48 @@ public class MessageService {
 
         // Сохраняем сообщение
         message = messageRepository.save(message);
-
         // Конвертируем в DTO используя маппер
         MessageResponseDto responseDto = messageMapper.toMessageResponseDto(message, sender);
 
-        // Отправляем через WebSocket используя маппер
-        ChatMessage chatMessage = messageMapper.toChatMessage(message, "NEW_MESSAGE");
+        // Отправляем через WebSocket
+        ChatMessage chatMessage = messageMapper.createNewMessageNotification(message);
         webSocketHandler.sendToUser(message.getRecipient().getId(), chatMessage);
 
         // Обновляем статус доставки
         updateDeliveryStatus(message.getId(), DeliveryStatus.DELIVERED);
 
+        afterMessageSent(message.getRecipient().getId());
+
         log.info("Message sent from {} to {}", sender.getId(), recipient.getId());
         return responseDto;
     }
 
+
     /**
-     * Получить список сообщений в конверсации
+     * Получить список сообщений в конверсации с правильной пагинацией
      */
     @Transactional(readOnly = true)
     public MessageListDto getConversation(Long otherUserId, int page, int size) {
         User currentUser = getCurrentUser();
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Message> messagesPage = messageRepository.findConversation(
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Message> messagesPage;
+
+        // ИЗМЕНИТЬ ЛОГИКУ: всегда загружаем последние сообщения для первой страницы
+        messagesPage = messageRepository.findConversationLatest(
                 currentUser.getId(), otherUserId, pageable);
 
-        // Используем маппер для конвертации списка сообщений
-        List<MessageResponseDto> messages = messageMapper.toMessageResponseDtoList(
-                messagesPage.getContent(), currentUser);
+        // ВАЖНО: Разворачиваем список, чтобы старые сообщения были сверху
+        List<Message> reversedMessages = new ArrayList<>(messagesPage.getContent());
+        Collections.reverse(reversedMessages);
 
-        // Получаем информацию о собеседнике
+        List<MessageResponseDto> messages = messageMapper.toMessageResponseDtoList(
+                reversedMessages, currentUser);
+
         User otherUser = userRepository.findById(otherUserId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
         UserBriefDto otherUserDto = userService.convertToUserBriefDto(otherUser);
-
-        // Подсчитываем непрочитанные сообщения
         Long unreadCount = messageRepository.countUnreadMessages(currentUser.getId());
 
         return MessageListDto.builder()
@@ -734,6 +741,57 @@ public class MessageService {
                 .otherUser(otherUserDto)
                 .totalUnreadCount(unreadCount.intValue())
                 .build();
+    }
+
+    /**
+     * Загрузка более старых сообщений для "Load More"
+     */
+    @Transactional(readOnly = true)
+    public MessageListDto loadMoreMessages(Long otherUserId, LocalDateTime beforeDate, int size) {
+        User currentUser = getCurrentUser();
+
+        Pageable pageable = PageRequest.of(0, size);
+        Page<Message> messagesPage = messageRepository.findConversationBefore(
+                currentUser.getId(), otherUserId, beforeDate, pageable);
+
+        // Разворачиваем для правильного порядка
+        List<Message> reversedMessages = new ArrayList<>(messagesPage.getContent());
+        Collections.reverse(reversedMessages);
+
+        List<MessageResponseDto> messages = messageMapper.toMessageResponseDtoList(
+                reversedMessages, currentUser);
+
+        return MessageListDto.builder()
+                .messages(messages)
+                .currentPage(0)
+                .totalPages(messagesPage.getTotalPages())
+                .totalElements(messagesPage.getTotalElements())
+                .size(size)
+                .hasNext(messagesPage.hasNext())
+                .hasPrevious(false)
+                .nextPage(messagesPage.hasNext() ? 1 : null)
+                .previousPage(null)
+                .build();
+    }
+
+    /**
+     * Загрузка более старых сообщений для "Load More" по timestamp
+     */
+    @Transactional(readOnly = true)
+    public MessageListDto loadMoreMessagesByTimestamp(Long otherUserId, String beforeTimestamp, int size) {
+        User currentUser = getCurrentUser();
+
+        try {
+            // Парсим timestamp
+            LocalDateTime beforeDate = LocalDateTime.parse(beforeTimestamp);
+
+            // Используем существующий метод
+            return loadMoreMessages(otherUserId, beforeDate, size);
+
+        } catch (Exception e) {
+            log.error("Error parsing timestamp: {}", beforeTimestamp, e);
+            throw new RuntimeException("Неверный формат timestamp");
+        }
     }
 
     /**
@@ -1001,5 +1059,34 @@ public class MessageService {
             message.setDeliveryStatus(status);
             messageRepository.save(message);
         });
+    }
+
+
+    /**
+     * Уведомление об обновлении счетчика непрочитанных через WebSocket
+     */
+    public void notifyUnreadCountUpdate(Long userId) {
+
+
+        // ✅ ПРАВИЛЬНО: получаем unreadCount для конкретного пользователя
+        Long unreadCount = messageRepository.countUnreadMessages(userId);
+
+        // Используем mapper для создания уведомления
+        ChatMessage unreadNotification = messageMapper.createUnreadCountNotification(userId, unreadCount.intValue());
+        webSocketHandler.sendToUser(userId, unreadNotification);
+    }
+
+    /**
+     * Вызывать после отправки сообщения
+     */
+    public void afterMessageSent(Long recipientId) {
+        notifyUnreadCountUpdate(recipientId);
+    }
+
+    /**
+     * Вызывать после прочтения сообщений
+     */
+    public void afterMessagesRead(Long userId) {
+        notifyUnreadCountUpdate(userId);
     }
 }

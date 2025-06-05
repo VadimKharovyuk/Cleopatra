@@ -678,17 +678,19 @@
 
         <!-- Messages List -->
         <div class="messages-list" id="messagesList" th:if="${hasMessages}">
+            <!-- Обновленный блок сообщения в Thymeleaf -->
             <div th:each="message : ${conversation.messages}"
                  class="message"
                  th:classappend="${message.isOwnMessage} ? 'sent' : 'received'"
-                 th:data-message-id="${message.id}">
+                 th:data-message-id="${message.id}"
+                 th:data-timestamp="${message.createdAt}">
 
                 <!-- Reply To Message -->
                 <div th:if="${message.replyToMessage}" class="reply-to">
                     <div class="reply-to-author" th:text="${message.replyToMessage.sender.displayName}">
                         Иван Петров
                     </div>
-                    <div class="reply-to-content" th:text="${message.replyToMessage.shortContent}">
+                    <div class="reply-to-content" th:text="${message.replyToMessage.getShortContent()}">
                         Это сообщение на которое отвечаем...
                     </div>
                 </div>
@@ -720,8 +722,8 @@
                         <i th:if="${message.deliveryStatus.name() == 'READ'}" class="fas fa-check-double" style="color: var(--accent-primary);" title="Прочитано"></i>
                     </div>
                     <span th:if="${message.isEdited}" class="edited-indicator" title="Отредактировано">
-                            <i class="fas fa-edit"></i>
-                        </span>
+            <i class="fas fa-edit"></i>
+        </span>
                 </div>
             </div>
         </div>
@@ -931,6 +933,9 @@
     /**
      * Load more messages
      */
+    /**
+     * ОБНОВЛЕННАЯ функция Load more messages - использует timestamp вместо page
+     */
     async function loadMoreMessages() {
         if (isLoading) return;
 
@@ -942,8 +947,21 @@
         if (loadingMessages) loadingMessages.style.display = 'flex';
 
         try {
-            currentPage += 1;
-            const response = await fetch(`/messages/chat/${otherUserId}/load-more?page=${currentPage}&size=50`);
+            // ✅ ИЗМЕНЕНИЕ: Получаем timestamp самого старого сообщения
+            const firstMessage = document.querySelector('.message[data-message-id]');
+            const oldestTimestamp = firstMessage?.dataset.timestamp;
+
+            if (!oldestTimestamp) {
+                console.error('❌ Не найден timestamp для загрузки старых сообщений');
+                showError('Ошибка определения времени сообщений');
+                return;
+            }
+
+            console.log('📅 Loading messages before:', oldestTimestamp);
+
+            // ✅ ИЗМЕНЕНИЕ: Используем новый endpoint с timestamp
+            const url = `/messages/chat/${otherUserId}/load-more?beforeTimestamp=${encodeURIComponent(oldestTimestamp)}&size=50`;
+            const response = await fetch(url);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -954,13 +972,20 @@
             if (result.messages && result.messages.length > 0) {
                 prependMessagesToUI(result.messages);
                 console.log(`📥 Loaded ${result.messages.length} more messages`);
+            } else {
+                console.log('📭 No more messages to load');
             }
 
+            // ✅ ИЗМЕНЕНИЕ: Проверяем hasNext вместо подсчета страниц
             if (!result.hasNext) {
-                if (loadMoreBtn) loadMoreBtn.remove();
+                if (loadMoreBtn) {
+                    loadMoreBtn.remove();
+                    console.log('🏁 All messages loaded, button removed');
+                }
             } else {
                 if (loadMoreBtn) loadMoreBtn.style.display = 'block';
             }
+
         } catch (error) {
             console.error('❌ Error loading more messages:', error);
             showError('Ошибка загрузки сообщений');
@@ -1255,49 +1280,54 @@
         const isOwn = message.isOwnMessage;
         const messageClass = isOwn ? 'sent' : 'received';
 
+        // ✅ ДОБАВЛЕНИЕ: Создаем timestamp для data-timestamp
+        const timestamp = message.createdAt || message.timestamp || new Date().toISOString();
+
         return `
-            <div class="message ${messageClass}" data-message-id="${message.id}">
-                ${message.replyToMessage ? `
-                    <div class="reply-to">
-                        <div class="reply-to-author">${escapeHtml(message.replyToMessage.sender.displayName || 'Пользователь')}</div>
-                        <div class="reply-to-content">${escapeHtml(message.replyToMessage.shortContent || '')}</div>
-                    </div>
-                ` : ''}
-                <div class="message-bubble">
-                    <p class="message-content">${escapeHtml(message.content || '')}</p>
-
-                    <div class="message-actions">
-                        <button class="message-action" onclick="replyToMessage(this)" title="Ответить">
-                            <i class="fas fa-reply"></i>
-                        </button>
-                        ${message.canEdit ? `
-                            <button class="message-action" onclick="editMessage(this)" title="Редактировать">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        ` : ''}
-                        ${message.canDelete ? `
-                            <button class="message-action" onclick="deleteMessage(this)" title="Удалить">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        ` : ''}
-                    </div>
+        <div class="message ${messageClass}"
+             data-message-id="${message.id}"
+             data-timestamp="${timestamp}">
+            ${message.replyToMessage ? `
+                <div class="reply-to">
+                    <div class="reply-to-author">${escapeHtml(message.replyToMessage.sender?.displayName || 'Пользователь')}</div>
+                    <div class="reply-to-content">${escapeHtml(message.replyToMessage.shortContent || '')}</div>
                 </div>
+            ` : ''}
+            <div class="message-bubble">
+                <p class="message-content">${escapeHtml(message.content || '')}</p>
 
-                <div class="message-meta">
-                    <span class="message-time">${escapeHtml(message.timeAgo || 'только что')}</span>
-                    ${isOwn ? `
-                        <div class="message-status">
-                            ${getDeliveryStatusIcon(message.deliveryStatus)}
-                        </div>
-                    ` : ''}
-                    ${message.isEdited ? `
-                        <span class="edited-indicator" title="Отредактировано">
+                <div class="message-actions">
+                    <button class="message-action" onclick="replyToMessage(this)" title="Ответить">
+                        <i class="fas fa-reply"></i>
+                    </button>
+                    ${message.canEdit ? `
+                        <button class="message-action" onclick="editMessage(this)" title="Редактировать">
                             <i class="fas fa-edit"></i>
-                        </span>
+                        </button>
+                    ` : ''}
+                    ${message.canDelete ? `
+                        <button class="message-action" onclick="deleteMessage(this)" title="Удалить">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     ` : ''}
                 </div>
             </div>
-        `;
+
+            <div class="message-meta">
+                <span class="message-time">${escapeHtml(message.timeAgo || 'только что')}</span>
+                ${isOwn ? `
+                    <div class="message-status">
+                        ${getDeliveryStatusIcon(message.deliveryStatus)}
+                    </div>
+                ` : ''}
+                ${message.isEdited ? `
+                    <span class="edited-indicator" title="Отредактировано">
+                        <i class="fas fa-edit"></i>
+                    </span>
+                ` : ''}
+            </div>
+        </div>
+    `;
     }
 
     /**
@@ -1527,7 +1557,7 @@
     }
 
     /**
-     * Handle new message from WebSocket
+     * ОБНОВЛЕННАЯ функция Handle new message - правильно обрабатываем timestamp
      */
     function handleNewMessage(data) {
         // Only process messages relevant to current chat
@@ -1544,6 +1574,9 @@
                 canEdit: data.senderId === currentUserId,
                 canDelete: data.senderId === currentUserId,
                 isEdited: false,
+                // ✅ ДОБАВЛЕНИЕ: Добавляем timestamp
+                createdAt: data.timestamp || new Date().toISOString(),
+                timestamp: data.timestamp || new Date().toISOString(),
                 sender: {
                     displayName: data.senderName || (data.senderId === currentUserId ? 'Вы' : 'Пользователь')
                 },
@@ -1757,6 +1790,8 @@
         }
     `;
     document.head.appendChild(style);
+
+
 </script>
 </body>
 </html>

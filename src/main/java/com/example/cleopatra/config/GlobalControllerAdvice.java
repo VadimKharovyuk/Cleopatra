@@ -1,12 +1,15 @@
 package com.example.cleopatra.config;
 
 import com.example.cleopatra.dto.user.UserResponse;
+import com.example.cleopatra.service.MessageService;
 import com.example.cleopatra.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -22,6 +25,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class GlobalControllerAdvice {
 
     private final UserService userService;
+    private final MessageService messageService;
 
     /**
      * Автоматически добавляет текущего пользователя в модель для всех контроллеров
@@ -154,4 +158,13 @@ public class GlobalControllerAdvice {
 
         return "dashboard";
     }
+
+    @ModelAttribute()
+    public String totalUnread(Model model) {
+
+        Long totalUnread = messageService.getUnreadMessagesCount();
+        model.addAttribute("totalUnread", totalUnread.intValue());
+        return null;
+    }
+
 }

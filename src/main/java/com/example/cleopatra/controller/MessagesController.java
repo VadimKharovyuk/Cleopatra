@@ -377,6 +377,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -403,7 +405,7 @@ public class MessagesController {
     public String allChats(Model model,
                            Authentication authentication,
                            @RequestParam(defaultValue = "0") @Min(0) int page,
-                           @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+                           @RequestParam(defaultValue = "50") @Min(1) @Max(100) int size) {
 
         log.info("Открытие страницы всех чатов для пользователя: {}", authentication.getName());
 
@@ -414,6 +416,7 @@ public class MessagesController {
             // Получаем список всех конверсаций
             ConversationListDto conversations = messageService.getConversations(page, size);
             model.addAttribute("conversations", conversations);
+
 
             // Общее количество непрочитанных сообщений
             Long totalUnread = messageService.getUnreadMessagesCount();
@@ -439,27 +442,23 @@ public class MessagesController {
     @GetMapping("/chat/{userId}")
     public String chatWithUser(@PathVariable Long userId,
                                Model model,
-                               Authentication authentication,
-                               @RequestParam(defaultValue = "0") @Min(0) int page,
-                               @RequestParam(defaultValue = "30") @Min(1) @Max(100) int size) {
+                               Authentication authentication) {
 
-        log.info("Открытие чата с пользователем {} для {}", userId, authentication.getName() + size +" размер ");
+        log.info("Открытие чата с пользователем {}", userId);
 
         try {
             User currentUser = getCurrentUser(authentication);
             addCommonAttributes(model, currentUser);
 
-            // Получаем сообщения конверсации
-            MessageListDto conversation = messageService.getConversation(userId, page, size);
+            // Всегда загружаем последние сообщения (page = 0)
+            MessageListDto conversation = messageService.getConversation(userId, 0, 50);
 
             model.addAttribute("conversation", conversation);
             model.addAttribute("otherUser", conversation.getOtherUser());
             model.addAttribute("otherUserId", userId);
 
-            // Отмечаем сообщения как прочитанные
             messageService.markMessagesAsRead(userId);
 
-            // Дополнительная информация для интерфейса
             model.addAttribute("hasMessages", !conversation.getMessages().isEmpty());
             model.addAttribute("canLoadMore", conversation.getHasNext());
 
@@ -473,7 +472,6 @@ public class MessagesController {
         }
 
         return "messages/chat";
-//        return "messages/chatV1";
     }
 
     /**
@@ -503,15 +501,18 @@ public class MessagesController {
     @ResponseBody
     public ResponseEntity<MessageListDto> loadMoreMessages(
             @PathVariable Long userId,
-            @RequestParam @Min(0) int page,
-            @RequestParam(defaultValue = "50") @Min(1) @Max(100) int size) {
+            @RequestParam String beforeTimestamp,
+            @RequestParam(defaultValue = "50") int size) {
 
         try {
-            log.debug("Загрузка дополнительных сообщений для пользователя {}: page={}, size={}", userId, page, size);
-            MessageListDto messages = messageService.getConversation(userId, page, size);
-            return ResponseEntity.ok(messages);
+            log.debug("Загрузка старых сообщений для пользователя {} до {}", userId, beforeTimestamp);
+
+            // ✅ ИСПОЛЬЗУЕМ новый метод из сервиса
+            MessageListDto result = messageService.loadMoreMessagesByTimestamp(userId, beforeTimestamp, size);
+            return ResponseEntity.ok(result);
+
         } catch (Exception e) {
-            log.error("Ошибка при загрузке дополнительных сообщений: {}", e.getMessage(), e);
+            log.error("Ошибка загрузки старых сообщений для пользователя {}: {}", userId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -643,18 +644,21 @@ public class MessagesController {
         }
     }
 
-    /**
-     * AJAX получение количества непрочитанных сообщений
-     */
-    @GetMapping("/unread-count")
+    @GetMapping("/api/unread-count")
     @ResponseBody
-    public ResponseEntity<UnreadCountResponse> getUnreadCount() {
+    public ResponseEntity<Map<String, Object>> getUnreadCountApi() {
         try {
             Long unreadCount = messageService.getUnreadMessagesCount();
-            return ResponseEntity.ok(new UnreadCountResponse(unreadCount));
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "count", unreadCount.intValue()
+            ));
         } catch (Exception e) {
-            log.error("Ошибка при получении количества непрочитанных: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Ошибка при получении счетчика непрочитанных: {}", e.getMessage(), e);
+            return ResponseEntity.ok(Map.of(
+                    "success", false,
+                    "count", 0
+            ));
         }
     }
 

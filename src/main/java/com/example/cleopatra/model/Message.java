@@ -4,6 +4,8 @@ import com.example.cleopatra.enums.DeliveryStatus;
 import com.example.cleopatra.enums.MessageType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -65,9 +67,9 @@ public class Message {
     private MessageType messageType = MessageType.TEXT;
 
 
-    // ID сообщения на которое отвечаем (для replies)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reply_to_message_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Message replyToMessage;
 
     // Статус доставки
