@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Мои заявки</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+
+<h1>Заявки пользователя <span th:text="${user.firstName}"></span></h1>
+
+<div th:if="${requests.isEmpty()}">
+  <p>У вас пока нет заявок.</p>
+</div>
+
+<table th:if="${!requests.isEmpty()}">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Заголовок</th>
+    <th>Категория</th>
+    <th>Статус</th>
+    <th>Создано</th>
+    <th>Действия</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="req : ${requests}">
+    <td th:text="${req.id}"></td>
+    <td th:text="${req.title}"></td>
+    <td th:text="${req.category.displayName}"></td>
+    <td th:text="${req.status}"></td>
+    <td th:text="${#temporals.format(req.createdAt, 'dd.MM.yyyy HH:mm')}"></td>
+    <td>
+      <a th:href="@{/support/view/{id}(id=${req.id})}">Просмотр</a>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<a th:href="@{/support/create/{userId}(userId=${user.id})}">+ Создать новую заявку</a>
+
+</body>
+</html>

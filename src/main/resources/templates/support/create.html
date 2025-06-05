@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Создание заявки</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+</head>
+<body>
+
+<h1>Создание заявки в поддержку</h1>
+
+<!-- Сообщения об успехе или ошибке -->
+<div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+<div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+<form th:action="@{/support/create}" method="post">
+  <!-- ID пользователя (скрытое поле) -->
+  <input type="hidden" name="userId" th:value="${user.id}" />
+
+  <div>
+    <label for="title">Заголовок:</label>
+    <input type="text" id="title" name="title" required maxlength="200"/>
+  </div>
+
+  <div>
+    <label for="description">Описание:</label>
+    <textarea id="description" name="description" rows="6" required></textarea>
+  </div>
+
+  <div>
+    <label for="category">Категория:</label>
+    <select id="category" name="category" required>
+      <option th:each="cat : ${categories}"
+              th:value="${cat.name()}"
+              th:text="${cat.displayName}">
+      </option>
+    </select>
+  </div>
+
+  <div>
+    <button type="submit">Отправить заявку</button>
+  </div>
+</form>
+
+</body>
+</html>

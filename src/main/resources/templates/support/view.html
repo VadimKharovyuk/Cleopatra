@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Просмотр заявки</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+</head>
+<body>
+
+<h1>Заявка №<span th:text="${request.id}"></span></h1>
+
+<div>
+  <strong>Заголовок:</strong>
+  <span th:text="${request.title}"></span>
+</div>
+
+<div>
+  <strong>Описание:</strong>
+  <p th:text="${request.description}"></p>
+</div>
+
+<div>
+  <strong>Категория:</strong>
+  <span th:text="${request.category.displayName}"></span>
+</div>
+
+<div>
+  <strong>Статус:</strong>
+  <span th:text="${request.status}"></span>
+</div>
+
+<div>
+  <strong>Пользователь:</strong>
+  <span th:text="${request.user.fullName}">Имя пользователя</span>
+</div>
+
+<div>
+  <strong>Создано:</strong>
+  <span th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy HH:mm')}"></span>
+</div>
+
+<div th:if="${request.updatedAt != null}">
+  <strong>Обновлено:</strong>
+  <span th:text="${#temporals.format(request.updatedAt, 'dd.MM.yyyy HH:mm')}"></span>
+</div>
+
+<div th:if="${request.resolvedAt != null}">
+  <strong>Решено:</strong>
+  <span th:text="${#temporals.format(request.resolvedAt, 'dd.MM.yyyy HH:mm')}"></span>
+</div>
+
+<div th:if="${request.adminResponse}">
+  <h3>Ответ администратора</h3>
+  <p th:text="${request.adminResponse}"></p>
+</div>
+
+<a th:href="@{/support/list}">← Назад к списку</a>
+
+</body>
+</html>

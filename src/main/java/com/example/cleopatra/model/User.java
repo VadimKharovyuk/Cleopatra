@@ -131,6 +131,10 @@ public class User {
     private UserOnlineStatus onlineStatus;
 
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<SupportRequest> supportRequests = new ArrayList<>();
+
+
     // Системные поля
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
