@@ -92,6 +92,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
                                  @Param("unreadOnly") Boolean unreadOnly,
                                  Pageable pageable);
 
+
     // Получить количество сообщений в конверсации
     @Query("SELECT COUNT(m) FROM Message m WHERE " +
             "((m.sender.id = :userId1 AND m.recipient.id = :userId2 AND m.deletedBySender = false) OR " +
@@ -132,4 +133,21 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
                                          @Param("otherUserId") Long otherUserId,
                                          @Param("beforeDate") LocalDateTime beforeDate,
                                          Pageable pageable);
+
+    // Добавьте этот метод в ваш MessageRepository
+    @Query("""
+    SELECT m FROM Message m 
+    LEFT JOIN FETCH m.sender s 
+    LEFT JOIN FETCH s.onlineStatus 
+    LEFT JOIN FETCH m.recipient r 
+    LEFT JOIN FETCH r.onlineStatus 
+    WHERE ((m.sender.id = :userId AND m.recipient.id = :otherUserId AND m.deletedBySender = false) OR 
+           (m.sender.id = :otherUserId AND m.recipient.id = :userId AND m.deletedByRecipient = false)) 
+    ORDER BY m.createdAt DESC
+    """)
+    Page<Message> findConversationWithUsers(@Param("userId") Long userId,
+                                            @Param("otherUserId") Long otherUserId,
+                                            Pageable pageable);
+
+
 }

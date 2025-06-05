@@ -434,12 +434,14 @@
         <div class="nav-section">
             <div class="nav-section-title">Социальное</div>
 
+
             <a href="/messages"
                class="nav-item"
                th:classappend="${activeSection == 'messages'} ? 'active' : ''">
                 <i class="fas fa-envelope nav-icon"></i>
                 <span class="nav-text">Сообщения</span>
-                <!-- Badge для непрочитанных сообщений -->
+
+                <!-- Badge только для авторизованных пользователей с непрочитанными сообщениями -->
                 <span th:if="${totalUnread != null and totalUnread > 0}"
                       class="nav-badge"
                       th:text="${totalUnread > 99 ? '99+' : totalUnread}"
@@ -447,6 +449,7 @@
         5
     </span>
             </a>
+
 
 <!--            <a href="/messages"-->
 <!--               class="nav-item"-->

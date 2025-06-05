@@ -126,6 +126,10 @@ public class User {
     private Set<Post> likedPosts = new HashSet<>();
 
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private UserOnlineStatus onlineStatus;
+
+
     // Системные поля
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

@@ -169,6 +169,58 @@ public class GlobalControllerAdvice {
 
 
 
+    @ModelAttribute("totalUnread")
+    public Integer getTotalUnread(Authentication authentication, HttpServletRequest request) {
+
+        String requestURI = request.getRequestURI();
+
+        // ✅ Пропускаем публичные страницы - возвращаем null
+        if (isPublicPage(requestURI)) {
+            return null;
+        }
+
+        // ✅ Пропускаем API endpoints - возвращаем null
+        if (requestURI.startsWith("/api/") || requestURI.startsWith("/auth/")) {
+            return null;
+        }
+
+        try {
+            // ✅ Проверяем авторизацию - если не авторизован, возвращаем null
+            if (authentication == null ||
+                    !authentication.isAuthenticated() ||
+                    "anonymousUser".equals(authentication.getName())) {
+                log.debug("👤 Пользователь не авторизован для {}, возвращаем null", requestURI);
+                return null;
+            }
+
+            // ✅ Получаем количество непрочитанных (может быть 0)
+            Long totalUnread = messageService.getUnreadMessagesCount();
+            Integer count = totalUnread.intValue();
+
+            log.debug("📬 Непрочитанных сообщений для {}: {}", authentication.getName(), count);
+            return count;
+
+        } catch (Exception e) {
+            log.warn("⚠️ Ошибка получения totalUnread для {}: {}", requestURI, e.getMessage());
+            return null; // ✅ Возвращаем null при ошибке
+        }
+    }
+
+    private boolean isPublicPage(String requestURI) {
+        String[] publicPages = {
+                "/", "/login", "/register", "/funny-login",
+                "/funny-login1", "/qr-login", "/favicon.ico",
+                "/health", "/error"
+        };
+
+        for (String publicPage : publicPages) {
+            if (requestURI.equals(publicPage) || requestURI.startsWith(publicPage + "/")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleAllExceptions(Exception e, HttpServletRequest request) {
         log.error("❌ GLOBAL EXCEPTION HANDLER");

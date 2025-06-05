@@ -67,36 +67,48 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("currentUserId") Long currentUserId,
             Pageable pageable
     );
-//    @Query("""
-//    SELECT u FROM User u
-//    WHERE u.id != :currentUserId
-//    AND u.firstName IS NOT NULL
-//    AND u.lastName IS NOT NULL
-//    ORDER BY
-//        CASE
-//            WHEN u.followersCount >= 10000 THEN 5
-//            WHEN u.followersCount >= 1000 THEN 4
-//            WHEN u.followersCount >= 100 THEN 3
-//            WHEN u.followersCount >= 10 THEN 2
-//            ELSE 1
-//        END DESC,
-//        u.followersCount DESC,
-//        u.createdAt DESC
-//    """)
-//    List<User> findTopRecommendations(
-//            @Param("currentUserId") Long currentUserId,
-//            Pageable pageable
-//    );
 
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE User u SET u.followingCount = :count WHERE u.id = :userId")
-    void updateFollowingCount(@Param("userId") Long userId, @Param("count") long count);
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE User u SET u.followersCount = :count WHERE u.id = :userId")
-    void updateFollowersCount(@Param("userId") Long userId, @Param("count") long count);
+    /**
+     * Найти пользователя по email с загруженным онлайн статусом
+     */
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.onlineStatus WHERE u.email = :email")
+    Optional<User> findByEmailWithOnlineStatus(@Param("email") String email);
+
+    /**
+     * Найти пользователя по ID с загруженным онлайн статусом
+     */
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.onlineStatus WHERE u.id = :id")
+    Optional<User> findByIdWithOnlineStatus(@Param("id") Long id);
+
+    /**
+     * Найти нескольких пользователей по ID с их онлайн статусами
+     */
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.onlineStatus WHERE u.id IN :userIds")
+    List<User> findByIdInWithOnlineStatus(@Param("userIds") List<Long> userIds);
+
+    /**
+     * Рекомендации с онлайн статусами (оптимизированная версия)
+     */
+    @Query("""
+        SELECT u FROM User u 
+        LEFT JOIN FETCH u.onlineStatus
+        WHERE u.id != :currentUserId 
+        AND u.firstName IS NOT NULL 
+        AND u.lastName IS NOT NULL
+        AND (:searchQuery = '' OR 
+             LOWER(u.firstName) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
+             LOWER(u.lastName) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
+             LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :searchQuery, '%')))
+        ORDER BY u.followersCount DESC, u.createdAt DESC
+        """)
+
+    Slice<User> findRecommendationsWithSearchAndOnlineStatus(
+            @Param("currentUserId") Long currentUserId,
+            @Param("searchQuery") String searchQuery,
+            Pageable pageable
+    );
+
 
 }

@@ -16,9 +16,9 @@ public class WebSocketMonitor {
 
     private final ChatWebSocketHandler chatWebSocketHandler;
 
-    @Scheduled(fixedRate = 60000) // каждые 60 секунд
-    public void logConnectionStats() {
-        int totalConnections = chatWebSocketHandler.getConnectedUsersCount();
-        log.info("Total active WebSocket connections: {}", totalConnections);
-    }
+//    @Scheduled(fixedRate = 60000) // каждые 60 секунд
+//    public void logConnectionStats() {
+//        int totalConnections = chatWebSocketHandler.getConnectedUsersCount();
+//        log.info("Total active WebSocket connections: {}", totalConnections);
+//    }
 }

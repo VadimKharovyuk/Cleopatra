@@ -126,13 +126,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserById(Long userId) {
-        User user = userRepository.findById(userId)
+        // ✅ ЗАМЕНИТЬ НА ОПТИМИЗИРОВАННЫЙ МЕТОД
+        User user = userRepository.findByIdWithOnlineStatus(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
-        // Маппим базовую информацию
         UserResponse userResponse = userMapper.toResponse(user);
 
-        // Добавляем статистику
         userResponse.setPostsCount(getPostsCount(userId));
         userResponse.setFollowersCount(getFollowersCount(userId));
         userResponse.setFollowingCount(getFollowingCount(userId));
@@ -263,24 +262,45 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
-    @Override
-    public User getCurrentUserEntity() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userEmail = authentication.getName();
-        return userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+//    @Override
+//    public User getCurrentUserEntity() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String userEmail = authentication.getName();
+//        return userRepository.findByEmail(userEmail)
+//                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+//    }
+@Override
+public User getCurrentUserEntity() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String userEmail = authentication.getName();
+
+    // ✅ ЗАМЕНИТЬ НА ОПТИМИЗИРОВАННЫЙ МЕТОД
+    return userRepository.findByEmailWithOnlineStatus(userEmail)
+            .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+}
+
+//    @Override
+//    public User getCurrentUserEntity(Authentication authentication) {
+//        if (authentication == null || !authentication.isAuthenticated()) {
+//            throw new RuntimeException("Пользователь не авторизован");
+//        }
+//
+//        String email = authentication.getName();
+//        return userRepository.findByEmail(email)
+//                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + email));
+//    }
+@Override
+public User getCurrentUserEntity(Authentication authentication) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+        throw new RuntimeException("Пользователь не авторизован");
     }
 
-    @Override
-    public User getCurrentUserEntity(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("Пользователь не авторизован");
-        }
+    String email = authentication.getName();
 
-        String email = authentication.getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + email));
-    }
+    // ✅ ЗАМЕНИТЬ НА ОПТИМИЗИРОВАННЫЙ МЕТОД
+    return userRepository.findByEmailWithOnlineStatus(email)
+            .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + email));
+}
 
     @Override
     @Transactional
@@ -336,13 +356,19 @@ public class UserServiceImpl implements UserService {
 
 
 
+
+    // ✅ ОПТИМИЗИРОВАТЬ convertToUserBriefDto:
     @Transactional(readOnly = true)
     public UserBriefDto convertToUserBriefDto(User user) {
         if (user == null) return null;
 
-        // Получаем статус онлайн
-        UserOnlineStatus onlineStatus = onlineStatusRepository.findByUserId(user.getId())
-                .orElse(null);
+        // ✅ ЕСЛИ У USER УЖЕ ЗАГРУЖЕН onlineStatus, НЕ ДЕЛАЕМ ДОПОЛНИТЕЛЬНЫЙ ЗАПРОС
+        UserOnlineStatus onlineStatus = user.getOnlineStatus();
+
+        // Если онлайн статус не загружен, загружаем отдельно (fallback)
+        if (onlineStatus == null) {
+            onlineStatus = onlineStatusRepository.findByUserId(user.getId()).orElse(null);
+        }
 
         boolean isOnline = onlineStatus != null && onlineStatus.getIsOnline();
         String lastSeenText = onlineStatus != null ? onlineStatus.getOnlineStatusText() : "давно не был(а) в сети";
@@ -357,16 +383,15 @@ public class UserServiceImpl implements UserService {
                 .lastSeenText(lastSeenText)
                 .lastSeen(onlineStatus != null ? onlineStatus.getLastSeen() : null)
                 .username(user.getFirstName())
-
-                .isTyping(false) // Определяется динамически
-                .isBlocked(false) // TODO: реализовать логику блокировки
-                .hasBlockedMe(false) // TODO: реализовать логику блокировки
-                .isFriend(false) // TODO: реализовать логику друзей
-                .isFollowing(false) // TODO: реализовать логику подписок
-                .isFollower(false) // TODO: реализовать логику подписок
-                .postsCount(0L) // TODO: подсчитать посты
-                .followersCount(0L) // TODO: подсчитать подписчиков
-                .followingCount(0L) // TODO: подсчитать подписки
+                .isTyping(false)
+                .isBlocked(false)
+                .hasBlockedMe(false)
+                .isFriend(false)
+                .isFollowing(false)
+                .isFollower(false)
+                .postsCount(0L)
+                .followersCount(0L)
+                .followingCount(0L)
                 .role(user.getRole().name())
                 .displayLetter(getDisplayLetter(user))
                 .build();
@@ -381,6 +406,7 @@ public class UserServiceImpl implements UserService {
         }
         return "?";
     }
+
 
 
 
