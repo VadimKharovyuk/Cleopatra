@@ -18,14 +18,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class SettingsController {
     private final UserService userService;
 
-
-    // ВАРИАНТ 2: Передаем весь объект пользователя
     @GetMapping
     public String Settings(Model model, Authentication authentication) {
         if (authentication != null) {
             String email = authentication.getName();
-            UserResponse user = userService.getUserByEmail(email);
-            model.addAttribute("user", user); // Передаем весь объект
+            Long userId = userService.getUserIdByEmail(email); // Получаем сразу ID
+            model.addAttribute("userId", userId);
         }
         return "settings/dashboard";
     }

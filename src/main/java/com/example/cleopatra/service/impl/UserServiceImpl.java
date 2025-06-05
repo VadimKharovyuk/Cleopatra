@@ -397,6 +397,12 @@ public User getCurrentUserEntity(Authentication authentication) {
                 .build();
     }
 
+    @Override
+    public Long getUserIdByEmail(String email) {
+        return userRepository.findIdByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Пользователь с email " + email + " не найден"));
+    }
+
     private String getDisplayLetter(User user) {
         if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
             return user.getFirstName().substring(0, 1).toUpperCase();

@@ -48,4 +48,7 @@ public interface UserService {
 
 
     UserBriefDto convertToUserBriefDto(User user);
+
+
+    Long getUserIdByEmail(String email);
 }

@@ -507,8 +507,7 @@
                     <i class="fas fa-chevron-right card-arrow"></i>
                 </div>
 
-
-                <div class="settings-card card-support" th:onclick="'redirectToSupport(' + ${user.id} + ')'">
+                <div class="settings-card card-support" th:onclick="'redirectToSupport(' + ${userId} + ')'">
                     <div class="card-header">
                         <div class="card-icon">
                             <i class="fas fa-headset"></i>
@@ -520,8 +519,8 @@
                     </div>
                     <i class="fas fa-chevron-right card-arrow"></i>
                 </div>
+
                 <script>
-                    // Для первых двух вариантов
                     function redirectToSupport(userId) {
                         if (userId) {
                             window.location.href = `/support/list/${userId}`;
@@ -530,9 +529,24 @@
                             alert('Ошибка: не удалось определить пользователя');
                         }
                     }
-
-
                 </script>
+
+                <style>
+                    .card-support {
+                        border-left: 4px solid var(--accent-success) !important;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    }
+
+                    .card-support .card-icon {
+                        background: linear-gradient(135deg, var(--accent-success), var(--accent-info));
+                    }
+
+                    .card-support:hover {
+                        transform: translateY(-2px);
+                        box-shadow: var(--shadow-lg);
+                    }
+                </style>
 
 
 
