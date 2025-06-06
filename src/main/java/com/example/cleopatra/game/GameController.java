@@ -104,6 +104,7 @@ public class GameController {
         }
     }
 
+
     @PostMapping("/{sessionId}/abandon")
     @Operation(summary = "Сдаться", description = "Завершить игру досрочно")
     @ApiResponse(responseCode = "200", description = "Игра завершена")
