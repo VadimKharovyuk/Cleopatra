@@ -53,4 +53,15 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             "LEFT JOIN FETCH n.actor " +
             "WHERE n.id = :id")
     Optional<Notification> findByIdWithUsers(@Param("id") Long id);
+
+    /**
+     * Находит неотправленные уведомления для пользователей которые сейчас онлайн
+     * Используется в Scheduler для доставки накопившихся уведомлений
+     */
+    @Query("SELECT n FROM Notification n " +
+            "JOIN FETCH n.recipient r " +
+            "WHERE n.isSent = false " +
+            "AND r.isOnline = true " +
+            "ORDER BY n.createdAt ASC")
+    List<Notification> findPendingNotificationsForOnlineUsers();
 }

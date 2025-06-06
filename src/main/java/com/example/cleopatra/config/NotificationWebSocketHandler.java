@@ -76,8 +76,13 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
     /**
      * 🚀 ГЛАВНЫЙ МЕТОД - отправка уведомления
      */
-    public void sendNotificationToUser(Long userId, NotificationDto notification) {
-        log.info("📤 Attempting to send notification to user {}: {}", userId, notification.getTitle());
+
+    /**
+     * Отправить уведомление пользователю
+     * @return true если отправлено успешно, false если пользователь не подключен
+     */
+    public boolean sendNotificationToUser(Long userId, NotificationDto notification) {
+        log.debug("📤 Attempting to send notification to user {}: {}", userId, notification.getTitle());
 
         WebSocketSession session = notificationSessions.get(userId);
 
@@ -90,15 +95,19 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
 
                 sendMessage(session, message);
                 log.info("✅ Notification sent to user {}: {}", userId, notification.getTitle());
+                return true; // 🔧 Возвращаем true при успехе
 
             } catch (Exception e) {
                 log.error("❌ Error sending notification to user {}", userId, e);
                 notificationSessions.remove(userId);
+                return false; // 🔧 Возвращаем false при ошибке
             }
         } else {
-            log.warn("🔕 User {} not connected to notifications WebSocket", userId);
+            log.debug("🔕 User {} not connected to notifications WebSocket", userId);
+            return false; // 🔧 Возвращаем false если не подключен
         }
     }
+
 
     private Long getUserIdFromSession(WebSocketSession session) {
         try {
