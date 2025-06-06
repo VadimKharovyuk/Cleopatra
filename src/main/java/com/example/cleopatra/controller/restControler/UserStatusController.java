@@ -99,7 +99,7 @@ public class UserStatusController {
 
         try {
             String email = authentication.getName();
-            log.info("✅ User email: {}", email);
+//            log.info("✅ User email: {}", email);
 
             if ("anonymousUser".equals(email)) {
                 log.warn("❌ Anonymous user");

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рейтинги - Кто хочет стать миллионером</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: white;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .leaderboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            padding: 40px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .leaderboard-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .leaderboard-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+        }
+
+        .player-row {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .player-row:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(10px);
+        }
+
+        .player-row.current-user {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .rank-badge {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 20px;
+        }
+
+        .rank-1 { background: linear-gradient(45deg, #ffd700, #ffed4e); color: #1a1a2e; }
+        .rank-2 { background: linear-gradient(45deg, #c0c0c0, #e8e8e8); color: #1a1a2e; }
+        .rank-3 { background: linear-gradient(45deg, #cd7f32, #daa520); color: white; }
+        .rank-other { background: rgba(255, 255, 255, 0.3); color: white; }
+
+        .player-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-right: 20px;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .player-stats {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .player-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-align: right;
+            margin-left: 20px;
+        }
+
+        .subscription-badge {
+            background: rgba(0, 123, 255, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        .crown-icon {
+            color: #ffd700;
+            font-size: 1.5rem;
+            margin-left: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            opacity: 0.7;
+        }
+
+        .user-rank-info {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            transform: translateY(-2px);
+        }
+
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            margin: 40px 0;
+            gap: 20px;
+        }
+
+        .podium-place {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .podium-1 {
+            order: 2;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 237, 78, 0.3));
+            transform: scale(1.1);
+        }
+
+        .podium-2 {
+            order: 1;
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.3), rgba(232, 232, 232, 0.3));
+        }
+
+        .podium-3 {
+            order: 3;
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.3), rgba(218, 165, 32, 0.3));
+        }
+    </style>
+</head>
+<body>
+<div class="leaderboard-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-trophy text-warning"></i>
+            Рейтинги игроков
+        </h1>
+        <p class="lead">Соревнуйтесь с лучшими и занимайте топовые позиции!</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="leaderboard-tabs">
+        <button class="tab-btn active" onclick="showTab('subscriptions')">
+            <i class="fas fa-users"></i> Мои подписки
+        </button>
+        <button class="tab-btn" onclick="showTab('global')">
+            <i class="fas fa-globe"></i> Глобальный рейтинг
+        </button>
+    </div>
+
+    <!-- User Rank Info -->
+    <div class="user-rank-info" th:if="${user}">
+        <h4>Ваша позиция</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <strong>Среди подписок:</strong>
+                <span class="text-warning fs-4" th:text="${subscriptionsLeaderboard.currentUserRank ?: 'Нет данных'}">
+                        -
+                    </span>
+                из <span th:text="${subscriptionsLeaderboard.totalPlayers}">0</span>
+            </div>
+            <div class="col-md-6">
+                <strong>В мире:</strong>
+                <span class="text-warning fs-4" th:text="${globalLeaderboard.currentUserRank ?: 'Нет данных'}">
+                        -
+                    </span>
+                из <span th:text="${globalLeaderboard.totalPlayers}">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscriptions Leaderboard -->
+    <div id="subscriptions-tab" class="tab-content">
+        <div class="leaderboard-card">
+            <h3>
+                <i class="fas fa-users text-primary"></i>
+                Рейтинг ваших подписок
+            </h3>
+
+            <div th:if="${subscriptionsLeaderboard.players.size() > 0}">
+                <!-- Top 3 Podium -->
+                <div class="podium" th:if="${subscriptionsLeaderboard.players.size() >= 3}">
+                    <div class="podium-place podium-2" th:if="${subscriptionsLeaderboard.players.size() >= 2}">
+                        <div class="rank-badge rank-2">2</div>
+                        <img th:src="${subscriptionsLeaderboard.players[1].avatarUrl}"
+                             class="player-avatar mx-auto d-block"
+                             th:alt="${subscriptionsLeaderboard.players[1].username}"
+                             onerror="this.src='https://via.placeholder.com/60x60/007bff/white?text=U'">
+                        <div class="player-name" th:text="${subscriptionsLeaderboard.players[1].username}">Player 2</div>
+                        <div class="player-score" th:text="${#numbers.formatInteger(subscriptionsLeaderboard.players[1].bestScore, 3, 'COMMA')}">0</div>
+                    </div>
+
+                    <div class="podium-place podium-1">
+                        <div class="rank-badge rank-1">1</div>
+                        <i class="crown-icon fas fa-crown"></i>
+                        <img th:src="${subscriptionsLeaderboard.players[0].avatarUrl}"
+                             class="player-avatar mx-auto d-block"
+                             th:alt="${subscriptionsLeaderboard.players[0].username}"
+                             onerror="this.src='https://via.placeholder.com/60x60/ffd700/black?text=U'">
+                        <div class="player-name" th:text="${subscriptionsLeaderboard.players[0].username}">Player 1</div>
+                        <div class="player-score" th:text="${#numbers.formatInteger(subscriptionsLeaderboard.players[0].bestScore, 3, 'COMMA')}">0</div>
+                    </div>
+
+                    <div class="podium-place podium-3">
+                        <div class="rank-badge rank-3">3</div>
+                        <img th:src="${subscriptionsLeaderboard.players[2].avatarUrl}"
+                             class="player-avatar mx-auto d-block"
+                             th:alt="${subscriptionsLeaderboard.players[2].username}"
+                             onerror="this.src='https://via.placeholder.com/60x60/cd7f32/white?text=U'">
+                        <div class="player-name" th:text="${subscriptionsLeaderboard.players[2].username}">Player 3</div>
+                        <div class="player-score" th:text="${#numbers.formatInteger(subscriptionsLeaderboard.players[2].bestScore, 3, 'COMMA')}">0</div>
+                    </div>
+                </div>
+
+                <!-- Full Player List -->
+                <div class="mt-4">
+                    <div th:each="player, iterStat : ${subscriptionsLeaderboard.players}"
+                         class="player-row"
+                         th:classappend="${player.userId == user.id} ? 'current-user' : ''">
+
+                        <div class="rank-badge"
+                             th:classappend="${player.rank == 1} ? 'rank-1' :
+                                                (${player.rank == 2} ? 'rank-2' :
+                                                (${player.rank == 3} ? 'rank-3' : 'rank-other'))"
+                             th:text="${player.rank}">
+                            1
+                        </div>
+
+                        <img th:src="${player.avatarUrl}"
+                             class="player-avatar"
+                             th:alt="${player.username}"
+                             onerror="this.src='https://via.placeholder.com/60x60/007bff/white?text=U'">
+
+                        <div class="player-info">
+                            <div class="player-name">
+                                <span th:text="${player.username}">Имя игрока</span>
+                                <span th:if="${player.rank == 1}" class="crown-icon">
+                                        <i class="fas fa-crown"></i>
+                                    </span>
+                                <span th:if="${player.userId == user.id}" class="subscription-badge bg-warning text-dark">
+                                        Это вы
+                                    </span>
+                                <span th:if="${player.isSubscribed}" class="subscription-badge">
+                                        <i class="fas fa-check"></i> Подписка
+                                    </span>
+                            </div>
+                            <div class="player-stats">
+                                <i class="fas fa-gamepad"></i> <span th:text="${player.totalGamesPlayed}">0</span> игр
+                                | <i class="fas fa-target"></i> <span th:text="${#numbers.formatDecimal(player.accuracyPercentage, 1, 1)}">0</span>% точность
+                                | <i class="fas fa-question-circle"></i> до <span th:text="${player.bestQuestionReached}">0</span> вопроса
+                            </div>
+                        </div>
+
+                        <div class="player-score">
+                            <div th:text="${#numbers.formatInteger(player.bestScore, 3, 'COMMA')}">0</div>
+                            <small class="text-muted">очков</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${subscriptionsLeaderboard.players.size() == 0}" class="empty-state">
+                <i class="fas fa-users fa-3x mb-3 text-muted"></i>
+                <h4>Нет данных о подписках</h4>
+                <p>Подпишитесь на других игроков, чтобы увидеть рейтинг!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Leaderboard -->
+    <div id="global-tab" class="tab-content" style="display: none;">
+        <div class="leaderboard-card">
+            <h3>
+                <i class="fas fa-globe text-success"></i>
+                Глобальный рейтинг
+            </h3>
+
+            <div th:if="${globalLeaderboard.players.size() > 0}">
+                <!-- Top 3 Podium for Global -->
+                <div class="podium" th:if="${globalLeaderboard.players.size() >= 3}">
+                    <div class="podium-place podium-2" th:if="${globalLeaderboard.players.size() >= 2}">
+                        <div class="rank-badge rank-2">2</div>
+                        <img th:src="${globalLeaderboard.players[1].avatarUrl}"
+                             class="player-avatar mx-auto d-block"
+                             th:alt="${globalLeaderboard.players[1].username}"
+                             onerror="this.src='https://via.placeholder.com/60x60/c0c0c0/black?text=U'">
+                        <div class="player-name" th:text="${globalLeaderboard.players[1].username}">Player 2</div>
+                        <div class="player-score" th:text="${#numbers.formatInteger(globalLeaderboard.players[1].bestScore, 3, 'COMMA')}">0</div>
+                    </div>
+
+                    <div class="podium-place podium-1">
+                        <div class="rank-badge rank-1">1</div>
+                        <i class="crown-icon fas fa-crown"></i>
+                        <img th:src="${globalLeaderboard.players[0].avatarUrl}"
+                             class="player-avatar mx-auto d-block"
+                             th:alt="${globalLeaderboard.players[0].username}"
+                             onerror="this.src='https://via.placeholder.com/60x60/ffd700/black?text=U'">
+                        <div class="player-name" th:text="${globalLeaderboard.players[0].username}">Player 1</div>
+                        <div class="player-score" th:text="${#numbers.formatInteger(globalLeaderboard.players[0].bestScore, 3, 'COMMA')}">0</div>
+                        <div class="mt-2">
+                            <i class="fas fa-trophy text-warning"></i>
+                            Чемпион мира
+                        </div>
+                    </div>
+
+                    <div class="podium-place podium-3">
+                        <div class="rank-badge rank-3">3</div>
+                        <img th:src="${globalLeaderboard.players[2].avatarUrl}"
+                             class="player-avatar mx-auto d-block"
+                             th:alt="${globalLeaderboard.players[2].username}"
+                             onerror="this.src='https://via.placeholder.com/60x60/cd7f32/white?text=U'">
+                        <div class="player-name" th:text="${globalLeaderboard.players[2].username}">Player 3</div>
+                        <div class="player-score" th:text="${#numbers.formatInteger(globalLeaderboard.players[2].bestScore, 3, 'COMMA')}">0</div>
+                    </div>
+                </div>
+
+                <!-- Full Global Player List -->
+                <div class="mt-4">
+                    <div th:each="player, iterStat : ${globalLeaderboard.players}"
+                         class="player-row"
+                         th:classappend="${player.userId == user.id} ? 'current-user' : ''">
+
+                        <div class="rank-badge"
+                             th:classappend="${player.rank == 1} ? 'rank-1' :
+                                                (${player.rank == 2} ? 'rank-2' :
+                                                (${player.rank == 3} ? 'rank-3' : 'rank-other'))"
+                             th:text="${player.rank}">
+                            1
+                        </div>
+
+                        <img th:src="${player.avatarUrl}"
+                             class="player-avatar"
+                             th:alt="${player.username}"
+                             onerror="this.src='https://via.placeholder.com/60x60/007bff/white?text=U'">
+
+                        <div class="player-info">
+                            <div class="player-name">
+                                <span th:text="${player.username}">Имя игрока</span>
+                                <span th:if="${player.rank == 1}" class="crown-icon">
+                                        <i class="fas fa-crown"></i>
+                                    </span>
+                                <span th:if="${player.rank <= 10}" class="subscription-badge bg-success">
+                                        ТОП-10
+                                    </span>
+                                <span th:if="${player.userId == user.id}" class="subscription-badge bg-warning text-dark">
+                                        Это вы
+                                    </span>
+                                <span th:if="${player.isSubscribed and player.userId != user.id}" class="subscription-badge">
+                                        <i class="fas fa-check"></i> Подписка
+                                    </span>
+                            </div>
+                            <div class="player-stats">
+                                <i class="fas fa-gamepad"></i> <span th:text="${player.totalGamesPlayed}">0</span> игр
+                                | <i class="fas fa-target"></i> <span th:text="${#numbers.formatDecimal(player.accuracyPercentage, 1, 1)}">0</span>% точность
+                                | <i class="fas fa-question-circle"></i> до <span th:text="${player.bestQuestionReached}">0</span> вопроса
+                                | <i class="fas fa-medal"></i> <span th:text="${player.performanceLevel}">Уровень</span>
+                            </div>
+                        </div>
+
+                        <div class="player-score">
+                            <div th:text="${#numbers.formatInteger(player.bestScore, 3, 'COMMA')}">0</div>
+                            <small class="text-muted">очков</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${globalLeaderboard.players.size() == 0}" class="empty-state">
+                <i class="fas fa-globe fa-3x mb-3 text-muted"></i>
+                <h4>Нет данных</h4>
+                <p>Пока никто не играл в эту игру. Будьте первым!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-menu">
+        <a href="/game" class="nav-btn">
+            <i class="fas fa-home"></i> Главная игры
+        </a>
+        <a href="/game/play" class="nav-btn">
+            <i class="fas fa-play"></i> Играть
+        </a>
+        <a href="/game/history" class="nav-btn">
+            <i class="fas fa-history"></i> История
+        </a>
+        <a href="/game/stats" class="nav-btn">
+            <i class="fas fa-chart-bar"></i> Статистика
+        </a>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    function showTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.style.display = 'none';
+        });
+
+        // Remove active class from all tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Show selected tab
+        document.getElementById(tabName + '-tab').style.display = 'block';
+
+        // Add active class to clicked button
+        event.target.classList.add('active');
+    }
+
+    // Add smooth scrolling to player rows
+    document.addEventListener('DOMContentLoaded', function() {
+        const playerRows = document.querySelectorAll('.player-row');
+
+        playerRows.forEach((row, index) => {
+            row.style.animationDelay = (index * 0.1) + 's';
+            row.style.animation = 'slideInRight 0.5s ease forwards';
+        });
+    });
+
+    // Add CSS animation for slide-in effect
+    const style = document.createElement('style');
+    style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    opacity: 0;
+                    transform: translateX(-50px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            .player-row {
+                opacity: 0;
+            }
+        `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Игра - Кто хочет стать миллионером</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      color: white;
+      min-height: 100vh;
+      font-family: 'Arial', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .game-interface {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .game-header {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 30px;
+      backdrop-filter: blur(10px);
+    }
+
+    .timer-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: conic-gradient(#ffd700 0deg, #ff6b6b 360deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      position: relative;
+      animation: pulse 1s infinite;
+    }
+
+    .question-card {
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 30px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .question-text {
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .answers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .answer-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .answer-btn:hover {
+      background: rgba(255, 215, 0, 0.2);
+      border-color: #ffd700;
+      transform: scale(1.02);
+      color: white;
+    }
+
+    .answer-btn.selected {
+      background: rgba(255, 215, 0, 0.3);
+      border-color: #ffd700;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+
+    .answer-btn.correct {
+      background: rgba(40, 167, 69, 0.8);
+      border-color: #28a745;
+      animation: correctAnswer 1s ease;
+    }
+
+    .answer-btn.incorrect {
+      background: rgba(220, 53, 69, 0.8);
+      border-color: #dc3545;
+      animation: incorrectAnswer 1s ease;
+    }
+
+    .hints-panel {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .hint-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .hint-btn:hover:not(.disabled) {
+      background: rgba(255, 215, 0, 0.2);
+      border-color: #ffd700;
+    }
+
+    .hint-btn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .control-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .btn-submit {
+      background: linear-gradient(45deg, #ffd700, #ffed4e);
+      color: #1a1a2e;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .progress-bar-container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      height: 10px;
+      margin: 20px 0;
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, #ffd700, #ffed4e);
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes correctAnswer {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes incorrectAnswer {
+      0% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.02) rotate(-2deg); }
+      75% { transform: scale(1.02) rotate(2deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .game-over-modal {
+      background: rgba(0, 0, 0, 0.8);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: rgba(255, 255, 255, 0.95);
+      color: #1a1a2e;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+    }
+  </style>
+</head>
+<body>
+<div class="game-interface">
+  <!-- Game Header -->
+  <div class="game-header">
+    <div class="row align-items-center">
+      <div class="col-3">
+        <div class="timer-circle" id="timer">
+          <span id="timeLeft">30</span>
+        </div>
+      </div>
+      <div class="col-6 text-center">
+        <h2>Вопрос <span id="questionNumber" th:text="${game.currentQuestion}">1</span> из 100</h2>
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+      <div class="col-3 text-end">
+        <div class="fs-4 fw-bold">
+          <i class="fas fa-coins text-warning"></i>
+          <span id="currentScore" th:text="${game.totalScore}">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question Card -->
+  <div class="question-card">
+    <div class="question-text" id="questionText" th:text="${game.question.questionText}">
+      Загрузка вопроса...
+    </div>
+
+    <div class="answers-grid" id="answersGrid">
+      <div th:each="answer, iterStat : ${game.question.allAnswers}"
+           class="answer-btn"
+           th:data-answer="${answer}"
+           th:data-index="${iterStat.index}"
+           onclick="selectAnswer(this)">
+        <strong th:text="${'ABCD'.charAt(iterStat.index)}">A</strong>:
+        <span th:text="${answer}">Вариант ответа</span>
+      </div>
+    </div>
+
+    <!-- Hints Panel -->
+    <div class="hints-panel">
+      <button class="hint-btn"
+              th:classappend="${#arrays.contains(game.availableHints, 'FIFTY_FIFTY')} ? '' : 'disabled'"
+              onclick="useHint('FIFTY_FIFTY')"
+              th:disabled="${!#arrays.contains(game.availableHints, 'FIFTY_FIFTY')}">
+        <i class="fas fa-divide"></i> 50/50
+      </button>
+      <button class="hint-btn"
+              th:classappend="${#arrays.contains(game.availableHints, 'SKIP_QUESTION')} ? '' : 'disabled'"
+              onclick="useHint('SKIP_QUESTION')"
+              th:disabled="${!#arrays.contains(game.availableHints, 'SKIP_QUESTION')}">
+        <i class="fas fa-forward"></i> Пропустить
+      </button>
+    </div>
+  </div>
+
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <button class="btn btn-outline-light" onclick="abandonGame()">
+      <i class="fas fa-flag"></i> Сдаться
+    </button>
+
+    <button class="btn btn-submit" id="submitBtn" onclick="submitAnswer()" disabled>
+      <i class="fas fa-check"></i> Ответить
+    </button>
+
+    <a href="/game" class="btn btn-outline-light">
+      <i class="fas fa-home"></i> В меню
+    </a>
+  </div>
+</div>
+
+<!-- Game Over Modal -->
+<div class="game-over-modal" id="gameOverModal">
+  <div class="modal-content">
+    <h2 id="gameOverTitle">Игра окончена!</h2>
+    <p id="gameOverMessage">Сообщение</p>
+    <div class="mt-4">
+      <button class="btn btn-primary me-2" onclick="window.location.href='/game'">
+        Новая игра
+      </button>
+      <button class="btn btn-secondary" onclick="window.location.href='/game/history'">
+        История
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+  let sessionId = /*[[${game.sessionId}]]*/ null;
+  let timeLeft = /*[[${game.timeLimit}]]*/ 30;
+  let selectedAnswer = null;
+  let timer;
+  let gameInProgress = true;
+
+  // Инициализация
+  document.addEventListener('DOMContentLoaded', function() {
+    updateProgressBar();
+    startTimer();
+  });
+
+  function startTimer() {
+    // Останавливаем предыдущий таймер если есть
+    if (timer) {
+      clearInterval(timer);
+    }
+
+    timer = setInterval(() => {
+      if (!gameInProgress) {
+        clearInterval(timer);
+        return;
+      }
+
+      timeLeft--;
+      document.getElementById('timeLeft').textContent = timeLeft;
+
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        handleTimeExpired();
+      }
+
+      // Меняем цвет таймера при малом времени
+      const timerElement = document.getElementById('timer');
+      if (timeLeft <= 10) {
+        timerElement.style.background = 'conic-gradient(#ff6b6b 0deg, #ffd700 360deg)';
+      } else {
+        timerElement.style.background = 'conic-gradient(#ffd700 0deg, #ff6b6b 360deg)';
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+  }
+
+  function handleTimeExpired() {
+    gameInProgress = false;
+    stopTimer();
+
+    // Отключаем все кнопки
+    document.querySelectorAll('.answer-btn').forEach(btn => {
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.5';
+    });
+    document.getElementById('submitBtn').disabled = true;
+
+    showGameOver('Время вышло!', 'К сожалению, время на ответ истекло.');
+  }
+
+  // ИСПРАВЛЕННАЯ функция selectAnswer - только выделяет ответ
+  function selectAnswer(element) {
+    if (!gameInProgress) {
+      return;
+    }
+
+    const answer = element.getAttribute('data-answer');
+
+    // Убираем выделение со всех кнопок
+    document.querySelectorAll('.answer-btn').forEach(btn => {
+      btn.classList.remove('selected');
+    });
+
+    // Выделяем выбранную кнопку
+    element.classList.add('selected');
+
+    // Сохраняем выбранный ответ
+    selectedAnswer = answer;
+
+    // Активируем кнопку "Ответить"
+    document.getElementById('submitBtn').disabled = false;
+
+    console.log('Selected answer:', answer);
+  }
+
+  // ИСПРАВЛЕННАЯ функция submitAnswer - отправляет выбранный ответ
+  function submitAnswer() {
+    if (!gameInProgress) {
+      return;
+    }
+
+    if (!selectedAnswer) {
+      alert('Пожалуйста, выберите ответ');
+      return;
+    }
+
+    // ВАЖНО: Останавливаем игру и таймер СРАЗУ
+    gameInProgress = false;
+    stopTimer();
+
+    // Отключаем кнопки
+    document.getElementById('submitBtn').disabled = true;
+    document.querySelectorAll('.answer-btn').forEach(btn => {
+      btn.style.pointerEvents = 'none';
+    });
+
+    console.log('Submitting answer:', selectedAnswer, 'for session:', sessionId);
+
+    // Логика отправки ответа на сервер
+    fetch('/api/game/answer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        sessionId: sessionId,
+        playerAnswer: selectedAnswer  // Исправлено: было answer, должно быть playerAnswer
+      })
+    })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              console.log('Server response:', data);
+              handleAnswerResponse(data);
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('Ошибка при отправке ответа: ' + error.message);
+
+              // В случае ошибки - восстанавливаем игру
+              gameInProgress = true;
+              document.getElementById('submitBtn').disabled = false;
+              document.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.style.pointerEvents = 'auto';
+              });
+              startTimer();
+            });
+  }
+
+  function handleAnswerResponse(data) {
+    console.log('Handling response:', data);
+
+    // Показываем правильный/неправильный ответ
+    document.querySelectorAll('.answer-btn').forEach(btn => {
+      const answerText = btn.getAttribute('data-answer');
+      if (data.correctAnswer && answerText === data.correctAnswer) {
+        btn.classList.add('correct');
+      } else if (answerText === selectedAnswer && data.lastAnswerCorrect === false) {
+        btn.classList.add('incorrect');
+      }
+    });
+
+    setTimeout(() => {
+      if (data.gameOver) {
+        if (data.gameCompleted) {
+          showGameOver('Поздравляем!', `Вы прошли всю игру! Итоговый счет: ${data.finalScore} очков`);
+        } else if (data.timeExpired) {
+          showGameOver('Время вышло!', `Итоговый счет: ${data.finalScore} очков`);
+        } else {
+          showGameOver('Игра окончена', `Правильный ответ: ${data.correctAnswer}. Итоговый счет: ${data.finalScore} очков`);
+        }
+      } else {
+        // Переходим к следующему вопросу
+        loadNextQuestion(data);
+      }
+    }, 2000);
+  }
+
+  function loadNextQuestion(data) {
+    // Сбрасываем состояние игры
+    gameInProgress = true;
+
+    // Обновляем счет и номер вопроса
+    document.getElementById('currentScore').textContent = data.totalScore;
+    document.getElementById('questionNumber').textContent = data.currentQuestion;
+
+    // Обновляем прогресс-бар
+    updateProgressBar();
+
+    // Загружаем новый вопрос
+    document.getElementById('questionText').textContent = data.question.questionText;
+
+    // Очищаем старые ответы
+    const answersGrid = document.getElementById('answersGrid');
+    answersGrid.innerHTML = '';
+
+    // Добавляем новые ответы
+    data.question.allAnswers.forEach((answer, index) => {
+      const answerBtn = document.createElement('div');
+      answerBtn.className = 'answer-btn';
+      answerBtn.setAttribute('data-answer', answer);
+      answerBtn.onclick = () => selectAnswer(answerBtn);
+      answerBtn.innerHTML = `<strong>${'ABCD'[index]}</strong>: ${answer}`;
+      answerBtn.style.pointerEvents = 'auto';
+      answerBtn.style.opacity = '1';
+      answersGrid.appendChild(answerBtn);
+    });
+
+    // Обновляем доступные подсказки
+    updateHints(data.availableHints);
+
+    // Сбрасываем состояние
+    selectedAnswer = null;
+    timeLeft = data.timeLimit || 30;
+    document.getElementById('submitBtn').disabled = true;
+
+    // Запускаем новый таймер
+    startTimer();
+  }
+
+  function useHint(hintType) {
+    if (!gameInProgress) {
+      return;
+    }
+
+    const hintBtn = event.target.closest('.hint-btn');
+    if (hintBtn.classList.contains('disabled')) return;
+
+    fetch('/api/game/hint', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        sessionId: sessionId,
+        hintType: hintType
+      })
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (hintType === 'FIFTY_FIFTY') {
+                // Обновляем варианты ответов после 50/50
+                const answersGrid = document.getElementById('answersGrid');
+                answersGrid.innerHTML = '';
+
+                data.question.allAnswers.forEach((answer, index) => {
+                  const answerBtn = document.createElement('div');
+                  answerBtn.className = 'answer-btn';
+                  answerBtn.setAttribute('data-answer', answer);
+                  answerBtn.onclick = () => selectAnswer(answerBtn);
+                  answerBtn.innerHTML = `<strong>${'ABCD'[index]}</strong>: ${answer}`;
+                  answersGrid.appendChild(answerBtn);
+                });
+
+                // Сбрасываем выбор после использования подсказки
+                selectedAnswer = null;
+                document.getElementById('submitBtn').disabled = true;
+
+              } else if (hintType === 'SKIP_QUESTION') {
+                // Пропускаем вопрос
+                gameInProgress = false;
+                stopTimer();
+                loadNextQuestion(data);
+              }
+
+              // Обновляем доступные подсказки
+              updateHints(data.availableHints);
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('Ошибка при использовании подсказки');
+            });
+  }
+
+  function updateHints(availableHints) {
+    const hints = ['FIFTY_FIFTY', 'SKIP_QUESTION'];
+    hints.forEach(hint => {
+      const btn = document.querySelector(`[onclick="useHint('${hint}')"]`);
+      if (btn) {
+        if (availableHints && availableHints.includes(hint)) {
+          btn.classList.remove('disabled');
+          btn.disabled = false;
+        } else {
+          btn.classList.add('disabled');
+          btn.disabled = true;
+        }
+      }
+    });
+  }
+
+  function abandonGame() {
+    if (!gameInProgress) {
+      return;
+    }
+
+    if (confirm('Вы уверены, что хотите сдаться?')) {
+      gameInProgress = false;
+      stopTimer();
+
+      fetch(`/api/game/${sessionId}/abandon`, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+              .then(response => response.json())
+              .then(data => {
+                showGameOver('Игра покинута', `Итоговый счет: ${data.finalScore} очков`);
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                window.location.href = '/game';
+              });
+    }
+  }
+
+  function updateProgressBar() {
+    const currentQuestion = parseInt(document.getElementById('questionNumber').textContent);
+    const progress = (currentQuestion / 100) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+  }
+
+  function showGameOver(title, message) {
+    gameInProgress = false;
+    stopTimer();
+
+    document.getElementById('gameOverTitle').textContent = title;
+    document.getElementById('gameOverMessage').textContent = message;
+    document.getElementById('gameOverModal').style.display = 'flex';
+  }
+
+  // Предотвращаем закрытие страницы во время игры
+  window.addEventListener('beforeunload', function(e) {
+    if (sessionId && gameInProgress) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+</script>
+
+</body>
+</html>

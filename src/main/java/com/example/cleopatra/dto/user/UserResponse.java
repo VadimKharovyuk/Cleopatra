@@ -2,6 +2,7 @@ package com.example.cleopatra.dto.user;
 
 import com.example.cleopatra.enums.Gender;
 import com.example.cleopatra.enums.Role;
+import com.example.cleopatra.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,4 +43,6 @@ public class UserResponse {
     private LocalDateTime lastSeen;
 
     private Boolean receiveVisitNotifications;
+
+
 }

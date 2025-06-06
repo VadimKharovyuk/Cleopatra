@@ -63,4 +63,7 @@ public interface UserService {
 
   // Метод для обновления настроек уведомлений
 void updateNotificationSettings(Long userId, Boolean receiveVisitNotifications);
+
+
+
 }

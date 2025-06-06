@@ -9,12 +9,12 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 public class SchedulerConfig {
 
     @Bean
-    public TaskScheduler taskScheduler() {
+    public ThreadPoolTaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(2); // Пул из 2 потоков для scheduled задач
+        scheduler.setPoolSize(3); // Увеличиваем для preloading потоков
         scheduler.setThreadNamePrefix("qr-scheduler-");
         scheduler.setWaitForTasksToCompleteOnShutdown(true);
-        scheduler.setAwaitTerminationSeconds(60);
+        scheduler.setAwaitTerminationSeconds(20);
         return scheduler;
     }
 }

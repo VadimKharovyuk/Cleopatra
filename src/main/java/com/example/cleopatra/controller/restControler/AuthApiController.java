@@ -44,10 +44,10 @@ public class AuthApiController {
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request,
                                                      HttpServletRequest httpRequest) {
 
-        // ДОБАВИТЬ детальное логирование
-        log.info("🔍 === НАЧАЛО ПРОЦЕССА ЛОГИНА ===");
-        log.info("🔍 Email: {}", request.getEmail());
-        log.info("🔍 Password length: {}", request.getPassword() != null ? request.getPassword().length() : "null");
+//        // ДОБАВИТЬ детальное логирование
+//        log.info("🔍 === НАЧАЛО ПРОЦЕССА ЛОГИНА ===");
+//        log.info("🔍 Email: {}", request.getEmail());
+//        log.info("🔍 Password length: {}", request.getPassword() != null ? request.getPassword().length() : "null");
 
         try {
             // Шаг 1: Проверяем входные данные
@@ -65,7 +65,7 @@ public class AuthApiController {
             log.info("✅ Входные данные валидны");
 
             // Шаг 2: Аутентификация
-            log.info("🔍 ШАГ 2: Вызов authenticationService.authenticate()");
+//            log.info("🔍 ШАГ 2: Вызов authenticationService.authenticate()");
             Optional<User> userOpt;
 
             try {
@@ -78,17 +78,17 @@ public class AuthApiController {
             }
 
             // Шаг 3: Проверяем результат аутентификации
-            log.info("🔍 ШАГ 3: Проверка результата аутентификации");
+//            log.info("🔍 ШАГ 3: Проверка результата аутентификации");
             if (userOpt.isEmpty()) {
                 log.warn("🔒 Аутентификация не прошла для email: {}", request.getEmail());
                 return createErrorResponse("Неверный email или пароль", HttpStatus.UNAUTHORIZED);
             }
 
             User user = userOpt.get();
-            log.info("✅ Пользователь найден: ID={}, Email={}", user.getId(), user.getEmail());
+//            log.info("✅ Пользователь найден: ID={}, Email={}", user.getId(), user.getEmail());
 
             // Шаг 4: Загрузка UserDetails
-            log.info("🔍 ШАГ 4: Загрузка UserDetails");
+//            log.info("🔍 ШАГ 4: Загрузка UserDetails");
             UserDetails userDetails;
 
             try {
@@ -101,60 +101,60 @@ public class AuthApiController {
             }
 
             // Шаг 5: Создание Authentication
-            log.info("🔍 ШАГ 5: Создание Authentication");
+//            log.info("🔍 ШАГ 5: Создание Authentication");
             Authentication authentication;
 
             try {
                 authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
-                log.info("✅ Authentication создан: {}", authentication.getName());
+//                log.info("✅ Authentication создан: {}", authentication.getName());
             } catch (Exception e) {
                 log.error("❌ ОШИБКА при создании Authentication: {}", e.getMessage(), e);
                 return createErrorResponse("Ошибка создания токена аутентификации: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            // Отладка - ДО установки
-            log.info("🔍 === ДО установки Authentication ===");
-            log.info("Current SecurityContext: {}", SecurityContextHolder.getContext().getAuthentication());
+//            // Отладка - ДО установки
+//            log.info("🔍 === ДО установки Authentication ===");
+//            log.info("Current SecurityContext: {}", SecurityContextHolder.getContext().getAuthentication());
 
             // Шаг 6: Установка в SecurityContext
-            log.info("🔍 ШАГ 6: Установка в SecurityContext");
+//            log.info("🔍 ШАГ 6: Установка в SecurityContext");
             try {
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
                 securityContext.setAuthentication(authentication);
                 SecurityContextHolder.setContext(securityContext);
-                log.info("✅ SecurityContext установлен");
+//                log.info("✅ SecurityContext установлен");
             } catch (Exception e) {
                 log.error("❌ ОШИБКА при установке SecurityContext: {}", e.getMessage(), e);
                 return createErrorResponse("Ошибка установки контекста безопасности: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
             // Шаг 7: Работа с сессией
-            log.info("🔍 ШАГ 7: Работа с сессией");
+//            log.info("🔍 ШАГ 7: Работа с сессией");
             HttpSession session;
 
             try {
                 session = httpRequest.getSession(true);
                 session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-                log.info("✅ Сессия создана: {}", session.getId());
+//                log.info("✅ Сессия создана: {}", session.getId());
             } catch (Exception e) {
                 log.error("❌ ОШИБКА при работе с сессией: {}", e.getMessage(), e);
                 return createErrorResponse("Ошибка создания сессии: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            // Отладка - ПОСЛЕ установки
-            log.info("🔍 === ПОСЛЕ установки Authentication ===");
-            log.info("New SecurityContext: {}", SecurityContextHolder.getContext().getAuthentication());
-            log.info("Session ID: {}", session.getId());
-            log.info("Session attribute: {}", session.getAttribute("SPRING_SECURITY_CONTEXT"));
-
-            // Шаг 8: Создание ответа
-            log.info("🔍 ШАГ 8: Создание ответа");
+//            // Отладка - ПОСЛЕ установки
+//            log.info("🔍 === ПОСЛЕ установки Authentication ===");
+//            log.info("New SecurityContext: {}", SecurityContextHolder.getContext().getAuthentication());
+//            log.info("Session ID: {}", session.getId());
+//            log.info("Session attribute: {}", session.getAttribute("SPRING_SECURITY_CONTEXT"));
+//
+//            // Шаг 8: Создание ответа
+//            log.info("🔍 ШАГ 8: Создание ответа");
             Map<String, Object> userInfo;
 
             try {
                 userInfo = createUserInfo(user);
-                log.info("✅ UserInfo создан");
+//                log.info("✅ UserInfo создан");
             } catch (Exception e) {
                 log.error("❌ ОШИБКА при создании UserInfo: {}", e.getMessage(), e);
                 return createErrorResponse("Ошибка формирования данных пользователя: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -168,7 +168,7 @@ public class AuthApiController {
             response.put("debugAuth", SecurityContextHolder.getContext().getAuthentication() != null ?
                     SecurityContextHolder.getContext().getAuthentication().getName() : "null");
 
-            log.info("✅ === ЛОГИН ЗАВЕРШЕН УСПЕШНО ===");
+//            log.info("✅ === ЛОГИН ЗАВЕРШЕН УСПЕШНО ===");
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {

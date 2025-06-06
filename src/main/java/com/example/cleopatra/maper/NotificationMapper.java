@@ -179,14 +179,14 @@ public class NotificationMapper {
             }
 
             if (actor.getLastName() != null && !actor.getLastName().trim().isEmpty()) {
-                if (nameBuilder.length() > 0) {
+                if (!nameBuilder.isEmpty()) {
                     nameBuilder.append(" ");
                 }
                 nameBuilder.append(actor.getLastName().trim());
             }
 
             // Если имя не указано, используем email
-            if (nameBuilder.length() == 0) {
+            if (nameBuilder.isEmpty()) {
                 if (actor.getEmail() != null && !actor.getEmail().trim().isEmpty()) {
                     String email = actor.getEmail().trim();
                     // Берем часть до @ для отображения

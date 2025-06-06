@@ -364,6 +364,8 @@ public User getCurrentUserEntity(Authentication authentication) {
                 userId, receiveVisitNotifications);
     }
 
+
+
     /**
      * Получить пользователей онлайн
      */
