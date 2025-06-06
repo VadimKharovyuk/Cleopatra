@@ -30,7 +30,7 @@ public class ProfileViewController {
 
     private final VisitService visitService;
     private final UserService userService;
-//    private final ActivityTracker activityTracker;
+
 
 
     @GetMapping()
@@ -118,10 +118,6 @@ public class ProfileViewController {
 
             model.addAttribute("visitStats", visitStats);
 
-
-//            // ✅ Отслеживаем активность
-//            activityTracker.trackActivity(authentication);
-            System.out.println();
 
             // Добавляем варианты периодов для фильтра
             Map<Integer, String> periodOptions = new LinkedHashMap<>();

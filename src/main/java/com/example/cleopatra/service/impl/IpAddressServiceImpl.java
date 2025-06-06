@@ -2,11 +2,14 @@ package com.example.cleopatra.service.impl;
 
 
 import com.example.cleopatra.service.IpAddressService;
+import com.example.cleopatra.service.NotificationService;
 import com.example.cleopatra.service.VisitService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class IpAddressServiceImpl implements IpAddressService {
 
     private final VisitService visitService;
+    private final NotificationService notificationService;
 
     @Override
     public String getClientIpAddress(HttpServletRequest request) {
@@ -70,10 +74,18 @@ public class IpAddressServiceImpl implements IpAddressService {
     }
 
     @Override
+
     public void recordUserVisit(Long visitedUserId, Long currentUserId, HttpServletRequest request) {
+        log.info("🔍 START recordUserVisit: visitedUserId={}, currentUserId={}", visitedUserId, currentUserId);
+
         if (visitedUserId == null || currentUserId == null || request == null) {
-            log.warn("Invalid parameters for recording visit: visitedUserId={}, currentUserId={}, request={}",
-                    visitedUserId, currentUserId, request != null ? "present" : "null");
+            log.warn("❌ Invalid parameters for recording visit");
+            return;
+        }
+
+        // Проверка что не посещаем сами себя
+        if (Objects.equals(visitedUserId, currentUserId)) {
+            log.debug("🚫 User visiting own profile, skipping");
             return;
         }
 
@@ -81,14 +93,16 @@ public class IpAddressServiceImpl implements IpAddressService {
             String ipAddress = getClientIpAddress(request);
             String userAgent = getUserAgent(request);
 
+            log.info("📝 Recording visit: {} -> {} from IP: {}", currentUserId, visitedUserId, ipAddress);
             visitService.recordVisit(visitedUserId, currentUserId, ipAddress, userAgent);
 
-            log.debug("Визит записан: пользователь {} посетил профиль {} с IP: {}",
-                    currentUserId, visitedUserId, ipAddress);
+            log.info("🔔 Creating notification: visitor={}, visited={}", currentUserId, visitedUserId);
+            notificationService.createProfileVisitNotification(visitedUserId, currentUserId);
+
+            log.info("✅ Visit and notification processed successfully");
 
         } catch (Exception e) {
-            log.warn("Не удалось записать визит пользователя {} к профилю {}: {}",
-                    currentUserId, visitedUserId, e.getMessage());
+            log.error("❌ Error in recordUserVisit", e);
         }
     }
 

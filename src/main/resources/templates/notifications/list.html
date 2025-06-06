@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Уведомления</title>
+</head>
+<body>
+<h1>Мои уведомления
+  <span th:if="${unreadCount > 0}" class="badge">[[${unreadCount}]]</span>
+</h1>
+
+<div th:each="notification : ${notifications}">
+  <div th:class="${notification.isRead} ? 'notification read' : 'notification unread'">
+    <h3>[[${notification.title}]]</h3>
+    <p>[[${notification.message}]]</p>
+    <small>[[${notification.createdAt}]]</small>
+
+    <div class="actions">
+      <form th:if="!${notification.isRead}"
+            th:action="@{/notifications/{id}/read(id=${notification.id})}"
+            method="post" style="display:inline;">
+        <button type="submit">Прочитано</button>
+      </form>
+
+      <form th:action="@{/notifications/{id}/delete(id=${notification.id})}"
+            method="post" style="display:inline;">
+        <button type="submit">Удалить</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -8,6 +8,7 @@ import com.example.cleopatra.model.User;
 import com.example.cleopatra.model.Visit;
 import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.repository.VisitRepository;
+import com.example.cleopatra.service.NotificationService;
 import com.example.cleopatra.service.VisitService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +27,13 @@ import java.util.Optional;
 @Service
 @Slf4j
 
+
 public class VisitServiceImpl implements VisitService {
 
-    private final  VisitRepository visitRepository;
-    private  final  UserRepository userRepository;
-    private  final VisitMapper visitMapper;
+    private final VisitRepository visitRepository;
+    private final UserRepository userRepository;
+    private final VisitMapper visitMapper;
+    private final NotificationService notificationService;
 
     @Override
     public void recordVisit(Long visitedUserId, Long visitorId, String ipAddress, String userAgent) {
@@ -63,6 +66,10 @@ public class VisitServiceImpl implements VisitService {
                     // Обновляем счетчик
                     Long currentVisits = visitedUser.getTotalVisits();
                     visitedUser.setTotalVisits((currentVisits != null ? currentVisits : 0L) + 1);
+
+                    notificationService.createProfileVisitNotification(visitedUserId, visitorId);
+
+
                     userRepository.save(visitedUser);
                 }
             }
@@ -144,7 +151,6 @@ public class VisitServiceImpl implements VisitService {
                 .uniqueVisitorsCount(0L)
                 .build();
     }
-
 
 
 }

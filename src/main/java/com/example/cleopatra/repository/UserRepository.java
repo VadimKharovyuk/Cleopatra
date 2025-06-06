@@ -126,4 +126,43 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("UPDATE User u SET u.isOnline = false, u.lastSeen = u.lastActivity " +
             "WHERE u.isOnline = true AND u.lastActivity < :threshold")
     int setOfflineForInactiveUsers(@Param("threshold") LocalDateTime threshold);
+
+
+//    /**
+//     * Батчевое обновление - один SQL запрос для всех пользователей
+//     */
+//    @Modifying
+//    @Transactional
+//    @Query("UPDATE User u SET " +
+//            "u.isOnline = false, " +
+//            "u.lastSeen = CURRENT_TIMESTAMP " +
+//            "WHERE u.isOnline = true " +
+//            "AND u.lastActivity < :threshold")
+//    int markUsersOfflineByLastActivity(@Param("threshold") LocalDateTime threshold);
+
+
+    // Батчевое обновление
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE users SET " +
+            "is_online = false, " +
+            "last_seen = NOW() " +
+            "WHERE id IN (" +
+            "  SELECT id FROM users " +
+            "  WHERE is_online = true " +
+            "  AND last_activity < :threshold " +
+            "  ORDER BY last_activity ASC " +
+            "  LIMIT :batchSize" +
+            ")",
+            nativeQuery = true)
+    int markUsersOfflineByLastActivityBatch(@Param("threshold") LocalDateTime threshold,
+                                            @Param("batchSize") int batchSize);
+
+    // Для статистики
+    @Query(value = "SELECT COUNT(*) FROM users WHERE is_online = true", nativeQuery = true)
+    long countOnlineUsers();
+
+    @Query(value = "SELECT COUNT(*) FROM users WHERE is_online = true AND last_activity < :threshold", nativeQuery = true)
+    long countInactiveUsers(@Param("threshold") LocalDateTime threshold);
+
 }

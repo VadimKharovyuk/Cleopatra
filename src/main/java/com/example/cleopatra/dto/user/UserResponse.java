@@ -18,7 +18,6 @@ public class UserResponse {
     private Role role;
     private Gender gender;
 
-
     private String firstName;
     private String lastName;
     private String imageUrl;
@@ -41,4 +40,6 @@ public class UserResponse {
 
     private Boolean isOnline;
     private LocalDateTime lastSeen;
+
+    private Boolean receiveVisitNotifications;
 }

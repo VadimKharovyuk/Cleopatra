@@ -65,6 +65,7 @@ public class User {
     private Long followingCount = 0L;
 
 
+
     // Добавить в User entity:
     @Column(name = "is_online")
     private Boolean isOnline = false;
@@ -81,6 +82,9 @@ public class User {
 
     @Column(name = "city")
     private String city;
+
+    @Column(name = "receive_visit_notifications")
+    private Boolean receiveVisitNotifications = true;
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -168,6 +172,8 @@ public class User {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+
 
 
 }

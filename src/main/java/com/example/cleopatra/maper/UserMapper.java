@@ -18,6 +18,7 @@ public class UserMapper {
         return user;
     }
 
+
     public UserResponse toResponse(User user) {
         UserResponse response = new UserResponse();
         response.setId(user.getId());
@@ -48,6 +49,9 @@ public class UserMapper {
 
         response.setIsOnline(user.getIsOnline());
         response.setLastSeen(user.getLastSeen());
+
+        response.setReceiveVisitNotifications(user.getReceiveVisitNotifications());
+
         return response;
     }
 

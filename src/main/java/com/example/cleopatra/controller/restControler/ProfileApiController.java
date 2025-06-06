@@ -3,9 +3,11 @@ package com.example.cleopatra.controller.restControler;
 import com.example.cleopatra.ExistsException.ImageValidationException;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.service.UserService;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -85,5 +87,23 @@ public class ProfileApiController {
                     "message", "Ошибка сервера"
             ));
         }
+    }
+
+
+    @PostMapping("/me/notification-settings")
+    public ResponseEntity<String> updateNotificationSettings(
+            @RequestBody NotificationSettingsRequest request,
+            Authentication authentication) {
+
+        String email = authentication.getName();
+        Long userId = userService.getUserIdByEmail(email);
+
+        userService.updateNotificationSettings(userId, request.getReceiveVisitNotifications());
+        return ResponseEntity.ok("Settings updated");
+    }
+
+    @Data
+    public static class NotificationSettingsRequest {
+        private Boolean receiveVisitNotifications;
     }
 }

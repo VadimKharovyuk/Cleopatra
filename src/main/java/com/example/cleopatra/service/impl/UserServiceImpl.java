@@ -351,6 +351,19 @@ public User getCurrentUserEntity(Authentication authentication) {
         userRepository.save(user);
         log.debug("⏰ Updated activity and set online for user {}", userId);
     }
+
+    @Override
+    public void updateNotificationSettings(Long userId, Boolean receiveVisitNotifications) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        user.setReceiveVisitNotifications(receiveVisitNotifications);
+        userRepository.save(user);
+
+        log.info("✅ Updated notification settings for user {}: receiveVisitNotifications={}",
+                userId, receiveVisitNotifications);
+    }
+
     /**
      * Получить пользователей онлайн
      */
