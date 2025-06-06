@@ -99,6 +99,7 @@ public class NotificationServiceImpl implements NotificationService {
                     title, message, data, visitorId, "USER"
             );
 
+
             log.info("✅ Created profile visit notification: id={}", notification.getId());
 
         } catch (Exception e) {
@@ -377,7 +378,10 @@ public class NotificationServiceImpl implements NotificationService {
             log.info("✅ Notification saved successfully with ID: {}", saved.getId());
 
             log.info("📢 Publishing NotificationCreatedEvent for ID: {}", saved.getId());
-            eventPublisher.publishEvent(new NotificationCreatedEvent(saved.getId()));
+            eventPublisher.publishEvent(new NotificationCreatedEvent(
+                    saved.getId(),
+                    saved.getRecipient().getId()
+            ));
 
             return saved;
 

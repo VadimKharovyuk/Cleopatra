@@ -1,5 +1,6 @@
 package com.example.cleopatra.EVENT;
 
+import com.example.cleopatra.config.NotificationWebSocketHandler;
 import com.example.cleopatra.model.Notification;
 import com.example.cleopatra.repository.NotificationRepository;
 import com.example.cleopatra.dto.Notification.NotificationDto;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -19,15 +21,17 @@ public class NotificationEventListener {
 
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
-    // private final WebSocketNotificationService webSocketService; // Добавите позже
+     private final NotificationWebSocketHandler notificationWebSocketHandler;
 
     @EventListener
     @Async
     public void handleNotificationCreated(NotificationCreatedEvent event) {
-        log.debug("📨 Handling notification created event: {}", event.getNotificationId());
+        log.info("🎉 EVENT RECEIVED: NotificationCreatedEvent for ID: {} to recipient: {}",
+                event.getNotificationId(), event.getRecipientId());
 
         try {
-            Notification notification = notificationRepository.findById(event.getNotificationId())
+            // Загружаем уведомление с eager loading
+            Notification notification = notificationRepository.findByIdWithUsers(event.getNotificationId())
                     .orElse(null);
 
             if (notification == null) {
@@ -35,27 +39,36 @@ public class NotificationEventListener {
                 return;
             }
 
-            // Проверяем, что пользователь онлайн
-            if (Boolean.TRUE.equals(notification.getRecipient().getIsOnline())) {
-                NotificationDto dto = notificationMapper.toWebSocketDto(notification);
+            log.info("📋 Found notification: title={}", notification.getTitle());
 
-                // TODO: Отправляем через WebSocket когда будет готов
-                log.info("📤 Would send real-time notification to user {} (WebSocket not implemented yet)",
-                        notification.getRecipient().getId());
+            // Преобразуем в DTO
+            NotificationDto dto = notificationMapper.toWebSocketDto(notification);
+            log.info("📤 Sending to WebSocket handler for user: {}", event.getRecipientId());
 
-                // Помечаем как отправленное
-                notification.setIsSent(true);
-                notification.setSentAt(LocalDateTime.now());
-                notificationRepository.save(notification);
+            // 🔧 ИСПОЛЬЗУЕМ ID ИЗ СОБЫТИЯ
+            notificationWebSocketHandler.sendNotificationToUser(
+                    event.getRecipientId(), // 🔧 Используем ID из события
+                    dto
+            );
 
-                log.debug("✅ Marked notification as sent: {}", event.getNotificationId());
-            } else {
-                log.debug("🔕 User {} is offline, notification will be sent later",
-                        notification.getRecipient().getId());
-            }
+            // Помечаем как отправленное в отдельной транзакции
+            updateNotificationAsSent(event.getNotificationId());
+
+            log.info("✅ Notification processing completed for user: {}", event.getRecipientId());
 
         } catch (Exception e) {
-            log.error("❌ Error handling notification created event: {}", event.getNotificationId(), e);
+            log.error("❌ Error in event listener for notification: {}", event.getNotificationId(), e);
+            e.printStackTrace();
         }
+    }
+
+    @Transactional
+    public void updateNotificationAsSent(Long notificationId) {
+        notificationRepository.findById(notificationId).ifPresent(notification -> {
+            notification.setIsSent(true);
+            notification.setSentAt(LocalDateTime.now());
+            notificationRepository.save(notification);
+            log.debug("✅ Marked notification {} as sent", notificationId);
+        });
     }
 }

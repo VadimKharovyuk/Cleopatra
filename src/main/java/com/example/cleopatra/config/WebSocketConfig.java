@@ -13,6 +13,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class WebSocketConfig implements WebSocketConfigurer {
 
     private final ChatWebSocketHandler chatWebSocketHandler;
+    private final NotificationWebSocketHandler notificationWebSocketHandler;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -32,6 +33,14 @@ public class WebSocketConfig implements WebSocketConfigurer {
                 .setAllowedOriginPatterns("*");
 
         registry.addHandler(chatWebSocketHandler, "/ws/websocket")
+                .setAllowedOriginPatterns("*");
+
+        // ===== NOTIFICATION ENDPOINTS ===== 🆕
+        registry.addHandler(notificationWebSocketHandler, "/ws/notifications")
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
+
+        registry.addHandler(notificationWebSocketHandler, "/ws/notifications/websocket")
                 .setAllowedOriginPatterns("*");
 
         log.info("✅ WebSocket handlers registered successfully");

@@ -46,6 +46,8 @@ public class NotificationController {
             model.addAttribute("totalPages", notifications.getTotalPages());
             model.addAttribute("hasNext", notifications.hasNext());
             model.addAttribute("hasPrevious", notifications.hasPrevious());
+            model.addAttribute("currentUserId", userId); // 🆕 Для WebSocket
+            model.addAttribute("isUnreadOnly", false);
 
             return "notifications/list";
 

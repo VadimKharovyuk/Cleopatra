@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
@@ -43,4 +45,12 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query("UPDATE Notification n SET n.isRead = true, n.readAt = CURRENT_TIMESTAMP " +
             "WHERE n.recipient.id = :userId AND n.isRead = false")
     int markAllAsReadByRecipientId(@Param("userId") Long userId);
+
+
+    // 🆕 Запрос с EAGER подгрузкой для избежания LazyInitializationException
+    @Query("SELECT n FROM Notification n " +
+            "LEFT JOIN FETCH n.recipient " +
+            "LEFT JOIN FETCH n.actor " +
+            "WHERE n.id = :id")
+    Optional<Notification> findByIdWithUsers(@Param("id") Long id);
 }

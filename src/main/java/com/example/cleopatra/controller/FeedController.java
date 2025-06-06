@@ -37,7 +37,11 @@ public class FeedController {
 
         if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/login";
+
         }
+        String email = authentication.getName();
+        Long userId = userService.getUserIdByEmail(email);
+        model.addAttribute("currentUserId", userId);
 
         try {
             // Получаем текущего пользователя
@@ -45,6 +49,8 @@ public class FeedController {
 
             // Получаем ленту постов
             PostListDto feedPosts = postService.getFeedPosts(currentUser.getId(), page, size);
+
+
 
             model.addAttribute("posts", feedPosts);
             model.addAttribute("currentUser", currentUser);

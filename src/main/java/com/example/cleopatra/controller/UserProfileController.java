@@ -47,9 +47,15 @@ public class UserProfileController {
                               HttpServletRequest request,
                               Authentication authentication) {
         try {
+
+            if (authentication != null) {
+                UserResponse currentUser = userService.getUserByEmail(authentication.getName());
+                model.addAttribute("currentUserId", currentUser.getId());
+            }
             // Получаем информацию о пользователе
             UserResponse user = userService.getUserById(userId);
             model.addAttribute("user", user);
+
 
 
             // Получаем посты пользователя

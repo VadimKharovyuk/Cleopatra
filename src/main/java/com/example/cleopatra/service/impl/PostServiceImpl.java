@@ -104,7 +104,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostListDto getUserPosts(Long userId, int page, int size) {
-        log.info("Получение постов пользователя с ID: {}, страница: {}, размер: {}", userId, page, size);
+//        log.info("Получение постов пользователя с ID: {}, страница: {}, размер: {}", userId, page, size);
 
         if (!userService.userExists(userId)) {
             throw new RuntimeException("Пользователь с ID " + userId + " не найден");
@@ -113,7 +113,7 @@ public class PostServiceImpl implements PostService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Slice<Post> postSlice = postRepository.findByAuthor_IdAndIsDeletedFalse(userId, pageable);
 
-        log.info("Найдено {} постов для пользователя {}", postSlice.getNumberOfElements(), userId);
+//        log.info("Найдено {} постов для пользователя {}", postSlice.getNumberOfElements(), userId);
 
         // ✅ ОБНОВЛЕННЫЙ МЕТОД с логикой лайков
         return convertPostSliceToListDto(postSlice, page);

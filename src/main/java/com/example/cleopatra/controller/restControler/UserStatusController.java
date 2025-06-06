@@ -85,12 +85,12 @@ public class UserStatusController {
      */
     @PostMapping("/me/ping")
     public ResponseEntity<String> ping(Authentication authentication, HttpServletRequest request) {
-        log.info("=== PING ENDPOINT CALLED ===");
-        log.info("Authentication: {}", authentication);
-        log.info("Is authenticated: {}", authentication != null && authentication.isAuthenticated());
-        log.info("Session ID: {}", request.getSession().getId());
-        log.info("User-Agent: {}", request.getHeader("User-Agent"));
-        log.info("Remote IP: {}", request.getRemoteAddr());
+//        log.info("=== PING ENDPOINT CALLED ===");
+//        log.info("Authentication: {}", authentication);
+//        log.info("Is authenticated: {}", authentication != null && authentication.isAuthenticated());
+//        log.info("Session ID: {}", request.getSession().getId());
+//        log.info("User-Agent: {}", request.getHeader("User-Agent"));
+//        log.info("Remote IP: {}", request.getRemoteAddr());
 
         if (authentication == null || !authentication.isAuthenticated()) {
             log.warn("❌ Not authenticated");
@@ -107,10 +107,10 @@ public class UserStatusController {
             }
 
             Long userId = userService.getUserIdByEmail(email);
-            log.info("✅ User ID: {}", userId);
+//            log.info("✅ User ID: {}", userId);
 
             userService.setUserOnline(userId, true);
-            log.info("🏓 Ping successful for user {}", userId);
+//            log.info("🏓 Ping successful for user {}", userId);
 
             return ResponseEntity.ok("PING");
 

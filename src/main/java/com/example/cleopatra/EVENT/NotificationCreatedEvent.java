@@ -7,4 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class NotificationCreatedEvent {
     private final Long notificationId;
+    private final Long recipientId;
 }

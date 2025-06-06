@@ -371,6 +371,89 @@
                 animation: none;
             }
         }
+
+
+
+
+        /* ===================== СТИЛИ ДЛЯ УВЕДОМЛЕНИЙ ===================== */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 350px;
+        }
+
+        .notification-popup {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            backdrop-filter: blur(20px);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-icon {
+            font-size: 24px;
+            margin-right: 12px;
+            opacity: 0.9;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+            letter-spacing: -0.01em;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        /* Badge для уведомлений (дополняем существующий) */
+        .notification-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            height: 18px;
+            display: none; /* Скрыт по умолчанию */
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+            animation: badgePulse 2s infinite;
+            z-index: 10;
+        }
     </style>
 </th:block>
 
@@ -428,6 +511,9 @@
                th:classappend="${activeSection == 'notifications'} ? 'active' : ''">
                 <i class="fas fa-bell nav-icon"></i>
                 <span class="nav-text">Уведомления</span>
+
+                <!-- 🆕 Badge для непрочитанных уведомлений -->
+                <span class="notification-badge" id="notifications-badge" style="display: none;">0</span>
             </a>
         </div>
 
@@ -709,9 +795,19 @@
     <!-- Sidebar -->
     <th:block th:replace="~{:: sidebar(${activeSection})}"></th:block>
 
+    <!-- 🆕 Контейнер для уведомлений -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <!-- 🆕 Данные для уведомлений -->
+    <div th:if="${currentUserId}"
+         th:attr="data-user-id=${currentUserId}"
+         style="display: none;"></div>
+
     <!-- Scripts -->
     <th:block th:replace="~{:: sidebar-scripts}"></th:block>
 </th:block>
 <script th:src="@{/js/online-status.js}"></script>
+
+<script th:src="@{/js/notifications.js}"></script>
 </body>
 </html>
