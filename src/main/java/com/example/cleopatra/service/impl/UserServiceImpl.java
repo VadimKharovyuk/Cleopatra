@@ -408,12 +408,16 @@ public User getCurrentUserEntity(Authentication authentication) {
         return userRepository.findIdByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Пользователь с email " + email + " не найден"));
     }
-
     @Override
     @Transactional
     public void setUserOnline(Long userId, boolean isOnline) {
+        log.debug("Setting user {} online status to: {}", userId, isOnline);
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        log.debug("Current user status: online={}, lastActivity={}",
+                user.getIsOnline(), user.getLastActivity());
 
         user.setIsOnline(isOnline);
         user.setLastActivity(LocalDateTime.now());
@@ -422,8 +426,9 @@ public User getCurrentUserEntity(Authentication authentication) {
             user.setLastSeen(LocalDateTime.now());
         }
 
-        userRepository.save(user);
-        log.debug("User {} status: {}", userId, isOnline ? "ONLINE" : "OFFLINE");
+        User savedUser = userRepository.save(user);
+        log.debug("User {} status updated: online={}, lastActivity={}",
+                userId, savedUser.getIsOnline(), savedUser.getLastActivity());
     }
 
     private String getDisplayLetter(User user) {

@@ -55,6 +55,8 @@ public class SecurityConfig {
                         // API эндпоинты - порядок важен!
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/subscriptions/**").authenticated()
+                        .requestMatchers("/api/users/**").authenticated()
+
                         .requestMatchers("/support/**").authenticated()
 
 

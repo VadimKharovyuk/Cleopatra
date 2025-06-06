@@ -1,6 +1,6 @@
 // **
 // * Универсальный скрипт для управления онлайн статусом
-// * Подключается один раз и работает на всех страницах
+// * Версия БЕЗ CSRF токенов
 // */
 
 (function() {
@@ -22,170 +22,239 @@
     // ===================== ПРОВЕРКА АУТЕНТИФИКАЦИИ =====================
 
     function checkAuthentication() {
-        // Можно проверить по наличию CSRF токена, или другим способом
-        const csrfToken = document.querySelector('meta[name="_csrf"]');
-        const userElement = document.querySelector('[data-user-id]');
+        console.log('🔍 Checking authentication...');
 
-        isUserAuthenticated = !!(csrfToken || userElement);
+        // Ищем признаки аутентификации без CSRF
+        const userElement = document.querySelector('[data-user-id]');
+        const userMenuElement = document.querySelector('.user-menu, .navbar-user, [data-user], .username');
+        const logoutButton = document.querySelector('a[href*="logout"], button[onclick*="logout"]');
+
+        // Проверяем cookies на наличие сессии
+        const hasSessionCookie = document.cookie.includes('JSESSIONID') ||
+            document.cookie.includes('SESSION') ||
+            document.cookie.includes('session');
+
+        // Проверяем URL - если есть /login или /auth, то скорее всего не авторизован
+        const isOnLoginPage = window.location.pathname.includes('/login') ||
+            window.location.pathname.includes('/auth');
+
+        console.log('User element:', userElement);
+        console.log('User menu element:', userMenuElement);
+        console.log('Logout button:', logoutButton);
+        console.log('Has session cookie:', hasSessionCookie);
+        console.log('Is on login page:', isOnLoginPage);
+
+        isUserAuthenticated = !isOnLoginPage && !!(userElement || userMenuElement || logoutButton || hasSessionCookie);
+        console.log('✅ User authenticated:', isUserAuthenticated);
+
         return isUserAuthenticated;
     }
 
     // ===================== HTTP ЗАПРОСЫ =====================
 
     function makeRequest(url, method = 'POST') {
+        console.log(`🌐 Making ${method} request to: ${url}`);
+
         const options = {
             method: method,
             headers: {
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'same-origin' // Важно! Передает cookies с сессией
         };
 
-        // Добавляем CSRF токен если есть
-        const csrfToken = document.querySelector('meta[name="_csrf"]');
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]');
-
-        if (csrfToken && csrfHeader) {
-            options.headers[csrfHeader.getAttribute('content')] = csrfToken.getAttribute('content');
-        }
+        console.log('📤 Request options:', JSON.stringify(options, null, 2));
 
         return fetch(url, options)
             .then(response => {
+                console.log(`📥 Response status: ${response.status} ${response.statusText}`);
+
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.text().then(text => {
+                        console.error(`❌ HTTP error! status: ${response.status}, body: ${text}`);
+                        throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
+                    });
                 }
                 return response.text();
             })
+            .then(data => {
+                console.log('✅ Request successful, response:', data);
+                return data;
+            })
             .catch(error => {
-                console.debug('Online status request failed:', error);
+                console.error('❌ Request failed:', error);
+                // Не выбрасываем ошибку дальше, чтобы не ломать весь скрипт
+                return null;
             });
     }
 
     // ===================== ОСНОВНЫЕ ФУНКЦИИ =====================
 
     function setOnline() {
-        if (!isUserAuthenticated) return;
+        console.log('🟢 Setting user ONLINE...');
+        if (!isUserAuthenticated) {
+            console.warn('⚠️ User not authenticated, skipping setOnline');
+            return;
+        }
 
         makeRequest(CONFIG.ENDPOINTS.ONLINE)
-            .then(() => {
-                console.debug('✅ User set to ONLINE');
-                startPingInterval();
+            .then((result) => {
+                if (result !== null) {
+                    console.log('✅ User set to ONLINE');
+                    startPingInterval();
+                } else {
+                    console.error('❌ Failed to set user ONLINE');
+                }
             });
     }
 
     function setOffline() {
-        if (!isUserAuthenticated) return;
-
-        // Используем sendBeacon для надежности при закрытии страницы
-        if (navigator.sendBeacon) {
-            navigator.sendBeacon(CONFIG.ENDPOINTS.OFFLINE);
-        } else {
-            makeRequest(CONFIG.ENDPOINTS.OFFLINE);
+        console.log('🔴 Setting user OFFLINE...');
+        if (!isUserAuthenticated) {
+            console.warn('⚠️ User not authenticated, skipping setOffline');
+            return;
         }
 
-        console.debug('📴 User set to OFFLINE');
+        // Для надежности при закрытии страницы используем обычный fetch
+        makeRequest(CONFIG.ENDPOINTS.OFFLINE)
+            .then((result) => {
+                if (result !== null) {
+                    console.log('📴 User set to OFFLINE');
+                } else {
+                    console.error('❌ Failed to set user OFFLINE');
+                }
+            });
+
         stopPingInterval();
     }
 
     function ping() {
-        if (!isUserAuthenticated) return;
+        console.log('🏓 Sending ping...');
+        if (!isUserAuthenticated) {
+            console.warn('⚠️ User not authenticated, skipping ping');
+            return;
+        }
 
         makeRequest(CONFIG.ENDPOINTS.PING)
-            .then(() => {
-                console.debug('🏓 Ping sent');
+            .then((result) => {
+                if (result !== null) {
+                    console.log('🏓 Ping sent successfully');
+                } else {
+                    console.error('❌ Ping failed');
+                }
             });
     }
 
     function startPingInterval() {
-        if (pingInterval) return; // Уже запущен
+        if (pingInterval) {
+            console.log('⏰ Ping interval already running');
+            return;
+        }
 
         pingInterval = setInterval(() => {
             ping();
         }, CONFIG.PING_INTERVAL);
 
-        console.debug('⏰ Ping interval started');
+        console.log(`⏰ Ping interval started (every ${CONFIG.PING_INTERVAL / 1000} seconds)`);
     }
 
     function stopPingInterval() {
         if (pingInterval) {
             clearInterval(pingInterval);
             pingInterval = null;
-            console.debug('⏹️ Ping interval stopped');
+            console.log('⏹️ Ping interval stopped');
         }
     }
 
     // ===================== ОБРАБОТЧИКИ СОБЫТИЙ =====================
 
-    // При загрузке страницы
     function onPageLoad() {
+        console.log('📄 Page loaded');
         if (checkAuthentication()) {
             setOnline();
+        } else {
+            console.log('❌ User not authenticated, not setting online');
         }
     }
 
-    // При закрытии страницы
     function onPageUnload() {
+        console.log('📄 Page unloading');
         setOffline();
     }
 
-    // При изменении видимости страницы
     function onVisibilityChange() {
+        console.log('👁️ Visibility changed, hidden:', document.hidden);
         if (!isUserAuthenticated) return;
 
         if (document.hidden) {
-            // Страница скрыта - можно остановить ping (опционально)
-            // stopPingInterval();
+            console.log('👁️ Page hidden');
         } else {
-            // Страница стала видимой - отправляем ping
+            console.log('👁️ Page visible');
             ping();
             startPingInterval();
         }
     }
 
-    // При фокусе/потере фокуса окна
     function onWindowFocus() {
+        console.log('🎯 Window focused');
         if (isUserAuthenticated) {
             ping();
         }
     }
 
     function onWindowBlur() {
-        // Можно ничего не делать или остановить ping
+        console.log('🌫️ Window blurred');
     }
 
     // ===================== ИНИЦИАЛИЗАЦИЯ =====================
 
     function init() {
-        // Проверяем что DOM загружен
+        console.log('🚀 Initializing Online Status Manager (NO CSRF)...');
+
         if (document.readyState === 'loading') {
+            console.log('⏳ DOM still loading, waiting for DOMContentLoaded');
             document.addEventListener('DOMContentLoaded', onPageLoad);
         } else {
+            console.log('✅ DOM ready, calling onPageLoad immediately');
             onPageLoad();
         }
 
         // Обработчики событий
         window.addEventListener('beforeunload', onPageUnload);
-        window.addEventListener('pagehide', onPageUnload);  // Для мобильных
+        window.addEventListener('pagehide', onPageUnload);
         document.addEventListener('visibilitychange', onVisibilityChange);
         window.addEventListener('focus', onWindowFocus);
         window.addEventListener('blur', onWindowBlur);
-
-        // Обработка навигации по SPA (если используете)
         window.addEventListener('popstate', onPageLoad);
 
-        console.debug('🚀 Online status manager initialized');
+        console.log('🚀 Online status manager initialized');
     }
 
     // Запускаем инициализацию
     init();
 
-    // ===================== ГЛОБАЛЬНЫЙ API (опционально) =====================
+    // ===================== ГЛОБАЛЬНЫЙ API =====================
 
-    // Экспортируем функции для ручного управления
     window.OnlineStatus = {
         setOnline: setOnline,
         setOffline: setOffline,
         ping: ping,
-        isActive: () => !!pingInterval
+        isActive: () => !!pingInterval,
+        // Отладочные функции
+        debug: {
+            checkAuth: checkAuthentication,
+            testPing: () => {
+                console.log('🧪 Testing ping manually...');
+                ping();
+            },
+            getConfig: () => CONFIG,
+            getAuthStatus: () => isUserAuthenticated,
+            forceSetOnline: () => {
+                isUserAuthenticated = true;
+                setOnline();
+            }
+        }
     };
 
 })();
