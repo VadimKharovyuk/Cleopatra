@@ -506,19 +506,37 @@
             </a>
 
 
+
             <a href="/notifications"
                class="nav-item"
                th:classappend="${activeSection == 'notifications'} ? 'active' : ''">
-                <i class="fas fa-bell nav-icon"></i>
+                <i class="fas fa-envelope nav-icon"></i>
                 <span class="nav-text">Уведомления</span>
 
-                <!-- 🆕 Badge для непрочитанных уведомлений -->
-                <span class="notification-badge" id="notifications-badge" style="display: none;">0</span>
+                <!-- Badge только для авторизованных пользователей с непрочитанными сообщениями -->
+                <span th:if="${notificationUser != null and notificationUser > 0}"
+                      class="nav-badge"
+                      th:text="${notificationUser > 99 ? '99+' : notificationUser}"
+                      th:title="|${notificationUser} непрочитанных сообщений|">
+        5
+    </span>
             </a>
+
+
+<!--            <a href="/notifications"-->
+<!--               class="nav-item"-->
+<!--               th:classappend="${activeSection == 'notifications'} ? 'active' : ''">-->
+<!--                <i class="fas fa-bell nav-icon"></i>-->
+<!--                <span class="nav-text">Уведомления</span>-->
+
+<!--                &lt;!&ndash; 🆕 Badge для непрочитанных уведомлений &ndash;&gt;-->
+<!--                <span class="notification-badge" id="notifications-badge" style="display: none;">0</span>-->
+<!--            </a>-->
         </div>
 
         <div class="nav-section">
             <div class="nav-section-title">Социальное</div>
+
 
 
             <a href="/messages"
