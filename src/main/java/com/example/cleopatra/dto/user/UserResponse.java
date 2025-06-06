@@ -38,4 +38,7 @@ public class UserResponse {
 
     private LocalDateTime createdAt;
 
+
+    private Boolean isOnline;
+    private LocalDateTime lastSeen;
 }

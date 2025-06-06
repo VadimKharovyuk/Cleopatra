@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -113,4 +114,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u.id FROM User u WHERE u.email = :email")
     Optional<Long> findIdByEmail(@Param("email") String email);
+
+
+    List<User> findByIsOnlineTrue();
+
+    @Query("SELECT u.isOnline FROM User u WHERE u.id = :userId")
+    Optional<Boolean> findOnlineStatusById(@Param("userId") Long userId);
+
+    // ✅ НОВЫЙ МЕТОД: Очистка неактивных пользователей
+    @Modifying
+    @Query("UPDATE User u SET u.isOnline = false, u.lastSeen = u.lastActivity " +
+            "WHERE u.isOnline = true AND u.lastActivity < :threshold")
+    int setOfflineForInactiveUsers(@Param("threshold") LocalDateTime threshold);
 }

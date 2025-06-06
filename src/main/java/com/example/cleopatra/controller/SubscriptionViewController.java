@@ -22,6 +22,7 @@ public class SubscriptionViewController {
 
     private final SubscriptionService subscriptionService;
     private final UserService userService;
+//    private final ActivityTracker activityTracker;
 
     /**
      * Страница со списком подписчиков пользователя
@@ -108,6 +109,8 @@ public class SubscriptionViewController {
                 redirectAttributes.addFlashAttribute("errorMessage", "Произошла ошибка при загрузке страницы");
                 return "redirect:/error";
             }
+            // ✅ Отслеживаем активность
+//            activityTracker.trackActivity(authentication);
 
             // Если пользователь уже в модели, показываем пустой список
             model.addAttribute("followersDto", createEmptySubscriptionsList(page, size));

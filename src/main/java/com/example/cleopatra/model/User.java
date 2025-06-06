@@ -65,6 +65,18 @@ public class User {
     private Long followingCount = 0L;
 
 
+    // Добавить в User entity:
+    @Column(name = "is_online")
+    private Boolean isOnline = false;
+
+    @Column(name = "show_online_status")
+    private Boolean showOnlineStatus = true;
+
+    @Column(name = "last_activity")
+    private LocalDateTime lastActivity;
+
+    @Column(name = "last_seen")
+    private LocalDateTime lastSeen;
 
 
     @Column(name = "city")
@@ -98,6 +110,8 @@ public class User {
     @Column(name = "total_visits")
     @Builder.Default
     private Long totalVisits = 0L;
+
+
 
 
 
@@ -154,4 +168,6 @@ public class User {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+
 }

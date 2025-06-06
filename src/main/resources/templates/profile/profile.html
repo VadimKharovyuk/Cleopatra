@@ -872,7 +872,122 @@
                     <span th:if="${user.city != null and !#strings.isEmpty(user.city)}" th:text="${user.city}"></span>
                     <span th:if="${user.city == null or #strings.isEmpty(user.city)}">Местоположение не указано</span>
                 </div>
+
+                <!-- ✅ РАСШИРЕННЫЙ БЛОК: Детальный онлайн статус -->
+                <div class="meta-item">
+                    <!-- Онлайн с анимацией -->
+                    <div th:if="${user.isOnline}" class="status-container online">
+                        <div class="status-indicator">
+                            <span class="status-dot online-dot"></span>
+                            <i class="fas fa-wifi meta-icon"></i>
+                        </div>
+                        <div class="status-info">
+                            <span class="status-main">Сейчас в сети</span>
+                            <small class="status-sub">Активен</small>
+                        </div>
+                    </div>
+
+                    <!-- Оффлайн с временем -->
+                    <div th:unless="${user.isOnline}" class="status-container offline">
+                        <div class="status-indicator">
+                            <span class="status-dot offline-dot"></span>
+                            <i class="fas fa-clock meta-icon"></i>
+                        </div>
+                        <div class="status-info">
+                <span class="status-main" th:if="${user.lastSeen != null}">
+                    Был в сети
+                </span>
+                            <span class="status-main" th:if="${user.lastSeen == null}">
+                    Неактивен
+                </span>
+                            <small class="status-sub" th:if="${user.lastSeen != null}">
+                                <span th:text="${#temporals.format(user.lastSeen, 'dd MMM yyyy, HH:mm', new java.util.Locale('ru'))}"></span>
+                            </small>
+                            <small class="status-sub" th:if="${user.lastSeen == null}">
+                                Давно не заходил
+                            </small>
+                        </div>
+                    </div>
+                </div>
             </div>
+            <style>
+                .status-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    padding: 0.5rem 0;
+                }
+
+                .status-indicator {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .status-dot {
+                    position: absolute;
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    top: -2px;
+                    right: -2px;
+                }
+
+                .online-dot {
+                    background: #10b981;
+                    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+                    animation: pulse-dot 2s infinite;
+                }
+
+                .offline-dot {
+                    background: #6b7280;
+                }
+
+                .status-info {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.2rem;
+                }
+
+                .status-main {
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                }
+
+                .status-container.online .status-main {
+                    color: #10b981;
+                }
+
+                .status-container.offline .status-main {
+                    color: #374151;
+                }
+
+                .status-sub {
+                    font-size: 0.8rem;
+                    color: #6b7280;
+                }
+
+                /* Анимации */
+                @keyframes pulse-dot {
+                    0% {
+                        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+                    }
+                    50% {
+                        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.1);
+                    }
+                    100% {
+                        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+                    }
+                }
+
+                /* Темная тема (если используете) */
+                @media (prefers-color-scheme: dark) {
+                    .status-container.offline .status-main {
+                        color: #d1d5db;
+                    }
+                }
+            </style>
 
 
             <!-- Stats Section с правильными ссылками -->
@@ -996,7 +1111,8 @@
                         </div>
 
                         <!-- Информация о лайках (новый блок) -->
-                        <div class="post-likes-info" th:if="${post.recentLikes != null and !post.recentLikes.empty and post.likesCount > 0}">
+                        <div class="post-likes-info"
+                             th:if="${post.recentLikes != null and !post.recentLikes.empty and post.likesCount > 0}">
                             <div class="likes-avatars">
                                 <!-- Показываем аватары последних пользователей, которые лайкнули -->
                                 <div class="like-avatar" th:each="likeUser, iterStat : ${post.recentLikes}"
@@ -1559,8 +1675,12 @@
             }
 
             @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
             }
 
             .share-btn:hover {
@@ -1875,8 +1995,6 @@
         </style>
 
 
-
-
     </div>
 </main>
 
@@ -1941,11 +2059,11 @@
                             <span th:text="${recommendation.followersCount}">150</span> подписчиков
                         </p>
                     </div>
-<!--                    <button class="btn-follow"-->
-<!--                            th:data-user-id="${recommendation.id}"-->
-<!--                            th:text="${recommendation.isFollowing ? 'Читаю' : 'Читать'}">-->
-<!--                        Читать-->
-<!--                    </button>-->
+                    <!--                    <button class="btn-follow"-->
+                    <!--                            th:data-user-id="${recommendation.id}"-->
+                    <!--                            th:text="${recommendation.isFollowing ? 'Читаю' : 'Читать'}">-->
+                    <!--                        Читать-->
+                    <!--                    </button>-->
                 </div>
             </div>
 
@@ -2099,6 +2217,7 @@
 
 <script th:src="@{/js/profile/postNotificationLike.js}"></script>
 
+<script th:src="@{/js/online-status.js}"></script>
 
 </body>
 </html>

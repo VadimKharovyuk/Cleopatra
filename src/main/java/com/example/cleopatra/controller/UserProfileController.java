@@ -35,8 +35,9 @@ public class UserProfileController {
     private final ImageValidator imageValidator;
     private final SubscriptionService subscriptionService;
     private final VisitService visitService;
-    private final  IpAddressService ipAddressService;
+    private final IpAddressService ipAddressService;
     private final PostService postService;
+//    private final ActivityTracker activityTracker;
 
 
     @GetMapping("/{userId}")
@@ -57,8 +58,6 @@ public class UserProfileController {
             model.addAttribute("posts", userPosts);
             model.addAttribute("currentPage", page);
             model.addAttribute("pageSize", size);
-
-
 
 
             // Обрабатываем данные текущего пользователя
@@ -92,6 +91,9 @@ public class UserProfileController {
                 model.addAttribute("isOwnProfile", false);
             }
 
+//            // ✅ Отслеживаем активность
+//            activityTracker.trackActivity(authentication);
+
             return "profile/profile";
 
         } catch (Exception e) {
@@ -117,7 +119,6 @@ public class UserProfileController {
             return ResponseEntity.badRequest().build();
         }
     }
-
 
 
     @GetMapping("/{userId}/edit")

@@ -7,6 +7,7 @@ import com.example.cleopatra.service.UserService;
 import com.example.cleopatra.service.VisitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Var;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,6 +30,7 @@ public class ProfileViewController {
 
     private final VisitService visitService;
     private final UserService userService;
+//    private final ActivityTracker activityTracker;
 
 
     @GetMapping()
@@ -115,6 +117,11 @@ public class ProfileViewController {
             }
 
             model.addAttribute("visitStats", visitStats);
+
+
+//            // ✅ Отслеживаем активность
+//            activityTracker.trackActivity(authentication);
+            System.out.println();
 
             // Добавляем варианты периодов для фильтра
             Map<Integer, String> periodOptions = new LinkedHashMap<>();

@@ -262,13 +262,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
-//    @Override
-//    public User getCurrentUserEntity() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String userEmail = authentication.getName();
-//        return userRepository.findByEmail(userEmail)
-//                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
-//    }
+
 @Override
 public User getCurrentUserEntity() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -279,16 +273,6 @@ public User getCurrentUserEntity() {
             .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 }
 
-//    @Override
-//    public User getCurrentUserEntity(Authentication authentication) {
-//        if (authentication == null || !authentication.isAuthenticated()) {
-//            throw new RuntimeException("Пользователь не авторизован");
-//        }
-//
-//        String email = authentication.getName();
-//        return userRepository.findByEmail(email)
-//                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + email));
-//    }
 @Override
 public User getCurrentUserEntity(Authentication authentication) {
     if (authentication == null || !authentication.isAuthenticated()) {
@@ -339,8 +323,8 @@ public User getCurrentUserEntity(Authentication authentication) {
      * Получить онлайн статус пользователя
      */
     public boolean isUserOnline(Long userId) {
-        return onlineStatusRepository.findByUserId(userId)
-                .map(status -> status.getIsOnline() != null && status.getIsOnline())
+        return userRepository.findById(userId)
+                .map(User::getIsOnline)
                 .orElse(false);
     }
 
@@ -353,7 +337,29 @@ public User getCurrentUserEntity(Authentication authentication) {
                 .orElse("статус неизвестен");
     }
 
+    /**
+     * Обновить время последней активности
+     */
+    @Transactional
+    public void updateLastActivity(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        user.setLastActivity(LocalDateTime.now());
+        user.setIsOnline(true);  // ✅ ДОБАВИТЬ ЭТУ СТРОКУ!
+
+        userRepository.save(user);
+        log.debug("⏰ Updated activity and set online for user {}", userId);
+    }
+    /**
+     * Получить пользователей онлайн
+     */
+    public List<UserResponse> getOnlineUsers() {
+        List<User> onlineUsers = userRepository.findByIsOnlineTrue();
+        return onlineUsers.stream()
+                .map(userMapper::toResponse)
+                .toList();
+    }
 
 
 
@@ -401,6 +407,23 @@ public User getCurrentUserEntity(Authentication authentication) {
     public Long getUserIdByEmail(String email) {
         return userRepository.findIdByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Пользователь с email " + email + " не найден"));
+    }
+
+    @Override
+    @Transactional
+    public void setUserOnline(Long userId, boolean isOnline) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setIsOnline(isOnline);
+        user.setLastActivity(LocalDateTime.now());
+
+        if (!isOnline) {
+            user.setLastSeen(LocalDateTime.now());
+        }
+
+        userRepository.save(user);
+        log.debug("User {} status: {}", userId, isOnline ? "ONLINE" : "OFFLINE");
     }
 
     private String getDisplayLetter(User user) {

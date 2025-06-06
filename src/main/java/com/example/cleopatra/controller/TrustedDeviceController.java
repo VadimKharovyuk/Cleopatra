@@ -2,6 +2,7 @@ package com.example.cleopatra.controller;
 
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.repository.UserRepository;
+
 import com.example.cleopatra.service.TrustedDeviceService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class TrustedDeviceController {
 
     private final TrustedDeviceService trustedDeviceService;
     private final UserRepository userRepository;
+//    private final ActivityTracker activityTracker;
 
 
     @GetMapping("/test")
@@ -55,6 +57,8 @@ public class TrustedDeviceController {
 
             model.addAttribute("devices", devices);
             model.addAttribute("devicesCount", devices.size());
+//
+//            activityTracker.trackActivity(authentication);
 
             return "devices/manage";
 

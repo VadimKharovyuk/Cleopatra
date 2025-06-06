@@ -45,6 +45,9 @@ public class UserMapper {
         response.setCity(user.getCity());
 
         response.setCreatedAt(user.getCreatedAt());
+
+        response.setIsOnline(user.getIsOnline());
+        response.setLastSeen(user.getLastSeen());
         return response;
     }
 

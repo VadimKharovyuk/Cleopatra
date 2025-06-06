@@ -8,6 +8,8 @@ import com.example.cleopatra.model.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 public interface UserService {
 
     UserResponse createUser(RegisterDto  registerDto);
@@ -51,4 +53,11 @@ public interface UserService {
 
 
     Long getUserIdByEmail(String email);
+
+    void setUserOnline(Long userId, boolean isOnline);
+    List<UserResponse> getOnlineUsers();
+
+
+
+    void updateLastActivity(Long userId);
 }
