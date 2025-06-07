@@ -12,14 +12,13 @@ import java.util.List;
 
 public interface UserService {
 
-    UserResponse createUser(RegisterDto  registerDto);
+    UserResponse createUser(RegisterDto registerDto);
 
     // Только загрузка/обновление аватара
- UserResponse uploadAvatar(Long userId, MultipartFile file) ;
+    UserResponse uploadAvatar(Long userId, MultipartFile file);
 
 
-
-  UserResponse updateProfile(Long userId, UpdateProfileDto profileDto);
+    UserResponse updateProfile(Long userId, UpdateProfileDto profileDto);
 
 
     UserResponse getUserById(Long userId);
@@ -33,11 +32,13 @@ public interface UserService {
     UserResponse deleteAvatar(Long userId);
 
     UserResponse uploadBackgroundImage(Long userId, MultipartFile file);
+
     UserResponse deleteBackgroundImage(Long userId);
 
     UserResponse getUserByEmail(String userEmail);
 
     User getCurrentUserEntity();
+
     User getCurrentUserEntity(Authentication authentication);
 
 
@@ -55,15 +56,14 @@ public interface UserService {
     Long getUserIdByEmail(String email);
 
     void setUserOnline(Long userId, boolean isOnline);
-    List<UserResponse> getOnlineUsers();
 
+    List<UserResponse> getOnlineUsers();
 
 
     void updateLastActivity(Long userId);
 
-  // Метод для обновления настроек уведомлений
-void updateNotificationSettings(Long userId, Boolean receiveVisitNotifications);
-
+    // Метод для обновления настроек уведомлений
+    void updateNotificationSettings(Long userId, Boolean receiveVisitNotifications);
 
 
 }
