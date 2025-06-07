@@ -283,6 +283,7 @@ public class GameService {
         Optional<GameSession> activeSession = gameSessionRepository
                 .findByPlayerAndGameStatus(user, GameStatus.IN_PROGRESS);
 
+
         if (activeSession.isEmpty()) {
             return Optional.empty();
         }
