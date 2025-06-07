@@ -5,6 +5,7 @@ import com.example.cleopatra.enums.NotificationType;
 import com.example.cleopatra.model.Notification;
 import com.example.cleopatra.model.User;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -210,18 +211,23 @@ public class NotificationMapper {
      */
     private String getActorImageUrl(Notification notification) {
         if (notification == null || notification.getActor() == null) {
-            return null; // Или путь к дефолтной аватарке системы
+            return null;
         }
 
         try {
+            // 🔥 Проверяем, инициализирован ли прокси
+            if (!Hibernate.isInitialized(notification.getActor())) {
+                log.warn("⚠️ Actor not initialized for notification: {}", notification.getId());
+                return null;
+            }
+
             String imageUrl = notification.getActor().getImageUrl();
 
-            // Проверяем что URL не пустой
             if (imageUrl != null && !imageUrl.trim().isEmpty()) {
                 return imageUrl.trim();
             }
 
-            return null; // Frontend подставит дефолтную аватарку
+            return null;
 
         } catch (Exception e) {
             log.warn("⚠️ Error getting actor image URL for notification: {}", notification.getId(), e);

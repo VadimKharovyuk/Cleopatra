@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
+
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;

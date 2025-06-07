@@ -6,6 +6,7 @@ import com.example.cleopatra.model.User;
 import com.example.cleopatra.repository.NotificationRepository;
 import com.example.cleopatra.dto.Notification.NotificationDto;
 import com.example.cleopatra.maper.NotificationMapper;
+import com.example.cleopatra.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -25,10 +26,12 @@ public class NotificationEventListener {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
      private final NotificationWebSocketHandler notificationWebSocketHandler;
+    private final NotificationService notificationService;
 
 
     @EventListener
     @Async
+    @Transactional(readOnly = true)
     public void handleNotificationCreated(NotificationCreatedEvent event) {
         log.info("🎉 EVENT RECEIVED: NotificationCreatedEvent for ID: {} to recipient: {}",
                 event.getNotificationId(), event.getRecipientId());
@@ -71,7 +74,7 @@ public class NotificationEventListener {
                     scheduleRetryNotification(event.getNotificationId(), event.getRecipientId(), dto);
                 } else {
                     log.info("💤 User {} is offline, notification will be delivered when online", event.getRecipientId());
-                    // Уведомление останется в БД как неотправленное
+
                 }
             }
 
@@ -82,6 +85,30 @@ public class NotificationEventListener {
             e.printStackTrace();
         }
     }
+
+
+
+    @EventListener
+    @Async
+    public void handlePostLiked(PostLikedEvent event) {
+        log.info("🎉 EVENT RECEIVED: PostLikedEvent for post: {} by user: {}",
+                event.getPostId(), event.getLikerUserId());
+
+        try {
+            notificationService.createLikeNotification(
+                    event.getPostAuthorId(), // кому
+                    event.getLikerUserId(),   // кто
+                    event.getPostId(),        // какой пост
+                    event.getPostTitle()      // название поста
+            );
+
+            log.info("✅ Like notification created successfully for post: {}", event.getPostId());
+        } catch (Exception e) {
+            log.error("❌ Error creating like notification for post: {}", event.getPostId(), e);
+        }
+    }
+
+
 
     /**
      * Планирует повторную отправку уведомления
@@ -110,45 +137,10 @@ public class NotificationEventListener {
         });
     }
 
-//    @EventListener
-//    @Async
-//    public void handleNotificationCreated(NotificationCreatedEvent event) {
-//        log.info("🎉 EVENT RECEIVED: NotificationCreatedEvent for ID: {} to recipient: {}",
-//                event.getNotificationId(), event.getRecipientId());
-//
-//        try {
-//            // Загружаем уведомление с eager loading
-//            Notification notification = notificationRepository.findByIdWithUsers(event.getNotificationId())
-//                    .orElse(null);
-//
-//            if (notification == null) {
-//                log.warn("⚠️ Notification not found: {}", event.getNotificationId());
-//                return;
-//            }
-//
-//            log.info("📋 Found notification: title={}", notification.getTitle());
-//
-//            // Преобразуем в DTO
-//            NotificationDto dto = notificationMapper.toWebSocketDto(notification);
-//            log.info("📤 Sending to WebSocket handler for user: {}", event.getRecipientId());
-//
-//            // 🔧 ИСПОЛЬЗУЕМ ID ИЗ СОБЫТИЯ
-//            notificationWebSocketHandler.sendNotificationToUser(
-//                    event.getRecipientId(), // 🔧 Используем ID из события
-//                    dto
-//            );
-//
-//            // Помечаем как отправленное в отдельной транзакции
-//            updateNotificationAsSent(event.getNotificationId());
-//
-//            log.info("✅ Notification processing completed for user: {}", event.getRecipientId());
-//
-//        } catch (Exception e) {
-//            log.error("❌ Error in event listener for notification: {}", event.getNotificationId(), e);
-//            e.printStackTrace();
-//        }
-//    }
-//
+
+
+
+
     @Transactional
     public void updateNotificationAsSent(Long notificationId) {
         notificationRepository.findById(notificationId).ifPresent(notification -> {
