@@ -9,6 +9,7 @@ import com.example.cleopatra.maper.NotificationMapper;
 import com.example.cleopatra.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -51,6 +52,14 @@ public class NotificationEventListener {
             // Преобразуем в DTO
             NotificationDto dto = notificationMapper.toWebSocketDto(notification);
 
+
+            // 🔥 ПРИНУДИТЕЛЬНО ИНИЦИАЛИЗИРУЕМ ВСЕ СВЯЗИ
+            Hibernate.initialize(notification.getRecipient());
+            if (notification.getActor() != null) {
+                Hibernate.initialize(notification.getActor());
+            }
+
+
             // 🔧 ПОПЫТКА ОТПРАВКИ ЧЕРЕЗ WEBSOCKET
             boolean sentViaWebSocket = notificationWebSocketHandler.sendNotificationToUser(
                     event.getRecipientId(),
@@ -86,6 +95,27 @@ public class NotificationEventListener {
         }
     }
 
+
+    @EventListener
+    @Async
+    public void handleSubscriptionCreated(SubscriptionCreatedEvent event) {
+        log.info("🎉 EVENT RECEIVED: SubscriptionCreatedEvent - {} subscribed to {}",
+                event.getSubscriberId(), event.getSubscribedToId());
+
+        try {
+            // Используем ваш существующий метод
+            notificationService.createFollowNotification(
+                    event.getSubscribedToId(), // кому (на кого подписались)
+                    event.getSubscriberId()    // кто (кто подписался)
+            );
+
+            log.info("✅ Follow notification created successfully: {} → {}",
+                    event.getSubscriberId(), event.getSubscribedToId());
+        } catch (Exception e) {
+            log.error("❌ Error creating follow notification: {} → {}",
+                    event.getSubscriberId(), event.getSubscribedToId(), e);
+        }
+    }
 
 
     @EventListener

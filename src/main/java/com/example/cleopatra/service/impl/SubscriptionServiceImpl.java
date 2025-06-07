@@ -1,5 +1,6 @@
 package com.example.cleopatra.service.impl;
 
+import com.example.cleopatra.EVENT.SubscriptionCreatedEvent;
 import com.example.cleopatra.dto.SubscriptionDto.UserSubscriptionCard;
 import com.example.cleopatra.dto.SubscriptionDto.UserSubscriptionDto;
 import com.example.cleopatra.dto.SubscriptionDto.UserSubscriptionListDto;
@@ -11,6 +12,7 @@ import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,14 +28,19 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class SubscriptionServiceImpl  implements SubscriptionService {
+public class SubscriptionServiceImpl implements SubscriptionService {
+
 
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
- private final UserSubscriptionMapper subscriptionMapper ;
+    private final UserSubscriptionMapper subscriptionMapper;
+    private final ApplicationEventPublisher eventPublisher;
+
+
+
 
     @Override
-    @Transactional  // ← Обязательно добавь это!
+    @Transactional
     public boolean subscribe(Long subscriberId, Long subscribedToId) {
         try {
             // Проверяем, что пользователи разные
@@ -58,6 +65,13 @@ public class SubscriptionServiceImpl  implements SubscriptionService {
             Subscription subscription = new Subscription(subscriber, subscribedTo);
             subscriptionRepository.save(subscription);
 
+            // 🔥 ПУБЛИКУЕМ СОБЫТИЕ О ПОДПИСКЕ
+            String subscriberName = getFullName(subscriber); // если у вас есть этот метод
+            eventPublisher.publishEvent(new SubscriptionCreatedEvent(
+                    subscriberId,
+                    subscribedToId,
+                    subscriberName
+            ));
             // Обновляем счетчики
             updateSubscriptionCounts(subscriberId, subscribedToId);
 
@@ -68,6 +82,17 @@ public class SubscriptionServiceImpl  implements SubscriptionService {
             log.error("Ошибка при подписке {} на {}: {}", subscriberId, subscribedToId, e.getMessage(), e);
             return false;
         }
+    }
+    // 🔥 Добавить метод если его нет
+    private String getFullName(User user) {
+        if (user.getFirstName() != null && user.getLastName() != null) {
+            return user.getFirstName() + " " + user.getLastName();
+        } else if (user.getFirstName() != null) {
+            return user.getFirstName();
+        } else if (user.getFirstName() != null) {
+            return user.getLastName();
+        }
+        return "Пользователь";
     }
 
     @Override
@@ -171,7 +196,6 @@ public class SubscriptionServiceImpl  implements SubscriptionService {
     }
 
 
-
     @Override
     public UserSubscriptionListDto getSubscriptions(Long userId, Pageable pageable) {
         try {
@@ -193,7 +217,6 @@ public class SubscriptionServiceImpl  implements SubscriptionService {
 
             log.debug("Найдено {} подписок на странице {} для пользователя {}",
                     cards.size(), pageable.getPageNumber(), userId);
-
 
 
             // Строим итоговый DTO с пагинацией через Slice
