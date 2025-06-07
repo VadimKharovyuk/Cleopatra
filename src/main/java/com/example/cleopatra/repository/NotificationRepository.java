@@ -4,6 +4,7 @@ package com.example.cleopatra.repository;
 import com.example.cleopatra.enums.NotificationType;
 import com.example.cleopatra.model.Notification;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -64,4 +65,87 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             "AND r.isOnline = true " +
             "ORDER BY n.createdAt ASC")
     List<Notification> findPendingNotificationsForOnlineUsers();
+
+
+    /**
+     * Находит неотправленные уведомления для онлайн пользователей с лимитом
+     */
+    @Query("SELECT n FROM Notification n " +
+            "LEFT JOIN FETCH n.actor " +
+            "LEFT JOIN FETCH n.recipient " +
+            "WHERE n.isSent = false " +
+            "AND n.recipient.isOnline = true " +
+            "ORDER BY n.createdAt ASC")
+    List<Notification> findPendingNotificationsForOnlineUsersWithLimit(Pageable pageable);
+
+
+    /**
+     * Batch-пометка уведомлений как прочитанных
+     */
+    @Modifying
+    @Query("UPDATE Notification n SET n.isRead = true, n.readAt = :readAt " +
+            "WHERE n.id IN :notificationIds AND n.recipient.id = :recipientId")
+    int markNotificationsAsReadBatch(@Param("notificationIds") List<Long> notificationIds,
+                                     @Param("recipientId") Long recipientId,
+                                     @Param("readAt") LocalDateTime readAt);
+
+    /**
+     * Batch-удаление старых уведомлений
+     */
+    @Modifying
+    @Query("DELETE FROM Notification n " +
+            "WHERE n.isSent = false " +
+            "AND n.createdAt < :cutoffDate")
+    int deleteOldPendingNotifications(@Param("cutoffDate") LocalDateTime cutoffDate);
+
+    /**
+     * Находит неотправленные уведомления конкретного пользователя
+     */
+    @Query("SELECT n FROM Notification n " +
+            "LEFT JOIN FETCH n.actor " +
+            "WHERE n.recipient.id = :recipientId " +
+            "AND n.isSent = false " +
+            "ORDER BY n.createdAt DESC")
+    List<Notification> findPendingNotificationsByRecipient(@Param("recipientId") Long recipientId);
+
+    /**
+     * Удобный метод с лимитом
+     */
+    default List<Notification> findPendingNotificationsForOnlineUsersWithLimit(int limit) {
+        return findPendingNotificationsForOnlineUsersWithLimit(PageRequest.of(0, limit));
+    }
+
+
+
+    /**
+     * Batch-обновление статуса уведомлений как отправленных
+     */
+    @Modifying
+    @Query("UPDATE Notification n SET n.isSent = true, n.sentAt = :sentAt " +
+            "WHERE n.id IN :notificationIds")
+    int updateNotificationsAsSent(@Param("notificationIds") List<Long> notificationIds,
+                                  @Param("sentAt") LocalDateTime sentAt);
+
+    /**
+     * Подсчет всех необработанных уведомлений
+     */
+    @Query("SELECT COUNT(n) FROM Notification n WHERE n.isSent = false")
+    long countPendingNotifications();
+
+    /**
+     * Подсчет необработанных уведомлений для онлайн пользователей
+     */
+    @Query("SELECT COUNT(n) FROM Notification n " +
+            "WHERE n.isSent = false AND n.recipient.isOnline = true")
+    long countPendingNotificationsForOnlineUsers();
+
+    /**
+     * Находит старые неотправленные уведомления (для очистки)
+     */
+    @Query("SELECT n FROM Notification n " +
+            "WHERE n.isSent = false " +
+            "AND n.createdAt < :cutoffDate")
+    List<Notification> findOldPendingNotifications(@Param("cutoffDate") LocalDateTime cutoffDate);
+
+
 }

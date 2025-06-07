@@ -11,11 +11,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -65,53 +68,198 @@ public class UserActivityScheduler {
 
 
 
-    /**
-     * Отправляет накопившиеся уведомления пользователям когда они приходят онлайн
-     */
-    @Scheduled(fixedRate = 60000) // Каждую минуту
-    public void sendPendingNotifications() {
-        log.debug("🔄 Checking for pending notifications...");
+        private static final int BATCH_SIZE = 100; // Размер пачки
+        private static final int MAX_RETRIES = 3;
 
-        try {
-            // Находим неотправленные уведомления для онлайн пользователей
-            List<Notification> pendingNotifications = notificationRepository.findPendingNotificationsForOnlineUsers();
+        /**
+         * Отправляет накопившиеся уведомления батчами
+         */
+        @Scheduled(fixedRate = 60000) // Каждую минуту
+        public void sendPendingNotificationsBatch() {
+            log.debug("🔄 Starting batch notification processing...");
 
-            if (!pendingNotifications.isEmpty()) {
-                log.info("📦 Found {} pending notifications for online users", pendingNotifications.size());
+            try {
+                int processedTotal = 0;
+                int batchNumber = 1;
 
-                for (Notification notification : pendingNotifications) {
-                    try {
-                        Long recipientId = notification.getRecipient().getId();
+                List<Notification> batch;
+                do {
+                    // Получаем очередную пачку уведомлений
+                    batch = notificationRepository.findPendingNotificationsForOnlineUsersWithLimit(BATCH_SIZE);
 
-                        // Проверяем что пользователь подключен к WebSocket
-                        if (notificationWebSocketHandler.isUserConnected(recipientId)) {
-                            NotificationDto dto = notificationMapper.toWebSocketDto(notification);
+                    if (!batch.isEmpty()) {
+                        log.info("📦 Processing batch {} with {} notifications", batchNumber, batch.size());
 
-                            boolean sent = notificationWebSocketHandler.sendNotificationToUser(recipientId, dto);
-                            if (sent) {
-                                updateNotificationAsSent(notification.getId());
-                                log.info("📤 Delivered pending notification {} to user {}", notification.getId(), recipientId);
+                        int processedInBatch = processBatch(batch);
+                        processedTotal += processedInBatch;
+
+                        log.info("✅ Batch {} completed: {}/{} notifications sent",
+                                batchNumber, processedInBatch, batch.size());
+                        batchNumber++;
+                    }
+
+                } while (batch.size() == BATCH_SIZE); // Продолжаем пока пачка полная
+
+                if (processedTotal > 0) {
+                    log.info("🎉 Batch processing completed: {} total notifications processed", processedTotal);
+                }
+
+            } catch (Exception e) {
+                log.error("❌ Error in batch notification processing", e);
+            }
+        }
+
+        /**
+         * Обрабатывает одну пачку уведомлений
+         */
+        private int processBatch(List<Notification> notifications) {
+            // Группируем уведомления по получателям для оптимизации WebSocket соединений
+            Map<Long, List<Notification>> notificationsByRecipient = notifications.stream()
+                    .collect(Collectors.groupingBy(n -> n.getRecipient().getId()));
+
+            List<Long> successfullyProcessedIds = new ArrayList<>();
+            int sentCount = 0;
+
+            for (Map.Entry<Long, List<Notification>> entry : notificationsByRecipient.entrySet()) {
+                Long recipientId = entry.getKey();
+                List<Notification> userNotifications = entry.getValue();
+
+                try {
+                    if (notificationWebSocketHandler.isUserConnected(recipientId)) {
+                        // Отправляем все уведомления пользователю одной пачкой
+                        List<NotificationDto> dtos = userNotifications.stream()
+                                .map(notificationMapper::toWebSocketDto)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toList());
+
+                        if (!dtos.isEmpty()) {
+                            boolean allSent = sendNotificationBatchToUser(recipientId, dtos);
+
+                            if (allSent) {
+                                // Добавляем ID успешно отправленных уведомлений
+                                userNotifications.stream()
+                                        .map(Notification::getId)
+                                        .forEach(successfullyProcessedIds::add);
+                                sentCount += userNotifications.size();
+
+                                log.debug("📤 Sent {} notifications to user {}", userNotifications.size(), recipientId);
                             }
                         }
-
-                    } catch (Exception e) {
-                        log.error("❌ Error sending pending notification: {}", notification.getId(), e);
+                    } else {
+                        log.debug("👤 User {} is not connected, skipping {} notifications",
+                                recipientId, userNotifications.size());
                     }
+
+                } catch (Exception e) {
+                    log.error("❌ Error processing notifications for user {}: {}", recipientId, e.getMessage());
                 }
             }
 
+            // Batch-обновление статуса отправленных уведомлений
+            if (!successfullyProcessedIds.isEmpty()) {
+                updateNotificationsAsSentBatch(successfullyProcessedIds);
+            }
+
+            return sentCount;
+        }
+
+        /**
+         * Отправляет пачку уведомлений одному пользователю
+         */
+        private boolean sendNotificationBatchToUser(Long recipientId, List<NotificationDto> notifications) {
+            try {
+                // Можно отправить либо по одному, либо одним сообщением с массивом
+
+                // Вариант 1: По одному (текущий подход)
+                boolean allSent = true;
+                for (NotificationDto dto : notifications) {
+                    boolean sent = notificationWebSocketHandler.sendNotificationToUser(recipientId, dto);
+                    if (!sent) {
+                        allSent = false;
+                        break;
+                    }
+                }
+                return allSent;
+
+                // Вариант 2: Одним сообщением (если ваш WebSocket поддерживает)
+                // return notificationWebSocketHandler.sendNotificationBatchToUser(recipientId, notifications);
+
+            } catch (Exception e) {
+                log.error("❌ Error sending notification batch to user {}", recipientId, e);
+                return false;
+            }
+        }
+
+    /**
+     * Batch-обновление статуса уведомлений как отправленных
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW) // Новая транзакция
+    public void updateNotificationsAsSentBatch(List<Long> notificationIds) {
+        if (notificationIds.isEmpty()) {
+            return;
+        }
+
+        try {
+            LocalDateTime sentAt = LocalDateTime.now();
+
+            // Batch-обновление одним запросом
+            int updated = notificationRepository.updateNotificationsAsSent(notificationIds, sentAt);
+
+            log.debug("✅ Marked {} notifications as sent in batch", updated);
+
         } catch (Exception e) {
-            log.error("❌ Error in sendPendingNotifications", e);
+            log.error("❌ Error updating notifications as sent in batch", e);
+
+            // Fallback: обновляем по одному
+            fallbackUpdateNotifications(notificationIds);
         }
     }
-    @Transactional
-    public void updateNotificationAsSent(Long notificationId) {
-        notificationRepository.findById(notificationId).ifPresent(notification -> {
-            notification.setIsSent(true);
-            notification.setSentAt(LocalDateTime.now());
-            notificationRepository.save(notification);
-            log.debug("✅ Marked notification {} as sent", notificationId);
-        });
+
+    /**
+     * Резервное обновление по одному (если batch не сработал)
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW) // Новая транзакция
+    public void fallbackUpdateNotifications(List<Long> notificationIds) {
+        LocalDateTime sentAt = LocalDateTime.now();
+
+        for (Long id : notificationIds) {
+            try {
+                notificationRepository.findById(id).ifPresent(notification -> {
+                    notification.setIsSent(true);
+                    notification.setSentAt(sentAt);
+                    notificationRepository.save(notification);
+                });
+            } catch (Exception e) {
+                log.error("❌ Error updating notification {} in fallback", id, e);
+            }
+        }
+
+        log.warn("⚠️ Used fallback update for {} notifications", notificationIds.size());
     }
-}
+
+
+        /**
+         * Получение статистики необработанных уведомлений
+         */
+        @Transactional(readOnly = true)
+        public Map<String, Object> getPendingNotificationsStats() {
+            try {
+                long totalPending = notificationRepository.countPendingNotifications();
+                long pendingForOnlineUsers = notificationRepository.countPendingNotificationsForOnlineUsers();
+
+                Map<String, Object> stats = new HashMap<>();
+                stats.put("totalPending", totalPending);
+                stats.put("pendingForOnlineUsers", pendingForOnlineUsers);
+                stats.put("batchSize", BATCH_SIZE);
+                stats.put("estimatedBatches", (pendingForOnlineUsers + BATCH_SIZE - 1) / BATCH_SIZE);
+
+                return stats;
+
+            } catch (Exception e) {
+                log.error("❌ Error getting pending notifications stats", e);
+                return Map.of("error", e.getMessage());
+            }
+        }
+    }
+
 
