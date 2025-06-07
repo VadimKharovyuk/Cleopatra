@@ -16,7 +16,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +37,9 @@ public class GameService {
     /**
      * Начать новую игру
      */
+    private final Map<Long, Question> currentQuestionCache = new ConcurrentHashMap<>();
+
+    // Измените метод startNewGame:
     public GameSessionResponse startNewGame(User user) {
         // Завершаем активную игру если есть
         finishActiveGame(user);
@@ -56,6 +61,10 @@ public class GameService {
         if (question == null) {
             throw new RuntimeException("Не удалось получить вопрос");
         }
+
+        // КЭШИРУЕМ ТЕКУЩИЙ ВОПРОС
+        currentQuestionCache.put(gameSession.getId(), question);
+        log.info("Cached question for session {}: {}", gameSession.getId(), question.getQuestionText());
 
         return GameSessionResponse.builder()
                 .sessionId(gameSession.getId())
@@ -180,11 +189,30 @@ public class GameService {
         return (int) ChronoUnit.SECONDS.between(session.getStartedAt(), LocalDateTime.now());
     }
 
+
     private boolean isTimeExpired(GameSession session) {
-        // Упрощенная проверка - в реальности нужно отслеживать время начала каждого вопроса
-        long secondsSinceStart = ChronoUnit.SECONDS.between(session.getStartedAt(), LocalDateTime.now());
-        long expectedTime = (session.getCurrentQuestionNumber() - 1) * TIME_LIMIT_SECONDS;
-        return secondsSinceStart > expectedTime + TIME_LIMIT_SECONDS;
+        LocalDateTime now = LocalDateTime.now();
+        long secondsSinceStart = ChronoUnit.SECONDS.between(session.getStartedAt(), now);
+        long expectedTime = (long) (session.getCurrentQuestionNumber() - 1) * TIME_LIMIT_SECONDS;
+        long timeOnCurrentQuestion = secondsSinceStart - expectedTime;
+
+        // Даем 60 секунд на каждый вопрос вместо 30 - этого достаточно для комфортной игры
+        boolean expired = timeOnCurrentQuestion > 60;
+
+        // ПОДРОБНОЕ ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ
+        log.info("=== TIME CHECK DEBUG ===");
+        log.info("Session ID: {}", session.getId());
+        log.info("Session started at: {}", session.getStartedAt());
+        log.info("Current time: {}", now);
+        log.info("Seconds since start: {}", secondsSinceStart);
+        log.info("Current question number: {}", session.getCurrentQuestionNumber());
+        log.info("Expected time for previous questions: {}", expectedTime);
+        log.info("Time on current question: {}", timeOnCurrentQuestion);
+        log.info("Time limit: 60 seconds");
+        log.info("Is expired: {}", expired);
+        log.info("========================");
+
+        return expired;
     }
 
     private GameSessionResponse handleTimeExpired(GameSession session) {
@@ -260,21 +288,35 @@ public class GameService {
         }
 
         GameSession session = activeSession.get();
-        Question currentQuestion = getQuestionForLevel(session.getCurrentQuestionNumber());
+
+        // ПОЛУЧАЕМ ВОПРОС ИЗ КЭША
+        Question currentQuestion = currentQuestionCache.get(session.getId());
 
         if (currentQuestion == null) {
-            // Если не удалось получить вопрос, завершаем игру
-            session.setGameStatus(GameStatus.FAILED);
-            session.setFinishedAt(LocalDateTime.now());
-            gameSessionRepository.save(session);
-            return Optional.empty();
+            log.warn("No cached question for session {}, loading new question", session.getId());
+            // Если вопроса нет в кэше, загружаем и кэшируем
+            currentQuestion = getQuestionForLevel(session.getCurrentQuestionNumber());
+
+            if (currentQuestion == null) {
+                // Если не удалось получить вопрос, завершаем игру
+                session.setGameStatus(GameStatus.FAILED);
+                session.setFinishedAt(LocalDateTime.now());
+                gameSessionRepository.save(session);
+                return Optional.empty();
+            }
+
+            // Кэшируем вопрос
+            currentQuestionCache.put(session.getId(), currentQuestion);
+            log.info("Cached question for session {}: {}", session.getId(), currentQuestion.getQuestionText());
+        } else {
+            log.info("Using cached question for session {}: {}", session.getId(), currentQuestion.getQuestionText());
         }
 
         return Optional.of(GameSessionResponse.builder()
                 .sessionId(session.getId())
                 .currentQuestion(session.getCurrentQuestionNumber())
                 .totalScore(session.getTotalScore())
-                .question(currentQuestion)
+                .question(currentQuestion) // Используем КЭШИРОВАННЫЙ вопрос
                 .availableHints(getAvailableHints(session))
                 .timeLimit(TIME_LIMIT_SECONDS)
                 .build());
@@ -408,56 +450,113 @@ public class GameService {
     // Добавьте эти методы в ваш существующий GameService
 
     /**
-     * Ответить на вопрос (обновленная версия с предварительной загрузкой)
+     * Ответить на вопрос (ИСПРАВЛЕННАЯ ВЕРСИЯ)
+     */
+    /**
+     * Ответить на вопрос (ПОЛНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ С КЭШЕМ)
      */
     public GameSessionResponse answerQuestion(Long sessionId, String playerAnswer, Long userId) {
-        GameSession session = getActiveGameSession(sessionId, userId);
+        log.error("=== USING NEW METHOD VERSION ===");
+        log.info("Processing answer for session {}, user {}, answer: {}", sessionId, userId, playerAnswer);
 
-        // Проверяем не истекло ли время
+        // Получаем сессию
+        Optional<GameSession> sessionOpt = gameSessionRepository.findById(sessionId);
+        if (sessionOpt.isEmpty()) {
+            log.error("Session {} not found in database", sessionId);
+            throw new RuntimeException("Игровая сессия не найдена");
+        }
+
+        GameSession session = sessionOpt.get();
+        log.info("Found session {}: status={}, player={}, currentQuestion={}",
+                sessionId, session.getGameStatus(), session.getPlayer().getId(), session.getCurrentQuestionNumber());
+
+        // Проверяем принадлежность и статус
+        if (!session.getPlayer().getId().equals(userId)) {
+            log.error("Session {} belongs to user {}, but request from user {}",
+                    sessionId, session.getPlayer().getId(), userId);
+            throw new RuntimeException("Доступ запрещен");
+        }
+
+        if (session.getGameStatus() != GameStatus.IN_PROGRESS) {
+            log.error("Session {} has status {}, expected IN_PROGRESS",
+                    sessionId, session.getGameStatus());
+
+            return GameSessionResponse.builder()
+                    .sessionId(sessionId)
+                    .gameOver(true)
+                    .finalScore(session.getTotalScore())
+                    .questionsAnswered(session.getCurrentQuestionNumber() - 1)
+                    .build();
+        }
+
+        // Проверяем время
         if (isTimeExpired(session)) {
+            log.info("Time expired for session {}", sessionId);
             return handleTimeExpired(session);
         }
 
-        Question currentQuestion = getQuestionForLevel(session.getCurrentQuestionNumber());
+        // ПОЛУЧАЕМ ТЕКУЩИЙ ВОПРОС ИЗ КЭША
+        Question currentQuestion = currentQuestionCache.get(sessionId);
         if (currentQuestion == null) {
-            throw new RuntimeException("Не удалось получить текущий вопрос");
+            log.error("No cached question for session {}, loading from provider", sessionId);
+            currentQuestion = getQuestionForLevel(session.getCurrentQuestionNumber());
+            if (currentQuestion == null) {
+                throw new RuntimeException("Не удалось получить текущий вопрос");
+            }
+        } else {
+            log.info("Using cached question for session {}: {}", sessionId, currentQuestion.getQuestionText());
         }
 
+        // Проверяем ответ на КЭШИРОВАННЫЙ вопрос
         boolean isCorrect = currentQuestion.getCorrectAnswer().equals(playerAnswer);
         int pointsEarned = 0;
+
+        log.info("Answer check: correct={}, playerAnswer='{}', correctAnswer='{}'",
+                isCorrect, playerAnswer, currentQuestion.getCorrectAnswer());
 
         if (isCorrect) {
             DifficultyLevel level = getDifficultyForQuestion(session.getCurrentQuestionNumber());
             pointsEarned = level.getPointsPerQuestion();
             session.setTotalScore(session.getTotalScore() + pointsEarned);
+            log.info("Correct answer! Earned {} points, total score: {}", pointsEarned, session.getTotalScore());
         }
 
-        // Сохраняем ответ
+        // Сохраняем ответ на КЭШИРОВАННЫЙ вопрос
         saveGameAnswer(session, currentQuestion, playerAnswer, isCorrect, pointsEarned);
 
         if (!isCorrect) {
             // Игра окончена - неправильный ответ
+            log.info("Wrong answer! Game over for session {}", sessionId);
             session.setGameStatus(GameStatus.FAILED);
             session.setFinishedAt(LocalDateTime.now());
             gameSessionRepository.save(session);
 
+            // УДАЛЯЕМ ИЗ КЭША
+            currentQuestionCache.remove(sessionId);
+
             return GameSessionResponse.builder()
                     .sessionId(sessionId)
                     .gameOver(true)
-                    .correctAnswer(currentQuestion.getCorrectAnswer())
+                    .correctAnswer(currentQuestion.getCorrectAnswer()) // Правильный ответ КЭШИРОВАННОГО вопроса
                     .finalScore(session.getTotalScore())
                     .questionsAnswered(session.getCurrentQuestionNumber())
+                    .lastAnswerCorrect(false)
                     .build();
         }
 
         // Переходим к следующему вопросу
         session.setCurrentQuestionNumber(session.getCurrentQuestionNumber() + 1);
+        log.info("Moving to question {}", session.getCurrentQuestionNumber());
 
         if (session.getCurrentQuestionNumber() > MAX_QUESTIONS) {
             // Игра завершена успешно
+            log.info("Game completed successfully for session {}", sessionId);
             session.setGameStatus(GameStatus.COMPLETED);
             session.setFinishedAt(LocalDateTime.now());
             gameSessionRepository.save(session);
+
+            // УДАЛЯЕМ ИЗ КЭША
+            currentQuestionCache.remove(sessionId);
 
             return GameSessionResponse.builder()
                     .sessionId(sessionId)
@@ -465,14 +564,14 @@ public class GameService {
                     .gameCompleted(true)
                     .finalScore(session.getTotalScore())
                     .questionsAnswered(session.getCurrentQuestionNumber() - 1)
+                    .lastAnswerCorrect(true)
                     .build();
         }
 
-        // НОВАЯ ЛОГИКА: Предварительная загрузка вопросов для следующего уровня
+        // Предварительная загрузка для следующего уровня
         DifficultyLevel currentLevel = getDifficultyForQuestion(session.getCurrentQuestionNumber());
         DifficultyLevel nextLevel = getDifficultyForQuestion(session.getCurrentQuestionNumber() + 1);
 
-        // Если приближаемся к новому уровню сложности, начинаем предварительную загрузку
         if (!currentLevel.equals(nextLevel)) {
             log.info("Player approaching {} level, starting preload", nextLevel);
             if (questionProvider instanceof LazyOpenTDBQuestionProvider) {
@@ -480,19 +579,28 @@ public class GameService {
             }
         }
 
+        // Сохраняем сессию
         gameSessionRepository.save(session);
 
-        // Получаем следующий вопрос
+        // ТЕПЕРЬ получаем СЛЕДУЮЩИЙ вопрос и кэшируем его
         Question nextQuestion = getQuestionForLevel(session.getCurrentQuestionNumber());
         if (nextQuestion == null) {
+            log.error("Could not get next question for level {}", session.getCurrentQuestionNumber());
             throw new RuntimeException("Не удалось получить следующий вопрос");
         }
+
+        // КЭШИРУЕМ СЛЕДУЮЩИЙ ВОПРОС
+        currentQuestionCache.put(sessionId, nextQuestion);
+        log.info("Cached next question for session {}: {}", sessionId, nextQuestion.getQuestionText());
+
+        log.info("Successfully processed answer for session {}, moving to question {}",
+                sessionId, session.getCurrentQuestionNumber());
 
         return GameSessionResponse.builder()
                 .sessionId(sessionId)
                 .currentQuestion(session.getCurrentQuestionNumber())
                 .totalScore(session.getTotalScore())
-                .question(nextQuestion)
+                .question(nextQuestion) // СЛЕДУЮЩИЙ вопрос
                 .availableHints(getAvailableHints(session))
                 .timeLimit(TIME_LIMIT_SECONDS)
                 .lastAnswerCorrect(true)

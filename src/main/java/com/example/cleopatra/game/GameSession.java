@@ -50,4 +50,13 @@ public class GameSession {
 
     @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<GameAnswer> answers = new ArrayList<>();
+
+    @Column(name = "current_question_text", columnDefinition = "TEXT")
+    private String currentQuestionText;
+
+    @Column(name = "current_correct_answer")
+    private String currentCorrectAnswer;
+
+    @Column(name = "current_question_data", columnDefinition = "TEXT")
+    private String currentQuestionData;
 }

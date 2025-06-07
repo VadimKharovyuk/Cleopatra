@@ -307,15 +307,34 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-<script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+  /*<![CDATA[*/
   let sessionId = /*[[${game.sessionId}]]*/ null;
   let timeLeft = /*[[${game.timeLimit}]]*/ 30;
   let selectedAnswer = null;
   let timer;
   let gameInProgress = true;
 
+  // ДОБАВЬТЕ ЭТУ ОТЛАДКУ
+  console.log('=== THYMELEAF DEBUG ===');
+  console.log('sessionId:', sessionId);
+  console.log('timeLeft:', timeLeft);
+  console.log('game object:', /*[[${game}]]*/ {});
+  console.log('typeof sessionId:', typeof sessionId);
+
   // Инициализация
   document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, sessionId:', sessionId);
+
+    // Проверяем что sessionId не null
+    if (!sessionId) {
+      console.error('SessionId is null! Redirecting to game start...');
+      alert('Ошибка: не удалось загрузить игровую сессию. Возвращаемся к началу.');
+      window.location.href = '/game';
+      return;
+    }
+
     updateProgressBar();
     startTimer();
   });
@@ -371,7 +390,6 @@
     showGameOver('Время вышло!', 'К сожалению, время на ответ истекло.');
   }
 
-  // ИСПРАВЛЕННАЯ функция selectAnswer - только выделяет ответ
   function selectAnswer(element) {
     if (!gameInProgress) {
       return;
@@ -396,7 +414,6 @@
     console.log('Selected answer:', answer);
   }
 
-  // ИСПРАВЛЕННАЯ функция submitAnswer - отправляет выбранный ответ
   function submitAnswer() {
     if (!gameInProgress) {
       return;
@@ -404,6 +421,13 @@
 
     if (!selectedAnswer) {
       alert('Пожалуйста, выберите ответ');
+      return;
+    }
+
+    if (!sessionId) {
+      console.error('SessionId is null in submitAnswer!');
+      alert('Ошибка сессии. Перенаправляем на главную страницу игры.');
+      window.location.href = '/game';
       return;
     }
 
@@ -417,7 +441,23 @@
       btn.style.pointerEvents = 'none';
     });
 
-    console.log('Submitting answer:', selectedAnswer, 'for session:', sessionId);
+    console.log('=== SUBMIT DEBUG ===');
+    console.log('sessionId:', sessionId);
+    console.log('selectedAnswer:', selectedAnswer);
+    console.log('typeof sessionId:', typeof sessionId);
+
+    // ДОБАВИМ ОТЛАДКУ СЕССИИ ПЕРЕД ОТПРАВКОЙ
+    fetch(`/api/game/debug/session/${sessionId}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+            .then(response => response.json())
+            .then(debugData => {
+              console.log('=== SESSION DEBUG ===');
+              console.log(debugData);
+            })
+            .catch(error => {
+              console.error('Debug error:', error);
+            });
 
     // Логика отправки ответа на сервер
     fetch('/api/game/answer', {
@@ -428,10 +468,11 @@
       },
       body: JSON.stringify({
         sessionId: sessionId,
-        playerAnswer: selectedAnswer  // Исправлено: было answer, должно быть playerAnswer
+        playerAnswer: selectedAnswer
       })
     })
             .then(response => {
+              console.log('Response status:', response.status);
               if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
               }
@@ -645,6 +686,7 @@
       e.returnValue = '';
     }
   });
+  /*]]>*/
 </script>
 
 </body>

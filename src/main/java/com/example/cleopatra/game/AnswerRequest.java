@@ -19,11 +19,9 @@ import lombok.NoArgsConstructor;
 public class AnswerRequest {
 
     @NotNull(message = "ID сессии обязателен")
-    @Schema(description = "ID игровой сессии", example = "123")
     private Long sessionId;
 
     @NotBlank(message = "Ответ не может быть пустым")
-    @Schema(description = "Выбранный ответ игрока", example = "Paris")
     private String playerAnswer;
 }
 

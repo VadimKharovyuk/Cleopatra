@@ -58,7 +58,6 @@ public class GameWebController {
 
         return "game/index";
     }
-
     @GetMapping("/play")
     public String playGame(Model model, Authentication authentication) {
         if (authentication == null) {
@@ -66,14 +65,19 @@ public class GameWebController {
         }
 
         User user = userService.getCurrentUserEntity(authentication);
-
-        // Проверяем есть ли активная игра
         Optional<GameSessionResponse> currentGame = gameService.getCurrentGame(user);
 
         if (currentGame.isPresent()) {
-            model.addAttribute("game", currentGame.get());
+            GameSessionResponse game = currentGame.get();
+
+
+            log.info("Loading game page - sessionId: {}, question: {}, score: {}",
+                    game.getSessionId(), game.getCurrentQuestion(), game.getTotalScore());
+
+            model.addAttribute("game", game);
             return "game/play";
         } else {
+            log.warn("No active game found for user {}", user.getEmail());
             return "redirect:/game?needStart=true";
         }
     }
