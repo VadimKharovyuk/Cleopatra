@@ -67,9 +67,14 @@
 }
 }
 
-    function openComments(btn) {
-    const postId = btn.dataset.postId;
-    window.location.href = `/posts/${postId}#comments`;
+ function openComments(event, button) {
+     event.stopPropagation();
+     const postId = button.getAttribute('data-post-id');
+     if (postId) {
+         // Переходим на страницу комментариев с якорем
+         window.location.href = `/posts/${postId}/comments#comments`;
+     }
+
 }
 
     // ✅ ОБНОВЛЕННАЯ функция для лайков с AJAX
