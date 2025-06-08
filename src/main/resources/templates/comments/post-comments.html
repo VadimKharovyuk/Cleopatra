@@ -7,6 +7,29 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
+    /* Основная сетка с сайдбаром */
+    .main-layout {
+      margin-left: 280px;
+      min-height: 100vh;
+      display: flex;
+      background-color: #f8f9fa;
+    }
+
+    .content-area {
+      flex: 1;
+      padding: 20px;
+      max-width: calc(100% - 320px);
+    }
+
+    .aside-section {
+      width: 320px;
+      padding: 20px 20px 20px 0;
+      position: sticky;
+      top: 20px;
+      height: fit-content;
+    }
+
+    /* Стили комментариев */
     .comment-item {
       border-bottom: 1px solid #e9ecef;
       padding: 15px 0;
@@ -76,90 +99,327 @@
       font-size: 0.75rem;
       padding: 2px 8px;
     }
+
+    /* Стили для aside виджетов */
+    .widget {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: 1px solid #e9ecef;
+    }
+
+    .widget-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+    }
+
+    .widget-title i {
+      margin-right: 8px;
+      color: #2563eb;
+    }
+
+    .latest-comment {
+      display: flex;
+      align-items: start;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .latest-comment:last-child {
+      border-bottom: none;
+    }
+
+    .latest-comment-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin-right: 10px;
+      object-fit: cover;
+    }
+
+    .latest-comment-content {
+      flex: 1;
+    }
+
+    .latest-comment-author {
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: #333;
+    }
+
+    .latest-comment-text {
+      font-size: 0.8rem;
+      color: #666;
+      margin: 2px 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .latest-comment-time {
+      font-size: 0.75rem;
+      color: #999;
+    }
+
+    .post-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .post-stats:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: #666;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .author-card {
+      text-align: center;
+    }
+
+    .author-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 15px;
+      object-fit: cover;
+      border: 3px solid #e9ecef;
+    }
+
+    .author-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .author-followers {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .follow-btn {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .follow-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    /* Адаптивность */
+    @media (max-width: 1200px) {
+      .aside-section {
+        display: none;
+      }
+      .content-area {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-layout {
+        margin-left: 0;
+        padding-top: 60px;
+      }
+      .content-area {
+        padding: 15px;
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
-<div class="container mt-4">
-  <!-- Информация о посте -->
-  <div class="post-info" th:if="${post}">
-    <div class="d-flex align-items-start">
-      <img th:src="${post.author.imageUrl}"
-           th:alt="${post.author.firstName + ' ' + post.author.lastName}"
-           class="comment-avatar me-3"
-           onerror="this.src='/images/default-avatar.png'">
-      <div class="flex-grow-1">
-        <h5 class="mb-1" th:text="${post.author.firstName + ' ' + post.author.lastName}">Автор</h5>
-        <small class="text-muted" th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</small>
+<!-- Подключаем сайдбар из фрагмента -->
+<div th:replace="~{fragments/sidebar :: complete-sidebar('comments')}"></div>
+
+<div class="main-layout">
+  <!-- Основной контент -->
+  <div class="content-area">
+    <!-- Информация о посте -->
+    <div class="post-info" th:if="${post}">
+      <div class="d-flex align-items-start">
+        <img th:src="${post.author.imageUrl}"
+             th:alt="${post.author.firstName + ' ' + post.author.lastName}"
+             class="comment-avatar me-3"
+             onerror="this.src='/images/default-avatar.png'">
+        <div class="flex-grow-1">
+          <h5 class="mb-1" th:text="${post.author.firstName + ' ' + post.author.lastName}">Автор</h5>
+          <small class="text-muted" th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</small>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <p th:text="${post.content}" class="mb-3">Содержание поста</p>
+        <img th:if="${post.imageUrl}"
+             th:src="${post.imageUrl}"
+             class="post-image mb-3"
+             alt="Изображение поста">
+      </div>
+
+      <div class="d-flex justify-content-between text-muted">
+        <span><i class="fas fa-heart"></i> <span th:text="${post.likesCount}">0</span> лайков</span>
+        <span><i class="fas fa-comment"></i> <span id="total-comments" th:text="${totalComments}">0</span> комментариев</span>
+        <span><i class="fas fa-eye"></i> <span th:text="${post.viewsCount}">0</span> просмотров</span>
       </div>
     </div>
 
-    <div class="mt-3">
-      <p th:text="${post.content}" class="mb-3">Содержание поста</p>
-      <img th:if="${post.imageUrl}"
-           th:src="${post.imageUrl}"
-           class="post-image mb-3"
-           alt="Изображение поста">
+    <!-- Форма добавления комментария -->
+    <div class="comment-form" th:if="${currentUser}">
+      <h5 class="mb-3">Добавить комментарий</h5>
+      <form id="comment-form">
+        <div class="mb-3">
+                        <textarea id="comment-content"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Напишите ваш комментарий..."
+                                  required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-paper-plane"></i> Отправить
+        </button>
+      </form>
     </div>
 
-    <div class="d-flex justify-content-between text-muted">
-      <span><i class="fas fa-heart"></i> <span th:text="${post.likesCount}">0</span> лайков</span>
-      <span><i class="fas fa-comment"></i> <span id="total-comments" th:text="${totalComments}">0</span> комментариев</span>
-      <span><i class="fas fa-eye"></i> <span th:text="${post.viewsCount}">0</span> просмотров</span>
+    <!-- Сообщение для неавторизованных пользователей -->
+    <div class="alert alert-info" th:unless="${currentUser}">
+      <i class="fas fa-info-circle"></i>
+      Войдите в систему, чтобы оставлять комментарии.
     </div>
-  </div>
 
-  <!-- Форма добавления комментария -->
-  <div class="comment-form" th:if="${currentUser}">
-    <h5 class="mb-3">Добавить комментарий</h5>
-    <form id="comment-form">
-      <div class="mb-3">
-                    <textarea id="comment-content"
-                              class="form-control"
-                              rows="3"
-                              placeholder="Напишите ваш комментарий..."
-                              required></textarea>
+    <!-- Уведомления -->
+    <div id="notifications"></div>
+
+    <!-- Заголовок комментариев -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4>Комментарии (<span id="comments-count" th:text="${totalComments}">0</span>)</h4>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-outline-secondary" onclick="sortComments('newest')">
+          <i class="fas fa-sort-amount-down"></i> Новые
+        </button>
+        <button class="btn btn-outline-secondary" onclick="sortComments('oldest')">
+          <i class="fas fa-sort-amount-up"></i> Старые
+        </button>
       </div>
-      <button type="submit" class="btn btn-primary">
-        <i class="fas fa-paper-plane"></i> Отправить
-      </button>
-    </form>
-  </div>
-
-  <!-- Сообщение для неавторизованных пользователей -->
-  <div class="alert alert-info" th:unless="${currentUser}">
-    <i class="fas fa-info-circle"></i>
-    Войдите в систему, чтобы оставлять комментарии.
-  </div>
-
-  <!-- Уведомления -->
-  <div id="notifications"></div>
-
-  <!-- Заголовок комментариев -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4>Комментарии (<span id="comments-count" th:text="${totalComments}">0</span>)</h4>
-    <div class="btn-group btn-group-sm">
-      <button class="btn btn-outline-secondary" onclick="sortComments('newest')">
-        <i class="fas fa-sort-amount-down"></i> Новые
-      </button>
-      <button class="btn btn-outline-secondary" onclick="sortComments('oldest')">
-        <i class="fas fa-sort-amount-up"></i> Старые
-      </button>
     </div>
-  </div>
 
-  <!-- Список комментариев -->
-  <div id="comments-container">
-    <div class="loading">
-      <i class="fas fa-spinner fa-spin"></i> Загрузка комментариев...
+    <!-- Список комментариев -->
+    <div id="comments-container">
+      <div class="loading">
+        <i class="fas fa-spinner fa-spin"></i> Загрузка комментариев...
+      </div>
     </div>
+
+    <!-- Пагинация -->
+    <nav aria-label="Пагинация комментариев" class="mt-4">
+      <ul id="pagination" class="pagination justify-content-center">
+        <!-- Пагинация будет сгенерирована JavaScript -->
+      </ul>
+    </nav>
   </div>
 
-  <!-- Пагинация -->
-  <nav aria-label="Пагинация комментариев" class="mt-4">
-    <ul id="pagination" class="pagination justify-content-center">
-      <!-- Пагинация будет сгенерирована JavaScript -->
-    </ul>
-  </nav>
+  <!-- Боковая панель -->
+  <aside class="aside-section">
+    <!-- Информация об авторе поста -->
+    <div class="widget" th:if="${post}">
+      <div class="widget-title">
+        <i class="fas fa-user"></i>
+        Автор поста
+      </div>
+      <div class="author-card">
+        <img th:src="${post.author.imageUrl}"
+             th:alt="${post.author.firstName + ' ' + post.author.lastName}"
+             class="author-avatar"
+             onerror="this.src='/images/default-avatar.png'">
+        <div class="author-name" th:text="${post.author.firstName + ' ' + post.author.lastName}">Имя автора</div>
+        <div class="author-followers">1.2K подписчиков</div>
+<!--        <button class="follow-btn" th:if="${currentUser and currentUser.id != post.author.id}">-->
+<!--          <i class="fas fa-plus"></i> Подписаться-->
+<!--        </button>-->
+      </div>
+    </div>
+
+    <!-- Статистика поста -->
+    <div class="widget" th:if="${post}">
+      <div class="widget-title">
+        <i class="fas fa-chart-bar"></i>
+        Статистика
+      </div>
+      <div class="post-stats">
+        <span class="stat-label">Лайки</span>
+        <span class="stat-value" th:text="${post.likesCount}">0</span>
+      </div>
+      <div class="post-stats">
+        <span class="stat-label">Комментарии</span>
+        <span class="stat-value" id="sidebar-comments-count" th:text="${totalComments}">0</span>
+      </div>
+      <div class="post-stats">
+        <span class="stat-label">Просмотры</span>
+        <span class="stat-value" th:text="${post.viewsCount}">0</span>
+      </div>
+      <div class="post-stats">
+        <span class="stat-label">Создан</span>
+        <span class="stat-value" th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy')}">01.01.2024</span>
+      </div>
+    </div>
+
+    <!-- Последние комментарии -->
+    <div class="widget">
+      <div class="widget-title">
+        <i class="fas fa-comments"></i>
+        Последние комментарии
+      </div>
+      <div id="latest-comments-widget">
+        <div class="loading">
+          <i class="fas fa-spinner fa-spin"></i> Загрузка...
+        </div>
+      </div>
+    </div>
+
+    <!-- Похожие посты -->
+    <div class="widget">
+      <div class="widget-title">
+        <i class="fas fa-bookmark"></i>
+        Действия
+      </div>
+      <div class="d-grid gap-2">
+        <button class="btn btn-outline-primary btn-sm" onclick="sharePost()">
+          <i class="fas fa-share"></i> Поделиться
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="reportPost()">
+          <i class="fas fa-flag"></i> Пожаловаться
+        </button>
+        <a th:href="@{'/posts/' + ${postId}}" class="btn btn-outline-info btn-sm">
+          <i class="fas fa-arrow-left"></i> К посту
+        </a>
+      </div>
+    </div>
+  </aside>
 </div>
 
 <!-- Модальное окно подтверждения удаления -->
@@ -194,6 +454,7 @@
   // Инициализация страницы
   document.addEventListener('DOMContentLoaded', function() {
     loadComments();
+    loadLatestComments();
     setupEventListeners();
   });
 
@@ -394,6 +655,8 @@
         document.getElementById('comment-content').value = '';
         // Обновляем счетчик комментариев
         updateCommentsCount();
+        // Обновляем виджет последних комментариев
+        loadLatestComments();
         // Перезагружаем комментарии на первой странице
         currentPage = 0;
         loadComments(0);
@@ -507,9 +770,71 @@
       if (data.success) {
         document.getElementById('total-comments').textContent = data.count;
         document.getElementById('comments-count').textContent = data.count;
+
+        // Обновляем счетчик в сайдбаре
+        const sidebarCount = document.getElementById('sidebar-comments-count');
+        if (sidebarCount) {
+          sidebarCount.textContent = data.count;
+        }
       }
     } catch (error) {
       console.error('Ошибка при обновлении счетчика:', error);
+    }
+  }
+
+  // Загрузка последних комментариев для виджета
+  async function loadLatestComments() {
+    try {
+      const response = await fetch(`/api/posts/${postId}/comments/latest?limit=3`);
+      const data = await response.json();
+
+      const widget = document.getElementById('latest-comments-widget');
+
+      if (data.success && data.comments && data.comments.length > 0) {
+        const commentsHtml = data.comments.map(comment => `
+                        <div class="latest-comment">
+                            <img src="${comment.author.imageUrl || '/images/default-avatar.png'}"
+                                 alt="${comment.author.firstName} ${comment.author.lastName}"
+                                 class="latest-comment-avatar"
+                                 onerror="this.src='/images/default-avatar.png'">
+                            <div class="latest-comment-content">
+                                <div class="latest-comment-author">${comment.author.firstName} ${comment.author.lastName}</div>
+                                <div class="latest-comment-text">${comment.content}</div>
+                                <div class="latest-comment-time">${formatDate(comment.createdAt)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+        widget.innerHTML = commentsHtml;
+      } else {
+        widget.innerHTML = '<div class="text-center text-muted py-3">Нет комментариев</div>';
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке последних комментариев:', error);
+      document.getElementById('latest-comments-widget').innerHTML =
+              '<div class="text-center text-muted py-3">Ошибка загрузки</div>';
+    }
+  }
+
+  // Функции для действий в сайдбаре
+  function sharePost() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Комментарии к посту',
+        url: window.location.href
+      });
+    } else {
+      // Fallback - копирование ссылки
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        showSuccess('Ссылка скопирована в буфер обмена');
+      });
+    }
+  }
+
+  function reportPost() {
+    if (confirm('Вы уверены, что хотите пожаловаться на этот пост?')) {
+      // Здесь можно добавить отправку жалобы на сервер
+      showSuccess('Жалоба отправлена на рассмотрение');
     }
   }
 
