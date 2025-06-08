@@ -105,7 +105,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         } catch (Exception e) {
             log.error("❌ Error creating profile visit notification", e);
-            e.printStackTrace(); // 🔍 Добавляем stack trace
+            e.printStackTrace();
         }
     }
 

@@ -139,10 +139,36 @@ public class NotificationEventListener {
     }
 
 
+    @EventListener
+    @Async
+    public void handlePostComment(PostCommentEvent event) {
+        // Метод createCommentNotification сам управляет транзакцией
+        try {
+            if (!event.getPostAuthorId().equals(event.getCommenterUserId())) {
+                notificationService.createCommentNotification(
+                        event.getPostAuthorId(),
+                        event.getCommenterUserId(),
+                        event.getPostId(),
+                        event.getCommentText()
+                );
+
+                log.info("Уведомление о комментарии отправлено: пост {}, от пользователя {} к пользователю {}",
+                        event.getPostId(), event.getCommenterUserId(), event.getPostAuthorId());
+            } else {
+                log.debug("Пользователь прокомментировал свой собственный пост, уведомление не отправляется");
+            }
+        } catch (Exception e) {
+            log.error("Ошибка при создании уведомления о комментарии для поста {}: {}",
+                    event.getPostId(), e.getMessage(), e);
+        }
+    }
+
+
 
     /**
      * Планирует повторную отправку уведомления
      */
+
     private void scheduleRetryNotification(Long notificationId, Long recipientId, NotificationDto dto) {
         log.info("⏰ Scheduling retry for notification {} to user {} in 30 seconds", notificationId, recipientId);
 

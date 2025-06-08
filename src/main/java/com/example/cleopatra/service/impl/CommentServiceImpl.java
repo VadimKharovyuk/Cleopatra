@@ -1,5 +1,6 @@
 package com.example.cleopatra.service.impl;
 
+import com.example.cleopatra.EVENT.PostCommentEvent;
 import com.example.cleopatra.ExistsException.CommentNotFoundException;
 import com.example.cleopatra.ExistsException.PostNotFoundException;
 import com.example.cleopatra.ExistsException.UnauthorizedException;
@@ -14,6 +15,7 @@ import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -34,6 +36,7 @@ public class CommentServiceImpl implements CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public CommentPageResponse getCommentsByPost(Long postId, Pageable pageable) {
@@ -74,8 +77,19 @@ public class CommentServiceImpl implements CommentService {
                 .isDeleted(false)
                 .build();
 
+
+
         // Сохраняем комментарий
         Comment savedComment = commentRepository.save(comment);
+
+        // ✅ Публикуем событие ПОСЛЕ сохранения комментария
+        eventPublisher.publishEvent(new PostCommentEvent(
+                post.getId(),                    // postId
+                post.getAuthor().getId(),        // postAuthorId (кому отправить уведомление)
+                author.getId(),                  // commenterUserId (кто прокомментировал)
+                savedComment.getId(),            // commentId
+                request.getContent().trim()      // commentText (для превью)
+        ));
 
         log.info("Комментарий с ID {} успешно создан пользователем {}", savedComment.getId(), userEmail);
 
