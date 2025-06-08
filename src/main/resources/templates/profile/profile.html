@@ -1159,6 +1159,7 @@
                                     onclick="openComments(event, this)"
                                     th:data-post-id="${post.id}">
                                 <i class="far fa-comment"></i>
+
                                 <span th:text="${post.commentsCount}">0</span>
                             </button>
 
@@ -1177,12 +1178,14 @@
                             </button>
 
                             <div class="action-stats">
-                        <span class="views-count">
+                           <span class="views-count">
                             <i class="far fa-eye"></i>
                             <span th:text="${post.viewsCount}">0</span>
-                        </span>
+                            </span>
                             </div>
+
                         </div>
+
 
                     </article>
                 </div>

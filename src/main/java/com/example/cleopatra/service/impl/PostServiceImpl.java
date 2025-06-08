@@ -6,6 +6,7 @@ import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.maper.PostMapper;
 import com.example.cleopatra.model.Post;
 import com.example.cleopatra.model.User;
+import com.example.cleopatra.repository.CommentRepository;
 import com.example.cleopatra.repository.PostRepository;
 import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.service.*;
@@ -39,6 +40,7 @@ public class PostServiceImpl implements PostService {
     private final SubscriptionService subscriptionService;
     // ✅ ДОБАВИТЬ новый сервис для лайков
     private final PostLikeService postLikeService;
+    private final CommentService commentService;
 
     @Override
     public PostResponseDto createPost(PostCreateDto postCreateDto) {
@@ -89,6 +91,9 @@ public class PostServiceImpl implements PostService {
         // Увеличиваем счетчик просмотров
         post.setViewsCount(post.getViewsCount() + 1);
         postRepository.save(post);
+
+        Long commentsCount = commentService.getCommentsCount(post.getId());
+        post.setCommentsCount(commentsCount);
 
         User currentUser = getCurrentUser();
 
