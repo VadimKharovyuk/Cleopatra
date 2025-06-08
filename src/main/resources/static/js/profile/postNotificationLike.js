@@ -71,11 +71,9 @@
      event.stopPropagation();
      const postId = button.getAttribute('data-post-id');
      if (postId) {
-         // Переходим на страницу комментариев с якорем
          window.location.href = `/posts/${postId}/comments#comments`;
      }
-
-}
+ }
 
     // ✅ ОБНОВЛЕННАЯ функция для лайков с AJAX
     async function toggleLike(btn) {
@@ -93,8 +91,7 @@
     method: 'POST',
     headers: {
     'Content-Type': 'application/json',
-    // Добавьте CSRF токен если используете Spring Security
-    // 'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
+
 }
 });
 

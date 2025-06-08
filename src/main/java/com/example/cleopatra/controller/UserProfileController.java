@@ -65,6 +65,8 @@ public class UserProfileController {
             model.addAttribute("pageSize", size);
 
 
+
+
             // Обрабатываем данные текущего пользователя
             if (authentication != null && authentication.isAuthenticated()) {
                 UserResponse currentUser = userService.getUserByEmail(authentication.getName());

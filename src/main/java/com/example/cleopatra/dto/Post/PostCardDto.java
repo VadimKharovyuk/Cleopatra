@@ -14,14 +14,16 @@ import java.util.List;
 @NoArgsConstructor
 public class PostCardDto {
 
+
     private Long id;
-    private String content; // обрезанный контент для превью
+    private String content;
     private String imageUrl;
     private AuthorDto author;
     private LocalDateTime createdAt;
     private Long likesCount;
     private Long commentsCount;
     private Long viewsCount;
+
 
     // Дополнительные поля для UI
     private Boolean hasImage;
