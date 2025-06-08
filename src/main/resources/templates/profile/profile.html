@@ -1153,7 +1153,8 @@
 
                         <!-- Действия с постом -->
                         <div class="post-actions">
-                            <button class="action-btn comment-btn" onclick="openComments(this)"
+                            <button class="action-btn comment-btn"
+                                    onclick="openComments(event, this)"
                                     th:data-post-id="${post.id}">
                                 <i class="far fa-comment"></i>
                                 <span th:text="${post.commentsCount}">0</span>
