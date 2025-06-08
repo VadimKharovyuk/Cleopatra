@@ -1,0 +1,56 @@
+<!-- templates/error/comment-error.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ошибка загрузки комментариев</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .error-container {
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .error-icon {
+      font-size: 4rem;
+      color: #dc3545;
+      margin-bottom: 1.5rem;
+    }
+    .error-card {
+      max-width: 500px;
+      text-align: center;
+      padding: 2rem;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="error-container">
+    <div class="error-card">
+      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <h2 class="text-danger mb-3">Ошибка загрузки комментариев</h2>
+      <p class="text-muted mb-4" th:text="${error ?: 'Произошла ошибка при загрузке комментариев. Пожалуйста, попробуйте позже.'}">
+        Сообщение об ошибке
+      </p>
+      <div class="d-flex gap-2 justify-content-center">
+        <button class="btn btn-primary" onclick="history.back()">
+          <i class="fas fa-arrow-left"></i>
+          Назад
+        </button>
+        <button class="btn btn-outline-primary" onclick="location.reload()">
+          <i class="fas fa-redo"></i>
+          Попробовать снова
+        </button>
+        <a href="/" class="btn btn-outline-secondary">
+          <i class="fas fa-home"></i>
+          На главную
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

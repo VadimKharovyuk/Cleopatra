@@ -1,0 +1,284 @@
+/* static/css/comments.css */
+
+/* Стили для комментариев */
+.comment-item {
+    border-left: 3px solid #dee2e6;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.comment-item:hover {
+    border-left-color: #007bff;
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.comment-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.comment-item:hover::before {
+    transform: scaleY(1);
+}
+
+/* Аватар автора */
+.comment-author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.comment-author-avatar:hover {
+    transform: scale(1.1);
+}
+
+/* Действия с комментариями */
+.comment-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.comment-item:hover .comment-actions {
+    opacity: 1;
+}
+
+.comment-actions .btn {
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Форма комментариев */
+.comment-form {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border: 1px solid #dee2e6;
+    position: relative;
+    overflow: hidden;
+}
+
+.comment-form::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #007bff, #0056b3, #007bff);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Текстарея комментария */
+.comment-form textarea {
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.9);
+}
+
+.comment-form textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 15px rgba(0,123,255,0.2);
+    background: #fff;
+}
+
+/* Счетчик символов */
+.form-text {
+    font-size: 0.875rem;
+    transition: color 0.3s ease;
+}
+
+.form-text .char-counter[data-warning="true"] {
+    color: #ffc107 !important;
+}
+
+.form-text .char-counter[data-danger="true"] {
+    color: #dc3545 !important;
+}
+
+/* Формы редактирования */
+.edit-form {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px dashed #dee2e6;
+}
+
+.edit-form textarea {
+    border: 1px solid #ced4da;
+    transition: border-color 0.3s ease;
+}
+
+.edit-form textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0,123,255,0.3);
+}
+
+/* Кнопки */
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #0056b3, #004085);
+    box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+}
+
+/* Кнопка "Загрузить еще" */
+#load-more-btn {
+    border-radius: 25px;
+    padding: 10px 30px;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+
+#load-more-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.5s ease;
+}
+
+#load-more-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Пустое состояние */
+.empty-state {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+/* Анимация появления комментариев */
+.comment-item {
+    animation: slideInUp 0.5s ease;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Анимация удаления */
+.comment-item.removing {
+    animation: slideOutLeft 0.3s ease forwards;
+}
+
+@keyframes slideOutLeft {
+    to {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+/* Спиннер загрузки */
+.loading-spinner {
+    padding: 40px;
+    text-align: center;
+}
+
+.loading-spinner .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Бейджи */
+.badge {
+    font-size: 0.75em;
+    padding: 4px 8px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .comment-author-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    .comment-actions .btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.875rem;
+    }
+
+    .comment-form {
+        border-radius: 10px;
+    }
+
+    .comment-item {
+        margin-bottom: 15px;
+    }
+
+    .comment-actions {
+        opacity: 1; /* Всегда видимы на мобильных */
+    }
+}
+
+/* Темная тема (опционально) */
+@media (prefers-color-scheme: dark) {
+    .comment-form {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        border-color: #4a5568;
+    }
+
+    .comment-item:hover {
+        background-color: #2d3748;
+    }
+
+    .edit-form {
+        background: #2d3748;
+        border-color: #4a5568;
+    }
+}
