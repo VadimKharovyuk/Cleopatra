@@ -35,6 +35,8 @@ public class SettingsController {
         return "settings/dashboard";
     }
 
+
+
     // Новый метод для AJAX обновления приватности
     @PostMapping("/privacy/toggle")
     @ResponseBody

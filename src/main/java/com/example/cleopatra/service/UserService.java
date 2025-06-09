@@ -1,6 +1,7 @@
 package com.example.cleopatra.service;
 
 import com.example.cleopatra.dto.ChatMessage.UserBriefDto;
+import com.example.cleopatra.dto.user.ChangePasswordDto;
 import com.example.cleopatra.dto.user.RegisterDto;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
@@ -84,6 +85,9 @@ public interface UserService {
      * @param isPrivate true для приватного профиля
      */
     void updateProfilePrivacy(Long userId, Boolean isPrivate);
+
+
+    void changePassword(Long userId, ChangePasswordDto changePasswordDto);
 
 
 

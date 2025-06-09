@@ -1,7 +1,11 @@
 package com.example.cleopatra.service.impl;
 
+import com.example.cleopatra.ExistsException.InvalidPasswordException;
+import com.example.cleopatra.ExistsException.PasswordMismatchException;
+import com.example.cleopatra.ExistsException.SamePasswordException;
 import com.example.cleopatra.ExistsException.UserAlreadyExistsException;
 import com.example.cleopatra.dto.ChatMessage.UserBriefDto;
+import com.example.cleopatra.dto.user.ChangePasswordDto;
 import com.example.cleopatra.dto.user.RegisterDto;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
@@ -33,6 +37,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
+
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -404,6 +409,32 @@ public User getCurrentUserEntity(Authentication authentication) {
         }
     }
 
+    @Override
+    public void changePassword(Long userId, ChangePasswordDto changePasswordDto) {
+
+        // Проверка совпадения нового пароля с подтверждением
+        if (!changePasswordDto.getNewPassword().equals(changePasswordDto.getConfirmPassword())) {
+            throw new PasswordMismatchException("Новый пароль и подтверждение не совпадают");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+
+        // Проверка текущего пароля
+        if (!passwordEncoder.matches(changePasswordDto.getCurrentPassword(), user.getPassword())) {
+            throw new InvalidPasswordException("Неверный текущий пароль");
+        }
+
+        // Проверка что новый пароль отличается от текущего
+        if (passwordEncoder.matches(changePasswordDto.getNewPassword(), user.getPassword())) {
+            throw new SamePasswordException("Новый пароль должен отличаться от текущего");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+        userRepository.save(user);
+
+        log.info("Пароль успешно изменен для пользователя с ID: {}", userId);
+    }
 
     /**
      * Получить пользователей онлайн
