@@ -151,6 +151,7 @@ public class UserBlockServiceImpl implements UserBlockService {
         return userBlockRepository.findByBlockerOrderByBlockedAtDesc(blocker, pageable);
     }
 
+
     @Override
     @Transactional(readOnly = true)
     public BlockedUsersPageResponse getBlockedUsersPageResponse(User blocker, Pageable pageable) {

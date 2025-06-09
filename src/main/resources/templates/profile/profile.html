@@ -834,15 +834,135 @@
                     </button>
 
 
-                    <a href="#"
-                       class="btn-luxury btn-danger-luxury"
-                       data-action="block"
-                       th:data-user-id="${user.id}"
-                       th:data-user-name="${user.firstName + ' ' + user.lastName}"
-                       th:if="${currentUserId != user.id}">
-                        <i class="fas fa-ban"></i>
-                        <span>Заблокировать</span>
-                    </a>
+                    <!-- Показывается только для чужих профилей -->
+                    <div th:if="${currentUserId != null and currentUserId != user.id}" class="block-button-container">
+
+                        <!-- Кнопка РАЗБЛОКИРОВАТЬ (показывается если пользователь заблокирован) -->
+                        <a th:if="${iBlockedUser}"
+                           href="#"
+                           class="btn-luxury btn-success-luxury smart-block-btn"
+                           data-action="unblock"
+                           th:data-user-id="${user.id}"
+                           th:data-user-name="${user.firstName + ' ' + user.lastName}"
+                           title="Разблокировать пользователя">
+                            <i class="fas fa-unlock"></i>
+                            <span>Разблокировать</span>
+                        </a>
+
+                        <!-- Кнопка ЗАБЛОКИРОВАТЬ (показывается если пользователь НЕ заблокирован) -->
+                        <a th:unless="${iBlockedUser}"
+                           href="#"
+                           class="btn-luxury btn-danger-luxury smart-block-btn"
+                           data-action="block"
+                           th:data-user-id="${user.id}"
+                           th:data-user-name="${user.firstName + ' ' + user.lastName}"
+                           title="Заблокировать пользователя">
+                            <i class="fas fa-ban"></i>
+                            <span>Заблокировать</span>
+                        </a>
+
+                    </div>
+
+                    <!-- Дополнительные стили для умных кнопок -->
+                    <style>
+                        .block-button-container {
+                            display: inline-block;
+                            margin: 0.5rem 0;
+                        }
+
+                        .smart-block-btn {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                            padding: 0.75rem 1.5rem;
+                            border-radius: 8px;
+                            text-decoration: none;
+                            font-weight: 500;
+                            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                            cursor: pointer;
+                            border: none;
+                            font-size: 0.875rem;
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        }
+
+                        /* Стили для кнопки блокировки */
+                        .btn-danger-luxury {
+                            background: linear-gradient(135deg, #dc2626, #ef4444);
+                            color: white;
+                        }
+
+                        .btn-danger-luxury:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+                            text-decoration: none;
+                            color: white;
+                        }
+
+                        .btn-danger-luxury:active {
+                            transform: translateY(0);
+                            box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+                        }
+
+                        /* Стили для кнопки разблокировки */
+                        .btn-success-luxury {
+                            background: linear-gradient(135deg, #059669, #10b981);
+                            color: white;
+                        }
+
+                        .btn-success-luxury:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+                            text-decoration: none;
+                            color: white;
+                        }
+
+                        .btn-success-luxury:active {
+                            transform: translateY(0);
+                            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+                        }
+
+                        /* Анимация при изменении состояния */
+                        .smart-block-btn {
+                            animation: buttonFadeIn 0.3s ease-in-out;
+                        }
+
+                        @keyframes buttonFadeIn {
+                            from {
+                                opacity: 0;
+                                transform: scale(0.9);
+                            }
+                            to {
+                                opacity: 1;
+                                transform: scale(1);
+                            }
+                        }
+
+                        /* Индикатор загрузки */
+                        .smart-block-btn.loading {
+                            pointer-events: none;
+                            opacity: 0.6;
+                        }
+
+                        .smart-block-btn.loading i {
+                            animation: spin 1s linear infinite;
+                        }
+
+                        @keyframes spin {
+                            from { transform: rotate(0deg); }
+                            to { transform: rotate(360deg); }
+                        }
+
+                        /* Адаптивность */
+                        @media (max-width: 768px) {
+                            .smart-block-btn {
+                                width: 100%;
+                                justify-content: center;
+                                padding: 1rem 1.5rem;
+                                font-size: 1rem;
+                            }
+                        }
+                    </style>
+
 
                 </th:block>
 

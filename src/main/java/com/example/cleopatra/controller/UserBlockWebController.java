@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -44,9 +45,11 @@ public class UserBlockWebController {
 
         model.addAttribute("blockedUsersPage", response);
         model.addAttribute("currentUser", user);
+        model.addAttribute("isOwnList", true);
 
         return "blocks/blocked-users";
     }
+
 
 
     /**

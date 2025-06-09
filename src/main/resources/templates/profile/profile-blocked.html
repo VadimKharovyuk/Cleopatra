@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профиль недоступен - Cleopatra</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<!-- Включаем sidebar -->
+<th:block th:replace="~{fragments/sidebar :: complete-sidebar('profile')}"></th:block>
+
+<!-- Animated background -->
+<div class="bg-decoration">
+  <div class="floating-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+    <div class="shape shape-4"></div>
+  </div>
+</div>
+
+<main class="main-content">
+  <div class="content-wrapper">
+    <div class="blocked-profile-container">
+      <!-- Animated blocked icon with glassmorphism -->
+      <div class="blocked-icon-wrapper">
+        <div class="blocked-icon">
+          <div class="icon-pulse"></div>
+          <i class="fas fa-user-slash"></i>
+        </div>
+      </div>
+
+      <!-- Main content with fade-in animation -->
+      <div class="blocked-content">
+        <h1 class="blocked-title">
+          <span class="gradient-text">Профиль недоступен</span>
+        </h1>
+
+        <p class="blocked-message">
+          Этот пользователь ограничил доступ к своему профилю.
+          <br>Возможно, вы были заблокированы или профиль приватный.
+        </p>
+
+        <!-- Action buttons with hover effects -->
+        <div class="blocked-actions">
+          <a href="/dashboard" class="btn-modern btn-primary">
+            <span class="btn-content">
+              <i class="fas fa-home"></i>
+              <span>На главную</span>
+            </span>
+            <div class="btn-shimmer"></div>
+          </a>
+
+          <a href="/recommendations" class="btn-modern btn-secondary">
+            <span class="btn-content">
+              <i class="fas fa-users"></i>
+              <span>Найти пользователей</span>
+            </span>
+            <div class="btn-shimmer"></div>
+          </a>
+        </div>
+
+        <!-- Info card with glassmorphism -->
+        <div class="info-card">
+          <div class="info-header">
+            <div class="info-icon">
+              <i class="fas fa-info-circle"></i>
+            </div>
+            <h3>Что это значит?</h3>
+          </div>
+
+          <div class="info-list">
+            <div class="info-item">
+              <div class="item-icon">
+                <i class="fas fa-eye-slash"></i>
+              </div>
+              <span>Вы не можете видеть посты этого пользователя</span>
+            </div>
+
+            <div class="info-item">
+              <div class="item-icon">
+                <i class="fas fa-comment-slash"></i>
+              </div>
+              <span>Отправка сообщений недоступна</span>
+            </div>
+
+            <div class="info-item">
+              <div class="item-icon">
+                <i class="fas fa-ban"></i>
+              </div>
+              <span>Взаимодействия ограничены</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggestion card -->
+        <div class="suggestion-card">
+          <div class="suggestion-icon">
+            <i class="fas fa-lightbulb"></i>
+          </div>
+          <div class="suggestion-content">
+            <h4>Попробуйте что-то другое</h4>
+            <p>Изучите рекомендации или найдите новых интересных людей в сообществе</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --bg-primary: #0f0f23;
+    --bg-secondary: #1a1a2e;
+    --bg-tertiary: #16213e;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b3b8;
+    --text-muted: #8e8e93;
+    --accent-primary: #007bff;
+    --accent-secondary: #28a745;
+    --accent-danger: #dc3545;
+    --accent-warning: #ffc107;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  .bg-decoration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .floating-shapes {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .shape {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .shape-1 {
+    width: 80px;
+    height: 80px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+
+  .shape-2 {
+    width: 120px;
+    height: 120px;
+    top: 60%;
+    right: 15%;
+    animation-delay: 2s;
+  }
+
+  .shape-3 {
+    width: 60px;
+    height: 60px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+  }
+
+  .shape-4 {
+    width: 100px;
+    height: 100px;
+    top: 40%;
+    right: 40%;
+    animation-delay: 1s;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+  }
+
+  .main-content {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .content-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem;
+  }
+
+  .blocked-profile-container {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Blocked Icon */
+  .blocked-icon-wrapper {
+    position: relative;
+    margin-bottom: 3rem;
+  }
+
+  .blocked-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    animation: iconBounce 2s ease-in-out infinite;
+  }
+
+  .blocked-icon i {
+    font-size: 3rem;
+    color: var(--accent-danger);
+    filter: drop-shadow(0 4px 8px rgba(220, 53, 69, 0.3));
+  }
+
+  .icon-pulse {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-danger);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes iconBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1.2);
+      opacity: 0;
+    }
+  }
+
+  /* Content */
+  .blocked-content {
+    animation: fadeIn 1s ease-out 0.3s both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .blocked-title {
+    margin-bottom: 2rem;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .blocked-message {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  /* Modern Buttons */
+  .blocked-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 4rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-modern {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    min-width: 180px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, #0056b3 100%);
+    color: var(--text-primary);
+    box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);
+  }
+
+  .btn-secondary {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
+    color: var(--text-primary);
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  .btn-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .btn-shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-modern:hover .btn-shimmer {
+    left: 100%;
+  }
+
+  /* Info Card */
+  .info-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    text-align: left;
+    animation: slideInUp 0.8s ease-out 0.5s both;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-primary) 0%, #0056b3 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+  }
+
+  .info-header h3 {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+  }
+
+  .info-item:hover {
+    background: var(--bg-tertiary);
+    transform: translateX(5px);
+    border-color: var(--accent-primary);
+  }
+
+  .item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(220, 53, 69, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-danger);
+    font-size: 0.9rem;
+  }
+
+  .info-item span {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  /* Suggestion Card */
+  .suggestion-card {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid rgba(255, 193, 7, 0.2);
+    text-align: left;
+    animation: slideInUp 0.8s ease-out 0.7s both;
+  }
+
+  .suggestion-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-warning) 0%, #ff9800 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg-primary);
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .suggestion-content h4 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .suggestion-content p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .blocked-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .btn-modern {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .gradient-text {
+      font-size: 2rem;
+    }
+
+    .blocked-icon {
+      width: 100px;
+      height: 100px;
+    }
+
+    .blocked-icon i {
+      font-size: 2.5rem;
+    }
+
+    .suggestion-card {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .content-wrapper {
+      padding: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .gradient-text {
+      font-size: 1.75rem;
+    }
+
+    .blocked-message {
+      font-size: 1rem;
+    }
+
+    .info-card {
+      padding: 1.5rem;
+    }
+
+    .suggestion-card {
+      padding: 1.25rem;
+    }
+  }
+</style>
+
+<script>
+  // Добавляем интерактивность при загрузке страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    // Эффект параллакса для фоновых фигур
+    document.addEventListener('mousemove', function(e) {
+      const shapes = document.querySelectorAll('.shape');
+      const mouseX = e.clientX / window.innerWidth;
+      const mouseY = e.clientY / window.innerHeight;
+
+      shapes.forEach((shape, index) => {
+        const speed = (index + 1) * 0.5;
+        const x = (mouseX - 0.5) * speed * 20;
+        const y = (mouseY - 0.5) * speed * 20;
+
+        shape.style.transform = `translate(${x}px, ${y}px)`;
+      });
+    });
+
+    // Добавляем ripple эффект к кнопкам
+    const buttons = document.querySelectorAll('.btn-modern');
+    buttons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        const ripple = document.createElement('div');
+        const rect = button.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+
+        ripple.style.cssText = `
+          position: absolute;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.3);
+          transform: scale(0);
+          animation: ripple 0.6s linear;
+          left: ${x}px;
+          top: ${y}px;
+          width: ${size}px;
+          height: ${size}px;
+          pointer-events: none;
+        `;
+
+        button.appendChild(ripple);
+
+        setTimeout(() => {
+          ripple.remove();
+        }, 600);
+      });
+    });
+  });
+
+  // CSS для анимации ripple
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>

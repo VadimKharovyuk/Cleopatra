@@ -36,6 +36,7 @@ public class UserProfileController {
     private final SubscriptionService subscriptionService;
     private final IpAddressService ipAddressService;
     private final PostService postService;
+    private final UserBlockService userBlockService;
 
 
 
@@ -51,11 +52,26 @@ public class UserProfileController {
             if (authentication != null) {
                 UserResponse currentUser = userService.getUserByEmail(authentication.getName());
                 model.addAttribute("currentUserId", currentUser.getId());
+
+
+                // ===== ПРОВЕРКА БЛОКИРОВКИ =====
+                // Проверяем заблокировал ли текущий пользователь просматриваемого
+                boolean iBlockedUser = userBlockService.isBlocked(currentUser.getId(), userId);
+                // Проверяем заблокировал ли просматриваемый пользователь текущего
+                boolean userBlockedMe = userBlockService.isBlocked(userId, currentUser.getId());
+
+                model.addAttribute("iBlockedUser", iBlockedUser);
+                model.addAttribute("userBlockedMe", userBlockedMe);
+                model.addAttribute("canInteract", !iBlockedUser && !userBlockedMe);
+
+                // Если просматриваемый пользователь заблокировал текущего - показываем ограниченную информацию
+                if (userBlockedMe) {
+                    return "profile/profile-blocked"; // Специальная страница для заблокированных
+                }
             }
             // Получаем информацию о пользователе
             UserResponse user = userService.getUserById(userId);
             model.addAttribute("user", user);
-
 
 
 

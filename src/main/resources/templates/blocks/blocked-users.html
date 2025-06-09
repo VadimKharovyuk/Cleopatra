@@ -3,152 +3,215 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Заблокированные пользователи - Cleopatra</title>
 
-  <title>Заблокированные пользователи</title>
-
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<main>
-  <!-- Сообщения об успехе/ошибке -->
-  <div th:if="${successMessage}" class="alert alert-success">
-    <p th:text="${successMessage}"></p>
-  </div>
+<!-- Включаем sidebar с активной секцией 'blocks' -->
+<th:block th:replace="~{fragments/sidebar :: complete-sidebar('blocks')}"></th:block>
 
-  <div th:if="${errorMessage}" class="alert alert-error">
-    <p th:text="${errorMessage}"></p>
-  </div>
-
-  <!-- Статистика -->
-  <div class="stats-container">
-    <h3>📊 Статистика блокировок</h3>
-    <p>Всего заблокировано пользователей: <strong th:text="${blockedUsersPage.blockedUsersCount}">0</strong></p>
-  </div>
-
-  <!-- Список заблокированных пользователей -->
-  <div th:if="${#lists.isEmpty(blockedUsersPage.blockedUsers)}" class="empty-state">
-    <div class="empty-content">
-      <i class="fas fa-users-slash fa-4x"></i>
-      <h2>У вас нет заблокированных пользователей</h2>
-      <p>Вы можете найти и заблокировать пользователей в поиске.</p>
-      <a href="/blocks/search" class="btn-luxury btn-primary-luxury">
-        <i class="fas fa-search"></i>
-        Найти пользователей
-      </a>
+<main class="main-content">
+  <div class="content-wrapper">
+    <!-- Заголовок страницы -->
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-title">
+          <i class="fas fa-ban header-icon"></i>
+          <h1>Заблокированные пользователи</h1>
+        </div>
+        <p class="header-subtitle">Управляйте списком заблокированных пользователей</p>
+      </div>
+<!--      <div class="header-actions">-->
+<!--        <a href="/blocks/search" class="btn-luxury btn-primary-luxury">-->
+<!--          <i class="fas fa-search"></i>-->
+<!--          Найти пользователей-->
+<!--        </a>-->
+<!--      </div>-->
     </div>
-  </div>
 
-  <div th:unless="${#lists.isEmpty(blockedUsersPage.blockedUsers)}" class="blocked-users-container">
-    <h2>Список заблокированных пользователей</h2>
+    <!-- Сообщения об успехе/ошибке -->
+    <div th:if="${successMessage}" class="alert alert-success">
+      <i class="fas fa-check-circle"></i>
+      <p th:text="${successMessage}"></p>
+    </div>
 
-    <div class="users-grid">
-      <div th:each="blockedUser : ${blockedUsersPage.blockedUsers}" class="user-card">
-        <!-- Фото пользователя -->
-        <div class="user-avatar">
-          <img th:if="${blockedUser.imageUrl}"
-               th:src="${blockedUser.imageUrl}"
-               alt="Фото пользователя"
-               class="avatar-img">
-          <div th:unless="${blockedUser.imageUrl}" class="avatar-placeholder">
-            <span th:text="${#strings.substring(blockedUser.firstName,0,1) + #strings.substring(blockedUser.lastName,0,1)}">AB</span>
-          </div>
+    <div th:if="${errorMessage}" class="alert alert-error">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p th:text="${errorMessage}"></p>
+    </div>
+
+    <!-- Статистика -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-ban"></i>
         </div>
-
-        <!-- Информация о пользователе -->
-        <div class="user-info">
-          <h3 class="user-name" th:text="${blockedUser.firstName + ' ' + blockedUser.lastName}">Имя Фамилия</h3>
-          <p class="user-email" th:text="${blockedUser.email}">email@example.com</p>
-
-          <div class="user-details">
-            <div class="detail-item">
-              <i class="fas fa-map-marker-alt"></i>
-              <span th:text="${blockedUser.city ?: 'Город не указан'}">Город</span>
-            </div>
-
-            <div class="detail-item">
-              <i class="fas fa-calendar"></i>
-              <span>Заблокирован: <span th:text="${#temporals.format(blockedUser.blockedAt, 'dd.MM.yyyy HH:mm')}">дата</span></span>
-            </div>
-
-            <div class="detail-item">
-              <i class="fas fa-users"></i>
-              <span th:text="${blockedUser.followersCount + ' подписчиков'}">0 подписчиков</span>
-            </div>
-          </div>
-
-          <!-- Статус онлайн -->
-          <div class="online-status">
-            <div th:if="${blockedUser.isOnline}" class="status online">
-              <i class="fas fa-circle"></i>
-              <span>Онлайн</span>
-            </div>
-            <div th:unless="${blockedUser.isOnline}" class="status offline">
-              <i class="far fa-circle"></i>
-              <span>Был в сети: <span th:text="${#temporals.format(blockedUser.lastSeen, 'dd.MM.yyyy HH:mm')}">дата</span></span>
-            </div>
-          </div>
+        <div class="stat-content">
+          <h3 class="stat-number" th:text="${blockedUsersPage.blockedUsersCount}">0</h3>
+          <p class="stat-label">Заблокированных пользователей</p>
         </div>
-
-        <!-- Действия -->
-        <div class="user-actions">
-          <a th:href="@{/profile/{userId}(userId=${blockedUser.userId})}"
-             class="btn-luxury btn-outline-luxury">
-            <i class="fas fa-user"></i>
-            Профиль
-          </a>
-
-          <a href="#"
-             class="btn-luxury btn-success-luxury"
-             data-action="unblock"
-             th:data-user-id="${blockedUser.userId}"
-             th:data-user-name="${blockedUser.firstName + ' ' + blockedUser.lastName}">
-            <i class="fas fa-unlock"></i>
-            Разблокировать
-          </a>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-secondary">
+          <i class="fas fa-eye-slash"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number" th:text="${blockedUsersPage.totalElements}">0</h3>
+          <p class="stat-label">Всего записей</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-success">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">100%</h3>
+          <p class="stat-label">Безопасность</p>
         </div>
       </div>
     </div>
 
-    <!-- Пагинация -->
-    <div th:if="${blockedUsersPage.totalPages > 1}" class="pagination-container">
-      <nav class="pagination">
-        <!-- Предыдущая страница -->
-        <a th:if="${blockedUsersPage.hasPrevious}"
-           th:href="@{/blocks(page=${blockedUsersPage.currentPage - 1}, size=${blockedUsersPage.pageSize})}"
-           class="pagination-btn">
-          <i class="fas fa-chevron-left"></i>
-          Предыдущая
-        </a>
-
-        <!-- Номера страниц -->
-        <div class="page-numbers">
-                        <span th:each="i : ${#numbers.sequence(0, blockedUsersPage.totalPages - 1)}">
-                            <a th:if="${i != blockedUsersPage.currentPage}"
-                               th:href="@{/blocks(page=${i}, size=${blockedUsersPage.pageSize})}"
-                               th:text="${i + 1}"
-                               class="page-number">
-                            </a>
-                            <span th:if="${i == blockedUsersPage.currentPage}"
-                                  th:text="${i + 1}"
-                                  class="page-number active">
-                            </span>
-                        </span>
+    <!-- Список заблокированных пользователей -->
+    <div th:if="${#lists.isEmpty(blockedUsersPage.blockedUsers)}" class="empty-state">
+      <div class="empty-content">
+        <div class="empty-icon">
+          <i class="fas fa-users-slash"></i>
         </div>
-
-        <!-- Следующая страница -->
-        <a th:if="${blockedUsersPage.hasNext}"
-           th:href="@{/blocks(page=${blockedUsersPage.currentPage + 1}, size=${blockedUsersPage.pageSize})}"
-           class="pagination-btn">
-          Следующая
-          <i class="fas fa-chevron-right"></i>
+        <h2>У вас нет заблокированных пользователей</h2>
+        <p>Это отлично! Вы поддерживаете позитивное общение в сообществе.</p>
+        <a href="/blocks/search" class="btn-luxury btn-primary-luxury">
+          <i class="fas fa-search"></i>
+          Найти пользователей
         </a>
-      </nav>
+      </div>
+    </div>
 
-      <div class="pagination-info">
-        <p>
-          Страница <span th:text="${blockedUsersPage.currentPage + 1}">1</span>
-          из <span th:text="${blockedUsersPage.totalPages}">1</span>
-          (Всего элементов: <span th:text="${blockedUsersPage.totalElements}">0</span>)
-        </p>
+    <div th:unless="${#lists.isEmpty(blockedUsersPage.blockedUsers)}" class="blocked-users-container">
+      <div class="section-header">
+        <h2>Заблокированные пользователи</h2>
+      </div>
+
+      <div class="users-grid" id="users-container">
+        <div th:each="blockedUser : ${blockedUsersPage.blockedUsers}" class="user-card">
+          <!-- Статус блокировки -->
+          <div class="block-status">
+            <i class="fas fa-ban"></i>
+            <span>Заблокирован</span>
+          </div>
+
+          <!-- Фото пользователя -->
+          <div class="user-avatar">
+            <img th:if="${blockedUser.imageUrl}"
+                 th:src="${blockedUser.imageUrl}"
+                 alt="Фото пользователя"
+                 class="avatar-img">
+            <div th:unless="${blockedUser.imageUrl}" class="avatar-placeholder">
+              <span th:text="${#strings.substring(blockedUser.firstName,0,1) + #strings.substring(blockedUser.lastName,0,1)}">AB</span>
+            </div>
+
+            <!-- Статус онлайн -->
+            <div class="online-indicator" th:classappend="${blockedUser.isOnline} ? 'online' : 'offline'"></div>
+          </div>
+
+          <!-- Информация о пользователе -->
+          <div class="user-info">
+            <h3 class="user-name" th:text="${blockedUser.firstName + ' ' + blockedUser.lastName}">Имя Фамилия</h3>
+            <p class="user-email" th:text="${blockedUser.email}">email@example.com</p>
+
+            <div class="user-details">
+              <div class="detail-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span th:text="${blockedUser.city ?: 'Город не указан'}">Город</span>
+              </div>
+
+              <div class="detail-item">
+                <i class="fas fa-calendar"></i>
+                <span>Заблокирован: <span th:text="${#temporals.format(blockedUser.blockedAt, 'dd.MM.yyyy')}">дата</span></span>
+              </div>
+
+              <div class="detail-item">
+                <i class="fas fa-users"></i>
+                <span th:text="${blockedUser.followersCount + ' подписчиков'}">0 подписчиков</span>
+              </div>
+
+              <div class="detail-item">
+                <i class="fas fa-clock"></i>
+                <span th:if="${blockedUser.isOnline}">Онлайн</span>
+                <span th:unless="${blockedUser.isOnline}">
+                                        Был в сети: <span th:text="${#temporals.format(blockedUser.lastSeen, 'dd.MM.yyyy HH:mm')}">дата</span>
+                                    </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Действия -->
+          <div class="user-actions">
+            <a th:href="@{/profile/{userId}(userId=${blockedUser.userId})}"
+               class="btn-action btn-outline"
+               title="Посмотреть профиль">
+              <i class="fas fa-user"></i>
+              <span>Профиль</span>
+            </a>
+
+            <a href="#"
+               class="btn-action btn-success"
+               data-action="unblock"
+               th:data-user-id="${blockedUser.userId}"
+               th:data-user-name="${blockedUser.firstName + ' ' + blockedUser.lastName}"
+               title="Разблокировать пользователя">
+              <i class="fas fa-unlock"></i>
+              <span>Разблокировать</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Пагинация -->
+      <div th:if="${blockedUsersPage.totalPages > 1}" class="pagination-container">
+        <nav class="pagination">
+          <!-- Предыдущая страница -->
+          <a th:if="${blockedUsersPage.hasPrevious}"
+             th:href="@{/blocks(page=${blockedUsersPage.currentPage - 1}, size=${blockedUsersPage.pageSize})}"
+             class="pagination-btn">
+            <i class="fas fa-chevron-left"></i>
+            Предыдущая
+          </a>
+
+          <!-- Номера страниц -->
+          <div class="page-numbers">
+                            <span th:each="i : ${#numbers.sequence(0, blockedUsersPage.totalPages - 1)}">
+                                <a th:if="${i != blockedUsersPage.currentPage}"
+                                   th:href="@{/blocks(page=${i}, size=${blockedUsersPage.pageSize})}"
+                                   th:text="${i + 1}"
+                                   class="page-number">
+                                </a>
+                                <span th:if="${i == blockedUsersPage.currentPage}"
+                                      th:text="${i + 1}"
+                                      class="page-number active">
+                                </span>
+                            </span>
+          </div>
+
+          <!-- Следующая страница -->
+          <a th:if="${blockedUsersPage.hasNext}"
+             th:href="@{/blocks(page=${blockedUsersPage.currentPage + 1}, size=${blockedUsersPage.pageSize})}"
+             class="pagination-btn">
+            Следующая
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </nav>
+
+        <div class="pagination-info">
+          <p>
+            Страница <strong th:text="${blockedUsersPage.currentPage + 1}">1</strong>
+            из <strong th:text="${blockedUsersPage.totalPages}">1</strong>
+            (Всего: <strong th:text="${blockedUsersPage.totalElements}">0</strong>)
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -157,5 +220,821 @@
 <!-- JavaScript -->
 <script th:src="@{/js/profile/lock-user.js}"></script>
 
+<style>
+  /* ===================== LUXURY DESIGN SYSTEM ===================== */
+  :root {
+    /* Luxury Color Palette */
+    --bg-primary: #fafafa;
+    --bg-secondary: #ffffff;
+    --bg-accent: #f8f9fa;
+    --surface-elevated: rgba(255, 255, 255, 0.95);
+
+    /* Text Colors */
+    --text-primary: #1a1a1a;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --text-light: #d1d5db;
+
+    /* Accent Colors */
+    --accent-primary: #2563eb;
+    --accent-secondary: #7c3aed;
+    --accent-success: #059669;
+    --accent-warning: #d97706;
+    --accent-danger: #dc2626;
+
+    /* Borders & Shadows */
+    --border-primary: rgba(0, 0, 0, 0.06);
+    --border-secondary: rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 20px 64px rgba(0, 0, 0, 0.16);
+
+    /* Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+  }
+
+  /* ===================== BASE LAYOUT ===================== */
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+  }
+
+  /* ИСПРАВЛЕНО: Увеличен отступ слева для основного контента */
+  .main-content {
+    margin-left: 300px; /* Увеличено с 280px до 300px */
+    padding: 2rem;
+    min-height: 100vh;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .content-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ===================== PAGE HEADER ===================== */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-primary);
+  }
+
+  .header-content {
+    flex: 1;
+  }
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .header-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent-danger), #ef4444);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+  }
+
+  .header-title h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .header-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  /* ===================== ALERTS ===================== */
+  .alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
+
+  .alert-success {
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.1));
+    color: var(--accent-success);
+    border: 1px solid rgba(5, 150, 105, 0.2);
+  }
+
+  .alert-error {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(239, 68, 68, 0.1));
+    color: var(--accent-danger);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+  }
+
+  /* ===================== STATISTICS ===================== */
+  .stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-primary);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--accent-danger), #ef4444);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+  }
+
+  .stat-icon-secondary {
+    background: linear-gradient(135deg, var(--accent-secondary), #8b5cf6);
+  }
+
+  .stat-icon-success {
+    background: linear-gradient(135deg, var(--accent-success), #10b981);
+  }
+
+  .stat-content {
+    flex: 1;
+  }
+
+  .stat-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem 0;
+    line-height: 1;
+  }
+
+  .stat-label {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  /* ===================== EMPTY STATE ===================== */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .empty-content {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--text-muted);
+    font-size: 2rem;
+  }
+
+  .empty-state h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .empty-state p {
+    color: var(--text-secondary);
+    margin: 0 0 2rem 0;
+    line-height: 1.6;
+  }
+
+  /* ===================== SECTION HEADER ===================== */
+  .section-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  /* ===================== USER CARDS GRID ===================== */
+  .users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .user-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-primary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .user-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, var(--accent-danger), #ef4444);
+  }
+
+  .user-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .block-status {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--accent-danger);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .user-avatar {
+    text-align: center;
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+  }
+
+  .avatar-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--bg-accent);
+  }
+
+  .avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    border: 3px solid var(--bg-accent);
+  }
+
+  .online-indicator {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid var(--bg-secondary);
+  }
+
+  .online-indicator.online {
+    background: var(--accent-success);
+  }
+
+  .online-indicator.offline {
+    background: var(--text-muted);
+  }
+
+  .user-info {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .user-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem 0;
+  }
+
+  .user-email {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin: 0 0 1rem 0;
+  }
+
+  .user-details {
+    text-align: left;
+  }
+
+  .detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  .detail-item i {
+    width: 16px;
+    color: var(--text-muted);
+  }
+
+  .user-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+
+  .btn-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-outline {
+    background: var(--bg-accent);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-primary);
+  }
+
+  .btn-outline:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--accent-success), #10b981);
+    color: white;
+    border: 1px solid transparent;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+    text-decoration: none;
+    color: white;
+  }
+
+  /* ===================== LUXURY BUTTONS ===================== */
+  .btn-luxury {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    font-size: 0.875rem;
+  }
+
+  .btn-primary-luxury {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-primary-luxury:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    text-decoration: none;
+    color: white;
+  }
+
+  /* ===================== PAGINATION ===================== */
+  .pagination-container {
+    margin-top: 3rem;
+    text-align: center;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .pagination-btn, .page-number {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .pagination-btn:hover, .page-number:hover {
+    background: var(--bg-accent);
+    color: var(--text-primary);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  .page-number.active {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    border-color: transparent;
+  }
+
+  .page-numbers {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .pagination-info {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+  }
+
+  /* ===================== RESPONSIVE DESIGN ===================== */
+  @media (max-width: 1024px) {
+    .main-content {
+      margin-left: 100px; /* Увеличено с 80px до 100px */
+    }
+  }
+
+  @media (max-width: 768px) {
+    .main-content {
+      margin-left: 0;
+      padding-top: 80px;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .page-header {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .header-actions {
+      width: 100%;
+    }
+
+    .stats-container {
+      grid-template-columns: 1fr;
+    }
+
+    .users-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pagination {
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+
+    .pagination-btn {
+      font-size: 0.75rem;
+      padding: 0.5rem 0.75rem;
+    }
+  }
+</style>
+
+<script>
+  // ===================== ANIMATIONS =====================
+  function animateCards() {
+    const cards = document.querySelectorAll('.user-card');
+
+    cards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+
+      setTimeout(() => {
+        card.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, index * 100);
+    });
+  }
+
+  // ===================== CONFIRMATION DIALOGS =====================
+    function enhanceUnblockButtons() {
+      document.querySelectorAll('[data-action="unblock"]').forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          const userName = this.getAttribute('data-user-name');
+          const userId = this.getAttribute('data-user-id');
+
+          // Создаем красивое модальное окно подтверждения
+          showUnblockConfirmation(userName, userId, this);
+        });
+      });
+    }
+
+    function showUnblockConfirmation(userName, userId, button) {
+      // Создаем модальное окно
+      const modal = document.createElement('div');
+      modal.className = 'confirmation-modal';
+      modal.style.cssText = `
+                  position: fixed;
+                  top: 0;
+                  left: 0;
+                  right: 0;
+                  bottom: 0;
+                  background: rgba(0, 0, 0, 0.5);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  z-index: 10000;
+                  backdrop-filter: blur(4px);
+                  animation: fadeIn 0.2s ease;
+              `;
+
+      const modalContent = document.createElement('div');
+      modalContent.style.cssText = `
+                  background: white;
+                  border-radius: var(--radius-lg);
+                  padding: 2rem;
+                  max-width: 400px;
+                  margin: 1rem;
+                  box-shadow: var(--shadow-xl);
+                  text-align: center;
+                  animation: slideIn 0.3s ease;
+              `;
+
+      modalContent.innerHTML = `
+                  <div style="margin-bottom: 1.5rem;">
+                      <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--accent-success), #10b981); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: white; font-size: 1.5rem;">
+                          <i class="fas fa-unlock"></i>
+                      </div>
+                      <h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">Разблокировать пользователя?</h3>
+                      <p style="color: var(--text-secondary); margin: 0;">Вы уверены, что хотите разблокировать <strong>${userName}</strong>?</p>
+                  </div>
+                  <div style="display: flex; gap: 0.75rem; justify-content: center;">
+                      <button class="cancel-btn" style="padding: 0.75rem 1.5rem; background: var(--bg-accent); color: var(--text-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-md); cursor: pointer; font-weight: 500;">
+                          Отмена
+                      </button>
+                      <button class="confirm-btn" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, var(--accent-success), #10b981); color: white; border: none; border-radius: var(--radius-md); cursor: pointer; font-weight: 500;">
+                          Разблокировать
+                      </button>
+                  </div>
+              `;
+
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+
+      // Добавляем стили анимации
+      const style = document.createElement('style');
+      style.textContent = `
+                  @keyframes fadeIn {
+                      from { opacity: 0; }
+                      to { opacity: 1; }
+                  }
+                  @keyframes slideIn {
+                      from { transform: scale(0.9) translateY(-20px); opacity: 0; }
+                      to { transform: scale(1) translateY(0); opacity: 1; }
+                  }
+              `;
+      document.head.appendChild(style);
+
+      // Обработчики событий
+      const cancelBtn = modalContent.querySelector('.cancel-btn');
+      const confirmBtn = modalContent.querySelector('.confirm-btn');
+
+      cancelBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+        document.head.removeChild(style);
+      });
+
+      confirmBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+        document.head.removeChild(style);
+
+        // Вызываем функцию разблокировки
+        if (window.unblockUserById) {
+          window.unblockUserById(userId, userName);
+        }
+      });
+
+      // Закрытие по клику на фон
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          document.body.removeChild(modal);
+          document.head.removeChild(style);
+        }
+      });
+
+      // Закрытие по Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          if (document.body.contains(modal)) {
+            document.body.removeChild(modal);
+            document.head.removeChild(style);
+          }
+        }
+      });
+    }
+
+    // ===================== ENHANCED NOTIFICATIONS =====================
+    function showEnhancedNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      notification.className = 'enhanced-notification';
+
+      const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
+      const bgColor = type === 'success' ? 'var(--accent-success)' : 'var(--accent-danger)';
+
+      notification.style.cssText = `
+                  position: fixed;
+                  top: 20px;
+                  right: 20px;
+                  background: ${bgColor};
+                  color: white;
+                  padding: 1rem 1.25rem;
+                  border-radius: var(--radius-md);
+                  box-shadow: var(--shadow-lg);
+                  z-index: 9999;
+                  max-width: 350px;
+                  display: flex;
+                  align-items: center;
+                  gap: 0.75rem;
+                  animation: slideInRight 0.3s ease;
+                  cursor: pointer;
+              `;
+
+      notification.innerHTML = `
+                  <i class="${icon}" style="font-size: 1.25rem;"></i>
+                  <span style="font-weight: 500;">${message}</span>
+                  <i class="fas fa-times" style="margin-left: auto; cursor: pointer; opacity: 0.8;"></i>
+              `;
+
+      document.body.appendChild(notification);
+
+      // Автоматическое удаление
+      setTimeout(() => {
+        if (document.body.contains(notification)) {
+          notification.style.animation = 'slideOutRight 0.3s ease';
+          setTimeout(() => {
+            if (document.body.contains(notification)) {
+              document.body.removeChild(notification);
+            }
+          }, 300);
+        }
+      }, 5000);
+
+      // Удаление по клику
+      notification.addEventListener('click', () => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
+        }, 300);
+      });
+
+      // Добавляем стили анимации если их еще нет
+      if (!document.querySelector('#notification-animations')) {
+        const style = document.createElement('style');
+        style.id = 'notification-animations';
+        style.textContent = `
+                      @keyframes slideInRight {
+                          from { transform: translateX(100%); opacity: 0; }
+                          to { transform: translateX(0); opacity: 1; }
+                      }
+                      @keyframes slideOutRight {
+                          from { transform: translateX(0); opacity: 1; }
+                          to { transform: translateX(100%); opacity: 0; }
+                      }
+                  `;
+        document.head.appendChild(style);
+      }
+    }
+
+    // ===================== STATISTICS ANIMATION =====================
+    function animateStatNumbers() {
+      document.querySelectorAll('.stat-number').forEach(element => {
+        const finalValue = parseInt(element.textContent) || 0;
+        let currentValue = 0;
+        const increment = Math.ceil(finalValue / 30);
+        const timer = setInterval(() => {
+          currentValue += increment;
+          if (currentValue >= finalValue) {
+            currentValue = finalValue;
+            clearInterval(timer);
+          }
+          element.textContent = currentValue;
+        }, 50);
+      });
+    }
+
+    // ===================== INITIALIZATION =====================
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🏛️ Blocked Users Page initialized');
+
+      // Загружаем сохраненный вид
+      loadSavedView();
+
+      // Анимируем карточки
+      setTimeout(animateCards, 200);
+
+      // Анимируем статистику
+      setTimeout(animateStatNumbers, 500);
+
+      // Инициализируем поиск
+      if (document.querySelector('.users-grid .user-card')) {
+        initializeSearch();
+      }
+
+      // Улучшаем кнопки разблокировки
+      enhanceUnblockButtons();
+
+      // Переопределяем функцию уведомлений если она существует
+      if (window.showNotification) {
+        window.showNotification = showEnhancedNotification;
+      }
+    });
+
+    // Экспортируем функции для глобального использования
+    window.switchView = switchView;
+    window.showEnhancedNotification = showEnhancedNotification;
+  </script>
 </body>
 </html>
