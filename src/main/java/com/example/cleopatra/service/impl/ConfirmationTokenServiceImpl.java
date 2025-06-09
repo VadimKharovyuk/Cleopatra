@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -85,7 +86,6 @@ public class ConfirmationTokenServiceImpl implements ConfirmationTokenService {
         return true;
     }
 
-    // В ConfirmationTokenServiceImpl добавьте логи:
     @Override
     public ConfirmationToken getToken(String token) {
         log.info("Searching for token: {}", token);

@@ -38,7 +38,6 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final UserRepository userRepository;
     private final SubscriptionService subscriptionService;
-    // ✅ ДОБАВИТЬ новый сервис для лайков
     private final PostLikeService postLikeService;
     private final CommentService commentService;
 

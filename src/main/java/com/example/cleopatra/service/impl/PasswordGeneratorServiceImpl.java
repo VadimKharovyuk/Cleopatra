@@ -11,7 +11,6 @@ import java.security.SecureRandom;
 public class PasswordGeneratorServiceImpl implements PasswordGeneratorService {
 
     private static final String LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
-
     private static final String DIGITS = "0123456789";
 
 
@@ -31,7 +30,7 @@ public class PasswordGeneratorServiceImpl implements PasswordGeneratorService {
 
     @Override
     public String generatePassword() {
-        return generatePassword(8); // Стандартная длина 8 символов
+        return generatePassword(8);
     }
 
     @Override

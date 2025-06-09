@@ -36,7 +36,6 @@ public class EmailQueueManager implements EmailService {
     @Value("${app.name:Cleopatra}")
     private String appName;
 
-    // Реализация интерфейса EmailService
     @Override
     public void sendPasswordResetEmail(String toEmail, String newPassword) {
         queuePasswordResetEmail(toEmail, newPassword);
@@ -52,7 +51,7 @@ public class EmailQueueManager implements EmailService {
         queueHtmlEmail(toEmail, subject, htmlContent);
     }
 
-    // Добавляем email в очередь
+
     public void queuePasswordResetEmail(String toEmail, String newPassword) {
         String subject = "Восстановление пароля - " + appName;
         String htmlContent = buildPasswordResetEmailTemplate(newPassword);

@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class PostCreateDto {
 
     @NotBlank(message = "Content cannot be empty")
-    @Size(max = 1000, message = "Content cannot exceed 1000 characters")
+    @Size()
     private String content;
 
     private MultipartFile  image;

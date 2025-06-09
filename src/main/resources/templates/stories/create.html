@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Создать историю - Cleopatra</title>
+</head>
+<body>
+<h1>Создать новую историю</h1>
+
+<div>
+  <a href="/stories">← Назад к историям</a>
+</div>
+
+<hr>
+
+<div>
+  <p><strong>Текущий пользователь ID:</strong> <span th:text="${currentUserId}">1</span></p>
+</div>
+
+<hr>
+
+<form id="createStoryForm" enctype="multipart/form-data">
+  <input type="hidden" name="currentUserId" th:value="${currentUserId}">
+
+  <div>
+    <label for="imageFile"><strong>Выберите изображение:</strong></label><br>
+    <input type="file" id="imageFile" name="file" accept="image/*" required>
+    <br><small>Поддерживаются: JPG, PNG, GIF. Максимум: 10MB</small>
+  </div>
+
+  <br>
+
+  <!-- Предварительный просмотр -->
+  <div id="imagePreview" style="display: none;">
+    <h3>Предварительный просмотр:</h3>
+    <img id="previewImg" alt="Предварительный просмотр" style="max-width: 300px; max-height: 300px;">
+  </div>
+
+  <br>
+
+  <div>
+    <label for="emoji"><strong>Эмодзи (необязательно):</strong></label><br>
+    <select id="emoji" name="emoji">
+      <option value="">-- Выберите эмодзи --</option>
+      <option th:each="emoji : ${storyEmojiValues}"
+              th:value="${emoji.name()}"
+              th:text="${emoji.emoji + ' ' + emoji.description}">
+        ❤️ Сердце
+      </option>
+    </select>
+  </div>
+
+  <br>
+
+  <div>
+    <label for="description"><strong>Описание (необязательно):</strong></label><br>
+    <textarea id="description" name="description" rows="3" cols="50" maxlength="500"
+              placeholder="Расскажите что-нибудь о своей истории..."></textarea>
+    <br><small><span id="charCount">0</span>/500 символов</small>
+  </div>
+
+  <br>
+
+  <div style="border: 1px solid #ccc; padding: 10px;">
+    <h3>Информация об истечении:</h3>
+    <p>Ваша история будет доступна в течение <strong>24 часов</strong> с момента создания.</p>
+    <p>После этого она автоматически удалится.</p>
+  </div>
+
+  <br>
+
+  <div>
+    <button type="submit" id="createBtn">Создать историю</button>
+    <a href="/stories">Отмена</a>
+  </div>
+</form>
+
+<!-- Индикатор загрузки -->
+<div id="loadingIndicator" style="display: none;">
+  <hr>
+  <h3>Загружаем вашу историю...</h3>
+  <p>Пожалуйста, подождите. Не закрывайте страницу.</p>
+</div>
+
+<!-- Результат -->
+<div id="result" style="display: none;">
+  <!-- Результат будет добавлен здесь -->
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('createStoryForm');
+    const fileInput = document.getElementById('imageFile');
+    const previewContainer = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const description = document.getElementById('description');
+    const charCount = document.getElementById('charCount');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const result = document.getElementById('result');
+
+    // Предварительный просмотр изображения
+    fileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Проверка размера файла (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          alert('Файл слишком большой! Максимальный размер: 10MB');
+          fileInput.value = '';
+          previewContainer.style.display = 'none';
+          return;
+        }
+
+        // Проверка типа файла
+        if (!file.type.startsWith('image/')) {
+          alert('Пожалуйста, выберите изображение!');
+          fileInput.value = '';
+          previewContainer.style.display = 'none';
+          return;
+        }
+
+        // Показываем предварительный просмотр
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImg.src = e.target.result;
+          previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Счетчик символов в описании
+    description.addEventListener('input', function() {
+      const length = this.value.length;
+      charCount.textContent = length;
+    });
+
+    // Отправка формы
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Проверяем, выбран ли файл
+      if (!fileInput.files[0]) {
+        alert('Пожалуйста, выберите изображение!');
+        return;
+      }
+
+      console.log('Отправляем форму...');
+
+      // Показываем индикатор загрузки
+      form.style.display = 'none';
+      loadingIndicator.style.display = 'block';
+
+      // Создаем FormData
+      const formData = new FormData(form);
+
+      // Выводим данные формы в консоль для отладки
+      console.log('FormData содержимое:');
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
+      // Отправляем запрос
+      fetch('/stories/api/create', {
+        method: 'POST',
+        body: formData
+      })
+              .then(response => {
+                console.log('Ответ получен:', response.status);
+                if (response.ok) {
+                  return response.json();
+                } else {
+                  return response.text().then(text => {
+                    throw new Error(text);
+                  });
+                }
+              })
+              .then(data => {
+                console.log('Успешно:', data);
+                // Успешное создание
+                loadingIndicator.style.display = 'none';
+                result.innerHTML = `
+                        <hr>
+                        <h3>✅ История создана успешно!</h3>
+                        <p>ID истории: ${data.id}</p>
+                        <p>Ваша история будет доступна в течение 24 часов.</p>
+                        <div>
+                            <a href="/stories/${data.id}">👀 Посмотреть историю</a> |
+                            <a href="/stories">📱 К списку историй</a> |
+                            <a href="/stories/create">➕ Создать еще одну</a>
+                        </div>
+                    `;
+                result.style.display = 'block';
+              })
+              .catch(error => {
+                console.error('Ошибка:', error);
+                // Ошибка создания
+                loadingIndicator.style.display = 'none';
+                result.innerHTML = `
+                        <hr>
+                        <h3>❌ Ошибка создания истории</h3>
+                        <p>${error.message || 'Произошла неизвестная ошибка'}</p>
+                        <div>
+                            <button type="button" onclick="tryAgain()">🔄 Попробовать еще раз</button>
+                            <a href="/stories">← Назад к историям</a>
+                        </div>
+                    `;
+                result.style.display = 'block';
+              });
+    });
+
+    // Функция для повторной попытки
+    window.tryAgain = function() {
+      form.style.display = 'block';
+      result.style.display = 'none';
+      loadingIndicator.style.display = 'none';
+
+      // Очищаем форму
+      fileInput.value = '';
+      previewContainer.style.display = 'none';
+      description.value = '';
+      charCount.textContent = '0';
+      document.getElementById('emoji').selectedIndex = 0;
+    };
+  });
+</script>
+</body>
+</html>

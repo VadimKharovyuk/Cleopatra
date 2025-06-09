@@ -7,6 +7,7 @@ import com.example.cleopatra.model.Notification;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.repository.NotificationRepository;
 import com.example.cleopatra.repository.UserRepository;
+import com.example.cleopatra.service.StoryService;
 import com.example.cleopatra.service.impl.EmailQueueManager;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -36,6 +37,7 @@ public class UserActivityScheduler {
     private final NotificationRepository notificationRepository;
     private final NotificationWebSocketHandler notificationWebSocketHandler;
     private final NotificationMapper notificationMapper;
+    private final StoryService storyService;
 
     // Конфигурация
     private static final int OFFLINE_THRESHOLD_MINUTES = 10;
@@ -269,6 +271,7 @@ public class UserActivityScheduler {
                 return Map.of("error", e.getMessage());
             }
         }
+
     }
 
 

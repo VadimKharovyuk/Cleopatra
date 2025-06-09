@@ -62,9 +62,6 @@ public class ForgotPasswordController {
     /**
      * ШАГ 2: Подтверждение сброса пароля (генерируем и отправляем новый пароль)
      */
-    /**
-     * ШАГ 2: Подтверждение сброса пароля (генерируем и отправляем новый пароль)
-     */
     @GetMapping("/confirm-reset")
     public ResponseEntity<Map<String, String>> confirmPasswordReset(@RequestParam String token) {
         log.info("Received password reset confirmation request with token: {}", token);

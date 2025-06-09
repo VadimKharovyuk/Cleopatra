@@ -1,5 +1,6 @@
 package com.example.cleopatra.service;
 
+import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ public interface StorageService {
     /**
      * Результат загрузки изображения
      */
+    @Getter
     class StorageResult {
         private String url;
         private String imageId;
@@ -36,12 +38,5 @@ public interface StorageService {
             this.imageId = imageId;
         }
 
-        public String getUrl() {
-            return url;
-        }
-
-        public String getImageId() {
-            return imageId;
-        }
     }
 }

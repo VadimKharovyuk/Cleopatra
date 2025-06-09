@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Истории - Cleopatra</title>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📸 Истории</h1>
+    <nav>
+      <a href="/stories">Все истории</a>
+      <a href="/stories/create">➕ Создать историю</a>
+      <a th:href="@{'/stories/user/' + ${currentUserId}}">Мои истории</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Сообщение об ошибке -->
+    <div th:if="${error}" class="error">
+      <p th:text="${error}"></p>
+    </div>
+
+    <!-- Список историй -->
+    <div th:if="${storyList}" class="stories-container">
+      <h2>Активные истории</h2>
+
+      <!-- Информация о пагинации -->
+      <div class="pagination-info">
+        <p>
+          Страница <span th:text="${storyList.currentPage + 1}">1</span>
+          из <span th:text="${storyList.totalPages}">1</span>
+          (всего историй: <span th:text="${storyList.totalElements}">0</span>)
+        </p>
+      </div>
+
+      <!-- Истории -->
+      <div class="stories-grid">
+        <div th:each="story : ${storyList.stories}" class="story-card">
+          <div class="story-header">
+            <div class="user-info">
+              <img th:if="${story.userImageUrl}"
+                   th:src="${story.userImageUrl}"
+                   th:alt="${story.userFullName}"
+                   class="user-avatar">
+              <div th:unless="${story.userImageUrl}" class="user-avatar-placeholder">👤</div>
+              <div class="user-details">
+                <h3 th:text="${story.userFullName}">Имя пользователя</h3>
+                <p class="time-info" th:text="${story.timeAgo}">2 часа назад</p>
+              </div>
+            </div>
+
+            <!-- Статус -->
+            <div class="story-status">
+              <span th:if="${story.isOwner}" class="owner-badge">Ваша история</span>
+              <span th:if="${story.isViewedByCurrentUser}" class="viewed-badge">👁️ Просмотрено</span>
+              <span th:if="${story.isExpiringSoon}" class="expiring-badge">⏰ Скоро истечет</span>
+            </div>
+          </div>
+
+          <!-- Изображение истории -->
+          <div class="story-image">
+            <a th:href="@{'/stories/' + ${story.id}}">
+              <img th:src="@{'/stories/image/' + ${story.imageId}}"
+                   alt="История"
+                   class="story-img">
+            </a>
+          </div>
+
+          <!-- Контент истории -->
+          <div class="story-content">
+            <div th:if="${story.emoji}" class="story-emoji">
+              <span th:text="${story.emoji.emoji}">❤️</span>
+              <span th:text="${story.emoji.description}" class="emoji-description">Сердце</span>
+            </div>
+
+            <p th:if="${story.description}"
+               th:text="${story.description}"
+               class="story-description">Описание истории</p>
+          </div>
+
+          <!-- Статистика -->
+          <div class="story-stats">
+            <div class="views-count">
+              👁️ <span th:text="${story.viewsCount}">0</span> просмотров
+            </div>
+            <div class="expires-info">
+              <span th:text="${story.expiresIn}">истекает через 5 часов</span>
+            </div>
+          </div>
+
+          <!-- Действия -->
+          <div class="story-actions">
+            <a th:href="@{'/stories/' + ${story.id}}" class="btn btn-primary">
+              📖 Смотреть
+            </a>
+
+            <div th:if="${story.isOwner}" class="owner-actions">
+              <button type="button"
+                      class="btn btn-secondary edit-emoji-btn"
+                      th:data-story-id="${story.id}">
+                😊 Изменить эмодзи
+              </button>
+
+              <button type="button"
+                      class="btn btn-danger delete-story-btn"
+                      th:data-story-id="${story.id}">
+                🗑️ Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Сообщение если нет историй -->
+      <div th:if="${storyList.isEmpty}" class="no-stories">
+        <h3>📭 Нет активных историй</h3>
+        <p>Создайте первую историю или подождите, пока другие пользователи добавят свои!</p>
+        <a href="/stories/create" class="btn btn-primary">➕ Создать историю</a>
+      </div>
+
+      <!-- Пагинация -->
+      <div th:if="${!storyList.isEmpty}" class="pagination">
+        <a th:if="${storyList.hasPrevious}"
+           th:href="@{'/stories'(page=${storyList.previousPage})}"
+           class="btn btn-secondary">← Предыдущая</a>
+
+        <span class="current-page">
+                        Страница <span th:text="${storyList.currentPage + 1}">1</span>
+                    </span>
+
+        <a th:if="${storyList.hasNext}"
+           th:href="@{'/stories'(page=${storyList.nextPage})}"
+           class="btn btn-secondary">Следующая →</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Модальное окно для изменения эмодзи -->
+  <div id="emojiModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h3>Выберите эмодзи</h3>
+      <div class="emoji-grid">
+        <button th:each="emoji : ${storyEmojiValues}"
+                type="button"
+                class="emoji-option"
+                th:data-emoji="${emoji.name()}"
+                th:title="${emoji.description}">
+          <span th:text="${emoji.emoji}">❤️</span>
+          <span th:text="${emoji.description}">Сердце</span>
+        </button>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="cancelEmojiBtn" class="btn btn-secondary">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // JavaScript для работы с модальными окнами и AJAX
+  document.addEventListener('DOMContentLoaded', function() {
+    const emojiModal = document.getElementById('emojiModal');
+    let currentStoryId = null;
+
+    // Обработчики для кнопок изменения эмодзи
+    document.querySelectorAll('.edit-emoji-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        currentStoryId = this.dataset.storyId;
+        emojiModal.style.display = 'block';
+      });
+    });
+
+    // Выбор эмодзи
+    document.querySelectorAll('.emoji-option').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const emoji = this.dataset.emoji;
+        updateStoryEmoji(currentStoryId, emoji);
+      });
+    });
+
+    // Закрытие модального окна
+    document.getElementById('cancelEmojiBtn').addEventListener('click', function() {
+      emojiModal.style.display = 'none';
+      currentStoryId = null;
+    });
+
+    // Обработчики для кнопок удаления
+    document.querySelectorAll('.delete-story-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const storyId = this.dataset.storyId;
+        if (confirm('Вы уверены, что хотите удалить эту историю?')) {
+          deleteStory(storyId);
+        }
+      });
+    });
+
+    // Функция обновления эмодзи
+    function updateStoryEmoji(storyId, emoji) {
+      fetch(`/stories/api/${storyId}/emoji`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `emoji=${emoji}&currentUserId=[[${currentUserId}]]`
+      })
+              .then(response => response.json())
+              .then(data => {
+                emojiModal.style.display = 'none';
+                location.reload(); // Перезагружаем страницу
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('Ошибка обновления эмодзи');
+              });
+    }
+
+    // Функция удаления истории
+    function deleteStory(storyId) {
+      fetch(`/stories/api/${storyId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `currentUserId=[[${currentUserId}]]`
+      })
+              .then(response => {
+                if (response.ok) {
+                  location.reload(); // Перезагружаем страницу
+                } else {
+                  alert('Ошибка удаления истории');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('Ошибка удаления истории');
+              });
+    }
+  });
+</script>
+</body>
+</html>

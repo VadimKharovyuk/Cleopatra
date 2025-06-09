@@ -73,8 +73,8 @@ public class IpAddressServiceImpl implements IpAddressService {
         return userAgent != null && !userAgent.trim().isEmpty() ? userAgent : "Unknown";
     }
 
-    @Override
 
+    @Override
     public void recordUserVisit(Long visitedUserId, Long currentUserId, HttpServletRequest request) {
         log.info("🔍 START recordUserVisit: visitedUserId={}, currentUserId={}", visitedUserId, currentUserId);
 

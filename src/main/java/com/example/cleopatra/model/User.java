@@ -168,6 +168,19 @@ public class User {
     private Set<UserBlock> blockedByUsers = new HashSet<>();
 
 
+
+    // Истории пользователя
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("createdAt DESC")
+    @Builder.Default
+    private List<Story> stories = new ArrayList<>();
+
+    // Просмотренные истории
+    @OneToMany(mappedBy = "viewer", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<StoryView> viewedStories = new HashSet<>();
+
+
     // Системные поля
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

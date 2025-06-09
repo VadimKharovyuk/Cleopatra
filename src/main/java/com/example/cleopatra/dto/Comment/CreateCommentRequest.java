@@ -1,5 +1,6 @@
 package com.example.cleopatra.dto.Comment;
 
+import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
