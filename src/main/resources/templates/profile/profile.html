@@ -833,10 +833,17 @@
                         <span>Поделиться</span>
                     </button>
 
-                    <a href="#" class="btn-luxury btn-danger-luxury" onclick="blockUser()">
+
+                    <a href="#"
+                       class="btn-luxury btn-danger-luxury"
+                       data-action="block"
+                       th:data-user-id="${user.id}"
+                       th:data-user-name="${user.firstName + ' ' + user.lastName}"
+                       th:if="${currentUserId != user.id}">
                         <i class="fas fa-ban"></i>
                         <span>Заблокировать</span>
                     </a>
+
                 </th:block>
 
                 <!-- Кнопки для СОБСТВЕННОГО профиля -->
@@ -2190,26 +2197,15 @@
     }
 
     function blockUser() {
-        if (confirm('Вы уверены, что хотите заблокировать этого пользователя?')) {
-            console.log('Блокировка пользователя...');
-            // TODO: Реализовать логику блокировки
-        }
+        // Получите ID пользователя из контекста страницы
+        const userId = getCurrentPageUserId(); // ваша функция получения ID
+        const userName = getCurrentPageUserName(); // имя пользователя
+        blockUserById(userId, userName);
     }
 </script>
 
 <!-- В конце body, перед закрывающим тегом -->
-<script>
-    // Простые функции
-    function sendMessage() {
-        alert('В разработке');
-    }
 
-    function shareProfile() { /* код */
-    }
-
-    function blockUser() { /* код */
-    }
-</script>
 
 <!-- Модуль подписок загружается последним -->
 <script th:src="@{/js/profile/subscriptionActions.js}"></script>
@@ -2221,9 +2217,14 @@
 <script th:src="@{/js/profile/profileUtils.js}"></script>
 
 
+
 <script th:src="@{/js/profile/postNotificationLike.js}"></script>
 
 <script th:src="@{/js/online-status.js}"></script>
+
+<script th:src="@{/js/profile/lock-user.js}"></script>
+
+
 
 </body>
 </html>

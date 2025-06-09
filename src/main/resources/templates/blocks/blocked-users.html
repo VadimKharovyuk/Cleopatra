@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Заблокированные пользователи</title>
+
+</head>
+<body>
+<main>
+  <!-- Сообщения об успехе/ошибке -->
+  <div th:if="${successMessage}" class="alert alert-success">
+    <p th:text="${successMessage}"></p>
+  </div>
+
+  <div th:if="${errorMessage}" class="alert alert-error">
+    <p th:text="${errorMessage}"></p>
+  </div>
+
+  <!-- Статистика -->
+  <div class="stats-container">
+    <h3>📊 Статистика блокировок</h3>
+    <p>Всего заблокировано пользователей: <strong th:text="${blockedUsersPage.blockedUsersCount}">0</strong></p>
+  </div>
+
+  <!-- Список заблокированных пользователей -->
+  <div th:if="${#lists.isEmpty(blockedUsersPage.blockedUsers)}" class="empty-state">
+    <div class="empty-content">
+      <i class="fas fa-users-slash fa-4x"></i>
+      <h2>У вас нет заблокированных пользователей</h2>
+      <p>Вы можете найти и заблокировать пользователей в поиске.</p>
+      <a href="/blocks/search" class="btn-luxury btn-primary-luxury">
+        <i class="fas fa-search"></i>
+        Найти пользователей
+      </a>
+    </div>
+  </div>
+
+  <div th:unless="${#lists.isEmpty(blockedUsersPage.blockedUsers)}" class="blocked-users-container">
+    <h2>Список заблокированных пользователей</h2>
+
+    <div class="users-grid">
+      <div th:each="blockedUser : ${blockedUsersPage.blockedUsers}" class="user-card">
+        <!-- Фото пользователя -->
+        <div class="user-avatar">
+          <img th:if="${blockedUser.imageUrl}"
+               th:src="${blockedUser.imageUrl}"
+               alt="Фото пользователя"
+               class="avatar-img">
+          <div th:unless="${blockedUser.imageUrl}" class="avatar-placeholder">
+            <span th:text="${#strings.substring(blockedUser.firstName,0,1) + #strings.substring(blockedUser.lastName,0,1)}">AB</span>
+          </div>
+        </div>
+
+        <!-- Информация о пользователе -->
+        <div class="user-info">
+          <h3 class="user-name" th:text="${blockedUser.firstName + ' ' + blockedUser.lastName}">Имя Фамилия</h3>
+          <p class="user-email" th:text="${blockedUser.email}">email@example.com</p>
+
+          <div class="user-details">
+            <div class="detail-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span th:text="${blockedUser.city ?: 'Город не указан'}">Город</span>
+            </div>
+
+            <div class="detail-item">
+              <i class="fas fa-calendar"></i>
+              <span>Заблокирован: <span th:text="${#temporals.format(blockedUser.blockedAt, 'dd.MM.yyyy HH:mm')}">дата</span></span>
+            </div>
+
+            <div class="detail-item">
+              <i class="fas fa-users"></i>
+              <span th:text="${blockedUser.followersCount + ' подписчиков'}">0 подписчиков</span>
+            </div>
+          </div>
+
+          <!-- Статус онлайн -->
+          <div class="online-status">
+            <div th:if="${blockedUser.isOnline}" class="status online">
+              <i class="fas fa-circle"></i>
+              <span>Онлайн</span>
+            </div>
+            <div th:unless="${blockedUser.isOnline}" class="status offline">
+              <i class="far fa-circle"></i>
+              <span>Был в сети: <span th:text="${#temporals.format(blockedUser.lastSeen, 'dd.MM.yyyy HH:mm')}">дата</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Действия -->
+        <div class="user-actions">
+          <a th:href="@{/profile/{userId}(userId=${blockedUser.userId})}"
+             class="btn-luxury btn-outline-luxury">
+            <i class="fas fa-user"></i>
+            Профиль
+          </a>
+
+          <a href="#"
+             class="btn-luxury btn-success-luxury"
+             data-action="unblock"
+             th:data-user-id="${blockedUser.userId}"
+             th:data-user-name="${blockedUser.firstName + ' ' + blockedUser.lastName}">
+            <i class="fas fa-unlock"></i>
+            Разблокировать
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Пагинация -->
+    <div th:if="${blockedUsersPage.totalPages > 1}" class="pagination-container">
+      <nav class="pagination">
+        <!-- Предыдущая страница -->
+        <a th:if="${blockedUsersPage.hasPrevious}"
+           th:href="@{/blocks(page=${blockedUsersPage.currentPage - 1}, size=${blockedUsersPage.pageSize})}"
+           class="pagination-btn">
+          <i class="fas fa-chevron-left"></i>
+          Предыдущая
+        </a>
+
+        <!-- Номера страниц -->
+        <div class="page-numbers">
+                        <span th:each="i : ${#numbers.sequence(0, blockedUsersPage.totalPages - 1)}">
+                            <a th:if="${i != blockedUsersPage.currentPage}"
+                               th:href="@{/blocks(page=${i}, size=${blockedUsersPage.pageSize})}"
+                               th:text="${i + 1}"
+                               class="page-number">
+                            </a>
+                            <span th:if="${i == blockedUsersPage.currentPage}"
+                                  th:text="${i + 1}"
+                                  class="page-number active">
+                            </span>
+                        </span>
+        </div>
+
+        <!-- Следующая страница -->
+        <a th:if="${blockedUsersPage.hasNext}"
+           th:href="@{/blocks(page=${blockedUsersPage.currentPage + 1}, size=${blockedUsersPage.pageSize})}"
+           class="pagination-btn">
+          Следующая
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      </nav>
+
+      <div class="pagination-info">
+        <p>
+          Страница <span th:text="${blockedUsersPage.currentPage + 1}">1</span>
+          из <span th:text="${blockedUsersPage.totalPages}">1</span>
+          (Всего элементов: <span th:text="${blockedUsersPage.totalElements}">0</span>)
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- JavaScript -->
+<script th:src="@{/js/profile/lock-user.js}"></script>
+
+</body>
+</html>

@@ -63,8 +63,6 @@ public class CommentController {
             }
 
 
-
-
             // Получаем комментарии с пагинацией
             Pageable pageable = PageRequest.of(page, size);
             CommentPageResponse comments = commentService.getCommentsByPost(postId, pageable);

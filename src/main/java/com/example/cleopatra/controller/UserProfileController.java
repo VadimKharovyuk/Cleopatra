@@ -59,6 +59,8 @@ public class UserProfileController {
 
 
 
+
+
             // Получаем посты пользователя
             PostListDto userPosts = postService.getUserPosts(userId, page, size);
             model.addAttribute("posts", userPosts);

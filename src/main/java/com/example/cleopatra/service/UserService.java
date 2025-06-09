@@ -66,4 +66,8 @@ public interface UserService {
     void updateNotificationSettings(Long userId, Boolean receiveVisitNotifications);
 
 
+    User findById(Long blockerId);
+
+
+
 }

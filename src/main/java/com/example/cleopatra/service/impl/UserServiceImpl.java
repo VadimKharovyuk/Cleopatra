@@ -364,6 +364,12 @@ public User getCurrentUserEntity(Authentication authentication) {
                 userId, receiveVisitNotifications);
     }
 
+    @Override
+    public User findById(Long blockerId) {
+        return  userRepository.findById(blockerId).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+
 
 
     /**

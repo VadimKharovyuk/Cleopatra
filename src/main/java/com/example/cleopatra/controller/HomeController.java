@@ -49,6 +49,7 @@ public class HomeController {
 
             // В случае ошибки показываем главную страницу
             model.addAttribute("isAuthenticated", false);
+//            return "homeV1";
             return "home";
         }
     }

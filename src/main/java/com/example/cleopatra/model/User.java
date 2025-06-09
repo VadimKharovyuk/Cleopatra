@@ -152,6 +152,17 @@ public class User {
     private List<SupportRequest> supportRequests = new ArrayList<>();
 
 
+    // Пользователи, которых заблокировал этот юзер
+    @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<UserBlock> blockedUsers = new HashSet<>();
+
+    // Пользователи, которые заблокировали этого юзера
+    @OneToMany(mappedBy = "blocked", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<UserBlock> blockedByUsers = new HashSet<>();
+
+
     // Системные поля
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
