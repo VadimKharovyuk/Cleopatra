@@ -36,6 +36,8 @@ public class EmailMonitoringController {
                 "queueSize", String.valueOf(emailQueueManager.getQueueSize())
         ));
     }
+
+
     // DTO для JSON requests
     @Data
     @NoArgsConstructor
