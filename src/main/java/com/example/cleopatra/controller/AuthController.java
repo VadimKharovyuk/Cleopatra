@@ -72,15 +72,8 @@ public class AuthController {
         return "auth/login";
     }
 
-//    /**
-//     * Отображение формы входа
-//     */
-//    @GetMapping("/login")
-//    public String showLoginForm(Model model) {
-//
-//
-//        return "auth/login";
-//    }
+
+
 
 
 

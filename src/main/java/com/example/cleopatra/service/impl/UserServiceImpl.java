@@ -437,6 +437,20 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
 
     /**
+     * Сбрасывает пароль пользователя по email
+     */
+    @Override
+    public void resetPasswordByEmail(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с email " + email + " не найден"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        log.info("Пароль успешно сброшен для пользователя с email: {}", email);
+    }
+
+    /**
      * Получить пользователей онлайн
      */
     public List<UserResponse> getOnlineUsers() {

@@ -89,6 +89,8 @@ public interface UserService {
 
     void changePassword(Long userId, ChangePasswordDto changePasswordDto);
 
+    void resetPasswordByEmail(String email, String newPassword);
+
 
 
 }

@@ -121,6 +121,19 @@
             <version>2.5.0</version> <!-- или актуальная версия -->
         </dependency>
 
+
+        <!-- Email отправка -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+        <!-- Для работы с HTML шаблонами (опционально) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
     </dependencies>
 
 
