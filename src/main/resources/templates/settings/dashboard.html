@@ -433,18 +433,21 @@
                 Аккаунт
             </h2>
             <div class="settings-grid">
-                <div class="settings-card card-profile" onclick="location.href='/settings/profile'">
-                    <div class="card-header">
-                        <div class="card-icon">
-                            <i class="fas fa-user-edit"></i>
+
+                <a th:href="@{/profile/{userId}/edit(userId=${user.id})}" class="no-decoration">
+                    <div class="settings-card card-profile">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-user-edit"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">Профиль</h3>
+                                <p class="card-description">Изменение личной информации, фото и статуса</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="card-title">Профиль</h3>
-                            <p class="card-description">Изменение личной информации, фото и статуса</p>
-                        </div>
+                        <i class="fas fa-chevron-right card-arrow"></i>
                     </div>
-                    <i class="fas fa-chevron-right card-arrow"></i>
-                </div>
+                </a>
 
                 <div class="settings-card card-security" onclick="location.href='/settings/security'">
                     <div class="card-header">
