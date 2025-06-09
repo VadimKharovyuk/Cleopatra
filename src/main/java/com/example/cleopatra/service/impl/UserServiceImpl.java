@@ -12,10 +12,7 @@ import com.example.cleopatra.repository.PostRepository;
 import com.example.cleopatra.repository.SubscriptionRepository;
 import com.example.cleopatra.repository.UserOnlineStatusRepository;
 import com.example.cleopatra.repository.UserRepository;
-import com.example.cleopatra.service.ImageConverterService;
-import com.example.cleopatra.service.ImageValidator;
-import com.example.cleopatra.service.StorageService;
-import com.example.cleopatra.service.UserService;
+import com.example.cleopatra.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -45,6 +42,7 @@ public class UserServiceImpl implements UserService {
     private final SubscriptionRepository subscriptionRepository;
     private final PostRepository postRepository;
     private final UserOnlineStatusRepository onlineStatusRepository;
+    private final SubscriptionService subscriptionService;
 
 
     @Override
@@ -369,7 +367,42 @@ public User getCurrentUserEntity(Authentication authentication) {
         return  userRepository.findById(blockerId).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    @Override
+    public boolean canViewProfile(Long targetUserId, Long currentUserId) {
+        // Получаем целевого пользователя
+        User targetUser = findById(targetUserId);
+        if (targetUser == null) {
+            return false;
+        }
 
+        // Если профиль публичный - доступен всем
+        if (!Boolean.TRUE.equals(targetUser.getIsPrivateProfile())) {
+            return true;
+        }
+
+        // Если пользователь не авторизован - нет доступа к приватному профилю
+        if (currentUserId == null) {
+            return false;
+        }
+
+        // Владелец всегда может видеть свой профиль
+        if (targetUserId.equals(currentUserId)) {
+            return true;
+        }
+
+        // Проверяем, подписан ли текущий пользователь на целевого
+        // Если да - то может видеть приватный профиль
+        return subscriptionService.isSubscribed(currentUserId, targetUserId);
+    }
+
+    @Override
+    public void updateProfilePrivacy(Long userId, Boolean isPrivate) {
+        User user = findById(userId);
+        if (user != null) {
+            user.setIsPrivateProfile(isPrivate);
+            userRepository.save(user);
+        }
+    }
 
 
     /**

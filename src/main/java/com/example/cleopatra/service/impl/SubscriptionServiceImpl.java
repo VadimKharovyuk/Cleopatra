@@ -39,6 +39,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
 
 
+
     @Override
     @Transactional
     public boolean subscribe(Long subscriberId, Long subscribedToId) {

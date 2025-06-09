@@ -64,6 +64,10 @@ public class User {
     private Long followingCount = 0L;
 
 
+    @Column(name = "is_private_profile")
+    private Boolean isPrivateProfile = false;
+
+
 
     // Добавить в User entity:
     @Column(name = "is_online")

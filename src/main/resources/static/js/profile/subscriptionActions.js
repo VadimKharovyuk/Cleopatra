@@ -13,6 +13,7 @@ function showNotification(message, type = 'success') {
         <span>${message}</span>
     `;
 
+
     const mainContent = document.querySelector('.main-content');
     const profileContainer = document.querySelector('.profile-container');
 

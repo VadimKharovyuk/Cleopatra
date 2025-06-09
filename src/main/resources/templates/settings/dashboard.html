@@ -459,20 +459,313 @@
                     <i class="fas fa-chevron-right card-arrow"></i>
                 </div>
 
-
                 <div class="settings-card card-privacy" onclick="location.href='/blocks'">
                     <div class="card-header">
                         <div class="card-icon">
-                            <i class="fas fa-lock"></i>
+                            <i class="fas fa-user-times"></i>
                         </div>
                         <div>
-                            <h3 class="card-title">Приватность</h3>
-                            <p class="card-description">Управление видимостью профиля и персональными данными</p>
+                            <h3 class="card-title">Заблокированные пользователи</h3>
+                            <p class="card-description">Управление черным списком и заблокированными аккаунтами</p>
                         </div>
                     </div>
                     <i class="fas fa-chevron-right card-arrow"></i>
                 </div>
+
+
+
+                <!-- Замените существующую карточку настроек приватности на эту: -->
+
+                <div class="settings-card card-privacy privacy-toggle-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">Приватный профиль</h3>
+                            <p class="card-description">Только подписчики смогут видеть ваши посты и активность</p>
+                        </div>
+                    </div>
+
+                    <!-- Toggle Switch вместо стрелки -->
+                    <div class="card-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox"
+                                   id="privacyToggle"
+                                   th:checked="${user != null and user.isPrivateProfile != null and user.isPrivateProfile}"
+                                   onchange="togglePrivacy(this)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Добавьте эти стили в ваш CSS: -->
+                <style>
+                    /* Стили для карточки с переключателем */
+                    .privacy-toggle-card {
+                        cursor: default !important; /* Убираем курсор pointer */
+                    }
+
+                    .privacy-toggle-card:hover {
+                        transform: none !important; /* Убираем hover эффект подъема */
+                    }
+
+                    .card-content {
+                        flex: 1;
+                    }
+
+                    .card-toggle {
+                        flex-shrink: 0;
+                        margin-left: 1rem;
+                    }
+
+                    /* Toggle Switch стили */
+                    .toggle-switch {
+                        position: relative;
+                        display: inline-block;
+                        width: 56px;
+                        height: 32px;
+                        cursor: pointer;
+                    }
+
+                    .toggle-switch input {
+                        opacity: 0;
+                        width: 0;
+                        height: 0;
+                    }
+
+                    .toggle-slider {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: var(--bg-accent);
+                        border: 2px solid var(--border-color);
+                        border-radius: 32px;
+                        transition: all 0.3s ease;
+                        display: flex;
+                        align-items: center;
+                        padding: 2px;
+                    }
+
+                    .toggle-slider:before {
+                        content: "";
+                        position: absolute;
+                        width: 24px;
+                        height: 24px;
+                        background: var(--text-primary);
+                        border-radius: 50%;
+                        transition: all 0.3s ease;
+                        box-shadow: var(--shadow-sm);
+                        left: 2px;
+                    }
+
+                    .toggle-switch input:checked + .toggle-slider {
+                        background: var(--accent-primary);
+                        border-color: var(--accent-primary);
+                    }
+
+                    .toggle-switch input:checked + .toggle-slider:before {
+                        transform: translateX(24px);
+                        background: var(--bg-primary);
+                    }
+
+                    .toggle-switch:hover .toggle-slider {
+                        box-shadow: 0 0 0 8px rgba(212, 175, 55, 0.1);
+                    }
+
+                    /* Анимация загрузки */
+                    .toggle-loading {
+                        pointer-events: none;
+                        opacity: 0.6;
+                    }
+
+                    .toggle-loading .toggle-slider:before {
+                        animation: toggleSpin 1s linear infinite;
+                    }
+
+                    @keyframes toggleSpin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+
+                    /* Уведомления */
+                    .privacy-notification {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: var(--accent-success);
+                        color: var(--bg-primary);
+                        padding: 1rem 1.5rem;
+                        border-radius: var(--radius-lg);
+                        box-shadow: var(--shadow-xl);
+                        z-index: 9999;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        font-weight: 600;
+                        animation: slideInRight 0.3s ease-out;
+                    }
+
+                    .privacy-notification.error {
+                        background: var(--accent-danger);
+                    }
+
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+
+                    @keyframes slideOutRight {
+                        from {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                        to {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                    }
+
+                    /* Мобильная адаптация */
+                    @media (max-width: 768px) {
+                        .privacy-toggle-card .card-header {
+                            flex-direction: column;
+                            gap: 1rem;
+                        }
+
+                        .card-toggle {
+                            margin-left: 0;
+                            align-self: flex-end;
+                        }
+
+                        .toggle-switch {
+                            width: 48px;
+                            height: 28px;
+                        }
+
+                        .toggle-slider:before {
+                            width: 20px;
+                            height: 20px;
+                        }
+
+                        .toggle-switch input:checked + .toggle-slider:before {
+                            transform: translateX(20px);
+                        }
+                    }
+                </style>
+
+                <!-- JavaScript для обработки переключения -->
+                <script>
+                    function togglePrivacy(checkbox) {
+                        const toggleSwitch = checkbox.closest('.toggle-switch');
+                        const card = checkbox.closest('.privacy-toggle-card');
+
+                        // Добавляем состояние загрузки
+                        toggleSwitch.classList.add('toggle-loading');
+
+                        // Отправляем AJAX запрос
+                        fetch('/settings/privacy/toggle', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({
+                                isPrivateProfile: checkbox.checked
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                // Убираем состояние загрузки
+                                toggleSwitch.classList.remove('toggle-loading');
+
+                                if (data.success) {
+                                    // Показываем уведомление об успехе
+                                    showNotification(
+                                        checkbox.checked ?
+                                            'Профиль стал приватным' :
+                                            'Профиль стал публичным',
+                                        'success'
+                                    );
+
+                                    // Обновляем описание карточки
+                                    const description = card.querySelector('.card-description');
+                                    description.textContent = checkbox.checked ?
+                                        'Только подписчики смогут видеть ваши посты и активность' :
+                                        'Все пользователи могут видеть ваш профиль и контент';
+
+                                } else {
+                                    // В случае ошибки возвращаем чекбокс в предыдущее состояние
+                                    checkbox.checked = !checkbox.checked;
+                                    showNotification('Ошибка при обновлении настроек', 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                // Убираем состояние загрузки и возвращаем чекбокс
+                                toggleSwitch.classList.remove('toggle-loading');
+                                checkbox.checked = !checkbox.checked;
+                                showNotification('Произошла ошибка. Попробуйте еще раз.', 'error');
+                            });
+                    }
+
+                    function showNotification(message, type = 'success') {
+                        // Удаляем существующие уведомления
+                        const existingNotifications = document.querySelectorAll('.privacy-notification');
+                        existingNotifications.forEach(notification => notification.remove());
+
+                        // Создаем новое уведомление
+                        const notification = document.createElement('div');
+                        notification.className = `privacy-notification ${type}`;
+                        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            <span>${message}</span>
+        `;
+
+                        document.body.appendChild(notification);
+
+                        // Автоматически удаляем через 3 секунды
+                        setTimeout(() => {
+                            notification.style.animation = 'slideOutRight 0.3s ease-out';
+                            setTimeout(() => {
+                                if (notification.parentNode) {
+                                    notification.parentNode.removeChild(notification);
+                                }
+                            }, 300);
+                        }, 3000);
+                    }
+
+                    // Инициализация при загрузке страницы
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const privacyToggle = document.getElementById('privacyToggle');
+                        if (privacyToggle) {
+                            // Устанавливаем правильное описание при загрузке
+                            const card = privacyToggle.closest('.privacy-toggle-card');
+                            const description = card.querySelector('.card-description');
+
+                            if (privacyToggle.checked) {
+                                description.textContent = 'Только подписчики смогут видеть ваши посты и активность';
+                            } else {
+                                description.textContent = 'Все пользователи могут видеть ваш профиль и контент';
+                            }
+                        }
+                    });
+                </script>
+
+
+
+
             </div>
+
+
         </div>
 
         <!-- App Settings Section -->

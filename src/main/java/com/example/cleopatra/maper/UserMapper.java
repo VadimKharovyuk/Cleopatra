@@ -52,6 +52,9 @@ public class UserMapper {
 
         response.setReceiveVisitNotifications(user.getReceiveVisitNotifications());
 
+        response.setIsPrivateProfile(user.getIsPrivateProfile());
+
+
         return response;
     }
 

@@ -54,6 +54,16 @@ public class UserProfileController {
                 model.addAttribute("currentUserId", currentUser.getId());
 
 
+
+                ///скрытый акканут
+                if (!userService.canViewProfile(userId, currentUser.getId())) {
+                    // Профиль недоступен - показываем страницу блокировки
+                    UserResponse blockedUser = userService.getUserById(userId);
+                    model.addAttribute("blockedUser", blockedUser);
+                    return "profile/CanViev-profile";
+                }
+
+
                 // ===== ПРОВЕРКА БЛОКИРОВКИ =====
                 // Проверяем заблокировал ли текущий пользователь просматриваемого
                 boolean iBlockedUser = userBlockService.isBlocked(currentUser.getId(), userId);
@@ -72,6 +82,7 @@ public class UserProfileController {
             // Получаем информацию о пользователе
             UserResponse user = userService.getUserById(userId);
             model.addAttribute("user", user);
+
 
 
 

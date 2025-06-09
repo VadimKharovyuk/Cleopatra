@@ -18,30 +18,13 @@ public class CleopatraApplication {
 
 //пост упомянуть по имени при создание посты
 
+//public enum ProfilePrivacyLevel {
+//    PUBLIC,           // Все могут видеть
+//    SUBSCRIBERS_ONLY, // Только подписчики
+//    PRIVATE          // Никто (только сам пользователь)
+//}
 //
 //
-//        @Entity
-//        @Table(name = "comment_reports")
-//        public class CommentReport {
-//            @Id
-//            @GeneratedValue(strategy = GenerationType.IDENTITY)
-//            private Long id;
-//
-//            @ManyToOne(fetch = FetchType.LAZY)
-//            @JoinColumn(name = "comment_id", nullable = false)
-//            private Comment comment;
-//
-//            @ManyToOne(fetch = FetchType.LAZY)
-//            @JoinColumn(name = "reporter_id", nullable = false)
-//            private User reporter;
-//
-//            @Enumerated(EnumType.STRING)
-//            private ReportReason reason;
-//
-//            private String description;
-//
-//            private LocalDateTime createdAt;
-//        }
 
 //// Подключение к WebSocket
 //const socket = new WebSocket('/ws/notifications');

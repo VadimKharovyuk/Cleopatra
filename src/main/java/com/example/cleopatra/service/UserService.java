@@ -62,11 +62,28 @@ public interface UserService {
 
     void updateLastActivity(Long userId);
 
+
     // Метод для обновления настроек уведомлений
     void updateNotificationSettings(Long userId, Boolean receiveVisitNotifications);
 
 
     User findById(Long blockerId);
+
+
+    /**
+     * Проверяет, может ли currentUser видеть профиль targetUser
+     * @param targetUserId ID пользователя, чей профиль хотят посмотреть
+     * @param currentUserId ID текущего пользователя (может быть null если не авторизован)
+     * @return true если профиль доступен для просмотра
+     */
+    boolean canViewProfile(Long targetUserId, Long currentUserId);
+
+    /**
+     * Обновляет настройки приватности профиля
+     * @param userId ID пользователя
+     * @param isPrivate true для приватного профиля
+     */
+    void updateProfilePrivacy(Long userId, Boolean isPrivate);
 
 
 
