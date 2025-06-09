@@ -27,7 +27,6 @@ public class DatabaseStorageServiceImpl implements DatabaseStorageService {
     @Override
     @Transactional(readOnly = true)
     public byte[] getImageData(String imageId) {
-        log.info("Getting image data for imageId: {}", imageId);
 
         Story story = storyRepository.findByImageId(imageId)
                 .orElseThrow(() -> new IllegalArgumentException("Изображение не найдено: " + imageId));

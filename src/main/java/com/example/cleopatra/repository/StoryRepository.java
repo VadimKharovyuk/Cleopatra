@@ -40,5 +40,13 @@ public interface StoryRepository extends JpaRepository<Story, Long> {
      */
     @Query("SELECT s.id FROM Story s WHERE s.expiresAt <= :now ORDER BY s.expiresAt ASC")
     List<Long> findExpiredStoryIds(@Param("now") LocalDateTime now, Pageable pageable);
-
+    /**
+     * Найти активные истории пользователей из списка ID
+     * @param userIds список ID пользователей (подписки)
+     * @param now текущее время для проверки истечения
+     * @param pageable параметры пагинации
+     * @return страница активных историй
+     */
+    @Query("SELECT s FROM Story s WHERE s.user.id IN :userIds AND s.expiresAt > :now ORDER BY s.createdAt DESC")
+    Page<Story> findActiveStoriesByUserIds(@Param("userIds") List<Long> userIds, @Param("now") LocalDateTime now, Pageable pageable);
 }

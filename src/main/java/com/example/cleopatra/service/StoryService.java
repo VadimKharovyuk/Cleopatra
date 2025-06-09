@@ -11,6 +11,22 @@ import java.io.IOException;
 public interface StoryService {
 
     /**
+     * Получить ленту историй подписок текущего пользователя
+     * @param currentUserId ID текущего пользователя
+     * @param pageable параметры пагинации
+     * @return истории людей, на которых подписан пользователь
+     */
+    StoryList getSubscriptionsStories(Long currentUserId, Pageable pageable);
+
+    /**
+     * Удобный метод для ленты историй
+     * @param currentUserId ID текущего пользователя
+     * @param page номер страницы
+     * @param size размер страницы
+     * @return истории подписок
+     */
+    StoryList getSubscriptionsStories(Long currentUserId, int page, int size);
+    /**
      * Создать новую историю
      * @param userId ID пользователя
      * @param file изображение для истории

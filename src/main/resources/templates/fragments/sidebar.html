@@ -576,6 +576,13 @@
                 <span class="nav-text">Просмотры</span>
             </a>
 
+            <a href="/stories/feed"
+               class="nav-item"
+               th:classappend="${activeSection == 'stories'} ? 'active' : ''">
+                <i class="fas fa-camera-retro nav-icon"></i>
+                <span class="nav-text">Stories</span>
+            </a>
+
             <a th:href="@{/profile/{userId}(userId=${currentUserId ?: 1})}"
                class="nav-item"
                th:classappend="${activeSection == 'profile'} ? 'active' : ''">

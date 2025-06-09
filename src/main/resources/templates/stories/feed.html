@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лента историй - Cleopatra</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #fafafa;
+      --bg-secondary: #ffffff;
+      --bg-accent: #f8f9fa;
+      --surface-elevated: rgba(255, 255, 255, 0.95);
+
+      /* Sophisticated Neutrals */
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --text-light: #d1d5db;
+
+      /* Additional Colors */
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --secondary-color: #64748b;
+      --accent-color: #8b5cf6;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+
+      /* Spacing */
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --spacing-2xl: 3rem;
+
+      /* Border Radius */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      min-height: 100vh;
+      padding: var(--spacing-xl);
+      transition: margin-left 0.3s ease;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--spacing-xl);
+      flex-wrap: wrap;
+    }
+
+    .header-text {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .title-icon {
+      color: var(--primary-color);
+      font-size: 2rem;
+    }
+
+    .page-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-lg);
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--text-light);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-accent);
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .btn-accent {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .btn-accent:hover {
+      background-color: #7c3aed;
+      transform: translateY(-1px);
+    }
+
+    /* Feed Content */
+    .feed-content {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-xl);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .feed-info {
+      margin-bottom: var(--spacing-xl);
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 1px solid var(--text-light);
+    }
+
+    .feed-stats {
+      display: flex;
+      gap: var(--spacing-lg);
+      align-items: center;
+    }
+
+    .stats-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .stats-item i {
+      color: var(--primary-color);
+    }
+
+    /* Stories Grid */
+    .stories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--spacing-xl);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .story-card {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .story-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Story Header */
+    .story-header {
+      padding: var(--spacing-lg);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--spacing-md);
+    }
+
+    .user-info {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: center;
+      flex: 1;
+    }
+
+    .user-link {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s ease;
+      border-radius: var(--radius-md);
+      padding: var(--spacing-xs);
+      margin: calc(-1 * var(--spacing-xs));
+    }
+
+    .user-link:hover {
+      background-color: rgba(59, 130, 246, 0.05);
+      transform: translateX(2px);
+    }
+
+    .user-avatar-wrapper {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .user-avatar,
+    .user-avatar-placeholder {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .user-avatar-placeholder {
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .story-indicator {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--bg-secondary);
+    }
+
+    .story-indicator.new {
+      background-color: var(--primary-color);
+    }
+
+    .story-indicator.viewed {
+      background-color: var(--text-muted);
+    }
+
+    .user-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-xs);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .story-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .separator {
+      color: var(--text-light);
+    }
+
+    .story-status {
+      flex-shrink: 0;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      font-size: 0.75rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+    }
+
+    .status-badge.warning {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: var(--warning-color);
+    }
+
+    .status-badge.viewed {
+      background-color: rgba(156, 163, 175, 0.1);
+      color: var(--text-muted);
+    }
+
+    /* Story Image */
+    .story-image-container {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .story-link {
+      display: block;
+      text-decoration: none;
+    }
+
+    .story-image-wrapper {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      overflow: hidden;
+    }
+
+    .story-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .story-card:hover .story-image {
+      transform: scale(1.05);
+    }
+
+    .story-overlay {
+      position: absolute;
+      top: var(--spacing-md);
+      left: var(--spacing-md);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-sm);
+    }
+
+    .story-emoji .emoji-icon {
+      font-size: 1.5rem;
+    }
+
+    .play-overlay {
+      display: none;
+    }
+
+    .play-button {
+      display: none;
+    }
+
+    /* Story Content */
+    .story-content {
+      padding: 0 var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .story-description {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    /* Story Footer */
+    .story-footer {
+      padding: var(--spacing-lg);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .story-stats {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .stat-item i {
+      color: var(--primary-color);
+    }
+
+    .recent-viewers {
+      display: flex;
+      align-items: center;
+    }
+
+    .viewers-avatars {
+      display: flex;
+      margin-left: var(--spacing-sm);
+    }
+
+    .viewer-avatar-mini {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      margin-left: -8px;
+      border: 2px solid var(--bg-secondary);
+      overflow: hidden;
+    }
+
+    .viewer-avatar-mini:first-child {
+      margin-left: 0;
+    }
+
+    .viewer-avatar-mini img,
+    .viewer-placeholder {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .viewer-placeholder {
+      background: var(--text-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+    }
+
+    .story-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn.primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .action-btn.primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Pagination */
+    .pagination-container {
+      margin-top: var(--spacing-2xl);
+      display: flex;
+      justify-content: center;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      background: var(--bg-secondary);
+      padding: var(--spacing-md) var(--spacing-xl);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pagination-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+    }
+
+    .pagination-btn:hover {
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    .pagination-info {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-2xl) var(--spacing-md);
+    }
+
+    .empty-content {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .empty-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--spacing-xl);
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-icon i {
+      font-size: 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .empty-description {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .empty-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 0;
+        padding: var(--spacing-lg);
+      }
+
+      .stories-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--spacing-lg);
+      }
+
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .header-content {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .main-content {
+        padding: var(--spacing-md);
+      }
+
+      .feed-content {
+        padding: var(--spacing-md);
+      }
+
+      .stories-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+      }
+
+      .story-header {
+        padding: var(--spacing-md);
+      }
+
+      .story-footer {
+        padding: var(--spacing-md);
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-md);
+      }
+
+      .story-stats {
+        justify-content: center;
+      }
+
+      .empty-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .pagination {
+        flex-direction: column;
+        gap: var(--spacing-md);
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Sidebar из фрагмента -->
+<th:block th:replace="~{fragments/sidebar :: complete-sidebar('stories')}"></th:block>
+
+<!-- Основной контент -->
+<main class="main-content">
+  <div class="container">
+    <!-- Заголовок -->
+    <header class="page-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="page-title">
+            <i class="fas fa-play-circle title-icon"></i>
+            Лента историй
+          </h1>
+          <p class="page-subtitle">Истории от людей, на которых вы подписаны</p>
+        </div>
+        <div class="header-actions">
+          <a href="/stories/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            Создать историю
+          </a>
+          <a href="/stories" class="btn btn-secondary">
+            <i class="fas fa-globe"></i>
+            Все истории
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Контент ленты -->
+    <div class="feed-content">
+      <!-- Проверяем наличие историй -->
+      <div th:if="${feed != null and !feed.isEmpty}" class="stories-feed">
+        <!-- Информация о пагинации -->
+        <div class="feed-info">
+          <div class="feed-stats">
+                            <span class="stats-item">
+                                <i class="fas fa-eye"></i>
+                                <span th:text="${feed.numberOfElements}">12</span> историй
+                            </span>
+            <span class="stats-item" th:if="${feed.totalElements != null}">
+                                <i class="fas fa-users"></i>
+                                Всего: <span th:text="${feed.totalElements}">45</span>
+                            </span>
+          </div>
+        </div>
+
+        <!-- Сетка историй -->
+        <div class="stories-grid">
+          <div th:each="story : ${feed.stories}" class="story-card">
+            <!-- Заголовок истории -->
+            <div class="story-header">
+              <div class="user-info">
+                <a th:href="@{'/profile/' + ${story.userId}}" class="user-link">
+                  <div class="user-avatar-wrapper">
+                    <img th:if="${story.userImageUrl}"
+                         th:src="${story.userImageUrl}"
+                         th:alt="${story.userFullName}"
+                         class="user-avatar">
+                    <div th:unless="${story.userImageUrl}" class="user-avatar-placeholder">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    <!-- Индикатор активности -->
+                    <div class="story-indicator" th:classappend="${story.isViewedByCurrentUser} ? 'viewed' : 'new'"></div>
+                  </div>
+                  <div class="user-details">
+                    <h3 class="user-name" th:text="${story.userFullName}">Имя пользователя</h3>
+                    <div class="story-meta">
+                      <span class="time-info" th:text="${story.timeAgo}">2 часа назад</span>
+                      <span class="separator">•</span>
+                      <span class="expires-info" th:text="${story.expiresIn}">истекает через 5 часов</span>
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+              <!-- Статус истории -->
+              <div class="story-status">
+                                    <span th:if="${story.isExpiringSoon}" class="status-badge warning">
+                                        <i class="fas fa-clock"></i>
+                                        Скоро истечет
+                                    </span>
+                <span th:if="${story.isViewedByCurrentUser}" class="status-badge viewed">
+                                        <i class="fas fa-eye"></i>
+                                        Просмотрено
+                                    </span>
+              </div>
+            </div>
+
+            <!-- Изображение истории -->
+            <div class="story-image-container">
+              <a th:href="@{'/stories/' + ${story.id}}" class="story-link">
+                <div class="story-image-wrapper">
+                  <img th:src="@{'/stories/image/' + ${story.imageId}}"
+                       th:alt="'История от ' + ${story.userFullName}"
+                       class="story-image"
+                       loading="lazy">
+
+                  <!-- Overlay с эмодзи -->
+                  <div th:if="${story.emoji}" class="story-overlay">
+                    <div class="story-emoji">
+                      <span class="emoji-icon" th:text="${story.emoji.emoji}">❤️</span>
+                    </div>
+                  </div>
+
+                  <!-- Play button overlay -->
+                  <div class="play-overlay">
+                    <div class="play-button">
+                      <i class="fas fa-play"></i>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            <!-- Контент истории -->
+            <div class="story-content" th:if="${story.description}">
+              <p class="story-description" th:text="${story.description}">Описание истории</p>
+            </div>
+
+            <!-- Статистика -->
+            <div class="story-footer">
+              <div class="story-stats">
+                <div class="stat-item">
+                  <i class="fas fa-eye"></i>
+                  <span th:text="${story.viewsCount}">0</span>
+                </div>
+                <div th:if="${story.recentViews != null and !story.recentViews.empty}" class="recent-viewers">
+                  <div class="viewers-avatars">
+                    <div th:each="view, iterStat : ${story.recentViews}"
+                         th:if="${iterStat.count <= 3}"
+                         class="viewer-avatar-mini">
+                      <img th:if="${view.viewerImageUrl}"
+                           th:src="${view.viewerImageUrl}"
+                           th:alt="${view.viewerFullName}"
+                           th:title="${view.viewerFullName}">
+                      <div th:unless="${view.viewerImageUrl}"
+                           class="viewer-placeholder"
+                           th:title="${view.viewerFullName}">
+                        <i class="fas fa-user"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="story-actions">
+                <a th:href="@{'/stories/' + ${story.id}}" class="action-btn primary">
+                  <i class="fas fa-play"></i>
+                  Смотреть
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Пагинация -->
+        <div th:if="${feed.hasNext or feed.hasPrevious}" class="pagination-container">
+          <div class="pagination">
+            <a th:if="${feed.hasPrevious}"
+               th:href="@{'/stories/feed'(page=${feed.previousPage})}"
+               class="pagination-btn prev">
+              <i class="fas fa-chevron-left"></i>
+              Предыдущая
+            </a>
+
+            <span class="pagination-info">
+                                Страница <span th:text="${feed.currentPage + 1}">1</span>
+                                <span th:if="${feed.totalPages != null}">
+                                    из <span th:text="${feed.totalPages}">1</span>
+                                </span>
+                            </span>
+
+            <a th:if="${feed.hasNext}"
+               th:href="@{'/stories/feed'(page=${feed.nextPage})}"
+               class="pagination-btn next">
+              Следующая
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Пустое состояние -->
+      <div th:if="${feed == null or feed.isEmpty}" class="empty-state">
+        <div class="empty-content">
+          <div class="empty-icon">
+            <i class="fas fa-users-slash"></i>
+          </div>
+          <h3 class="empty-title">Нет историй в ленте</h3>
+          <p class="empty-description">
+            Истории появятся здесь, когда люди, на которых вы подписаны, начнут их создавать.
+          </p>
+          <div class="empty-actions">
+            <a href="/recommendations" class="btn btn-primary">
+              <i class="fas fa-user-plus"></i>
+              Найти людей
+            </a>
+            <a href="/stories" class="btn btn-secondary">
+              <i class="fas fa-globe"></i>
+              Посмотреть все истории
+            </a>
+            <a href="/stories/create" class="btn btn-accent">
+              <i class="fas fa-plus"></i>
+              Создать свою историю
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

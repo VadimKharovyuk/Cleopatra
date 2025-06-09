@@ -32,6 +32,18 @@ public class StoryController {
     private final UserService userService;
 
 
+
+    @GetMapping("/feed")
+    public String storiesFeed(Authentication auth, Model model) {
+        String email = auth.getName();
+        Long currentUserId = userService.getUserIdByEmail(email);
+        StoryList feed = storyService.getSubscriptionsStories(currentUserId, 0, 20);
+        model.addAttribute("feed", feed);
+        return "stories/feed";
+    }
+
+
+
     /**
      * Главная страница историй
      */

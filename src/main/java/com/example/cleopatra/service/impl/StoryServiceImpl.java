@@ -1,6 +1,8 @@
 package com.example.cleopatra.service.impl;
 import com.example.cleopatra.dto.StoryDTO.StoryDTO;
 import com.example.cleopatra.dto.StoryDTO.StoryList;
+import com.example.cleopatra.dto.SubscriptionDto.UserSubscriptionCard;
+import com.example.cleopatra.dto.SubscriptionDto.UserSubscriptionListDto;
 import com.example.cleopatra.enums.StoryEmoji;
 import com.example.cleopatra.maper.StoryManualMapper;
 import com.example.cleopatra.model.Story;
@@ -10,6 +12,7 @@ import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.service.DatabaseStorageService;
 import com.example.cleopatra.service.StorageService;
 import com.example.cleopatra.service.StoryService;
+import com.example.cleopatra.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,8 +25,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,7 +41,80 @@ public class StoryServiceImpl implements StoryService {
     private final UserRepository userRepository;
     private final DatabaseStorageService databaseStorageService;
     private final StoryManualMapper storyMapper;
+    private final SubscriptionService subscriptionService;
 
+
+    @Override
+    @Transactional(readOnly = true)
+    public StoryList getSubscriptionsStories(Long currentUserId, Pageable pageable) {
+        // Проверяем, существует ли пользователь
+        if (!userRepository.existsById(currentUserId)) {
+            throw new IllegalArgumentException("Пользователь не найден с ID: " + currentUserId);
+        }
+
+        try {
+            // Получаем подписки пользователя
+            UserSubscriptionListDto subscriptions = subscriptionService.getSubscriptions(currentUserId,
+                    PageRequest.of(0, 1000)); // Берем большой лимит, чтобы получить все подписки
+
+            if (subscriptions == null || subscriptions.getSubscriptions() == null || subscriptions.getSubscriptions().isEmpty()) {
+                // Возвращаем пустой результат
+                return createEmptyStoryList(pageable);
+            }
+
+            // Извлекаем ID пользователей, на которых подписан current user
+            List<Long> subscribedUserIds = subscriptions.getSubscriptions()
+                    .stream()
+                    .map(UserSubscriptionCard::getId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            if (subscribedUserIds.isEmpty()) {
+                log.debug("No valid subscription user IDs found for user {}", currentUserId);
+                return createEmptyStoryList(pageable);
+            }
+
+            log.debug("Found {} subscriptions for user {}: {}", subscribedUserIds.size(), currentUserId, subscribedUserIds);
+
+            // Получаем активные истории от пользователей из подписок
+            LocalDateTime now = LocalDateTime.now();
+            Page<Story> storiesPage = storyRepository.findActiveStoriesByUserIds(subscribedUserIds, now, pageable);
+
+            // Преобразуем в DTO
+            return storyMapper.toStoryList(storiesPage, currentUserId, false);
+
+        } catch (Exception e) {
+            log.error("Error getting subscription stories for user {}", currentUserId, e);
+            // В случае ошибки возвращаем пустой результат вместо исключения
+            return createEmptyStoryList(pageable);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public StoryList getSubscriptionsStories(Long currentUserId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return getSubscriptionsStories(currentUserId, pageable);
+    }
+
+    /**
+     * Создает пустой StoryList для случаев когда нет подписок или историй
+     */
+    private StoryList createEmptyStoryList(Pageable pageable) {
+        StoryList emptyList = new StoryList();
+        emptyList.setStories(Collections.emptyList());
+        emptyList.setHasNext(false);
+        emptyList.setHasPrevious(false);
+        emptyList.setCurrentPage(pageable.getPageNumber());
+        emptyList.setNextPage(null);
+        emptyList.setPreviousPage(null);
+        emptyList.setPageSize(pageable.getPageSize());
+        emptyList.setIsEmpty(true);
+        emptyList.setNumberOfElements(0);
+        emptyList.setTotalElements(0L);
+        emptyList.setTotalPages(0);
+        return emptyList;
+    }
 
     @Override
     public StoryDTO createStory(Long userId, MultipartFile file, StoryEmoji emoji, String description) throws IOException {
@@ -90,7 +169,6 @@ public class StoryServiceImpl implements StoryService {
     @Override
     @Transactional(readOnly = true)
     public StoryDTO getStoryById(Long storyId, Long currentUserId) {
-        log.info("Getting story by ID: {}", storyId);
 
         Story story = storyRepository.findById(storyId)
                 .orElseThrow(() -> new IllegalArgumentException("История не найдена с ID: " + storyId));
@@ -106,8 +184,6 @@ public class StoryServiceImpl implements StoryService {
     @Override
     @Transactional(readOnly = true)
     public byte[] getStoryImage(String imageId) {
-        log.info("Getting story image: {}", imageId);
-
         // Проверяем, существует ли история с таким imageId
         Story story = storyRepository.findByImageId(imageId)
                 .orElseThrow(() -> new IllegalArgumentException("История с изображением не найдена: " + imageId));
