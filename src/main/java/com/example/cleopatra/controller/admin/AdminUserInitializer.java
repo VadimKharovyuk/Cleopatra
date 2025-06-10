@@ -25,7 +25,7 @@ public class AdminUserInitializer implements ApplicationRunner {
     }
 
     private void createAdminIfNotExists() {
-        String adminEmail = "admin@gmail.com";
+        String adminEmail = "vadimKh17@gmail.com";
 
         if (!userRepository.existsByEmail(adminEmail)) {
             User admin = User.builder()

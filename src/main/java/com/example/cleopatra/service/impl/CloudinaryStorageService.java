@@ -41,6 +41,8 @@ public class CloudinaryStorageService implements StorageService {
         }
     }
 
+
+
     @Override
     public StorageResult uploadImage(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
