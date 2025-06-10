@@ -25,6 +25,7 @@ import java.util.List;
 @Transactional
 public class StoryViewServiceImpl implements StoryViewService {
 
+
     private final StoryViewRepository storyViewRepository;
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;

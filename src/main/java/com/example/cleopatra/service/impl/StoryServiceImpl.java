@@ -90,6 +90,7 @@ public class StoryServiceImpl implements StoryService {
         }
     }
 
+
     @Override
     @Transactional(readOnly = true)
     public StoryList getSubscriptionsStories(Long currentUserId, int page, int size) {

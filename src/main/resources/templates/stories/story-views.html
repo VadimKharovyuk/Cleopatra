@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Просмотры истории</title>
+</head>
+<body>
+<header>
+  <h1>Просмотры истории #<span th:text="${storyId}"></span></h1>
+  <div th:if="${story}" style="margin: 10px 0; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
+    <h3>Информация об истории</h3>
+    <p><strong>Автор:</strong> <span th:text="${story.userFullName}"></span></p>
+    <p><strong>Описание:</strong> <span th:text="${story.description ?: 'Без описания'}"></span></p>
+    <p><strong>Создана:</strong> <span th:text="${story.timeAgo}"></span></p>
+    <p><strong>Статус:</strong>
+      <span th:if="${story.isExpired}" style="color: red;">Истекла</span>
+      <span th:unless="${story.isExpired}" style="color: green;">Активна</span>
+    </p>
+  </div>
+  <nav>
+    <a href="/stories/list">← Назад к историям</a>
+    <a th:href="@{'/stories/user/' + ${story.userId}}">← К историям автора</a>
+  </nav>
+</header>
+
+<main>
+  <!-- Сообщения об ошибках или успехе -->
+  <div th:if="${message}" style="background-color: #d4edda; border: 1px solid #c3e6cb; padding: 10px; margin: 10px 0; border-radius: 4px;">
+    <span th:text="${message}"></span>
+  </div>
+
+  <div th:if="${error}" style="background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; margin: 10px 0; border-radius: 4px;">
+    <span th:text="${error}"></span>
+  </div>
+
+  <!-- Статистика просмотров -->
+  <section>
+    <h2>Статистика</h2>
+    <p><strong>Общее количество просмотров:</strong> <span th:text="${totalViews}"></span></p>
+    <p><strong>Уникальных просмотров:</strong> <span th:text="${#lists.size(views)}"></span></p>
+  </section>
+
+  <!-- Форма для добавления просмотра (только для разработки/тестирования) -->
+  <section th:if="${#authentication.name == 'admin@example.com'}" style="border: 2px dashed #ddd; padding: 15px; margin: 20px 0;">
+    <h3>🧪 Режим разработчика</h3>
+    <p><em>Эта секция видна только администраторам для тестирования</em></p>
+    <form th:action="@{/stories/{storyId}/view(storyId=${storyId})}" method="post">
+      <button type="submit">Отметить просмотр (текущий пользователь)</button>
+    </form>
+  </section>
+
+  <!-- Список просмотров -->
+  <section>
+    <h3>Кто просматривал</h3>
+
+    <div th:if="${!hasViews}">
+      <p><em>Пока никто не просматривал эту историю</em></p>
+    </div>
+
+    <div th:if="${hasViews}">
+      <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+        <thead>
+        <tr style="background-color: #f8f9fa;">
+          <th>ID Просмотра</th>
+          <th>ID Пользователя</th>
+          <th>Имя пользователя</th>
+          <th>Время просмотра</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="view : ${views}">
+          <td th:text="${view.id}"></td>
+          <td th:text="${view.viewerId}"></td>
+          <td th:text="${view.getId()}"></td>
+          <td th:text="${#temporals.format(view.viewedAt, 'dd.MM.yyyy HH:mm:ss')}"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Инструменты для проверки (только для администраторов) -->
+  <section th:if="${#authentication.name == 'admin@example.com'}" style="border: 2px dashed #ddd; padding: 15px;">
+    <h3>🔍 Проверить статус просмотра</h3>
+    <p><em>Инструменты разработчика</em></p>
+    <button onclick="checkCurrentUserView()">Проверить мой статус просмотра</button>
+    <div id="checkResult" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; display: none;"></div>
+  </section>
+
+  <!-- Автообновление счетчика -->
+  <section>
+    <h3>Актуальный счетчик просмотров</h3>
+    <p>Просмотров: <span id="liveCount">загрузка...</span></p>
+    <button onclick="updateCount()">Обновить</button>
+    <button id="autoRefreshBtn" onclick="toggleAutoRefresh()">Включить автообновление</button>
+  </section>
+</main>
+
+<script>
+  let autoRefreshInterval;
+  let autoRefreshActive = false;
+
+  // Загрузить актуальное количество просмотров
+  function updateCount() {
+    const storyId = /*[[${storyId}]]*/ 1;
+    fetch(`/stories/${storyId}/views/count`)
+            .then(response => response.text())
+            .then(count => {
+              document.getElementById('liveCount').textContent = count;
+            })
+            .catch(error => {
+              console.error('Ошибка:', error);
+              document.getElementById('liveCount').textContent = 'ошибка';
+            });
+  }
+
+  // Проверить, просматривал ли текущий пользователь историю
+  function checkCurrentUserView() {
+    const storyId = /*[[${storyId}]]*/ 1;
+    const resultDiv = document.getElementById('checkResult');
+
+    fetch(`/stories/${storyId}/check-view`)
+            .then(response => response.text())
+            .then(result => {
+              resultDiv.style.display = 'block';
+              if (result === 'viewed') {
+                resultDiv.style.backgroundColor = '#d4edda';
+                resultDiv.style.borderColor = '#c3e6cb';
+                resultDiv.textContent = 'Вы УЖЕ просматривали эту историю';
+              } else if (result === 'not-viewed') {
+                resultDiv.style.backgroundColor = '#fff3cd';
+                resultDiv.style.borderColor = '#ffeeba';
+                resultDiv.textContent = 'Вы НЕ просматривали эту историю';
+              } else {
+                resultDiv.style.backgroundColor = '#f8d7da';
+                resultDiv.style.borderColor = '#f5c6cb';
+                resultDiv.textContent = 'Ошибка при проверке';
+              }
+            })
+            .catch(error => {
+              console.error('Ошибка:', error);
+              resultDiv.style.display = 'block';
+              resultDiv.style.backgroundColor = '#f8d7da';
+              resultDiv.style.borderColor = '#f5c6cb';
+              resultDiv.textContent = 'Ошибка при проверке';
+            });
+  }
+
+  // Включить/выключить автообновление
+  function toggleAutoRefresh() {
+    const btn = document.getElementById('autoRefreshBtn');
+    if (autoRefreshActive) {
+      clearInterval(autoRefreshInterval);
+      autoRefreshActive = false;
+      btn.textContent = 'Включить автообновление';
+    } else {
+      autoRefreshInterval = setInterval(updateCount, 5000); // каждые 5 секунд
+      autoRefreshActive = true;
+      btn.textContent = 'Выключить автообновление';
+    }
+  }
+
+  // Загрузить счетчик при загрузке страницы
+  window.onload = function() {
+    updateCount();
+  };
+</script>
+</body>
+</html>

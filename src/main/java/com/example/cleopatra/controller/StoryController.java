@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -31,6 +32,9 @@ public class StoryController {
     private final StoryService storyService;
     private final StoryViewService storyViewService;
     private final UserService userService;
+
+
+
 
 
     /**
@@ -118,6 +122,7 @@ public class StoryController {
         return "stories/create";
     }
 
+
     /**
      * Страница детального просмотра истории
      */
@@ -140,10 +145,22 @@ public class StoryController {
                 story = storyService.getStoryById(storyId, currentUserId);
             }
 
-            List<StoryViewDTO> views = storyViewService.getStoryViews(storyId);
+            // Получаем просмотры только если текущий пользователь - владелец истории
+            List<StoryViewDTO> views = Collections.emptyList();
+            Long totalViewsCount = 0L;
+
+            if (story.getIsOwner()) {
+                // Для страницы детального просмотра показываем только первые 5 просмотров
+                views = storyViewService.getStoryViews(storyId);
+                totalViewsCount = storyViewService.getViewsCount(storyId);
+
+                log.info("Story {} has {} total views, showing first {}",
+                        storyId, totalViewsCount, views.size());
+            }
 
             model.addAttribute("story", story);
             model.addAttribute("views", views);
+            model.addAttribute("totalViewsCount", totalViewsCount);
             model.addAttribute("currentUserId", currentUserId);
             model.addAttribute("storyEmojiValues", StoryEmoji.values());
 
@@ -154,6 +171,7 @@ public class StoryController {
             return "stories/stories";
         }
     }
+
 
 
 

@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class StoryView {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -729,8 +729,17 @@
                                     <div class="viewer-name" th:text="${view.viewerFullName}">Имя зрителя</div>
                                     <div class="view-time" th:text="${view.viewedAt}">время просмотра</div>
                                 </div>
+
                             </a>
                         </div>
+                        <!-- Кнопка "Посмотреть всех" - показывается только автору и если просмотров больше 5 -->
+                        <a th:if="${story.isOwner and #lists.size(views) > 1}"
+                           th:href="@{'/views/' + ${story.id} + '/views'}"
+                           class="view-all-btn">
+                            <i class="fas fa-list"></i>
+                            Посмотреть всех
+                        </a>
+
                     </div>
 
                     <div th:if="${#lists.isEmpty(views)}" class="empty-views">

@@ -17,6 +17,7 @@ import java.util.List;
 @Builder
 public class Story {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
