@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Locale;
+
 
 @Slf4j
 @Service
@@ -72,39 +74,17 @@ public class MapboxService {
                 baseUrl, longitude, latitude, zoom, width, height, accessToken);
     }
 
-    // Геокодирование (адрес -> координаты)
-    public String getGeocodingUrl(String address) {
-        return String.format("%s/geocoding/v5/mapbox.places/%s.json?access_token=%s",
-                baseUrl, address, accessToken);
-    }
 
-    // Обратное геокодирование (координаты -> адрес)
-    public String getReverseGeocodingUrl(double longitude, double latitude) {
-        return String.format("%s/geocoding/v5/mapbox.places/%f,%f.json?access_token=%s",
+
+    public String getReverseGeocodingUrl(Double longitude, Double latitude) {
+        // ✅ КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: добавляем Locale.US
+        String url = String.format(Locale.US,
+                "%s/geocoding/v5/mapbox.places/%.6f,%.6f.json?access_token=%s",
                 baseUrl, longitude, latitude, accessToken);
+
+        log.debug("Сформирован URL для Mapbox: {}", url);
+        return url;
     }
 
-    // Построение маршрута
-    public String getDirectionsUrl(String coordinates, String profile) {
-        return String.format("%s/directions/v5/mapbox/%s/%s?access_token=%s",
-                baseUrl, profile, coordinates, accessToken);
-    }
-
-    // Скачивание статической карты
-    public byte[] downloadStaticMap(double longitude, double latitude, int zoom, int width, int height) {
-        String url = generateStaticMapUrl(longitude, latitude, zoom, width, height);
-
-        try {
-            return restTemplate.getForObject(url, byte[].class);
-        } catch (Exception e) {
-            log.error("Ошибка скачивания карты: {}", e.getMessage());
-            throw new RuntimeException("Failed to download map", e);
-        }
-    }
-
-    // Геттер для проверки инициализации
-    public boolean isInitialized() {
-        return accessToken != null && !accessToken.trim().isEmpty() && restTemplate != null;
-    }
 
 }

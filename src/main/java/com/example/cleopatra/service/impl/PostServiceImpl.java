@@ -396,9 +396,6 @@ public class PostServiceImpl implements PostService {
 
         log.info("🗑️ Удаляем пост {} пользователя {}", postId, userId);
 
-        Long countBefore = postRepository.countByAuthorId(userId);
-        log.info("📊 Количество постов ДО удаления: {}", countBefore);
-
         postRepository.deleteById(postId);
 
 
