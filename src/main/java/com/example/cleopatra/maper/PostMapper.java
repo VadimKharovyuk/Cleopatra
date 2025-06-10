@@ -46,6 +46,8 @@ public class PostMapper {
                 .isLikedByCurrentUser(isLikedByCurrentUser)
                 .recentLikes(recentLikes)
                 .build();
+
+
     }
 
     /**
