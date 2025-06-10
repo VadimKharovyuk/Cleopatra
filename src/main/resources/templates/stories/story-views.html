@@ -495,13 +495,11 @@
   </style>
 </head>
 <body>
+<th:block th:replace="~{fragments/sidebar :: complete-sidebar('stories')}"></th:block>
 <div class="container">
   <!-- Header -->
   <header class="page-header">
-    <h1 class="page-title">
-      <i class="fas fa-eye title-icon"></i>
-      Просмотры истории #<span th:text="${storyId}"></span>
-    </h1>
+
 
     <div th:if="${story}" class="story-info">
       <h3>Информация об истории</h3>
@@ -552,41 +550,9 @@
         <div class="stat-number" th:text="${totalViews}">0</div>
         <div class="stat-label">Общие просмотры</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" th:text="${#lists.size(views)}">0</div>
-        <div class="stat-label">Уникальные зрители</div>
-      </div>
     </div>
   </section>
 
-  <!-- Admin Controls -->
-  <section th:if="${#authentication.name == 'admin@example.com'}" class="controls-section">
-    <h3 class="controls-title">
-      🧪 Режим разработчика
-    </h3>
-    <p style="margin-bottom: var(--spacing-md);"><em>Эта секция видна только администраторам</em></p>
-    <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;">
-      <form th:action="@{/stories/{storyId}/view(storyId=${storyId})}" method="post" style="display: inline;">
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-plus"></i>
-          Отметить просмотр
-        </button>
-      </form>
-      <button onclick="checkCurrentUserView()" class="btn btn-secondary">
-        <i class="fas fa-search"></i>
-        Проверить статус
-      </button>
-      <button onclick="updateCount()" class="btn btn-secondary">
-        <i class="fas fa-sync"></i>
-        Обновить счетчик
-      </button>
-      <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" class="btn btn-secondary">
-        <i class="fas fa-play"></i>
-        Автообновление
-      </button>
-    </div>
-    <div id="checkResult" style="margin-top: var(--spacing-md); padding: var(--spacing-md); border: 1px solid var(--text-light); border-radius: var(--radius-md); display: none;"></div>
-  </section>
 
   <!-- Views List -->
   <section class="views-section">
@@ -916,5 +882,7 @@
     }
   });
 </script>
+<script th:src="@{/js/online-status.js}"></script>
+<script th:src="@{/js/notifications.js}"></script>
 </body>
 </html>

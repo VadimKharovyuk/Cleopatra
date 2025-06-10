@@ -123,6 +123,7 @@ public class StoryController {
     }
 
 
+
     /**
      * Страница детального просмотра истории
      */

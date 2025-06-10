@@ -27,6 +27,7 @@ public class StoryViewController {
     private final UserService userService;
 
 
+
     /**
      * Страница для просмотра списка просмотров истории
      * Только автор истории может просматривать свои просмотры
@@ -63,8 +64,6 @@ public class StoryViewController {
             // Получаем просмотры
             List<StoryViewDTO> views = storyViewService.getStoryViews(storyId);
             Long totalViews = storyViewService.getViewsCount(storyId);
-
-
 
             model.addAttribute("story", story);
             model.addAttribute("storyId", storyId);
