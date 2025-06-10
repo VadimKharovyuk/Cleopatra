@@ -76,16 +76,12 @@ public class UserProfileController {
 
                 // Если просматриваемый пользователь заблокировал текущего - показываем ограниченную информацию
                 if (userBlockedMe) {
-                    return "profile/profile-blocked"; // Специальная страница для заблокированных
+                    return "profile/profile-blocked";
                 }
             }
             // Получаем информацию о пользователе
             UserResponse user = userService.getUserById(userId);
             model.addAttribute("user", user);
-
-
-
-
 
 
             // Получаем посты пользователя

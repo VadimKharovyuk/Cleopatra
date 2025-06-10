@@ -23,7 +23,6 @@ public class RecommendationController {
 
 
 
-
     /**
      * Просмотр всех пользователей с пагинацией
      */
@@ -42,6 +41,7 @@ public class RecommendationController {
                     recommendationService.getAllRecommendations(currentUserId, page);
 
             model.addAttribute("recommendations", recommendations);
+            model.addAttribute("currentUserId", currentUserId);
             model.addAttribute("isMainPage", false);
 
             return "recommendations/list";
@@ -49,7 +49,10 @@ public class RecommendationController {
         } catch (Exception e) {
             log.error("Ошибка при загрузке всех рекомендаций для пользователя {}: {}",
                     currentUserId, e.getMessage(), e);
+
             model.addAttribute("recommendations", createEmptyRecommendations());
+            model.addAttribute("currentUserId", currentUserId); // ← И ЭТУ ТОЖЕ
+
             return "recommendations/list";
         }
     }

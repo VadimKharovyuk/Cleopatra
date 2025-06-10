@@ -1,513 +1,519 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Найти людей - Cleopatra</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- ПОДКЛЮЧЕНИЕ ФРАГМЕНТА СТИЛЕЙ -->
-  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
-
-  <style>
-    /* Luxury Minimalism Color Palette */
-    :root {
-      --bg-primary: #fafafa;
-      --bg-secondary: #ffffff;
-      --bg-accent: #f8f9fa;
-      --surface-elevated: rgba(255, 255, 255, 0.95);
-
-      /* Sophisticated Neutrals */
-      --text-primary: #1a1a1a;
-      --text-secondary: #6b7280;
-      --text-muted: #9ca3af;
-      --text-light: #d1d5db;
-
-      /* Premium Accent Colors */
-      --accent-primary: #2563eb;
-      --accent-secondary: #7c3aed;
-      --accent-success: #059669;
-      --accent-warning: #d97706;
-
-      /* Elegant Borders & Shadows */
-      --border-primary: rgba(0, 0, 0, 0.06);
-      --border-secondary: rgba(0, 0, 0, 0.04);
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-      --shadow-xl: 0 20px 64px rgba(0, 0, 0, 0.16);
-
-      /* Spacing & Sizing */
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
-      --radius-xl: 24px;
-    }
-
-    body {
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
-      color: var(--text-primary);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      font-weight: 400;
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-
-    /* Адаптация под sidebar */
-    .main-content {
-      margin-left: 320px;
-      min-height: 100vh;
-      padding: 3rem 2rem 2rem 3rem;
-      width: calc(100% - 320px);
-      overflow-x: hidden;
-    }
-
-    .container {
-      max-width: 100%;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .page-header {
-      margin-bottom: 3rem;
-      padding-top: 1rem;
-    }
-
-    .page-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.5rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
-      letter-spacing: -0.02em;
-    }
-
-    .page-subtitle {
-      color: var(--text-secondary);
-      font-size: 1.1rem;
-      font-weight: 400;
-      margin-bottom: 2rem;
-    }
-
-    /* Search Section */
-    .search-section {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-      padding: 2rem;
-      margin-bottom: 2rem;
-      box-shadow: var(--shadow-md);
-      border: 1px solid var(--border-primary);
-    }
-
-    .search-container {
-      position: relative;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 1rem 1rem 1rem 3rem;
-      border: 2px solid var(--border-primary);
-      border-radius: var(--radius-md);
-      font-size: 1rem;
-      background: var(--bg-accent);
-      color: var(--text-primary);
-      transition: all 0.3s ease;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: var(--accent-primary);
-      background: var(--bg-secondary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 1.1rem;
-    }
-
-    .search-clear {
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 0.25rem;
-      border-radius: 50%;
-      transition: all 0.2s ease;
-      display: none;
-    }
-
-    .search-clear:hover {
-      background: var(--bg-accent);
-      color: var(--text-primary);
-    }
-
-    .search-clear.visible {
-      display: block;
-    }
-
-    /* Results Section */
-    .results-section {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
-      border: 1px solid var(--border-primary);
-      overflow: hidden;
-    }
-
-    .results-header {
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid var(--border-secondary);
-      background: var(--surface-elevated);
-    }
-
-    .results-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0;
-    }
-
-    .results-count {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      margin-top: 0.25rem;
-    }
-
-    /* User Grid */
-    .users-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-      padding: 2rem;
-    }
-
-    .user-card {
-      background: var(--surface-elevated);
-      border: 1px solid var(--border-secondary);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      text-align: center;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .user-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-    }
-
-    .user-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-lg);
-      border-color: var(--accent-primary);
-    }
-
-    .user-card:hover::before {
-      transform: scaleX(1);
-    }
-
-    .user-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      margin: 0 auto 1rem;
-      border: 3px solid var(--border-primary);
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .user-card:hover .user-avatar {
-      border-color: var(--accent-primary);
-      transform: scale(1.05);
-    }
-
-    .avatar-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .default-avatar {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, var(--bg-accent), #f1f5f9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-size: 2rem;
-    }
-
-    .user-name {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.25rem;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    .user-name:hover {
-      color: var(--accent-primary);
-    }
-
-    .user-handle {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    .user-handle:hover {
-      color: var(--accent-primary);
-    }
-
-    .user-stats {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      margin-bottom: 1rem;
-    }
-
-    .follow-btn {
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: var(--radius-md);
-      font-weight: 500;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .follow-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .follow-btn:hover::before {
-      left: 100%;
-    }
-
-    .follow-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .follow-btn.following {
-      background: var(--bg-accent);
-      color: var(--text-primary);
-      border: 1px solid var(--border-primary);
-    }
-
-    .follow-btn.following:hover {
-      background: #fee2e2;
-      color: #dc2626;
-      border-color: #fecaca;
-    }
-
-    /* Pagination */
-    .pagination-section {
-      padding: 2rem;
-      text-align: center;
-      border-top: 1px solid var(--border-secondary);
-      background: var(--surface-elevated);
-    }
-
-    .load-more-btn {
-      background: var(--surface-elevated);
-      color: var(--text-primary);
-      border: 2px solid var(--border-primary);
-      padding: 1rem 2rem;
-      border-radius: var(--radius-md);
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .load-more-btn:hover {
-      background: var(--accent-primary);
-      color: white;
-      border-color: var(--accent-primary);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .load-more-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Loading States */
-    .loading {
-      text-align: center;
-      padding: 3rem;
-      color: var(--text-secondary);
-    }
-
-    .loading i {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      color: var(--accent-primary);
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 4rem 2rem;
-    }
-
-    .empty-icon {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, var(--bg-accent), #f1f5f9);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.5rem;
-      color: var(--text-muted);
-      font-size: 2rem;
-    }
-
-    .empty-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.75rem;
-    }
-
-    .empty-description {
-      color: var(--text-secondary);
-      font-size: 1rem;
-      line-height: 1.5;
-    }
-
-    /* Alert Messages */
-    .alert {
-      border: none;
-      border-radius: var(--radius-md);
-      padding: 1rem 1.5rem;
-      margin-bottom: 1.5rem;
-      border-left: 4px solid;
-    }
-
-    .alert-info {
-      background: rgba(59, 130, 246, 0.1);
-      color: var(--accent-primary);
-      border-left-color: var(--accent-primary);
-    }
-
-    .alert-warning {
-      background: rgba(217, 119, 6, 0.1);
-      color: var(--accent-warning);
-      border-left-color: var(--accent-warning);
-    }
-
-    /* Responsive Design */
-    @media (max-width: 1200px) {
-      .main-content {
-        margin-left: 320px;
-        width: calc(100% - 320px);
-      }
-
-      .users-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1.25rem;
-      }
-    }
-
-    @media (max-width: 1024px) {
-      .main-content {
-        margin-left: 120px;
-        width: calc(100% - 120px);
-        padding: 2rem 1.5rem 2rem 2rem;
-      }
-
-      .users-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 1rem;
-        padding: 1.5rem;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .main-content {
-        margin-left: 0;
-        margin-top: 60px;
-        padding: 2rem 1rem 1rem 1rem;
-        width: 100%;
-      }
-
-      .page-title {
-        font-size: 2rem;
-      }
-
-      .search-section {
-        padding: 1.5rem;
-      }
-
-      .users-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 1rem;
-        padding: 1rem;
-      }
-
-      .user-card {
-        padding: 1.25rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .users-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Найти людей - Cleopatra</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <!-- ПОДКЛЮЧЕНИЕ ФРАГМЕНТА СТИЛЕЙ -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+    <style>
+        /* Luxury Minimalism Color Palette */
+        :root {
+            --bg-primary: #fafafa;
+            --bg-secondary: #ffffff;
+            --bg-accent: #f8f9fa;
+            --surface-elevated: rgba(255, 255, 255, 0.95);
+
+            /* Sophisticated Neutrals */
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --text-light: #d1d5db;
+
+            /* Premium Accent Colors */
+            --accent-primary: #2563eb;
+            --accent-secondary: #7c3aed;
+            --accent-success: #059669;
+            --accent-warning: #d97706;
+
+            /* Elegant Borders & Shadows */
+            --border-primary: rgba(0, 0, 0, 0.06);
+            --border-secondary: rgba(0, 0, 0, 0.04);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-xl: 0 20px 64px rgba(0, 0, 0, 0.16);
+
+            /* Spacing & Sizing */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 400;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Адаптация под sidebar */
+        .main-content {
+            margin-left: 320px;
+            min-height: 100vh;
+            padding: 3rem 2rem 2rem 3rem;
+            width: calc(100% - 320px);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-header {
+            margin-bottom: 3rem;
+            padding-top: 1rem;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-primary);
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: var(--bg-secondary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            display: none;
+        }
+
+        .search-clear:hover {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+        }
+
+        .search-clear.visible {
+            display: block;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-primary);
+            overflow: hidden;
+        }
+
+        .results-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-secondary);
+            background: var(--surface-elevated);
+        }
+
+        .results-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .results-count {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* User Grid */
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+
+        .user-card {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border-secondary);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-primary);
+        }
+
+        .user-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--border-primary);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .user-card:hover .user-avatar {
+            border-color: var(--accent-primary);
+            transform: scale(1.05);
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .default-avatar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--bg-accent), #f1f5f9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 2rem;
+        }
+
+        .user-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .user-name:hover {
+            color: var(--accent-primary);
+        }
+
+        .user-handle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .user-handle:hover {
+            color: var(--accent-primary);
+        }
+
+        .user-stats {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .follow-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .follow-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+
+        .follow-btn:hover::before {
+            left: 100%;
+        }
+
+        .follow-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .follow-btn.following {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .follow-btn.following:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+
+        /* Pagination */
+        .pagination-section {
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border-secondary);
+            background: var(--surface-elevated);
+        }
+
+        .load-more-btn {
+            background: var(--surface-elevated);
+            color: var(--text-primary);
+            border: 2px solid var(--border-primary);
+            padding: 1rem 2rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .load-more-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .load-more-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--bg-accent), #f1f5f9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--text-muted);
+            font-size: 2rem;
+        }
+
+        .empty-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .empty-description {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* Alert Messages */
+        .alert {
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+            border-left-color: var(--accent-primary);
+        }
+
+        .alert-warning {
+            background: rgba(217, 119, 6, 0.1);
+            color: var(--accent-warning);
+            border-left-color: var(--accent-warning);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-content {
+                margin-left: 320px;
+                width: calc(100% - 320px);
+            }
+
+            .users-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1.25rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 120px;
+                width: calc(100% - 120px);
+                padding: 2rem 1.5rem 2rem 2rem;
+            }
+
+            .users-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 1rem;
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                margin-top: 60px;
+                padding: 2rem 1rem 1rem 1rem;
+                width: 100%;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .search-section {
+                padding: 1.5rem;
+            }
+
+            .users-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .user-card {
+                padding: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-<body>
+<body th:data-current-user-id="${currentUserId}">
 
 <!-- ПОДКЛЮЧЕНИЕ МОБИЛЬНОГО ХЕДЕРА ИЗ ФРАГМЕНТА -->
 <th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
@@ -517,367 +523,368 @@
 
 <!-- Main Content -->
 <main class="main-content">
-  <div class="container">
-    <!-- Page Header -->
-    <div class="page-header">
-      <h1 class="page-title">
-        <i class="fas fa-search-plus" style="color: var(--accent-primary); margin-right: 0.5rem;"></i>
-        Найти людей
-      </h1>
-      <p class="page-subtitle">Откройте для себя интересных людей и расширьте свою сеть контактов</p>
-    </div>
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-search-plus" style="color: var(--accent-primary); margin-right: 0.5rem;"></i>
+                Найти людей
+            </h1>
+            <p class="page-subtitle">Откройте для себя интересных людей и расширьте свою сеть контактов</p>
+        </div>
 
-    <!-- Search Section -->
-    <div class="search-section">
-      <div class="search-container">
-        <i class="fas fa-search search-icon"></i>
-        <input type="text"
-               class="search-input"
-               id="searchInput"
-               placeholder="Поиск людей по имени или интересам..."
-               autocomplete="off">
-        <button class="search-clear" id="searchClear">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-    </div>
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text"
+                       class="search-input"
+                       id="searchInput"
+                       placeholder="Поиск людей по имени или интересам..."
+                       autocomplete="off">
+                <button class="search-clear" id="searchClear">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
 
-    <!-- Results Section -->
-    <div class="results-section">
-      <div class="results-header">
-        <h2 class="results-title" id="resultsTitle">Рекомендуемые пользователи</h2>
-        <div class="results-count" id="resultsCount">
+        <!-- Results Section -->
+        <div class="results-section">
+            <div class="results-header">
+                <h2 class="results-title" id="resultsTitle">Рекомендуемые пользователи</h2>
+                <div class="results-count" id="resultsCount">
                     <span th:if="${recommendations != null and !recommendations.userRecommendations.empty}">
                         Найдено пользователей: <span th:text="${recommendations.userRecommendations.size()}">0</span>
                     </span>
-        </div>
-      </div>
-
-      <!-- Loading State -->
-      <div class="loading" id="loadingState" style="display: none;">
-        <i class="fas fa-spinner"></i>
-        <p>Ищем интересных людей...</p>
-      </div>
-
-      <!-- Users Grid -->
-      <div class="users-grid" id="usersGrid">
-        <!-- Users will be loaded here -->
-        <th:block th:if="${recommendations != null and !recommendations.userRecommendations.empty}">
-          <div class="user-card" th:each="user : ${recommendations.userRecommendations}">
-            <div class="user-avatar">
-              <img th:if="${user.imageUrl}"
-                   th:src="${user.imageUrl}"
-                   th:alt="${user.firstName + ' ' + user.lastName}"
-                   class="avatar-img">
-              <div th:unless="${user.imageUrl}" class="default-avatar">
-                <i class="fas fa-user"></i>
-              </div>
+                </div>
             </div>
 
-            <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-name">
-              <span th:text="${user.firstName + ' ' + user.lastName}">Имя Пользователя</span>
-            </a>
-
-<!--            <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-handle">-->
-<!--              @<span th:text="'user' + ${user.id}">username</span>-->
-<!--            </a>-->
-
-            <div class="user-stats" th:if="${user.followersCount != null and user.followersCount > 0}">
-              <span th:text="${user.followersCount}">0</span> подписчиков
+            <!-- Loading State -->
+            <div class="loading" id="loadingState" style="display: none;">
+                <i class="fas fa-spinner"></i>
+                <p>Ищем интересных людей...</p>
             </div>
 
-            <button class="follow-btn"
-                    th:classappend="${user.isFollowing} ? 'following' : ''"
-                    th:data-user-id="${user.id}"
-                    th:text="${user.isFollowing} ? 'Читаю' : 'Читать'"
-                    onclick="toggleFollow(this)">
-              Читать
-            </button>
-          </div>
-        </th:block>
-      </div>
+            <!-- Users Grid -->
+            <div class="users-grid" id="usersGrid">
+                <!-- Users will be loaded here -->
+                <th:block th:if="${recommendations != null and !recommendations.userRecommendations.empty}">
+                    <div class="user-card" th:each="user : ${recommendations.userRecommendations}">
+                        <div class="user-avatar">
+                            <img th:if="${user.imageUrl}"
+                                 th:src="${user.imageUrl}"
+                                 th:alt="${user.firstName + ' ' + user.lastName}"
+                                 class="avatar-img">
+                            <div th:unless="${user.imageUrl}" class="default-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
 
-      <!-- Empty State -->
-      <div class="empty-state" id="emptyState"
-           th:style="${recommendations == null or recommendations.userRecommendations.empty} ? 'display: block;' : 'display: none;'">
-        <div class="empty-icon">
-          <i class="fas fa-users"></i>
+                        <a th:href="@{/profile/{userId}(userId=${user.id})}" class="user-name">
+                            <span th:text="${user.firstName + ' ' + user.lastName}">Имя Пользователя</span>
+                        </a>
+
+
+                        <div class="user-stats" th:if="${user.followersCount != null and user.followersCount > 0}">
+                            <span th:text="${user.followersCount}">0</span> подписчиков
+                        </div>
+
+<!--                        <button class="follow-btn"-->
+<!--                                th:classappend="${user.isFollowing} ? 'following' : ''"-->
+<!--                                th:data-user-id="${user.id}"-->
+<!--                                data-action="follow">-->
+<!--                            <i class="follow-icon"-->
+<!--                               th:class="${user.isFollowing} ? 'fas fa-user-check' : 'fas fa-user-plus'"></i>-->
+<!--                            <span class="follow-text"-->
+<!--                                  th:text="${user.isFollowing} ? 'Подписан' : 'Подписаться'">Подписаться</span>-->
+<!--                        </button>-->
+
+
+                    </div>
+                </th:block>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState"
+                 th:style="${recommendations == null or recommendations.userRecommendations.empty} ? 'display: block;' : 'display: none;'">
+                <div class="empty-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="empty-title">Пользователи не найдены</h3>
+                <p class="empty-description">
+                    Попробуйте изменить поисковый запрос или посмотрите наши рекомендации
+                </p>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-section"
+                 th:if="${recommendations != null and recommendations.hasNext}"
+                 id="paginationSection">
+                <button class="load-more-btn" id="loadMoreBtn" onclick="loadMore()">
+                    <i class="fas fa-plus"></i>
+                    <span>Загрузить еще</span>
+                </button>
+            </div>
         </div>
-        <h3 class="empty-title">Пользователи не найдены</h3>
-        <p class="empty-description">
-          Попробуйте изменить поисковый запрос или посмотрите наши рекомендации
-        </p>
-      </div>
-
-      <!-- Pagination -->
-      <div class="pagination-section"
-           th:if="${recommendations != null and recommendations.hasNext}"
-           id="paginationSection">
-        <button class="load-more-btn" id="loadMoreBtn" onclick="loadMore()">
-          <i class="fas fa-plus"></i>
-          <span>Загрузить еще</span>
-        </button>
-      </div>
     </div>
-  </div>
 </main>
 
 <!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ ИЗ ФРАГМЕНТА -->
 <th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
 
 <script>
-  // Global variables
-  let currentPage = 0;
-  let currentQuery = '';
-  let isLoading = false;
-  let hasNext = true;
+    // Global variables
+    let currentPage = 0;
+    let currentQuery = '';
+    let isLoading = false;
+    let hasNext = true;
 
-  // Initialize page
-  document.addEventListener('DOMContentLoaded', function() {
-    initializeRecommendationsPage();
-  });
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeRecommendationsPage();
+    });
 
-  function initializeRecommendationsPage() {
-    console.log('🔍 Recommendations page initialized');
+    function initializeRecommendationsPage() {
+        console.log('🔍 Recommendations page initialized');
 
-    // Get initial data from Thymeleaf
-    const recommendations = /*[[${recommendations}]]*/ null;
-    if (recommendations) {
-      currentPage = recommendations.currentPage || 0;
-      hasNext = recommendations.hasNext || false;
-    }
-
-    // Setup search functionality
-    setupSearch();
-
-    // Setup follow buttons
-    setupFollowButtons();
-
-    console.log('📊 Initial state:', { currentPage, hasNext });
-  }
-
-  function setupSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const searchClear = document.getElementById('searchClear');
-    let searchTimeout;
-
-    // Search input handler
-    searchInput.addEventListener('input', function() {
-      const query = this.value.trim();
-
-      // Show/hide clear button
-      if (query) {
-        searchClear.classList.add('visible');
-      } else {
-        searchClear.classList.remove('visible');
-      }
-
-      // Очищаем предыдущие ошибки при новом вводе
-      clearExistingErrors();
-
-      // Debounced search с увеличенной задержкой
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-        // Поиск только если запрос не слишком короткий или пустой
-        if (query.length === 0 || query.length >= 2) {
-          performSearch(query);
-        } else {
-          // Для очень коротких запросов просто обновляем заголовок
-          updateResultsTitle(query);
+        // Get initial data from Thymeleaf
+        const recommendations = /*[[${recommendations}]]*/ null;
+        if (recommendations) {
+            currentPage = recommendations.currentPage || 0;
+            hasNext = recommendations.hasNext || false;
         }
-      }, 500); // Увеличена задержка до 500ms
-    });
 
-    // Clear search
-    searchClear.addEventListener('click', function() {
-      searchInput.value = '';
-      searchClear.classList.remove('visible');
-      clearExistingErrors();
-      performSearch('');
-    });
+        // Setup search functionality
+        setupSearch();
 
-    // Enter key search
-    searchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        clearTimeout(searchTimeout);
-        clearExistingErrors();
-        performSearch(this.value.trim());
-      }
-    });
-  }
+        // Setup follow buttons
+        setupFollowButtons();
 
-  function performSearch(query) {
-    if (isLoading) return;
-
-    console.log('🔍 Performing search:', query);
-
-    currentQuery = query;
-    currentPage = 0;
-    isLoading = true;
-
-    // Показываем loading только для непустых запросов или при первом поиске
-    if (query.length > 0) {
-      showLoading();
+        console.log('📊 Initial state:', {currentPage, hasNext});
     }
-    updateResultsTitle(query);
 
-    fetch(`/recommendations/search?query=${encodeURIComponent(query)}&page=0`)
+    function setupSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const searchClear = document.getElementById('searchClear');
+        let searchTimeout;
+
+        // Search input handler
+        searchInput.addEventListener('input', function () {
+            const query = this.value.trim();
+
+            // Show/hide clear button
+            if (query) {
+                searchClear.classList.add('visible');
+            } else {
+                searchClear.classList.remove('visible');
+            }
+
+            // Очищаем предыдущие ошибки при новом вводе
+            clearExistingErrors();
+
+            // Debounced search с увеличенной задержкой
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                // Поиск только если запрос не слишком короткий или пустой
+                if (query.length === 0 || query.length >= 2) {
+                    performSearch(query);
+                } else {
+                    // Для очень коротких запросов просто обновляем заголовок
+                    updateResultsTitle(query);
+                }
+            }, 500); // Увеличена задержка до 500ms
+        });
+
+        // Clear search
+        searchClear.addEventListener('click', function () {
+            searchInput.value = '';
+            searchClear.classList.remove('visible');
+            clearExistingErrors();
+            performSearch('');
+        });
+
+        // Enter key search
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                clearTimeout(searchTimeout);
+                clearExistingErrors();
+                performSearch(this.value.trim());
+            }
+        });
+    }
+
+    function performSearch(query) {
+        if (isLoading) return;
+
+        console.log('🔍 Performing search:', query);
+
+        currentQuery = query;
+        currentPage = 0;
+        isLoading = true;
+
+        // Показываем loading только для непустых запросов или при первом поиске
+        if (query.length > 0) {
+            showLoading();
+        }
+        updateResultsTitle(query);
+
+        fetch(`/recommendations/search?query=${encodeURIComponent(query)}&page=0`)
             .then(response => {
-              if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-              }
-              return response.json();
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
             })
             .then(data => {
-              console.log('📊 Search results:', data);
+                console.log('📊 Search results:', data);
 
-              displayUsers(data.userRecommendations || [], true);
-              updatePagination(data);
-              updateResultsCount(data.userRecommendations?.length || 0, query);
+                displayUsers(data.userRecommendations || [], true);
+                updatePagination(data);
+                updateResultsCount(data.userRecommendations?.length || 0, query);
 
-              currentPage = data.currentPage || 0;
-              hasNext = data.hasNext || false;
+                currentPage = data.currentPage || 0;
+                hasNext = data.hasNext || false;
             })
             .catch(error => {
-              console.error('❌ Search error:', error);
+                console.error('❌ Search error:', error);
 
-              // Показываем ошибку только если это не пустой поиск и есть реальная проблема
-              if (query.length > 3) {  // Показываем ошибку только для запросов длиннее 2 символов
-                showError('Ошибка при поиске пользователей. Попробуйте позже.');
-              } else {
-                // Для коротких запросов просто показываем пустое состояние
-                displayUsers([], true);
-                updateResultsCount(0, query);
-              }
+                // Показываем ошибку только если это не пустой поиск и есть реальная проблема
+                if (query.length > 3) {  // Показываем ошибку только для запросов длиннее 2 символов
+                    showError('Ошибка при поиске пользователей. Попробуйте позже.');
+                } else {
+                    // Для коротких запросов просто показываем пустое состояние
+                    displayUsers([], true);
+                    updateResultsCount(0, query);
+                }
             })
             .finally(() => {
-              hideLoading();
-              isLoading = false;
+                hideLoading();
+                isLoading = false;
             });
-  }
+    }
 
-  function loadMore() {
-    if (isLoading || !hasNext) return;
+    function loadMore() {
+        if (isLoading || !hasNext) return;
 
-    console.log('📄 Loading more results, page:', currentPage + 1);
+        console.log('📄 Loading more results, page:', currentPage + 1);
 
-    isLoading = true;
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    const originalText = loadMoreBtn.innerHTML;
+        isLoading = true;
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const originalText = loadMoreBtn.innerHTML;
 
-    loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Загружаем...</span>';
-    loadMoreBtn.disabled = true;
+        loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Загружаем...</span>';
+        loadMoreBtn.disabled = true;
 
-    fetch(`/recommendations/load-more?query=${encodeURIComponent(currentQuery)}&page=${currentPage + 1}`)
+        fetch(`/recommendations/load-more?query=${encodeURIComponent(currentQuery)}&page=${currentPage + 1}`)
             .then(response => {
-              if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-              }
-              return response.json();
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
             })
             .then(data => {
-              console.log('📊 Load more results:', data);
+                console.log('📊 Load more results:', data);
 
-              displayUsers(data.userRecommendations || [], false);
-              updatePagination(data);
+                displayUsers(data.userRecommendations || [], false);
+                updatePagination(data);
 
-              currentPage = data.currentPage || currentPage + 1;
-              hasNext = data.hasNext || false;
+                currentPage = data.currentPage || currentPage + 1;
+                hasNext = data.hasNext || false;
             })
             .catch(error => {
-              console.error('❌ Load more error:', error);
-              showError('Ошибка при загрузке дополнительных результатов.');
+                console.error('❌ Load more error:', error);
+                showError('Ошибка при загрузке дополнительных результатов.');
             })
             .finally(() => {
-              loadMoreBtn.innerHTML = originalText;
-              loadMoreBtn.disabled = false;
-              isLoading = false;
+                loadMoreBtn.innerHTML = originalText;
+                loadMoreBtn.disabled = false;
+                isLoading = false;
             });
-  }
-
-  function displayUsers(users, replace = true) {
-    const usersGrid = document.getElementById('usersGrid');
-    const emptyState = document.getElementById('emptyState');
-
-    if (replace) {
-      usersGrid.innerHTML = '';
     }
 
-    // Обновляем empty state
-    if (!users || users.length === 0) {
-      if (replace) {
-        // Показываем разные сообщения в зависимости от контекста
-        updateEmptyState();
-        emptyState.style.display = 'block';
-      }
-      return;
+    function displayUsers(users, replace = true) {
+        const usersGrid = document.getElementById('usersGrid');
+        const emptyState = document.getElementById('emptyState');
+
+        if (replace) {
+            usersGrid.innerHTML = '';
+        }
+
+        // Обновляем empty state
+        if (!users || users.length === 0) {
+            if (replace) {
+                // Показываем разные сообщения в зависимости от контекста
+                updateEmptyState();
+                emptyState.style.display = 'block';
+            }
+            return;
+        }
+
+        emptyState.style.display = 'none';
+
+        users.forEach(user => {
+            const userCard = createUserCard(user);
+            usersGrid.appendChild(userCard);
+        });
+
+        // Setup follow buttons for new cards
+        setupFollowButtons();
+
+        // Add entrance animation
+        const newCards = usersGrid.querySelectorAll('.user-card');
+        newCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
     }
 
-    emptyState.style.display = 'none';
+    function updateEmptyState() {
+        const emptyState = document.getElementById('emptyState');
+        const emptyTitle = emptyState.querySelector('.empty-title');
+        const emptyDescription = emptyState.querySelector('.empty-description');
+        const emptyIcon = emptyState.querySelector('.empty-icon i');
 
-    users.forEach(user => {
-      const userCard = createUserCard(user);
-      usersGrid.appendChild(userCard);
-    });
-
-    // Setup follow buttons for new cards
-    setupFollowButtons();
-
-    // Add entrance animation
-    const newCards = usersGrid.querySelectorAll('.user-card');
-    newCards.forEach((card, index) => {
-      card.style.opacity = '0';
-      card.style.transform = 'translateY(20px)';
-      setTimeout(() => {
-        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        card.style.opacity = '1';
-        card.style.transform = 'translateY(0)';
-      }, index * 100);
-    });
-  }
-
-  function updateEmptyState() {
-    const emptyState = document.getElementById('emptyState');
-    const emptyTitle = emptyState.querySelector('.empty-title');
-    const emptyDescription = emptyState.querySelector('.empty-description');
-    const emptyIcon = emptyState.querySelector('.empty-icon i');
-
-    if (currentQuery && currentQuery.length > 0) {
-      // Поисковый запрос не дал результатов
-      emptyIcon.className = 'fas fa-search';
-      emptyTitle.textContent = 'Ничего не найдено';
-      emptyDescription.textContent = `По запросу "${currentQuery}" пользователи не найдены. Попробуйте изменить поисковый запрос.`;
-    } else {
-      // Нет пользователей вообще
-      emptyIcon.className = 'fas fa-users';
-      emptyTitle.textContent = 'Пользователи не найдены';
-      emptyDescription.textContent = 'Попробуйте изменить поисковый запрос или посмотрите наши рекомендации';
+        if (currentQuery && currentQuery.length > 0) {
+            // Поисковый запрос не дал результатов
+            emptyIcon.className = 'fas fa-search';
+            emptyTitle.textContent = 'Ничего не найдено';
+            emptyDescription.textContent = `По запросу "${currentQuery}" пользователи не найдены. Попробуйте изменить поисковый запрос.`;
+        } else {
+            // Нет пользователей вообще
+            emptyIcon.className = 'fas fa-users';
+            emptyTitle.textContent = 'Пользователи не найдены';
+            emptyDescription.textContent = 'Попробуйте изменить поисковый запрос или посмотрите наши рекомендации';
+        }
     }
-  }
 
-  function clearExistingErrors() {
-    const existingAlert = document.querySelector('.alert-warning');
-    if (existingAlert) {
-      existingAlert.remove();
+    function clearExistingErrors() {
+        const existingAlert = document.querySelector('.alert-warning');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
     }
-  }
 
-  function createUserCard(user) {
-    const card = document.createElement('div');
-    card.className = 'user-card';
+    function createUserCard(user) {
+        const card = document.createElement('div');
+        card.className = 'user-card';
 
-    const avatarHtml = user.imageUrl
+        const avatarHtml = user.imageUrl
             ? `<img src="${user.imageUrl}" alt="${user.firstName} ${user.lastName}" class="avatar-img">`
             : '<div class="default-avatar"><i class="fas fa-user"></i></div>';
 
-    const followersText = user.followersCount && user.followersCount > 0
+        const followersText = user.followersCount && user.followersCount > 0
             ? `<div class="user-stats">${user.followersCount} подписчиков</div>`
             : '';
 
-    const followButtonClass = user.isFollowing ? 'follow-btn following' : 'follow-btn';
-    const followButtonText = user.isFollowing ? 'Читаю' : 'Читать';
+        const followButtonClass = user.isFollowing ? 'follow-btn following' : 'follow-btn';
+        const followButtonText = user.isFollowing ? 'Читаю' : 'Читать';
 
-    card.innerHTML = `
+        card.innerHTML = `
             <div class="user-avatar">
                 ${avatarHtml}
             </div>
@@ -895,169 +902,146 @@
             </button>
         `;
 
-    return card;
-  }
-
-  function setupFollowButtons() {
-    // This will be implemented when follow functionality is ready
-    console.log('🔗 Follow buttons setup completed');
-  }
-
-  function toggleFollow(button) {
-    const userId = button.dataset.userId;
-    const isFollowing = button.classList.contains('following');
-
-    console.log(`${isFollowing ? 'Unfollow' : 'Follow'} user:`, userId);
-
-    // Add loading state
-    button.disabled = true;
-    const originalText = button.textContent;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-    // TODO: Implement actual follow/unfollow API call
-    setTimeout(() => {
-      if (isFollowing) {
-        button.classList.remove('following');
-        button.textContent = 'Читать';
-      } else {
-        button.classList.add('following');
-        button.textContent = 'Читаю';
-      }
-      button.disabled = false;
-    }, 500);
-  }
-
-  function updateResultsTitle(query) {
-    const resultsTitle = document.getElementById('resultsTitle');
-    if (query) {
-      resultsTitle.textContent = `Результаты поиска: "${query}"`;
-    } else {
-      resultsTitle.textContent = 'Рекомендуемые пользователи';
-    }
-  }
-
-  function updateResultsCount(count, query) {
-    const resultsCount = document.getElementById('resultsCount');
-    if (count > 0) {
-      const text = query
-              ? `Найдено пользователей: ${count}`
-              : `Показано пользователей: ${count}`;
-      resultsCount.textContent = text;
-    } else {
-      resultsCount.textContent = '';
-    }
-  }
-
-  function updatePagination(data) {
-    const paginationSection = document.getElementById('paginationSection');
-    if (data.hasNext) {
-      paginationSection.style.display = 'block';
-    } else {
-      paginationSection.style.display = 'none';
-    }
-  }
-
-  function showLoading() {
-    const loadingState = document.getElementById('loadingState');
-    const usersGrid = document.getElementById('usersGrid');
-    const emptyState = document.getElementById('emptyState');
-
-    loadingState.style.display = 'block';
-    usersGrid.style.display = 'none';
-    emptyState.style.display = 'none';
-  }
-
-  function hideLoading() {
-    const loadingState = document.getElementById('loadingState');
-    const usersGrid = document.getElementById('usersGrid');
-
-    loadingState.style.display = 'none';
-    usersGrid.style.display = 'grid';
-  }
-
-  function showError(message) {
-    // Не показываем ошибки слишком часто
-    const existingAlert = document.querySelector('.alert-warning');
-    if (existingAlert) {
-      return; // Уже есть ошибка на экране
+        return card;
     }
 
-    const container = document.querySelector('.container');
-    const alert = document.createElement('div');
-    alert.className = 'alert alert-warning';
-    alert.innerHTML = `
+    function setupFollowButtons() {
+        // This will be implemented when follow functionality is ready
+        console.log('🔗 Follow buttons setup completed');
+    }
+
+
+    function updateResultsTitle(query) {
+        const resultsTitle = document.getElementById('resultsTitle');
+        if (query) {
+            resultsTitle.textContent = `Результаты поиска: "${query}"`;
+        } else {
+            resultsTitle.textContent = 'Рекомендуемые пользователи';
+        }
+    }
+
+    function updateResultsCount(count, query) {
+        const resultsCount = document.getElementById('resultsCount');
+        if (count > 0) {
+            const text = query
+                ? `Найдено пользователей: ${count}`
+                : `Показано пользователей: ${count}`;
+            resultsCount.textContent = text;
+        } else {
+            resultsCount.textContent = '';
+        }
+    }
+
+    function updatePagination(data) {
+        const paginationSection = document.getElementById('paginationSection');
+        if (data.hasNext) {
+            paginationSection.style.display = 'block';
+        } else {
+            paginationSection.style.display = 'none';
+        }
+    }
+
+    function showLoading() {
+        const loadingState = document.getElementById('loadingState');
+        const usersGrid = document.getElementById('usersGrid');
+        const emptyState = document.getElementById('emptyState');
+
+        loadingState.style.display = 'block';
+        usersGrid.style.display = 'none';
+        emptyState.style.display = 'none';
+    }
+
+    function hideLoading() {
+        const loadingState = document.getElementById('loadingState');
+        const usersGrid = document.getElementById('usersGrid');
+
+        loadingState.style.display = 'none';
+        usersGrid.style.display = 'grid';
+    }
+
+    function showError(message) {
+        // Не показываем ошибки слишком часто
+        const existingAlert = document.querySelector('.alert-warning');
+        if (existingAlert) {
+            return; // Уже есть ошибка на экране
+        }
+
+        const container = document.querySelector('.container');
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-warning';
+        alert.innerHTML = `
             <i class="fas fa-exclamation-triangle"></i>
             ${message}
             <button type="button" class="btn-close" onclick="this.parentElement.remove()" style="float: right; background: none; border: none; color: inherit; cursor: pointer; font-size: 1.2rem;">&times;</button>
         `;
 
-    container.insertBefore(alert, container.firstChild);
+        container.insertBefore(alert, container.firstChild);
 
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-      if (alert.parentNode) {
-        alert.remove();
-      }
-    }, 5000);
-  }
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
 
-  // Smooth scroll behavior
-  document.documentElement.style.scrollBehavior = 'smooth';
+    // Smooth scroll behavior
+    document.documentElement.style.scrollBehavior = 'smooth';
 
-  // Intersection Observer for animations
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  };
+    // Intersection Observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
 
-  const observer = new IntersectionObserver(function(entries) {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-      }
+    const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe user cards for animation
+    document.querySelectorAll('.user-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
     });
-  }, observerOptions);
 
-  // Observe user cards for animation
-  document.querySelectorAll('.user-card').forEach(card => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    observer.observe(card);
-  });
+    // Enhanced search input focus effects
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('focus', function () {
+        this.parentElement.style.transform = 'scale(1.02)';
+    });
 
-  // Enhanced search input focus effects
-  const searchInput = document.getElementById('searchInput');
-  searchInput.addEventListener('focus', function() {
-    this.parentElement.style.transform = 'scale(1.02)';
-  });
+    searchInput.addEventListener('blur', function () {
+        this.parentElement.style.transform = 'scale(1)';
+    });
 
-  searchInput.addEventListener('blur', function() {
-    this.parentElement.style.transform = 'scale(1)';
-  });
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function (e) {
+        // Ctrl/Cmd + K to focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+        }
 
-  // Keyboard shortcuts
-  document.addEventListener('keydown', function(e) {
-    // Ctrl/Cmd + K to focus search
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-      e.preventDefault();
-      searchInput.focus();
-    }
+        // Escape to clear search
+        if (e.key === 'Escape' && document.activeElement === searchInput) {
+            searchInput.value = '';
+            document.getElementById('searchClear').classList.remove('visible');
+            performSearch('');
+        }
+    });
 
-    // Escape to clear search
-    if (e.key === 'Escape' && document.activeElement === searchInput) {
-      searchInput.value = '';
-      document.getElementById('searchClear').classList.remove('visible');
-      performSearch('');
-    }
-  });
-
-  // Add keyboard hint
-  const searchContainer = document.querySelector('.search-container');
-  const keyboardHint = document.createElement('div');
-  keyboardHint.className = 'keyboard-hint';
-  keyboardHint.style.cssText = `
+    // Add keyboard hint
+    const searchContainer = document.querySelector('.search-container');
+    const keyboardHint = document.createElement('div');
+    keyboardHint.className = 'keyboard-hint';
+    keyboardHint.style.cssText = `
         position: absolute;
         right: 3rem;
         top: 50%;
@@ -1070,122 +1054,133 @@
         border: 1px solid var(--border-secondary);
         display: none;
     `;
-  keyboardHint.textContent = 'Ctrl+K';
-  searchContainer.appendChild(keyboardHint);
+    keyboardHint.textContent = 'Ctrl+K';
+    searchContainer.appendChild(keyboardHint);
 
-  // Show keyboard hint on desktop
-  if (window.innerWidth > 768) {
-    keyboardHint.style.display = 'block';
-  }
-
-  // Handle responsive keyboard hint
-  window.addEventListener('resize', function() {
+    // Show keyboard hint on desktop
     if (window.innerWidth > 768) {
-      keyboardHint.style.display = 'block';
-    } else {
-      keyboardHint.style.display = 'none';
+        keyboardHint.style.display = 'block';
     }
-  });
+
+    // Handle responsive keyboard hint
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 768) {
+            keyboardHint.style.display = 'block';
+        } else {
+            keyboardHint.style.display = 'none';
+        }
+    });
 </script>
 
 <!-- Additional styles for keyboard hint and enhanced animations -->
 <style>
-  .search-container {
-    transition: transform 0.2s ease;
-  }
-
-  .user-card {
-    cursor: pointer;
-  }
-
-  .user-card .user-avatar {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .user-card .user-avatar::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, transparent, rgba(37, 99, 235, 0.1));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .user-card:hover .user-avatar::after {
-    opacity: 1;
-  }
-
-  .follow-btn {
-    position: relative;
-    z-index: 1;
-  }
-
-  .follow-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none !important;
-  }
-
-  /* Enhanced loading animation */
-  .loading i {
-    background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Pulse animation for empty state */
-  .empty-state .empty-icon {
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-
-  /* Enhanced alert styles */
-  .alert {
-    animation: slideInDown 0.3s ease-out;
-  }
-
-  @keyframes slideInDown {
-    from {
-      transform: translateY(-100%);
-      opacity: 0;
+    .search-container {
+        transition: transform 0.2s ease;
     }
-    to {
-      transform: translateY(0);
-      opacity: 1;
+
+    .user-card {
+        cursor: pointer;
     }
-  }
 
-  /* Progress indicator for search */
-  .search-input {
-    position: relative;
-  }
+    .user-card .user-avatar {
+        position: relative;
+        overflow: hidden;
+    }
 
-  .search-input.searching::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-    animation: searchProgress 1s ease-in-out infinite;
-  }
+    .user-card .user-avatar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, transparent, rgba(37, 99, 235, 0.1));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
 
-  @keyframes searchProgress {
-    0% { width: 0%; }
-    50% { width: 50%; }
-    100% { width: 100%; }
-  }
+    .user-card:hover .user-avatar::after {
+        opacity: 1;
+    }
+
+    .follow-btn {
+        position: relative;
+        z-index: 1;
+    }
+
+    .follow-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* Enhanced loading animation */
+    .loading i {
+        background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Pulse animation for empty state */
+    .empty-state .empty-icon {
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    /* Enhanced alert styles */
+    .alert {
+        animation: slideInDown 0.3s ease-out;
+    }
+
+    @keyframes slideInDown {
+        from {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Progress indicator for search */
+    .search-input {
+        position: relative;
+    }
+
+    .search-input.searching::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        animation: searchProgress 1s ease-in-out infinite;
+    }
+
+    @keyframes searchProgress {
+        0% {
+            width: 0%;
+        }
+        50% {
+            width: 50%;
+        }
+        100% {
+            width: 100%;
+        }
+    }
 </style>
 
 <script th:src="@{/js/online-status.js}"></script>
+
 </body>
 </html>
