@@ -29,6 +29,7 @@ public class DashboardController {
 
 
 
+
     @GetMapping
     public String dashboard(Model model, Authentication authentication) {
         model.addAttribute("postCreateDto", new PostCreateDto());
@@ -37,16 +38,10 @@ public class DashboardController {
             try {
                 User currentUser = userService.getCurrentUserEntity();
 
-                // Добавляем несколько последних постов из ленты на главную (показываем только 3-5)
+
                 PostListDto recentFeedPosts = postService.getFeedPosts(currentUser.getId(), 0, 10);
                 model.addAttribute("recentPosts", recentFeedPosts);
                 model.addAttribute("currentUser", currentUser);
-
-
-
-                // Дополнительно можно добавить статистику для dashboard
-                // model.addAttribute("totalFollowers", userService.getFollowersCount(currentUser.getId()));
-                // model.addAttribute("totalFollowing", userService.getFollowingCount(currentUser.getId()));
 
             } catch (Exception e) {
                 log.warn("Не удалось загрузить данные для dashboard: {}", e.getMessage());
