@@ -4,6 +4,7 @@ import com.example.cleopatra.ExistsException.PostNotFoundException;
 import com.example.cleopatra.dto.Post.*;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.maper.PostMapper;
+import com.example.cleopatra.model.Location;
 import com.example.cleopatra.model.Post;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.repository.CommentRepository;
@@ -36,13 +37,29 @@ public class PostServiceImpl implements PostService {
     private final SubscriptionService subscriptionService;
     private final PostLikeService postLikeService;
     private final CommentService commentService;
+    private final LocationService locationService;
+
+
 
     @Override
     public PostResponseDto createPost(PostCreateDto postCreateDto) {
-        log.info("Создание нового поста");
+        log.info("=== НАЧАЛО СОЗДАНИЯ ПОСТА ===");
+        log.info("Содержимое поста: {}", postCreateDto.getContent());
+
+        // ✅ ДОБАВЛЯЕМ детальные логи для геолокации
+        log.info("=== ПРОВЕРКА ГЕОЛОКАЦИИ ===");
+        log.info("LocationId: {}", postCreateDto.getLocationId());
+        log.info("Latitude: {}", postCreateDto.getLatitude());
+        log.info("Longitude: {}", postCreateDto.getLongitude());
+        log.info("PlaceName: {}", postCreateDto.getPlaceName());
 
         User currentUser = getCurrentUser();
         Post post = postMapper.toEntity(postCreateDto, currentUser);
+
+        log.info("Пост создан в маппере, ID: {}", post.getId());
+
+        // ✅ ДОБАВЛЯЕМ логику для необязательной геолокации
+        handleLocationForPost(post, postCreateDto);
 
         if (postCreateDto.getImage() != null && !postCreateDto.getImage().isEmpty()) {
             try {
@@ -63,8 +80,31 @@ public class PostServiceImpl implements PostService {
             }
         }
 
+        // ✅ ЛОГИРУЕМ СОСТОЯНИЕ ПОСТА ПЕРЕД СОХРАНЕНИЕМ
+        log.info("=== СОСТОЯНИЕ ПОСТА ПЕРЕД СОХРАНЕНИЕМ ===");
+        log.info("Post ID: {}", post.getId());
+        log.info("Post Content: {}", post.getContent());
+        log.info("Post Author: {}", post.getAuthor().getFirstName());
+        log.info("Post Location: {}", post.getLocation());
+        if (post.getLocation() != null) {
+            log.info("Location ID: {}", post.getLocation().getId());
+            log.info("Location Coordinates: ({}, {})",
+                    post.getLocation().getLatitude(), post.getLocation().getLongitude());
+            log.info("Location PlaceName: {}", post.getLocation().getPlaceName());
+        }
+
         Post savedPost = postRepository.save(post);
         userRepository.save(currentUser);
+
+        // ✅ ЛОГИРУЕМ СОСТОЯНИЕ ПОСЛЕ СОХРАНЕНИЯ
+        log.info("=== СОСТОЯНИЕ ПОСЛЕ СОХРАНЕНИЯ ===");
+        log.info("Saved Post ID: {}", savedPost.getId());
+        log.info("Saved Post Location: {}", savedPost.getLocation());
+        if (savedPost.getLocation() != null) {
+            log.info("Saved Location ID: {}", savedPost.getLocation().getId());
+            log.info("Saved Location Coordinates: ({}, {})",
+                    savedPost.getLocation().getLatitude(), savedPost.getLocation().getLongitude());
+        }
 
         log.info("Пост успешно создан с ID: {}", savedPost.getId());
 
@@ -73,7 +113,65 @@ public class PostServiceImpl implements PostService {
         List<PostResponseDto.LikeUserDto> recentLikes =
                 postLikeService.getRecentLikes(savedPost, 5);
 
-        return postMapper.toResponseDto(savedPost, isLiked, recentLikes);
+        PostResponseDto responseDto = postMapper.toResponseDto(savedPost, isLiked, recentLikes);
+
+        // ✅ ЛОГИРУЕМ ФИНАЛЬНЫЙ DTO
+        log.info("=== ФИНАЛЬНЫЙ RESPONSE DTO ===");
+        log.info("Response DTO Location: {}", responseDto.getLocation());
+        if (responseDto.getLocation() != null) {
+            log.info("Response Location ID: {}", responseDto.getLocation().getId());
+            log.info("Response Location Coordinates: ({}, {})",
+                    responseDto.getLocation().getLatitude(), responseDto.getLocation().getLongitude());
+        }
+        log.info("=== КОНЕЦ СОЗДАНИЯ ПОСТА ===");
+
+        return responseDto;
+    }
+
+    // ✅ ДОБАВЛЯЕМ приватный метод для обработки локации с подробными логами
+    private void handleLocationForPost(Post post, PostCreateDto postCreateDto) {
+        log.info("=== ОБРАБОТКА ГЕОЛОКАЦИИ ===");
+
+        try {
+            // Вариант 1: Используем существующую локацию по ID
+            if (postCreateDto.getLocationId() != null) {
+                log.info("Используем существующую локацию с ID: {}", postCreateDto.getLocationId());
+                Location location = locationService.findById(postCreateDto.getLocationId());
+                post.setLocation(location);
+                log.info("К посту добавлена существующая локация с ID: {} (координаты: {}, {})",
+                        postCreateDto.getLocationId(), location.getLatitude(), location.getLongitude());
+            }
+            // Вариант 2: Создаем новую локацию из координат
+            else if (postCreateDto.getLatitude() != null && postCreateDto.getLongitude() != null) {
+                log.info("Создаем новую локацию из координат: ({}, {}) с названием: {}",
+                        postCreateDto.getLatitude(), postCreateDto.getLongitude(), postCreateDto.getPlaceName());
+
+                Location location = locationService.createLocationFromCoordinates(
+                        postCreateDto.getLatitude(),
+                        postCreateDto.getLongitude(),
+                        postCreateDto.getPlaceName()
+                );
+
+                log.info("Локация создана с ID: {}", location.getId());
+                post.setLocation(location);
+                log.info("К посту добавлена новая локация: {} (ID: {}, координаты: {}, {})",
+                        location.getPlaceName(), location.getId(), location.getLatitude(), location.getLongitude());
+            }
+            // Вариант 3: Без локации (по умолчанию)
+            else {
+                post.setLocation(null);
+                log.info("Пост создается без геолокации - все поля локации пустые");
+            }
+
+            log.info("Финальное состояние локации в посте: {}", post.getLocation());
+
+        } catch (Exception e) {
+            log.error("Ошибка при обработке геолокации для поста: {}", e.getMessage(), e);
+            post.setLocation(null);
+            log.warn("Локация установлена в null из-за ошибки");
+        }
+
+        log.info("=== КОНЕЦ ОБРАБОТКИ ГЕОЛОКАЦИИ ===");
     }
 
     @Override

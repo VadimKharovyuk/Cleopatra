@@ -1,6 +1,7 @@
 package com.example.cleopatra.service;
 
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,19 @@ public class MapboxService {
         }
     }
 
+    // ✅ ДОБАВЛЯЕМ геттеры для LocationService
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public RestTemplate getRestTemplate() {
+        return restTemplate;
+    }
+
     // Генерация статической карты
     public String generateStaticMapUrl(double longitude, double latitude, int zoom, int width, int height) {
         return String.format("%s/styles/v1/mapbox/streets-v11/static/%f,%f,%d/%dx%d?access_token=%s",
@@ -92,4 +106,5 @@ public class MapboxService {
     public boolean isInitialized() {
         return accessToken != null && !accessToken.trim().isEmpty() && restTemplate != null;
     }
+
 }

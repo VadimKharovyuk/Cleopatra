@@ -6,15 +6,19 @@ import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.service.PostService;
 import com.example.cleopatra.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Arrays;
 
 @Controller
 @RequestMapping("/posts")
@@ -36,30 +40,68 @@ public class PostController {
     public String createPost(@Valid @ModelAttribute PostCreateDto postCreateDto,
                              BindingResult bindingResult,
                              RedirectAttributes redirectAttributes,
-                             Model model) {
+                             Model model,
+                             HttpServletRequest request) {
+
+        // ✅ ДОБАВЛЯЕМ детальные логи входящих данных
+        log.info("=== ПОЛУЧЕН ЗАПРОС НА СОЗДАНИЕ ПОСТА ===");
+        log.info("PostCreateDto: {}", postCreateDto);
+
+        // Проверяем все параметры запроса
+        log.info("=== ВСЕ ПАРАМЕТРЫ ЗАПРОСА ===");
+        request.getParameterMap().forEach((key, values) -> {
+            log.info("Параметр {}: {}", key, Arrays.toString(values));
+        });
 
         // Проверка валидации
         if (bindingResult.hasErrors()) {
+            log.warn("Ошибки валидации: {}", bindingResult.getAllErrors());
             model.addAttribute("postCreateDto", postCreateDto);
             return "posts/create";
         }
 
-
         try {
             PostResponseDto createdPost = postService.createPost(postCreateDto);
-
             log.info("Пост успешно создан с ID: {}", createdPost.getId());
             redirectAttributes.addFlashAttribute("successMessage", "Пост успешно создан!");
-
             return "redirect:/posts/" + createdPost.getId();
 
         } catch (Exception e) {
-            log.error("Ошибка при создании поста: {}", e.getMessage());
+            log.error("Ошибка при создании поста: {}", e.getMessage(), e);
             model.addAttribute("errorMessage", "Ошибка при создании поста: " + e.getMessage());
             model.addAttribute("postCreateDto", postCreateDto);
             return "posts/create";
         }
     }
+
+//    @PostMapping("/create")
+//    public String createPost(@Valid @ModelAttribute PostCreateDto postCreateDto,
+//                             BindingResult bindingResult,
+//                             RedirectAttributes redirectAttributes,
+//                             Model model) {
+//
+//        // Проверка валидации
+//        if (bindingResult.hasErrors()) {
+//            model.addAttribute("postCreateDto", postCreateDto);
+//            return "posts/create";
+//        }
+//
+//
+//        try {
+//            PostResponseDto createdPost = postService.createPost(postCreateDto);
+//
+//            log.info("Пост успешно создан с ID: {}", createdPost.getId());
+//            redirectAttributes.addFlashAttribute("successMessage", "Пост успешно создан!");
+//
+//            return "redirect:/posts/" + createdPost.getId();
+//
+//        } catch (Exception e) {
+//            log.error("Ошибка при создании поста: {}", e.getMessage());
+//            model.addAttribute("errorMessage", "Ошибка при создании поста: " + e.getMessage());
+//            model.addAttribute("postCreateDto", postCreateDto);
+//            return "posts/create";
+//        }
+//    }
 
 
     
@@ -163,20 +205,80 @@ public class PostController {
     }
 
 
+
     /**
      * API endpoint для создания поста (для AJAX)
      */
     @PostMapping("/api/create")
     @ResponseBody
-    public ResponseEntity<PostResponseDto> createPostApi(@Valid @ModelAttribute PostCreateDto postCreateDto) {
-        try {
-            PostResponseDto createdPost = postService.createPost(postCreateDto);
-            return ResponseEntity.ok(createdPost);
-        } catch (Exception e) {
-            log.error("Ошибка при создании поста через API: {}", e.getMessage());
+    public ResponseEntity<PostResponseDto> createPostApi(@Valid @ModelAttribute PostCreateDto postCreateDto,
+                                                         BindingResult bindingResult,
+                                                         HttpServletRequest request) {
+
+        // ✅ ДОБАВЛЯЕМ детальные логи для API endpoint
+        log.info("=== ПОЛУЧЕН API ЗАПРОС НА СОЗДАНИЕ ПОСТА ===");
+        log.info("PostCreateDto: {}", postCreateDto);
+
+        // Проверяем все параметры запроса
+        log.info("=== ВСЕ ПАРАМЕТРЫ API ЗАПРОСА ===");
+        request.getParameterMap().forEach((key, values) -> {
+            log.info("API Параметр {}: {}", key, Arrays.toString(values));
+        });
+
+        // Детальная проверка геолокации
+        log.info("=== API ПРОВЕРКА ГЕОЛОКАЦИИ ===");
+        log.info("API LocationId: {}", postCreateDto.getLocationId());
+        log.info("API Latitude: {}", postCreateDto.getLatitude());
+        log.info("API Longitude: {}", postCreateDto.getLongitude());
+        log.info("API PlaceName: {}", postCreateDto.getPlaceName());
+
+        // Проверяем заголовки запроса
+        log.info("=== ЗАГОЛОВКИ API ЗАПРОСА ===");
+        log.info("Content-Type: {}", request.getContentType());
+        log.info("Content-Length: {}", request.getContentLength());
+
+        // Проверка валидации
+        if (bindingResult.hasErrors()) {
+            log.warn("API Ошибки валидации: {}", bindingResult.getAllErrors());
             return ResponseEntity.badRequest().build();
         }
+
+        try {
+            log.info("Вызываем postService.createPost() из API...");
+            PostResponseDto createdPost = postService.createPost(postCreateDto);
+
+            log.info("=== API УСПЕШНЫЙ ОТВЕТ ===");
+            log.info("API Created Post ID: {}", createdPost.getId());
+            log.info("API Response Location: {}", createdPost.getLocation());
+            if (createdPost.getLocation() != null) {
+                log.info("API Response Location ID: {}", createdPost.getLocation().getId());
+                log.info("API Response Location Coordinates: ({}, {})",
+                        createdPost.getLocation().getLatitude(), createdPost.getLocation().getLongitude());
+            }
+
+            return ResponseEntity.ok(createdPost);
+
+        } catch (Exception e) {
+            log.error("Ошибка при создании поста через API: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
     }
+//
+//    /**
+//     * API endpoint для создания поста (для AJAX)
+//     */
+//    @PostMapping("/api/create")
+//    @ResponseBody
+//    public ResponseEntity<PostResponseDto> createPostApi(@Valid @ModelAttribute PostCreateDto postCreateDto) {
+//        try {
+//            PostResponseDto createdPost = postService.createPost(postCreateDto);
+//            return ResponseEntity.ok(createdPost);
+//        } catch (Exception e) {
+//            log.error("Ошибка при создании поста через API: {}", e.getMessage());
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
     /**
      * API endpoint для AJAX загрузки постов пользователя
      */

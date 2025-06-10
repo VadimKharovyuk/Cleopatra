@@ -1,6 +1,7 @@
 package com.example.cleopatra.dto.Post;
 
 
+import com.example.cleopatra.dto.Location.LocationDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +28,11 @@ public class PostResponseDto {
     // ✅ ДОБАВИТЬ поля для лайков
     private Boolean isLikedByCurrentUser; // Лайкнул ли текущий пользователь
     private List<LikeUserDto> recentLikes;
+
+
+
+    // ✅ ДОБАВЛЯЕМ геолокацию
+    private LocationDto location;
 
     @Data
     @Builder

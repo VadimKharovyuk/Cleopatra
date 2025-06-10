@@ -1,5 +1,6 @@
 package com.example.cleopatra.maper;
 
+import com.example.cleopatra.dto.Location.LocationDto;
 import com.example.cleopatra.dto.Post.PostCardDto;
 import com.example.cleopatra.dto.Post.PostCreateDto;
 import com.example.cleopatra.dto.Post.PostListDto;
@@ -44,7 +45,9 @@ public class PostMapper {
                 .commentsCount(post.getCommentsCount())
                 .viewsCount(post.getViewsCount())
                 .isLikedByCurrentUser(isLikedByCurrentUser)
+                .location(post.getLocation() != null ? LocationDto.from(post.getLocation()) : null)
                 .recentLikes(recentLikes)
+                .location(LocationDto.from(post.getLocation()))
                 .build();
 
 

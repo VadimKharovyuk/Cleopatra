@@ -2151,25 +2151,126 @@
         <div class="content-header">
             <h1 class="header-title">Главная</h1>
         </div>
-
         <!-- Create Post Section с интеграцией AJAX -->
+
+<!--        &lt;!&ndash; Create Post Section с интеграцией AJAX &ndash;&gt;-->
+<!--        <div class="create-post">-->
+<!--            <div class="post-composer">-->
+<!--                <div class="composer-avatar">-->
+<!--                    <i class="fas fa-user" th:if="${currentUser?.imageUrl == null}"></i>-->
+<!--                    <img th:if="${currentUser?.imageUrl}" th:src="${currentUser.imageUrl}" alt="Avatar"-->
+<!--                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">-->
+<!--                </div>-->
+<!--                <div class="composer-content">-->
+<!--                    &lt;!&ndash; Форма для создания поста &ndash;&gt;-->
+<!--                    <form id="createPostForm" enctype="multipart/form-data">-->
+<!--                <textarea-->
+<!--                        class="post-textarea"-->
+<!--                        placeholder="Что происходит?"-->
+<!--                        maxlength="1000"-->
+<!--                        id="postContent"-->
+<!--                        name="content"-->
+<!--                        required></textarea>-->
+
+<!--                        &lt;!&ndash; Скрытое поле для загрузки изображения &ndash;&gt;-->
+<!--                        <input type="file"-->
+<!--                               id="imageInput"-->
+<!--                               name="image"-->
+<!--                               accept="image/jpeg,image/jpg,image/png,image/heif,image/heic"-->
+<!--                               style="display: none;">-->
+
+<!--                        &lt;!&ndash; Предварительный просмотр изображения &ndash;&gt;-->
+<!--                        <div id="imagePreview" class="image-preview" style="display: none;">-->
+<!--                            <img id="previewImg" src="" alt="Preview" class="preview-image">-->
+<!--                            <button type="button" class="remove-image-btn" onclick="removeImage()">-->
+<!--                                <i class="fas fa-times"></i>-->
+<!--                            </button>-->
+<!--                        </div>-->
+
+<!--                        <div class="composer-actions">-->
+<!--                            <div class="composer-tools">-->
+<!--                                <button type="button" class="tool-btn" title="Добавить изображение" onclick="selectImage()">-->
+<!--                                    <i class="fas fa-image"></i>-->
+<!--                                </button>-->
+<!--                                <button type="button" class="tool-btn" title="Добавить GIF">-->
+<!--                                    <i class="fas fa-photo-video"></i>-->
+<!--                                </button>-->
+<!--                                <button type="button" class="tool-btn" title="Создать опрос">-->
+<!--                                    <i class="fas fa-poll"></i>-->
+<!--                                </button>-->
+<!--                                <button type="button" class="tool-btn" title="Добавить эмодзи">-->
+<!--                                    <i class="fas fa-smile"></i>-->
+<!--                                </button>-->
+
+<!--                                &lt;!&ndash; Счетчик символов &ndash;&gt;-->
+<!--                                <div class="char-counter">-->
+<!--                                    <span id="charCount">0</span>/1000-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <button type="submit" class="post-btn" id="postButton" disabled onclick="handleButtonClick(event)">-->
+<!--                                <span class="btn-text">Опубликовать</span>-->
+<!--                                <i class="fas fa-spinner fa-spin btn-spinner" style="display: none;"></i>-->
+<!--                            </button>-->
+<!--                        </div>-->
+<!--                    </form>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
         <div class="create-post">
             <div class="post-composer">
                 <div class="composer-avatar">
-                    <i class="fas fa-user" th:if="${currentUser?.imageUrl == null}"></i>
-                    <img th:if="${currentUser?.imageUrl}" th:src="${currentUser.imageUrl}" alt="Avatar"
-                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    <i class="fas fa-user"></i>
                 </div>
                 <div class="composer-content">
                     <!-- Форма для создания поста -->
                     <form id="createPostForm" enctype="multipart/form-data">
-                <textarea
-                        class="post-textarea"
-                        placeholder="Что происходит?"
-                        maxlength="1000"
-                        id="postContent"
-                        name="content"
-                        required></textarea>
+                    <textarea
+                            class="post-textarea"
+                            placeholder="Что происходит?"
+                            maxlength="1000"
+                            id="postContent"
+                            name="content"
+                            required></textarea>
+
+                        <!-- Скрытые поля для геолокации -->
+                        <input type="hidden" id="locationId" name="locationId">
+                        <input type="hidden" id="latitude" name="latitude">
+                        <input type="hidden" id="longitude" name="longitude">
+
+                        <!-- Секция геолокации -->
+                        <div class="location-section">
+                            <div class="location-header">
+                                <button type="button" class="location-toggle" onclick="toggleLocationSection()">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span id="locationToggleText">Добавить местоположение</span>
+                                </button>
+                            </div>
+
+                            <div id="locationControls" class="location-controls">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div class="location-input-group">
+                                        <label>Широта:</label>
+                                        <input type="number" id="latitudeInput" step="any" placeholder="55.7558" readonly>
+                                    </div>
+                                    <div class="location-input-group">
+                                        <label>Долгота:</label>
+                                        <input type="number" id="longitudeInput" step="any" placeholder="37.6176" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="location-buttons">
+                                    <button type="button" class="location-btn" onclick="getCurrentLocation()">
+                                        <i class="fas fa-crosshairs"></i> Получить заново
+                                    </button>
+                                </div>
+
+                                <div id="currentLocationDisplay" class="current-location" style="display: none;">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span id="currentLocationText"></span>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Скрытое поле для загрузки изображения -->
                         <input type="file"
@@ -2191,11 +2292,8 @@
                                 <button type="button" class="tool-btn" title="Добавить изображение" onclick="selectImage()">
                                     <i class="fas fa-image"></i>
                                 </button>
-                                <button type="button" class="tool-btn" title="Добавить GIF">
-                                    <i class="fas fa-photo-video"></i>
-                                </button>
-                                <button type="button" class="tool-btn" title="Создать опрос">
-                                    <i class="fas fa-poll"></i>
+                                <button type="button" class="tool-btn" title="Добавить местоположение" onclick="toggleLocationSection()">
+                                    <i class="fas fa-map-marker-alt"></i>
                                 </button>
                                 <button type="button" class="tool-btn" title="Добавить эмодзи">
                                     <i class="fas fa-smile"></i>
@@ -2206,7 +2304,7 @@
                                     <span id="charCount">0</span>/1000
                                 </div>
                             </div>
-                            <button type="submit" class="post-btn" id="postButton" disabled onclick="handleButtonClick(event)">
+                            <button type="submit" class="post-btn" id="postButton" disabled>
                                 <span class="btn-text">Опубликовать</span>
                                 <i class="fas fa-spinner fa-spin btn-spinner" style="display: none;"></i>
                             </button>
@@ -2215,6 +2313,487 @@
                 </div>
             </div>
         </div>
+
+        <script>
+
+            // ============================================
+            // ГЕОЛОКАЦИЯ
+            // ============================================
+
+            function toggleLocationSection() {
+                const controls = document.getElementById('locationControls');
+                const toggleText = document.getElementById('locationToggleText');
+
+                if (controls.classList.contains('active')) {
+                    controls.classList.remove('active');
+                    toggleText.textContent = 'Добавить местоположение';
+                } else {
+                    controls.classList.add('active');
+                    toggleText.textContent = 'Скрыть местоположение';
+
+                    // Автоматически запрашиваем местоположение при открытии секции
+                    setTimeout(() => {
+                        getCurrentLocation();
+                    }, 300);
+                }
+            }
+
+            function getCurrentLocation() {
+                const btn = event.target;
+                btn.classList.add('loading');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Получаем...';
+
+                if (!navigator.geolocation) {
+                    showNotification('Геолокация не поддерживается этим браузером', 'error');
+                    resetLocationButton(btn);
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+
+                        document.getElementById('latitudeInput').value = lat;
+                        document.getElementById('longitudeInput').value = lng;
+
+                        // Обновляем скрытые поля
+                        document.getElementById('latitude').value = lat;
+                        document.getElementById('longitude').value = lng;
+
+                        showCurrentLocation(lat, lng, 'Текущее местоположение');
+                        resetLocationButton(btn);
+
+                        console.log('📍 Получены координаты:', lat, lng);
+                    },
+                    function(error) {
+                        console.error('Ошибка геолокации:', error);
+                        showNotification('Не удалось получить местоположение', 'error');
+                        resetLocationButton(btn);
+                    }
+                );
+            }
+
+            function resetLocationButton(btn) {
+                btn.classList.remove('loading');
+                btn.innerHTML = '<i class="fas fa-crosshairs"></i> Моё местоположение';
+            }
+
+            function showCurrentLocation(lat, lng, placeName) {
+                const display = document.getElementById('currentLocationDisplay');
+                const text = document.getElementById('currentLocationText');
+
+                text.textContent = `${placeName} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+                display.style.display = 'block';
+            }
+
+            function clearLocation() {
+                // Очищаем все поля
+                document.getElementById('latitudeInput').value = '';
+                document.getElementById('longitudeInput').value = '';
+
+                // Очищаем скрытые поля
+                document.getElementById('locationId').value = '';
+                document.getElementById('latitude').value = '';
+                document.getElementById('longitude').value = '';
+
+                // Скрываем отображение текущей локации
+                document.getElementById('currentLocationDisplay').style.display = 'none';
+
+                console.log('🗑️ Локация очищена');
+            }
+
+            // Обработчики изменения координат (только для скрытых полей)
+            document.getElementById('latitudeInput').addEventListener('input', function() {
+                const value = this.value.trim();
+                document.getElementById('latitude').value = value;
+                console.log('📍 Обновлена широта:', value);
+            });
+
+            document.getElementById('longitudeInput').addEventListener('input', function() {
+                const value = this.value.trim();
+                document.getElementById('longitude').value = value;
+                console.log('📍 Обновлена долгота:', value);
+            });
+
+            // ============================================
+            // ОСНОВНЫЕ ФУНКЦИИ
+            // ============================================
+
+            function initializePostComposer() {
+                console.log('🔧 Инициализация composer...');
+
+                const postContent = document.getElementById('postContent');
+                const postButton = document.getElementById('postButton');
+                const charCount = document.getElementById('charCount');
+                const imageInput = document.getElementById('imageInput');
+                const createPostForm = document.getElementById('createPostForm');
+
+                if (!postContent || !postButton || !createPostForm) {
+                    console.error('❌ Не найдены обязательные элементы формы!');
+                    return;
+                }
+
+                // Счетчик символов и валидация
+                postContent.addEventListener('input', function() {
+                    const length = this.value.length;
+                    const maxLength = 1000;
+
+                    if (charCount) {
+                        charCount.textContent = length;
+
+                        const counter = charCount.parentElement;
+                        counter.className = 'char-counter';
+                        if (length > maxLength * 0.9) {
+                            counter.classList.add('warning');
+                        }
+                        if (length > maxLength * 0.95) {
+                            counter.classList.remove('warning');
+                            counter.classList.add('danger');
+                        }
+                    }
+
+                    const isValid = length > 0 && length <= maxLength;
+                    postButton.disabled = !isValid;
+                });
+
+                // Обработка загрузки изображения
+                if (imageInput) {
+                    imageInput.addEventListener('change', handleImageSelect);
+                }
+
+                // Отправка формы
+                createPostForm.addEventListener('submit', handleFormSubmit);
+
+                console.log('✅ Инициализация завершена');
+            }
+
+            function selectImage() {
+                const imageInput = document.getElementById('imageInput');
+                if (imageInput) {
+                    imageInput.click();
+                }
+            }
+
+            function handleImageSelect(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                console.log('📁 Обрабатываем файл:', file.name, file.type, file.size);
+
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heif', 'image/heic'];
+                if (!allowedTypes.includes(file.type)) {
+                    showNotification('Неподдерживаемый формат файла. Используйте JPG, PNG, HEIF или HEIC.', 'error');
+                    event.target.value = '';
+                    return;
+                }
+
+                const maxSize = 10 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    showNotification('Файл слишком большой. Максимальный размер: 10MB.', 'error');
+                    event.target.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewImg = document.getElementById('previewImg');
+                    const imagePreview = document.getElementById('imagePreview');
+
+                    if (previewImg && imagePreview) {
+                        previewImg.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        console.log('✅ Превью показано');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function removeImage() {
+                console.log('🗑️ Удаляем изображение...');
+                const imageInput = document.getElementById('imageInput');
+                const imagePreview = document.getElementById('imagePreview');
+
+                if (imageInput) imageInput.value = '';
+                if (imagePreview) imagePreview.style.display = 'none';
+            }
+
+            async function handleFormSubmit(event) {
+                event.preventDefault();
+                console.log('🚀 Начинаем отправку формы...');
+
+                const postContent = document.getElementById('postContent');
+                const imageInput = document.getElementById('imageInput');
+
+                const content = postContent.value.trim();
+                if (!content) {
+                    showNotification('Введите текст поста', 'error');
+                    return;
+                }
+
+                setLoadingState(true);
+
+                try {
+                    // Создаем FormData
+                    const formData = new FormData();
+                    formData.append('content', content);
+
+                    if (imageInput && imageInput.files[0]) {
+                        formData.append('image', imageInput.files[0]);
+                        console.log('📎 Добавлено изображение к запросу');
+                    }
+
+                    // Собираем данные геолокации
+                    const locationId = document.getElementById('locationId').value.trim();
+                    const latitude = document.getElementById('latitude').value.trim();
+                    const longitude = document.getElementById('longitude').value.trim();
+
+                    console.log('📍 Проверяем геолокацию перед отправкой:');
+                    console.log('LocationId:', locationId);
+                    console.log('Latitude:', latitude);
+                    console.log('Longitude:', longitude);
+
+                    // Добавляем геолокацию в FormData
+                    if (locationId && locationId !== '') {
+                        formData.append('locationId', locationId);
+                        console.log('📍 Добавлен locationId:', locationId);
+                    } else if (latitude && longitude && latitude !== '' && longitude !== '') {
+                        formData.append('latitude', latitude);
+                        formData.append('longitude', longitude);
+                        console.log('📍 Добавлены координаты:', latitude, longitude);
+                    }
+
+                    // Логируем все данные FormData перед отправкой
+                    console.log('📦 Содержимое FormData:');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`${key}:`, value);
+                    }
+
+                    console.log('📤 Отправляем запрос на /posts/api/create');
+
+                    // Отправляем запрос
+                    const response = await fetch('/posts/api/create', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    console.log('📥 Получен ответ:', response.status, response.statusText);
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('✅ Пост создан:', result);
+
+                        // Проверяем, сохранилась ли геолокация
+                        if (result.location) {
+                            console.log('✅ Геолокация сохранена:', result.location);
+                            showNotification('Пост с геолокацией успешно создан!', 'success');
+                        } else {
+                            console.log('ℹ️ Пост создан без геолокации');
+                            showNotification('Пост успешно создан!', 'success');
+                        }
+
+                        resetForm();
+
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+
+                    } else {
+                        const errorText = await response.text();
+                        console.error('❌ Ошибка ответа:', errorText);
+                        showNotification('Ошибка при создании поста: ' + response.status, 'error');
+                    }
+                } catch (error) {
+                    console.error('❌ Ошибка при создании поста:', error);
+                    showNotification('Произошла ошибка при создании поста', 'error');
+                } finally {
+                    setLoadingState(false);
+                }
+            }
+
+            function setLoadingState(loading) {
+                const postButton = document.getElementById('postButton');
+                const btnText = postButton?.querySelector('.btn-text');
+                const btnSpinner = postButton?.querySelector('.btn-spinner');
+
+                if (!postButton) return;
+
+                postButton.disabled = loading;
+
+                if (loading) {
+                    if (btnText) btnText.style.opacity = '0';
+                    if (btnSpinner) btnSpinner.style.display = 'inline-block';
+                } else {
+                    if (btnText) btnText.style.opacity = '1';
+                    if (btnSpinner) btnSpinner.style.display = 'none';
+                }
+            }
+
+            function resetForm() {
+                console.log('🔄 Сбрасываем форму...');
+                const postContent = document.getElementById('postContent');
+                const imageInput = document.getElementById('imageInput');
+                const imagePreview = document.getElementById('imagePreview');
+                const charCount = document.getElementById('charCount');
+                const postButton = document.getElementById('postButton');
+
+                if (postContent) postContent.value = '';
+                if (imageInput) imageInput.value = '';
+                if (imagePreview) imagePreview.style.display = 'none';
+                if (charCount) {
+                    charCount.textContent = '0';
+                    charCount.parentElement.className = 'char-counter';
+                }
+                if (postButton) postButton.disabled = true;
+
+                // Очищаем геолокацию
+                clearLocation();
+
+                // Скрываем секцию геолокации
+                const controls = document.getElementById('locationControls');
+                const toggleText = document.getElementById('locationToggleText');
+                controls.classList.remove('active');
+                toggleText.textContent = 'Добавить местоположение';
+            }
+
+            function showNotification(message, type = 'success') {
+                console.log('🔔 Уведомление:', type, message);
+
+                const existingNotifications = document.querySelectorAll('.notification');
+                existingNotifications.forEach(n => n.remove());
+
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" style="margin-right: 0.5rem;"></i>
+                ${message}
+            `;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 100);
+
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            // Инициализация при загрузке страницы
+            document.addEventListener('DOMContentLoaded', initializePostComposer);
+
+            // Инициализация если DOM уже загружен
+            if (document.readyState !== 'loading') {
+                initializePostComposer();
+            }
+
+            console.log('📝 Скрипт создания постов загружен');
+        </script>
+        <style>
+            .location-section {
+                margin: 12px 0;
+                padding: 12px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                border-left: 4px solid #1da1f2;
+            }
+
+            .location-header {
+                display: flex;
+                justify-content: between;
+                align-items: center;
+                margin-bottom: 8px;
+            }
+
+            .location-toggle {
+                background: none;
+                border: none;
+                color: #1da1f2;
+                cursor: pointer;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .location-toggle:hover {
+                text-decoration: underline;
+            }
+
+            .location-controls {
+                display: none;
+            }
+
+            .location-controls.active {
+                display: block;
+            }
+
+            .location-input-group {
+                margin-bottom: 8px;
+            }
+
+            .location-input-group label {
+                display: block;
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 4px;
+            }
+
+            .location-input-group input {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+
+            .location-input-group input[readonly] {
+                background: #f8f9fa;
+                cursor: default;
+            }
+
+            .location-buttons {
+                display: flex;
+                gap: 8px;
+                margin-top: 8px;
+            }
+
+            .location-btn {
+                padding: 6px 12px;
+                border: 1px solid #1da1f2;
+                background: white;
+                color: #1da1f2;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
+            }
+
+            .location-btn:hover {
+                background: #1da1f2;
+                color: white;
+            }
+
+            .location-btn.loading {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            .current-location {
+                background: #e8f5e8;
+                border: 1px solid #4caf50;
+                padding: 8px;
+                border-radius: 4px;
+                margin-top: 8px;
+                font-size: 14px;
+            }
+        </style>
+
 
         <!-- Feed -->
         <div class="feed" id="feed">
@@ -2382,680 +2961,680 @@
 <!-- JS в конце страницы -->
 <th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
 
-<script>
-    // ============================================
-    // ПЕРЕМЕННЫЕ ДЛЯ БЕСКОНЕЧНОЙ ЗАГРУЗКИ
-    // ============================================
-    let currentPage = 1; // Начинаем с 1, так как страница 0 уже загружена
-    let isLoading = false;
-    let hasMorePosts = true;
-    const postsPerPage = 10;
-
-    // ============================================
-    // ФУНКЦИИ ДЛЯ БЕСКОНЕЧНОЙ ЗАГРУЗКИ
-    // ============================================
-
-    // Функция для создания HTML поста
-    function createPostHTML(post) {
-        const authorInitials = post.author.firstName.substring(0, 1) + post.author.lastName.substring(0, 1);
-        const authorFullName = post.author.firstName + ' ' + post.author.lastName;
-        const postTime = new Date(post.createdAt).toLocaleTimeString('ru-RU', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        return `
-            <div class="post-item" onclick="navigateToPost(event, this)" data-post-id="${post.id}">
-                <div class="post-header">
-                    <a href="/profile/${post.author.id}" class="post-avatar">
-                        ${post.author.imageUrl ?
-            `<img src="${post.author.imageUrl}" alt="${authorFullName}">` :
-            `<div class="default-avatar"><span>${authorInitials}</span></div>`
-        }
-                    </a>
-
-                    <div class="post-meta">
-                        <a href="/profile/${post.author.id}" class="post-author">
-                            <span>${authorFullName}</span>
-                        </a>
-                        <span class="post-handle">@${post.author.firstName.toLowerCase()}</span>
-                        <span class="post-time">· ${postTime}</span>
-                    </div>
-                </div>
-
-                <div class="post-content">${post.content}</div>
-
-                ${post.hasImage ? `<img src="${post.imageUrl}" alt="Изображение поста" class="post-image">` : ''}
-
-                <div class="post-actions">
-                    <button class="action-btn comment-btn" onclick="openComments(event, this)" data-post-id="${post.id}">
-                        <i class="fas fa-comment"></i>
-                        <span>${post.commentsCount}</span>
-                    </button>
-
-                    <button class="action-btn like-btn" onclick="toggleLike(event, this)" data-post-id="${post.id}">
-                        <i class="fas fa-heart"></i>
-                        <span>${post.likesCount}</span>
-                    </button>
-
-                    <button class="action-btn share-btn" onclick="sharePost(event, this)" data-post-id="${post.id}">
-                        <i class="fas fa-share"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-    }
-
-    // Функция загрузки постов
-    async function loadMorePosts() {
-        if (isLoading || !hasMorePosts) {
-            return;
-        }
-
-        isLoading = true;
-        showLoadingIndicator();
-
-        try {
-            const response = await fetch(`/feed/api/posts?page=${currentPage}&size=${postsPerPage}`);
-            if (!response.ok) {
-                throw new Error('Ошибка загрузки постов');
-            }
-
-            const data = await response.json();
-
-            if (data.posts && data.posts.length > 0) {
-                appendPostsToFeed(data.posts);
-                currentPage++;
-
-                // Проверяем, есть ли еще посты
-                hasMorePosts = data.posts.length === postsPerPage;
-            } else {
-                hasMorePosts = false;
-                showNoMorePostsMessage();
-            }
-
-        } catch (error) {
-            console.error('Ошибка при загрузке постов:', error);
-            showErrorMessage();
-        } finally {
-            isLoading = false;
-            hideLoadingIndicator();
-        }
-    }
-
-    // Функция добавления постов в ленту
-    function appendPostsToFeed(posts) {
-        const feedContainer = document.getElementById('feed');
-        let existingPostsContainer = feedContainer.querySelector('.posts-container');
-
-        // Если контейнер не существует, создаем его
-        if (!existingPostsContainer) {
-            existingPostsContainer = document.createElement('div');
-            existingPostsContainer.className = 'posts-container';
-
-            // Вставляем контейнер после секции создания поста, но до empty-feed
-            const emptyFeed = feedContainer.querySelector('.empty-feed');
-            if (emptyFeed) {
-                feedContainer.insertBefore(existingPostsContainer, emptyFeed);
-                emptyFeed.style.display = 'none'; // Скрываем empty state
-            } else {
-                feedContainer.appendChild(existingPostsContainer);
-            }
-        }
-
-        posts.forEach(post => {
-            const postElement = document.createElement('div');
-            postElement.innerHTML = createPostHTML(post);
-            existingPostsContainer.appendChild(postElement.firstElementChild);
-        });
-    }
-
-    // Функция показа индикатора загрузки
-    function showLoadingIndicator() {
-        let loadingIndicator = document.getElementById('loading-indicator');
-
-        if (!loadingIndicator) {
-            loadingIndicator = document.createElement('div');
-            loadingIndicator.id = 'loading-indicator';
-            loadingIndicator.className = 'loading-indicator';
-            loadingIndicator.innerHTML = `
-                <div class="loading-spinner">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <span>Загрузка постов...</span>
-                </div>
-            `;
-            document.getElementById('feed').appendChild(loadingIndicator);
-        }
-
-        loadingIndicator.style.display = 'block';
-    }
-
-    // Функция скрытия индикатора загрузки
-    function hideLoadingIndicator() {
-        const loadingIndicator = document.getElementById('loading-indicator');
-        if (loadingIndicator) {
-            loadingIndicator.style.display = 'none';
-        }
-    }
-
-    // Функция показа сообщения об отсутствии постов
-    function showNoMorePostsMessage() {
-        let noMoreMessage = document.getElementById('no-more-posts');
-
-        if (!noMoreMessage) {
-            noMoreMessage = document.createElement('div');
-            noMoreMessage.id = 'no-more-posts';
-            noMoreMessage.className = 'no-more-posts';
-            noMoreMessage.innerHTML = `
-                <div class="no-more-content">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Вы просмотрели все посты</span>
-                </div>
-            `;
-            document.getElementById('feed').appendChild(noMoreMessage);
-        }
-
-        noMoreMessage.style.display = 'block';
-    }
-
-    // Функция показа сообщения об ошибке
-    function showErrorMessage() {
-        let errorMessage = document.getElementById('error-message');
-
-        if (!errorMessage) {
-            errorMessage = document.createElement('div');
-            errorMessage.id = 'error-message';
-            errorMessage.className = 'error-message';
-            errorMessage.innerHTML = `
-                <div class="error-content">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Ошибка загрузки. Попробуйте позже.</span>
-                    <button onclick="retryLoading()" class="retry-btn">Повторить</button>
-                </div>
-            `;
-            document.getElementById('feed').appendChild(errorMessage);
-        }
-
-        errorMessage.style.display = 'block';
-    }
-
-    // Функция повторной загрузки
-    function retryLoading() {
-        const errorMessage = document.getElementById('error-message');
-        if (errorMessage) {
-            errorMessage.style.display = 'none';
-        }
-        loadMorePosts();
-    }
-
-    // Функция определения достижения конца страницы
-    function isNearBottom() {
-        const threshold = 200; // Загружать за 200px до конца
-        return window.innerHeight + window.scrollY >= document.body.offsetHeight - threshold;
-    }
-
-    // Обработчик скролла с throttling
-    let scrollTimeout;
-    function handleScroll() {
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
-        }
-
-        scrollTimeout = setTimeout(() => {
-            if (isNearBottom()) {
-                loadMorePosts();
-            }
-        }, 100); // Throttling на 100ms
-    }
-
-    // Инициализация бесконечной загрузки
-    function initInfiniteScroll() {
-        // Проверяем, есть ли уже загруженные посты
-        const existingPosts = document.querySelectorAll('.post-item');
-        if (existingPosts.length > 0) {
-            // Если есть посты, значит мы уже на странице 0, следующая будет 1
-            currentPage = 1;
-            hasMorePosts = existingPosts.length === postsPerPage;
-        } else {
-            // Если постов нет, начинаем с 0
-            currentPage = 0;
-            hasMorePosts = true;
-        }
-
-        // Добавляем обработчик скролла
-        window.addEventListener('scroll', handleScroll);
-
-        console.log('Бесконечная загрузка инициализирована');
-    }
-
-    // Функция очистки обработчиков (для SPA)
-    function destroyInfiniteScroll() {
-        window.removeEventListener('scroll', handleScroll);
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
-        }
-    }
-
-    // ============================================
-    // ОРИГИНАЛЬНЫЕ ФУНКЦИИ СОЗДАНИЯ ПОСТОВ
-    // ============================================
-
-    console.log('🚀 Загружаем скрипт создания постов...');
-
-    // Функция инициализации - вызывается когда DOM готов
-    function initializePostComposer() {
-        console.log('🔧 Инициализация composer...');
-
-        // Проверяем наличие всех элементов
-        const postContent = document.getElementById('postContent');
-        const postButton = document.getElementById('postButton');
-        const charCount = document.getElementById('charCount');
-        const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
-        const previewImg = document.getElementById('previewImg');
-        const createPostForm = document.getElementById('createPostForm');
-
-        console.log('📋 Элементы формы:', {
-            postContent: !!postContent,
-            postButton: !!postButton,
-            charCount: !!charCount,
-            imageInput: !!imageInput,
-            createPostForm: !!createPostForm
-        });
-
-        if (!postContent || !postButton || !createPostForm) {
-            console.error('❌ Не найдены обязательные элементы формы!');
-            return;
-        }
-
-        // Счетчик символов и валидация
-        postContent.addEventListener('input', function() {
-            console.log('📝 Ввод текста:', this.value.length);
-            const length = this.value.length;
-            const maxLength = 1000;
-
-            if (charCount) {
-                charCount.textContent = length;
-
-                // Обновляем стиль счетчика
-                const counter = charCount.parentElement;
-                counter.className = 'char-counter';
-                if (length > maxLength * 0.9) {
-                    counter.classList.add('warning');
-                }
-                if (length > maxLength * 0.95) {
-                    counter.classList.remove('warning');
-                    counter.classList.add('danger');
-                }
-            }
-
-            // Активируем/деактивируем кнопку
-            const isValid = length > 0 && length <= maxLength;
-            postButton.disabled = !isValid;
-            console.log('🔘 Кнопка активна:', isValid);
-        });
-
-        // Обработка загрузки изображения
-        if (imageInput) {
-            imageInput.addEventListener('change', function(event) {
-                console.log('🖼️ Выбрано изображение');
-                handleImageSelect(event);
-            });
-        }
-
-        // Отправка формы
-        createPostForm.addEventListener('submit', function(event) {
-            console.log('📤 Отправка формы...');
-            handleFormSubmit(event);
-        });
-
-        console.log('✅ Инициализация завершена');
-    }
-
-    // Функции для работы с изображениями
-    function selectImage() {
-        console.log('🖼️ Открываем выбор изображения...');
-        const imageInput = document.getElementById('imageInput');
-        if (imageInput) {
-            imageInput.click();
-        } else {
-            console.error('❌ imageInput не найден');
-        }
-    }
-
-    function handleImageSelect(event) {
-        const file = event.target.files[0];
-        if (!file) {
-            console.log('❌ Файл не выбран');
-            return;
-        }
-
-        console.log('📁 Обрабатываем файл:', file.name, file.type, file.size);
-
-        // Валидация типа файла
-        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heif', 'image/heic'];
-        if (!allowedTypes.includes(file.type)) {
-            showNotification('Неподдерживаемый формат файла. Используйте JPG, PNG, HEIF или HEIC.', 'error');
-            event.target.value = '';
-            return;
-        }
-
-        // Валидация размера файла (10MB)
-        const maxSize = 10 * 1024 * 1024;
-        if (file.size > maxSize) {
-            showNotification('Файл слишком большой. Максимальный размер: 10MB.', 'error');
-            event.target.value = '';
-            return;
-        }
-
-        // Показываем превью
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const previewImg = document.getElementById('previewImg');
-            const imagePreview = document.getElementById('imagePreview');
-
-            if (previewImg && imagePreview) {
-                previewImg.src = e.target.result;
-                imagePreview.style.display = 'block';
-                console.log('✅ Превью показано');
-            }
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function removeImage() {
-        console.log('🗑️ Удаляем изображение...');
-        const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
-
-        if (imageInput) imageInput.value = '';
-        if (imagePreview) imagePreview.style.display = 'none';
-    }
-
-    // Обработчик клика кнопки (дублирует submit)
-    function handleButtonClick(event) {
-        console.log('🖱️ Клик по кнопке Опубликовать');
-        event.preventDefault();
-        handleFormSubmit(event);
-    }
-
-    // Обработка отправки формы
-    async function handleFormSubmit(event) {
-        event.preventDefault();
-        console.log('🚀 Начинаем отправку формы...');
-
-        const postContent = document.getElementById('postContent');
-        const imageInput = document.getElementById('imageInput');
-
-        const content = postContent.value.trim();
-        if (!content) {
-            showNotification('Введите текст поста', 'error');
-            return;
-        }
-
-        // Показываем состояние загрузки
-        setLoadingState(true);
-
-        try {
-            // Создаем FormData
-            const formData = new FormData();
-            formData.append('content', content);
-
-            if (imageInput && imageInput.files[0]) {
-                formData.append('image', imageInput.files[0]);
-                console.log('📎 Добавлено изображение к запросу');
-            }
-
-            console.log('📤 Отправляем запрос на /posts/api/create');
-
-            // Отправляем запрос
-            const response = await fetch('/posts/api/create', {
-                method: 'POST',
-                body: formData
-            });
-
-            console.log('📥 Получен ответ:', response.status, response.statusText);
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log('✅ Пост создан:', result);
-                showNotification('Пост успешно создан!', 'success');
-
-                // Очищаем форму
-                resetForm();
-
-                // Обновляем ленту - можно перезагрузить страницу или добавить новый пост в начало
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-
-            } else {
-                const errorText = await response.text();
-                console.error('❌ Ошибка ответа:', errorText);
-                showNotification('Ошибка при создании поста: ' + response.status, 'error');
-            }
-        } catch (error) {
-            console.error('❌ Ошибка при создании поста:', error);
-            showNotification('Произошла ошибка при создании поста', 'error');
-        } finally {
-            setLoadingState(false);
-        }
-    }
-
-    // Управление состоянием загрузки
-    function setLoadingState(loading) {
-        console.log('⏳ Состояние загрузки:', loading);
-        const postButton = document.getElementById('postButton');
-        const btnText = postButton?.querySelector('.btn-text');
-        const btnSpinner = postButton?.querySelector('.btn-spinner');
-
-        if (!postButton) return;
-
-        postButton.disabled = loading;
-
-        if (loading) {
-            if (btnText) btnText.style.opacity = '0';
-            if (btnSpinner) btnSpinner.style.display = 'inline-block';
-        } else {
-            if (btnText) btnText.style.opacity = '1';
-            if (btnSpinner) btnSpinner.style.display = 'none';
-        }
-    }
-
-    // Сброс формы
-    function resetForm() {
-        console.log('🔄 Сбрасываем форму...');
-        const postContent = document.getElementById('postContent');
-        const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
-        const charCount = document.getElementById('charCount');
-        const postButton = document.getElementById('postButton');
-
-        if (postContent) postContent.value = '';
-        if (imageInput) imageInput.value = '';
-        if (imagePreview) imagePreview.style.display = 'none';
-        if (charCount) {
-            charCount.textContent = '0';
-            charCount.parentElement.className = 'char-counter';
-        }
-        if (postButton) postButton.disabled = true;
-    }
-
-    // Показ уведомлений
-    function showNotification(message, type = 'success') {
-        console.log('🔔 Уведомление:', type, message);
-
-        // Удаляем существующие уведомления
-        const existingNotifications = document.querySelectorAll('.notification');
-        existingNotifications.forEach(n => n.remove());
-
-        // Создаем новое уведомление
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" style="margin-right: 0.5rem;"></i>
-            ${message}
-        `;
-
-        document.body.appendChild(notification);
-
-        // Показываем уведомление
-        setTimeout(() => {
-            notification.classList.add('show');
-        }, 100);
-
-        // Скрываем через 3 секунды
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }, 3000);
-    }
-
-    // Функции для работы с постами
-    function navigateToPost(event, element) {
-        // Проверяем, что клик не был по кнопке действия
-        if (event.target.closest('.action-btn') || event.target.closest('.post-author')) {
-            return;
-        }
-
-        const postId = element.getAttribute('data-post-id');
-        if (postId) {
-            window.location.href = `/posts/${postId}`;
-        }
-    }
-
-    function openComments(event, button) {
-        event.stopPropagation();
-        const postId = button.getAttribute('data-post-id');
-        if (postId) {
-            window.location.href = `/posts/${postId}#comments`;
-        }
-    }
-
-    async function toggleLike(event, button) {
-        event.stopPropagation();
-        const postId = button.getAttribute('data-post-id');
-
-        if (!postId) return;
-
-        try {
-            const response = await fetch(`/posts/${postId}/like`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-
-                // Обновляем UI
-                const icon = button.querySelector('i');
-                const count = button.querySelector('span');
-
-                if (result.liked) {
-                    button.classList.add('liked');
-                    icon.classList.remove('far');
-                    icon.classList.add('fas');
-                } else {
-                    button.classList.remove('liked');
-                    icon.classList.remove('fas');
-                    icon.classList.add('far');
-                }
-
-                count.textContent = result.likesCount;
-            }
-        } catch (error) {
-            console.error('Ошибка при лайке:', error);
-            showNotification('Ошибка при обновлении лайка', 'error');
-        }
-    }
-
-    function sharePost(event, button) {
-        event.stopPropagation();
-        const postId = button.getAttribute('data-post-id');
-
-        if (navigator.share) {
-            navigator.share({
-                title: 'Пост из Cleopatra',
-                url: `${window.location.origin}/posts/${postId}`
-            });
-        } else {
-            // Fallback - копируем ссылку в буфер обмена
-            const url = `${window.location.origin}/posts/${postId}`;
-            navigator.clipboard.writeText(url).then(() => {
-                showNotification('Ссылка скопирована в буфер обмена', 'success');
-            }).catch(() => {
-                showNotification('Не удалось скопировать ссылку', 'error');
-            });
-        }
-    }
-
-    // ============================================
-    // ИНИЦИАЛИЗАЦИЯ
-    // ============================================
-
-    // Инициализация при загрузке страницы
-    document.addEventListener('DOMContentLoaded', function() {
-        // Инициализируем composer
-        initializePostComposer();
-
-        // Инициализируем бесконечную загрузку
-        initInfiniteScroll();
-
-        // Инициализация кнопок подписки
-        document.querySelectorAll('.follow-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                if (this.textContent === 'Читать') {
-                    this.textContent = 'Читаем';
-                    this.style.background = '#10b981';
-                } else {
-                    this.textContent = 'Читать';
-                    this.style.background = '';
-                }
-            });
-        });
-
-        // Анимации для tool buttons
-        document.querySelectorAll('.tool-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 150);
-            });
-        });
-
-        console.log('🐦 Dashboard инициализирован');
-        console.log('📝 Composer готов к работе');
-        console.log('👥 Социальные функции активированы');
-        console.log('♾️ Бесконечная загрузка активирована');
-    });
-
-    // Инициализация если DOM уже загружен
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            initializePostComposer();
-            initInfiniteScroll();
-        });
-    } else {
-        initializePostComposer();
-        initInfiniteScroll();
-    }
-
-    // Экспорт функций для использования в других частях приложения
-    window.infiniteScroll = {
-        init: initInfiniteScroll,
-        destroy: destroyInfiniteScroll,
-        loadMore: loadMorePosts
-    };
-
-    console.log('📝 Скрипт создания постов загружен');
-    console.log('♾️ Скрипт бесконечной загрузки загружен');
-</script>
+<!--<script>-->
+<!--    // ============================================-->
+<!--    // ПЕРЕМЕННЫЕ ДЛЯ БЕСКОНЕЧНОЙ ЗАГРУЗКИ-->
+<!--    // ============================================-->
+<!--    let currentPage = 1; // Начинаем с 1, так как страница 0 уже загружена-->
+<!--    let isLoading = false;-->
+<!--    let hasMorePosts = true;-->
+<!--    const postsPerPage = 10;-->
+
+<!--    // ============================================-->
+<!--    // ФУНКЦИИ ДЛЯ БЕСКОНЕЧНОЙ ЗАГРУЗКИ-->
+<!--    // ============================================-->
+
+<!--    // Функция для создания HTML поста-->
+<!--    function createPostHTML(post) {-->
+<!--        const authorInitials = post.author.firstName.substring(0, 1) + post.author.lastName.substring(0, 1);-->
+<!--        const authorFullName = post.author.firstName + ' ' + post.author.lastName;-->
+<!--        const postTime = new Date(post.createdAt).toLocaleTimeString('ru-RU', {-->
+<!--            hour: '2-digit',-->
+<!--            minute: '2-digit'-->
+<!--        });-->
+
+<!--        return `-->
+<!--            <div class="post-item" onclick="navigateToPost(event, this)" data-post-id="${post.id}">-->
+<!--                <div class="post-header">-->
+<!--                    <a href="/profile/${post.author.id}" class="post-avatar">-->
+<!--                        ${post.author.imageUrl ?-->
+<!--            `<img src="${post.author.imageUrl}" alt="${authorFullName}">` :-->
+<!--            `<div class="default-avatar"><span>${authorInitials}</span></div>`-->
+<!--        }-->
+<!--                    </a>-->
+
+<!--                    <div class="post-meta">-->
+<!--                        <a href="/profile/${post.author.id}" class="post-author">-->
+<!--                            <span>${authorFullName}</span>-->
+<!--                        </a>-->
+<!--                        <span class="post-handle">@${post.author.firstName.toLowerCase()}</span>-->
+<!--                        <span class="post-time">· ${postTime}</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="post-content">${post.content}</div>-->
+
+<!--                ${post.hasImage ? `<img src="${post.imageUrl}" alt="Изображение поста" class="post-image">` : ''}-->
+
+<!--                <div class="post-actions">-->
+<!--                    <button class="action-btn comment-btn" onclick="openComments(event, this)" data-post-id="${post.id}">-->
+<!--                        <i class="fas fa-comment"></i>-->
+<!--                        <span>${post.commentsCount}</span>-->
+<!--                    </button>-->
+
+<!--                    <button class="action-btn like-btn" onclick="toggleLike(event, this)" data-post-id="${post.id}">-->
+<!--                        <i class="fas fa-heart"></i>-->
+<!--                        <span>${post.likesCount}</span>-->
+<!--                    </button>-->
+
+<!--                    <button class="action-btn share-btn" onclick="sharePost(event, this)" data-post-id="${post.id}">-->
+<!--                        <i class="fas fa-share"></i>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        `;-->
+<!--    }-->
+
+<!--    // Функция загрузки постов-->
+<!--    async function loadMorePosts() {-->
+<!--        if (isLoading || !hasMorePosts) {-->
+<!--            return;-->
+<!--        }-->
+
+<!--        isLoading = true;-->
+<!--        showLoadingIndicator();-->
+
+<!--        try {-->
+<!--            const response = await fetch(`/feed/api/posts?page=${currentPage}&size=${postsPerPage}`);-->
+<!--            if (!response.ok) {-->
+<!--                throw new Error('Ошибка загрузки постов');-->
+<!--            }-->
+
+<!--            const data = await response.json();-->
+
+<!--            if (data.posts && data.posts.length > 0) {-->
+<!--                appendPostsToFeed(data.posts);-->
+<!--                currentPage++;-->
+
+<!--                // Проверяем, есть ли еще посты-->
+<!--                hasMorePosts = data.posts.length === postsPerPage;-->
+<!--            } else {-->
+<!--                hasMorePosts = false;-->
+<!--                showNoMorePostsMessage();-->
+<!--            }-->
+
+<!--        } catch (error) {-->
+<!--            console.error('Ошибка при загрузке постов:', error);-->
+<!--            showErrorMessage();-->
+<!--        } finally {-->
+<!--            isLoading = false;-->
+<!--            hideLoadingIndicator();-->
+<!--        }-->
+<!--    }-->
+
+<!--    // Функция добавления постов в ленту-->
+<!--    function appendPostsToFeed(posts) {-->
+<!--        const feedContainer = document.getElementById('feed');-->
+<!--        let existingPostsContainer = feedContainer.querySelector('.posts-container');-->
+
+<!--        // Если контейнер не существует, создаем его-->
+<!--        if (!existingPostsContainer) {-->
+<!--            existingPostsContainer = document.createElement('div');-->
+<!--            existingPostsContainer.className = 'posts-container';-->
+
+<!--            // Вставляем контейнер после секции создания поста, но до empty-feed-->
+<!--            const emptyFeed = feedContainer.querySelector('.empty-feed');-->
+<!--            if (emptyFeed) {-->
+<!--                feedContainer.insertBefore(existingPostsContainer, emptyFeed);-->
+<!--                emptyFeed.style.display = 'none'; // Скрываем empty state-->
+<!--            } else {-->
+<!--                feedContainer.appendChild(existingPostsContainer);-->
+<!--            }-->
+<!--        }-->
+
+<!--        posts.forEach(post => {-->
+<!--            const postElement = document.createElement('div');-->
+<!--            postElement.innerHTML = createPostHTML(post);-->
+<!--            existingPostsContainer.appendChild(postElement.firstElementChild);-->
+<!--        });-->
+<!--    }-->
+
+<!--    // Функция показа индикатора загрузки-->
+<!--    function showLoadingIndicator() {-->
+<!--        let loadingIndicator = document.getElementById('loading-indicator');-->
+
+<!--        if (!loadingIndicator) {-->
+<!--            loadingIndicator = document.createElement('div');-->
+<!--            loadingIndicator.id = 'loading-indicator';-->
+<!--            loadingIndicator.className = 'loading-indicator';-->
+<!--            loadingIndicator.innerHTML = `-->
+<!--                <div class="loading-spinner">-->
+<!--                    <i class="fas fa-spinner fa-spin"></i>-->
+<!--                    <span>Загрузка постов...</span>-->
+<!--                </div>-->
+<!--            `;-->
+<!--            document.getElementById('feed').appendChild(loadingIndicator);-->
+<!--        }-->
+
+<!--        loadingIndicator.style.display = 'block';-->
+<!--    }-->
+
+<!--    // Функция скрытия индикатора загрузки-->
+<!--    function hideLoadingIndicator() {-->
+<!--        const loadingIndicator = document.getElementById('loading-indicator');-->
+<!--        if (loadingIndicator) {-->
+<!--            loadingIndicator.style.display = 'none';-->
+<!--        }-->
+<!--    }-->
+
+<!--    // Функция показа сообщения об отсутствии постов-->
+<!--    function showNoMorePostsMessage() {-->
+<!--        let noMoreMessage = document.getElementById('no-more-posts');-->
+
+<!--        if (!noMoreMessage) {-->
+<!--            noMoreMessage = document.createElement('div');-->
+<!--            noMoreMessage.id = 'no-more-posts';-->
+<!--            noMoreMessage.className = 'no-more-posts';-->
+<!--            noMoreMessage.innerHTML = `-->
+<!--                <div class="no-more-content">-->
+<!--                    <i class="fas fa-check-circle"></i>-->
+<!--                    <span>Вы просмотрели все посты</span>-->
+<!--                </div>-->
+<!--            `;-->
+<!--            document.getElementById('feed').appendChild(noMoreMessage);-->
+<!--        }-->
+
+<!--        noMoreMessage.style.display = 'block';-->
+<!--    }-->
+
+<!--    // Функция показа сообщения об ошибке-->
+<!--    function showErrorMessage() {-->
+<!--        let errorMessage = document.getElementById('error-message');-->
+
+<!--        if (!errorMessage) {-->
+<!--            errorMessage = document.createElement('div');-->
+<!--            errorMessage.id = 'error-message';-->
+<!--            errorMessage.className = 'error-message';-->
+<!--            errorMessage.innerHTML = `-->
+<!--                <div class="error-content">-->
+<!--                    <i class="fas fa-exclamation-triangle"></i>-->
+<!--                    <span>Ошибка загрузки. Попробуйте позже.</span>-->
+<!--                    <button onclick="retryLoading()" class="retry-btn">Повторить</button>-->
+<!--                </div>-->
+<!--            `;-->
+<!--            document.getElementById('feed').appendChild(errorMessage);-->
+<!--        }-->
+
+<!--        errorMessage.style.display = 'block';-->
+<!--    }-->
+
+<!--    // Функция повторной загрузки-->
+<!--    function retryLoading() {-->
+<!--        const errorMessage = document.getElementById('error-message');-->
+<!--        if (errorMessage) {-->
+<!--            errorMessage.style.display = 'none';-->
+<!--        }-->
+<!--        loadMorePosts();-->
+<!--    }-->
+
+<!--    // Функция определения достижения конца страницы-->
+<!--    function isNearBottom() {-->
+<!--        const threshold = 200; // Загружать за 200px до конца-->
+<!--        return window.innerHeight + window.scrollY >= document.body.offsetHeight - threshold;-->
+<!--    }-->
+
+<!--    // Обработчик скролла с throttling-->
+<!--    let scrollTimeout;-->
+<!--    function handleScroll() {-->
+<!--        if (scrollTimeout) {-->
+<!--            clearTimeout(scrollTimeout);-->
+<!--        }-->
+
+<!--        scrollTimeout = setTimeout(() => {-->
+<!--            if (isNearBottom()) {-->
+<!--                loadMorePosts();-->
+<!--            }-->
+<!--        }, 100); // Throttling на 100ms-->
+<!--    }-->
+
+<!--    // Инициализация бесконечной загрузки-->
+<!--    function initInfiniteScroll() {-->
+<!--        // Проверяем, есть ли уже загруженные посты-->
+<!--        const existingPosts = document.querySelectorAll('.post-item');-->
+<!--        if (existingPosts.length > 0) {-->
+<!--            // Если есть посты, значит мы уже на странице 0, следующая будет 1-->
+<!--            currentPage = 1;-->
+<!--            hasMorePosts = existingPosts.length === postsPerPage;-->
+<!--        } else {-->
+<!--            // Если постов нет, начинаем с 0-->
+<!--            currentPage = 0;-->
+<!--            hasMorePosts = true;-->
+<!--        }-->
+
+<!--        // Добавляем обработчик скролла-->
+<!--        window.addEventListener('scroll', handleScroll);-->
+
+<!--        console.log('Бесконечная загрузка инициализирована');-->
+<!--    }-->
+
+<!--    // Функция очистки обработчиков (для SPA)-->
+<!--    function destroyInfiniteScroll() {-->
+<!--        window.removeEventListener('scroll', handleScroll);-->
+<!--        if (scrollTimeout) {-->
+<!--            clearTimeout(scrollTimeout);-->
+<!--        }-->
+<!--    }-->
+
+<!--    // ============================================-->
+<!--    // ОРИГИНАЛЬНЫЕ ФУНКЦИИ СОЗДАНИЯ ПОСТОВ-->
+<!--    // ============================================-->
+
+<!--    console.log('🚀 Загружаем скрипт создания постов...');-->
+
+<!--    // Функция инициализации - вызывается когда DOM готов-->
+<!--    function initializePostComposer() {-->
+<!--        console.log('🔧 Инициализация composer...');-->
+
+<!--        // Проверяем наличие всех элементов-->
+<!--        const postContent = document.getElementById('postContent');-->
+<!--        const postButton = document.getElementById('postButton');-->
+<!--        const charCount = document.getElementById('charCount');-->
+<!--        const imageInput = document.getElementById('imageInput');-->
+<!--        const imagePreview = document.getElementById('imagePreview');-->
+<!--        const previewImg = document.getElementById('previewImg');-->
+<!--        const createPostForm = document.getElementById('createPostForm');-->
+
+<!--        console.log('📋 Элементы формы:', {-->
+<!--            postContent: !!postContent,-->
+<!--            postButton: !!postButton,-->
+<!--            charCount: !!charCount,-->
+<!--            imageInput: !!imageInput,-->
+<!--            createPostForm: !!createPostForm-->
+<!--        });-->
+
+<!--        if (!postContent || !postButton || !createPostForm) {-->
+<!--            console.error('❌ Не найдены обязательные элементы формы!');-->
+<!--            return;-->
+<!--        }-->
+
+<!--        // Счетчик символов и валидация-->
+<!--        postContent.addEventListener('input', function() {-->
+<!--            console.log('📝 Ввод текста:', this.value.length);-->
+<!--            const length = this.value.length;-->
+<!--            const maxLength = 1000;-->
+
+<!--            if (charCount) {-->
+<!--                charCount.textContent = length;-->
+
+<!--                // Обновляем стиль счетчика-->
+<!--                const counter = charCount.parentElement;-->
+<!--                counter.className = 'char-counter';-->
+<!--                if (length > maxLength * 0.9) {-->
+<!--                    counter.classList.add('warning');-->
+<!--                }-->
+<!--                if (length > maxLength * 0.95) {-->
+<!--                    counter.classList.remove('warning');-->
+<!--                    counter.classList.add('danger');-->
+<!--                }-->
+<!--            }-->
+
+<!--            // Активируем/деактивируем кнопку-->
+<!--            const isValid = length > 0 && length <= maxLength;-->
+<!--            postButton.disabled = !isValid;-->
+<!--            console.log('🔘 Кнопка активна:', isValid);-->
+<!--        });-->
+
+<!--        // Обработка загрузки изображения-->
+<!--        if (imageInput) {-->
+<!--            imageInput.addEventListener('change', function(event) {-->
+<!--                console.log('🖼️ Выбрано изображение');-->
+<!--                handleImageSelect(event);-->
+<!--            });-->
+<!--        }-->
+
+<!--        // Отправка формы-->
+<!--        createPostForm.addEventListener('submit', function(event) {-->
+<!--            console.log('📤 Отправка формы...');-->
+<!--            handleFormSubmit(event);-->
+<!--        });-->
+
+<!--        console.log('✅ Инициализация завершена');-->
+<!--    }-->
+
+<!--    // Функции для работы с изображениями-->
+<!--    function selectImage() {-->
+<!--        console.log('🖼️ Открываем выбор изображения...');-->
+<!--        const imageInput = document.getElementById('imageInput');-->
+<!--        if (imageInput) {-->
+<!--            imageInput.click();-->
+<!--        } else {-->
+<!--            console.error('❌ imageInput не найден');-->
+<!--        }-->
+<!--    }-->
+
+<!--    function handleImageSelect(event) {-->
+<!--        const file = event.target.files[0];-->
+<!--        if (!file) {-->
+<!--            console.log('❌ Файл не выбран');-->
+<!--            return;-->
+<!--        }-->
+
+<!--        console.log('📁 Обрабатываем файл:', file.name, file.type, file.size);-->
+
+<!--        // Валидация типа файла-->
+<!--        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heif', 'image/heic'];-->
+<!--        if (!allowedTypes.includes(file.type)) {-->
+<!--            showNotification('Неподдерживаемый формат файла. Используйте JPG, PNG, HEIF или HEIC.', 'error');-->
+<!--            event.target.value = '';-->
+<!--            return;-->
+<!--        }-->
+
+<!--        // Валидация размера файла (10MB)-->
+<!--        const maxSize = 10 * 1024 * 1024;-->
+<!--        if (file.size > maxSize) {-->
+<!--            showNotification('Файл слишком большой. Максимальный размер: 10MB.', 'error');-->
+<!--            event.target.value = '';-->
+<!--            return;-->
+<!--        }-->
+
+<!--        // Показываем превью-->
+<!--        const reader = new FileReader();-->
+<!--        reader.onload = function(e) {-->
+<!--            const previewImg = document.getElementById('previewImg');-->
+<!--            const imagePreview = document.getElementById('imagePreview');-->
+
+<!--            if (previewImg && imagePreview) {-->
+<!--                previewImg.src = e.target.result;-->
+<!--                imagePreview.style.display = 'block';-->
+<!--                console.log('✅ Превью показано');-->
+<!--            }-->
+<!--        };-->
+<!--        reader.readAsDataURL(file);-->
+<!--    }-->
+
+<!--    function removeImage() {-->
+<!--        console.log('🗑️ Удаляем изображение...');-->
+<!--        const imageInput = document.getElementById('imageInput');-->
+<!--        const imagePreview = document.getElementById('imagePreview');-->
+
+<!--        if (imageInput) imageInput.value = '';-->
+<!--        if (imagePreview) imagePreview.style.display = 'none';-->
+<!--    }-->
+
+<!--    // Обработчик клика кнопки (дублирует submit)-->
+<!--    function handleButtonClick(event) {-->
+<!--        console.log('🖱️ Клик по кнопке Опубликовать');-->
+<!--        event.preventDefault();-->
+<!--        handleFormSubmit(event);-->
+<!--    }-->
+
+<!--    // Обработка отправки формы-->
+<!--    async function handleFormSubmit(event) {-->
+<!--        event.preventDefault();-->
+<!--        console.log('🚀 Начинаем отправку формы...');-->
+
+<!--        const postContent = document.getElementById('postContent');-->
+<!--        const imageInput = document.getElementById('imageInput');-->
+
+<!--        const content = postContent.value.trim();-->
+<!--        if (!content) {-->
+<!--            showNotification('Введите текст поста', 'error');-->
+<!--            return;-->
+<!--        }-->
+
+<!--        // Показываем состояние загрузки-->
+<!--        setLoadingState(true);-->
+
+<!--        try {-->
+<!--            // Создаем FormData-->
+<!--            const formData = new FormData();-->
+<!--            formData.append('content', content);-->
+
+<!--            if (imageInput && imageInput.files[0]) {-->
+<!--                formData.append('image', imageInput.files[0]);-->
+<!--                console.log('📎 Добавлено изображение к запросу');-->
+<!--            }-->
+
+<!--            console.log('📤 Отправляем запрос на /posts/api/create');-->
+
+<!--            // Отправляем запрос-->
+<!--            const response = await fetch('/posts/api/create', {-->
+<!--                method: 'POST',-->
+<!--                body: formData-->
+<!--            });-->
+
+<!--            console.log('📥 Получен ответ:', response.status, response.statusText);-->
+
+<!--            if (response.ok) {-->
+<!--                const result = await response.json();-->
+<!--                console.log('✅ Пост создан:', result);-->
+<!--                showNotification('Пост успешно создан!', 'success');-->
+
+<!--                // Очищаем форму-->
+<!--                resetForm();-->
+
+<!--                // Обновляем ленту - можно перезагрузить страницу или добавить новый пост в начало-->
+<!--                setTimeout(() => {-->
+<!--                    location.reload();-->
+<!--                }, 1000);-->
+
+<!--            } else {-->
+<!--                const errorText = await response.text();-->
+<!--                console.error('❌ Ошибка ответа:', errorText);-->
+<!--                showNotification('Ошибка при создании поста: ' + response.status, 'error');-->
+<!--            }-->
+<!--        } catch (error) {-->
+<!--            console.error('❌ Ошибка при создании поста:', error);-->
+<!--            showNotification('Произошла ошибка при создании поста', 'error');-->
+<!--        } finally {-->
+<!--            setLoadingState(false);-->
+<!--        }-->
+<!--    }-->
+
+<!--    // Управление состоянием загрузки-->
+<!--    function setLoadingState(loading) {-->
+<!--        console.log('⏳ Состояние загрузки:', loading);-->
+<!--        const postButton = document.getElementById('postButton');-->
+<!--        const btnText = postButton?.querySelector('.btn-text');-->
+<!--        const btnSpinner = postButton?.querySelector('.btn-spinner');-->
+
+<!--        if (!postButton) return;-->
+
+<!--        postButton.disabled = loading;-->
+
+<!--        if (loading) {-->
+<!--            if (btnText) btnText.style.opacity = '0';-->
+<!--            if (btnSpinner) btnSpinner.style.display = 'inline-block';-->
+<!--        } else {-->
+<!--            if (btnText) btnText.style.opacity = '1';-->
+<!--            if (btnSpinner) btnSpinner.style.display = 'none';-->
+<!--        }-->
+<!--    }-->
+
+<!--    // Сброс формы-->
+<!--    function resetForm() {-->
+<!--        console.log('🔄 Сбрасываем форму...');-->
+<!--        const postContent = document.getElementById('postContent');-->
+<!--        const imageInput = document.getElementById('imageInput');-->
+<!--        const imagePreview = document.getElementById('imagePreview');-->
+<!--        const charCount = document.getElementById('charCount');-->
+<!--        const postButton = document.getElementById('postButton');-->
+
+<!--        if (postContent) postContent.value = '';-->
+<!--        if (imageInput) imageInput.value = '';-->
+<!--        if (imagePreview) imagePreview.style.display = 'none';-->
+<!--        if (charCount) {-->
+<!--            charCount.textContent = '0';-->
+<!--            charCount.parentElement.className = 'char-counter';-->
+<!--        }-->
+<!--        if (postButton) postButton.disabled = true;-->
+<!--    }-->
+
+<!--    // Показ уведомлений-->
+<!--    function showNotification(message, type = 'success') {-->
+<!--        console.log('🔔 Уведомление:', type, message);-->
+
+<!--        // Удаляем существующие уведомления-->
+<!--        const existingNotifications = document.querySelectorAll('.notification');-->
+<!--        existingNotifications.forEach(n => n.remove());-->
+
+<!--        // Создаем новое уведомление-->
+<!--        const notification = document.createElement('div');-->
+<!--        notification.className = `notification ${type}`;-->
+<!--        notification.innerHTML = `-->
+<!--            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" style="margin-right: 0.5rem;"></i>-->
+<!--            ${message}-->
+<!--        `;-->
+
+<!--        document.body.appendChild(notification);-->
+
+<!--        // Показываем уведомление-->
+<!--        setTimeout(() => {-->
+<!--            notification.classList.add('show');-->
+<!--        }, 100);-->
+
+<!--        // Скрываем через 3 секунды-->
+<!--        setTimeout(() => {-->
+<!--            notification.classList.remove('show');-->
+<!--            setTimeout(() => {-->
+<!--                if (notification.parentNode) {-->
+<!--                    notification.parentNode.removeChild(notification);-->
+<!--                }-->
+<!--            }, 300);-->
+<!--        }, 3000);-->
+<!--    }-->
+
+<!--    // Функции для работы с постами-->
+<!--    function navigateToPost(event, element) {-->
+<!--        // Проверяем, что клик не был по кнопке действия-->
+<!--        if (event.target.closest('.action-btn') || event.target.closest('.post-author')) {-->
+<!--            return;-->
+<!--        }-->
+
+<!--        const postId = element.getAttribute('data-post-id');-->
+<!--        if (postId) {-->
+<!--            window.location.href = `/posts/${postId}`;-->
+<!--        }-->
+<!--    }-->
+
+<!--    function openComments(event, button) {-->
+<!--        event.stopPropagation();-->
+<!--        const postId = button.getAttribute('data-post-id');-->
+<!--        if (postId) {-->
+<!--            window.location.href = `/posts/${postId}#comments`;-->
+<!--        }-->
+<!--    }-->
+
+<!--    async function toggleLike(event, button) {-->
+<!--        event.stopPropagation();-->
+<!--        const postId = button.getAttribute('data-post-id');-->
+
+<!--        if (!postId) return;-->
+
+<!--        try {-->
+<!--            const response = await fetch(`/posts/${postId}/like`, {-->
+<!--                method: 'POST',-->
+<!--                headers: {-->
+<!--                    'Content-Type': 'application/json'-->
+<!--                }-->
+<!--            });-->
+
+<!--            if (response.ok) {-->
+<!--                const result = await response.json();-->
+
+<!--                // Обновляем UI-->
+<!--                const icon = button.querySelector('i');-->
+<!--                const count = button.querySelector('span');-->
+
+<!--                if (result.liked) {-->
+<!--                    button.classList.add('liked');-->
+<!--                    icon.classList.remove('far');-->
+<!--                    icon.classList.add('fas');-->
+<!--                } else {-->
+<!--                    button.classList.remove('liked');-->
+<!--                    icon.classList.remove('fas');-->
+<!--                    icon.classList.add('far');-->
+<!--                }-->
+
+<!--                count.textContent = result.likesCount;-->
+<!--            }-->
+<!--        } catch (error) {-->
+<!--            console.error('Ошибка при лайке:', error);-->
+<!--            showNotification('Ошибка при обновлении лайка', 'error');-->
+<!--        }-->
+<!--    }-->
+
+<!--    function sharePost(event, button) {-->
+<!--        event.stopPropagation();-->
+<!--        const postId = button.getAttribute('data-post-id');-->
+
+<!--        if (navigator.share) {-->
+<!--            navigator.share({-->
+<!--                title: 'Пост из Cleopatra',-->
+<!--                url: `${window.location.origin}/posts/${postId}`-->
+<!--            });-->
+<!--        } else {-->
+<!--            // Fallback - копируем ссылку в буфер обмена-->
+<!--            const url = `${window.location.origin}/posts/${postId}`;-->
+<!--            navigator.clipboard.writeText(url).then(() => {-->
+<!--                showNotification('Ссылка скопирована в буфер обмена', 'success');-->
+<!--            }).catch(() => {-->
+<!--                showNotification('Не удалось скопировать ссылку', 'error');-->
+<!--            });-->
+<!--        }-->
+<!--    }-->
+
+<!--    // ============================================-->
+<!--    // ИНИЦИАЛИЗАЦИЯ-->
+<!--    // ============================================-->
+
+<!--    // Инициализация при загрузке страницы-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        // Инициализируем composer-->
+<!--        initializePostComposer();-->
+
+<!--        // Инициализируем бесконечную загрузку-->
+<!--        initInfiniteScroll();-->
+
+<!--        // Инициализация кнопок подписки-->
+<!--        document.querySelectorAll('.follow-btn').forEach(btn => {-->
+<!--            btn.addEventListener('click', function() {-->
+<!--                if (this.textContent === 'Читать') {-->
+<!--                    this.textContent = 'Читаем';-->
+<!--                    this.style.background = '#10b981';-->
+<!--                } else {-->
+<!--                    this.textContent = 'Читать';-->
+<!--                    this.style.background = '';-->
+<!--                }-->
+<!--            });-->
+<!--        });-->
+
+<!--        // Анимации для tool buttons-->
+<!--        document.querySelectorAll('.tool-btn').forEach(btn => {-->
+<!--            btn.addEventListener('click', function() {-->
+<!--                this.style.transform = 'scale(0.95)';-->
+<!--                setTimeout(() => {-->
+<!--                    this.style.transform = '';-->
+<!--                }, 150);-->
+<!--            });-->
+<!--        });-->
+
+<!--        console.log('🐦 Dashboard инициализирован');-->
+<!--        console.log('📝 Composer готов к работе');-->
+<!--        console.log('👥 Социальные функции активированы');-->
+<!--        console.log('♾️ Бесконечная загрузка активирована');-->
+<!--    });-->
+
+<!--    // Инициализация если DOM уже загружен-->
+<!--    if (document.readyState === 'loading') {-->
+<!--        document.addEventListener('DOMContentLoaded', function() {-->
+<!--            initializePostComposer();-->
+<!--            initInfiniteScroll();-->
+<!--        });-->
+<!--    } else {-->
+<!--        initializePostComposer();-->
+<!--        initInfiniteScroll();-->
+<!--    }-->
+
+<!--    // Экспорт функций для использования в других частях приложения-->
+<!--    window.infiniteScroll = {-->
+<!--        init: initInfiniteScroll,-->
+<!--        destroy: destroyInfiniteScroll,-->
+<!--        loadMore: loadMorePosts-->
+<!--    };-->
+
+<!--    console.log('📝 Скрипт создания постов загружен');-->
+<!--    console.log('♾️ Скрипт бесконечной загрузки загружен');-->
+<!--</script>-->
 </body>
 </html>
