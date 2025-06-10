@@ -199,8 +199,6 @@ public class StoryServiceImpl implements StoryService {
     @Override
     @Transactional(readOnly = true)
     public String getImageContentType(String imageId) {
-        log.info("Getting content type for image: {}", imageId);
-
         // Проверяем, существует ли история с таким imageId
         Story story = storyRepository.findByImageId(imageId)
                 .orElseThrow(() -> new IllegalArgumentException("История с изображением не найдена: " + imageId));

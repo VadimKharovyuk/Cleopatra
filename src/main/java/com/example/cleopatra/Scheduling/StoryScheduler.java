@@ -1,10 +1,14 @@
 package com.example.cleopatra.Scheduling;
 
+import com.example.cleopatra.repository.StoryRepository;
+import com.example.cleopatra.repository.StoryViewRepository;
 import com.example.cleopatra.service.StoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Component
@@ -12,6 +16,8 @@ import org.springframework.stereotype.Component;
 public class StoryScheduler {
 
     private final StoryService storyService;
+    private final StoryRepository storyRepository;
+    private final StoryViewRepository storyViewRepository;
 
     /**
      * Удаляет истекшие истории каждые 30 минут
@@ -79,17 +85,13 @@ public class StoryScheduler {
         }
     }
 
-    /**
-     * Задача для мониторинга - каждые 2 часа
-     * Логирует статистику активных историй
-     */
-    @Scheduled(fixedRate = 7200000) // 2 часа = 7200000 миллисекунд
+
+    @Scheduled(fixedRate = 7200000)
+//@Scheduled(fixedRate = 120000) // 2 минуты = 120000 мс
     public void logStoriesStatistics() {
         try {
-            // Здесь можно добавить логику подсчета статистики
-
-            log.debug("📊 Мониторинг историй выполнен");
-
+            long activeStoriesCount = storyRepository.count();
+            log.info("📊 Активных историй: {}", activeStoriesCount);
         } catch (Exception e) {
             log.error("❌ Ошибка при мониторинге историй", e);
         }

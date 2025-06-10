@@ -41,8 +41,6 @@ public class DatabaseStorageServiceImpl implements DatabaseStorageService {
     @Override
     @Transactional(readOnly = true)
     public String getContentType(String imageId) {
-        log.info("Getting content type for imageId: {}", imageId);
-
         Story story = storyRepository.findByImageId(imageId)
                 .orElseThrow(() -> new IllegalArgumentException("Изображение не найдено: " + imageId));
 

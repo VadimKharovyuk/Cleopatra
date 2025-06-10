@@ -1,228 +1,1090 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Создать историю - Cleopatra</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>Создать новую историю</h1>-->
+
+<!--<div>-->
+<!--  <a href="/stories">← Назад к историям</a>-->
+<!--</div>-->
+
+<!--<hr>-->
+
+<!--<div>-->
+<!--  <p><strong>Текущий пользователь ID:</strong> <span th:text="${currentUserId}">1</span></p>-->
+<!--</div>-->
+
+<!--<hr>-->
+
+<!--<form id="createStoryForm" enctype="multipart/form-data">-->
+<!--  <input type="hidden" name="currentUserId" th:value="${currentUserId}">-->
+
+<!--  <div>-->
+<!--    <label for="imageFile"><strong>Выберите изображение:</strong></label><br>-->
+<!--    <input type="file" id="imageFile" name="file" accept="image/*" required>-->
+<!--    <br><small>Поддерживаются: JPG, PNG, GIF. Максимум: 10MB</small>-->
+<!--  </div>-->
+
+<!--  <br>-->
+
+<!--  &lt;!&ndash; Предварительный просмотр &ndash;&gt;-->
+<!--  <div id="imagePreview" style="display: none;">-->
+<!--    <h3>Предварительный просмотр:</h3>-->
+<!--    <img id="previewImg" alt="Предварительный просмотр" style="max-width: 300px; max-height: 300px;">-->
+<!--  </div>-->
+
+<!--  <br>-->
+
+<!--  <div>-->
+<!--    <label for="emoji"><strong>Эмодзи (необязательно):</strong></label><br>-->
+<!--    <select id="emoji" name="emoji">-->
+<!--      <option value="">&#45;&#45; Выберите эмодзи &#45;&#45;</option>-->
+<!--      <option th:each="emoji : ${storyEmojiValues}"-->
+<!--              th:value="${emoji.name()}"-->
+<!--              th:text="${emoji.emoji + ' ' + emoji.description}">-->
+<!--        ❤️ Сердце-->
+<!--      </option>-->
+<!--    </select>-->
+<!--  </div>-->
+
+<!--  <br>-->
+
+<!--  <div>-->
+<!--    <label for="description"><strong>Описание (необязательно):</strong></label><br>-->
+<!--    <textarea id="description" name="description" rows="3" cols="50" maxlength="500"-->
+<!--              placeholder="Расскажите что-нибудь о своей истории..."></textarea>-->
+<!--    <br><small><span id="charCount">0</span>/500 символов</small>-->
+<!--  </div>-->
+
+<!--  <br>-->
+
+<!--  <div style="border: 1px solid #ccc; padding: 10px;">-->
+<!--    <h3>Информация об истечении:</h3>-->
+<!--    <p>Ваша история будет доступна в течение <strong>24 часов</strong> с момента создания.</p>-->
+<!--    <p>После этого она автоматически удалится.</p>-->
+<!--  </div>-->
+
+<!--  <br>-->
+
+<!--  <div>-->
+<!--    <button type="submit" id="createBtn">Создать историю</button>-->
+<!--    <a href="/stories">Отмена</a>-->
+<!--  </div>-->
+<!--</form>-->
+
+<!--&lt;!&ndash; Индикатор загрузки &ndash;&gt;-->
+<!--<div id="loadingIndicator" style="display: none;">-->
+<!--  <hr>-->
+<!--  <h3>Загружаем вашу историю...</h3>-->
+<!--  <p>Пожалуйста, подождите. Не закрывайте страницу.</p>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Результат &ndash;&gt;-->
+<!--<div id="result" style="display: none;">-->
+<!--  &lt;!&ndash; Результат будет добавлен здесь &ndash;&gt;-->
+<!--</div>-->
+
+<!--<script>-->
+<!--  document.addEventListener('DOMContentLoaded', function() {-->
+<!--    const form = document.getElementById('createStoryForm');-->
+<!--    const fileInput = document.getElementById('imageFile');-->
+<!--    const previewContainer = document.getElementById('imagePreview');-->
+<!--    const previewImg = document.getElementById('previewImg');-->
+<!--    const description = document.getElementById('description');-->
+<!--    const charCount = document.getElementById('charCount');-->
+<!--    const loadingIndicator = document.getElementById('loadingIndicator');-->
+<!--    const result = document.getElementById('result');-->
+
+<!--    // Предварительный просмотр изображения-->
+<!--    fileInput.addEventListener('change', function(e) {-->
+<!--      const file = e.target.files[0];-->
+<!--      if (file) {-->
+<!--        // Проверка размера файла (10MB)-->
+<!--        if (file.size > 10 * 1024 * 1024) {-->
+<!--          alert('Файл слишком большой! Максимальный размер: 10MB');-->
+<!--          fileInput.value = '';-->
+<!--          previewContainer.style.display = 'none';-->
+<!--          return;-->
+<!--        }-->
+
+<!--        // Проверка типа файла-->
+<!--        if (!file.type.startsWith('image/')) {-->
+<!--          alert('Пожалуйста, выберите изображение!');-->
+<!--          fileInput.value = '';-->
+<!--          previewContainer.style.display = 'none';-->
+<!--          return;-->
+<!--        }-->
+
+<!--        // Показываем предварительный просмотр-->
+<!--        const reader = new FileReader();-->
+<!--        reader.onload = function(e) {-->
+<!--          previewImg.src = e.target.result;-->
+<!--          previewContainer.style.display = 'block';-->
+<!--        };-->
+<!--        reader.readAsDataURL(file);-->
+<!--      }-->
+<!--    });-->
+
+<!--    // Счетчик символов в описании-->
+<!--    description.addEventListener('input', function() {-->
+<!--      const length = this.value.length;-->
+<!--      charCount.textContent = length;-->
+<!--    });-->
+
+<!--    // Отправка формы-->
+<!--    form.addEventListener('submit', function(e) {-->
+<!--      e.preventDefault();-->
+
+<!--      // Проверяем, выбран ли файл-->
+<!--      if (!fileInput.files[0]) {-->
+<!--        alert('Пожалуйста, выберите изображение!');-->
+<!--        return;-->
+<!--      }-->
+
+<!--      console.log('Отправляем форму...');-->
+
+<!--      // Показываем индикатор загрузки-->
+<!--      form.style.display = 'none';-->
+<!--      loadingIndicator.style.display = 'block';-->
+
+<!--      // Создаем FormData-->
+<!--      const formData = new FormData(form);-->
+
+<!--      // Выводим данные формы в консоль для отладки-->
+<!--      console.log('FormData содержимое:');-->
+<!--      for (let pair of formData.entries()) {-->
+<!--        console.log(pair[0] + ': ' + pair[1]);-->
+<!--      }-->
+
+<!--      // Отправляем запрос-->
+<!--      fetch('/stories/api/create', {-->
+<!--        method: 'POST',-->
+<!--        body: formData-->
+<!--      })-->
+<!--              .then(response => {-->
+<!--                console.log('Ответ получен:', response.status);-->
+<!--                if (response.ok) {-->
+<!--                  return response.json();-->
+<!--                } else {-->
+<!--                  return response.text().then(text => {-->
+<!--                    throw new Error(text);-->
+<!--                  });-->
+<!--                }-->
+<!--              })-->
+<!--              .then(data => {-->
+<!--                console.log('Успешно:', data);-->
+<!--                // Успешное создание-->
+<!--                loadingIndicator.style.display = 'none';-->
+<!--                result.innerHTML = `-->
+<!--                        <hr>-->
+<!--                        <h3>✅ История создана успешно!</h3>-->
+<!--                        <p>ID истории: ${data.id}</p>-->
+<!--                        <p>Ваша история будет доступна в течение 24 часов.</p>-->
+<!--                        <div>-->
+<!--                            <a href="/stories/${data.id}">👀 Посмотреть историю</a> |-->
+<!--                            <a href="/stories">📱 К списку историй</a> |-->
+<!--                            <a href="/stories/create">➕ Создать еще одну</a>-->
+<!--                        </div>-->
+<!--                    `;-->
+<!--                result.style.display = 'block';-->
+<!--              })-->
+<!--              .catch(error => {-->
+<!--                console.error('Ошибка:', error);-->
+<!--                // Ошибка создания-->
+<!--                loadingIndicator.style.display = 'none';-->
+<!--                result.innerHTML = `-->
+<!--                        <hr>-->
+<!--                        <h3>❌ Ошибка создания истории</h3>-->
+<!--                        <p>${error.message || 'Произошла неизвестная ошибка'}</p>-->
+<!--                        <div>-->
+<!--                            <button type="button" onclick="tryAgain()">🔄 Попробовать еще раз</button>-->
+<!--                            <a href="/stories">← Назад к историям</a>-->
+<!--                        </div>-->
+<!--                    `;-->
+<!--                result.style.display = 'block';-->
+<!--              });-->
+<!--    });-->
+
+<!--    // Функция для повторной попытки-->
+<!--    window.tryAgain = function() {-->
+<!--      form.style.display = 'block';-->
+<!--      result.style.display = 'none';-->
+<!--      loadingIndicator.style.display = 'none';-->
+
+<!--      // Очищаем форму-->
+<!--      fileInput.value = '';-->
+<!--      previewContainer.style.display = 'none';-->
+<!--      description.value = '';-->
+<!--      charCount.textContent = '0';-->
+<!--      document.getElementById('emoji').selectedIndex = 0;-->
+<!--    };-->
+<!--  });-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Создать историю - Cleopatra</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #fafafa;
+      --bg-secondary: #ffffff;
+      --bg-accent: #f8f9fa;
+      --surface-elevated: rgba(255, 255, 255, 0.95);
+
+      /* Sophisticated Neutrals */
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --text-light: #d1d5db;
+
+      /* Additional Colors */
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --secondary-color: #64748b;
+      --accent-color: #8b5cf6;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+
+      /* Spacing */
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --spacing-2xl: 3rem;
+
+      /* Border Radius */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      min-height: 100vh;
+      padding: var(--spacing-xl);
+      transition: margin-left 0.3s ease;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--spacing-xl);
+      flex-wrap: wrap;
+    }
+
+    .header-text {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .title-icon {
+      color: var(--primary-color);
+      font-size: 2rem;
+    }
+
+    .page-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-lg);
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:disabled {
+      background-color: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--text-light);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-accent);
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    /* Create Form */
+    .create-form-container {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-2xl);
+      box-shadow: var(--shadow-md);
+    }
+
+    .form-section {
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .form-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .section-icon {
+      color: var(--primary-color);
+      font-size: 1.2rem;
+    }
+
+    /* File Upload */
+    .upload-area {
+      border: 2px dashed var(--text-light);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-2xl);
+      text-align: center;
+      background-color: var(--bg-accent);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .upload-area:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(59, 130, 246, 0.05);
+    }
+
+    .upload-area.dragover {
+      border-color: var(--primary-color);
+      background-color: rgba(59, 130, 246, 0.1);
+      transform: scale(1.02);
+    }
+
+    .upload-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .upload-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+    }
+
+    .upload-text {
+      color: var(--text-primary);
+      font-weight: 500;
+      font-size: 1.125rem;
+    }
+
+    .upload-hint {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    /* Image Preview */
+    .image-preview {
+      display: none;
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .preview-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview-overlay {
+      position: absolute;
+      top: var(--spacing-md);
+      right: var(--spacing-md);
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    .overlay-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .overlay-btn.change {
+      background: rgba(59, 130, 246, 0.9);
+      color: white;
+    }
+
+    .overlay-btn.remove {
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+    }
+
+    .overlay-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Form Controls */
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-sm);
+      font-size: 0.875rem;
+    }
+
+    .form-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: var(--spacing-md);
+      border: 1px solid var(--text-light);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-accent);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .char-counter {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: var(--spacing-xs);
+    }
+
+    .char-counter.warning {
+      color: var(--warning-color);
+    }
+
+    .char-counter.danger {
+      color: var(--danger-color);
+    }
+
+    /* Emoji Selection */
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: var(--spacing-md);
+    }
+
+    .emoji-option {
+      padding: var(--spacing-md);
+      border: 2px solid var(--text-light);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-accent);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-xs);
+      text-align: center;
+    }
+
+    .emoji-option:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(59, 130, 246, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .emoji-option.selected {
+      border-color: var(--primary-color);
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .emoji-icon {
+      font-size: 1.5rem;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .emoji-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    /* Action Buttons */
+    .form-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: flex-end;
+      padding-top: var(--spacing-xl);
+      border-top: 1px solid var(--text-light);
+    }
+
+    /* Progress Indicator */
+    .upload-progress {
+      display: none;
+      margin-top: var(--spacing-lg);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: var(--text-light);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      text-align: center;
+      margin-top: var(--spacing-sm);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    /* Error Messages */
+    .error-message {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--danger-color);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .success-message {
+      background-color: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--success-color);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 0;
+        padding: var(--spacing-lg);
+      }
+
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .header-content {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .main-content {
+        padding: var(--spacing-md);
+      }
+
+      .create-form-container {
+        padding: var(--spacing-lg);
+      }
+
+      .emoji-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: var(--spacing-sm);
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .upload-area {
+        padding: var(--spacing-lg);
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>Создать новую историю</h1>
+<!-- Sidebar из фрагмента -->
+<th:block th:replace="~{fragments/sidebar :: complete-sidebar('stories')}"></th:block>
 
-<div>
-  <a href="/stories">← Назад к историям</a>
-</div>
+<!-- Основной контент -->
+<main class="main-content">
+  <div class="container">
+    <!-- Заголовок -->
+    <header class="page-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="page-title">
+            <i class="fas fa-plus title-icon"></i>
+            Создать историю
+          </h1>
+          <p class="page-subtitle">Поделитесь моментом своей жизни с друзьями</p>
+        </div>
+        <div class="header-actions">
+          <a href="/stories" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Все истории
+          </a>
+          <a href="/stories/feed" class="btn btn-secondary">
+            <i class="fas fa-heart"></i>
+            Моя лента
+          </a>
+        </div>
+      </div>
+    </header>
 
-<hr>
+    <!-- Форма создания истории -->
+    <div class="create-form-container">
+      <form id="createStoryForm" enctype="multipart/form-data">
+        <!-- Загрузка изображения -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i class="fas fa-image section-icon"></i>
+            Добавить изображение
+          </h3>
 
-<div>
-  <p><strong>Текущий пользователь ID:</strong> <span th:text="${currentUserId}">1</span></p>
-</div>
+          <div class="upload-area" id="uploadArea">
+            <div class="upload-content">
+              <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+              </div>
+              <div class="upload-text">Выберите изображение или перетащите его сюда</div>
+              <div class="upload-hint">Поддерживаются JPG, PNG, GIF до 10MB</div>
+            </div>
+            <input type="file"
+                   id="fileInput"
+                   name="file"
+                   class="file-input"
+                   accept="image/*"
+                   required>
+          </div>
 
-<hr>
+          <div class="image-preview" id="imagePreview">
+            <img id="previewImage" class="preview-image" src="" alt="Предпросмотр">
+            <div class="preview-overlay">
+              <button type="button" class="overlay-btn change" id="changeImageBtn" title="Изменить изображение">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button type="button" class="overlay-btn remove" id="removeImageBtn" title="Удалить изображение">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
 
-<form id="createStoryForm" enctype="multipart/form-data">
-  <input type="hidden" name="currentUserId" th:value="${currentUserId}">
+          <div class="upload-progress" id="uploadProgress">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Загрузка...</div>
+          </div>
+        </div>
 
-  <div>
-    <label for="imageFile"><strong>Выберите изображение:</strong></label><br>
-    <input type="file" id="imageFile" name="file" accept="image/*" required>
-    <br><small>Поддерживаются: JPG, PNG, GIF. Максимум: 10MB</small>
+        <!-- Описание истории -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i class="fas fa-pen section-icon"></i>
+            Описание (необязательно)
+          </h3>
+
+          <div class="form-group">
+            <label for="description" class="form-label">Расскажите о своем моменте</label>
+            <textarea
+                    id="description"
+                    name="description"
+                    class="form-textarea"
+                    placeholder="Что происходит на этом фото? Поделитесь своими мыслями..."
+                    maxlength="500"></textarea>
+            <div class="char-counter" id="charCounter">0/500</div>
+          </div>
+        </div>
+
+        <!-- Выбор эмодзи -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i class="fas fa-smile section-icon"></i>
+            Настроение (необязательно)
+          </h3>
+
+          <div class="emoji-grid">
+            <div class="emoji-option" data-emoji="">
+              <div class="emoji-icon">🌟</div>
+              <div class="emoji-label">Без эмодзи</div>
+            </div>
+            <div th:each="emoji : ${storyEmojiValues}"
+                 class="emoji-option"
+                 th:data-emoji="${emoji.name()}">
+              <div class="emoji-icon" th:text="${emoji.emoji}">😊</div>
+              <div class="emoji-label" th:text="${emoji.description}">Радость</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+            <i class="fas fa-times"></i>
+            Отмена
+          </button>
+          <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+            <i class="fas fa-share"></i>
+            Опубликовать историю
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
-
-  <br>
-
-  <!-- Предварительный просмотр -->
-  <div id="imagePreview" style="display: none;">
-    <h3>Предварительный просмотр:</h3>
-    <img id="previewImg" alt="Предварительный просмотр" style="max-width: 300px; max-height: 300px;">
-  </div>
-
-  <br>
-
-  <div>
-    <label for="emoji"><strong>Эмодзи (необязательно):</strong></label><br>
-    <select id="emoji" name="emoji">
-      <option value="">-- Выберите эмодзи --</option>
-      <option th:each="emoji : ${storyEmojiValues}"
-              th:value="${emoji.name()}"
-              th:text="${emoji.emoji + ' ' + emoji.description}">
-        ❤️ Сердце
-      </option>
-    </select>
-  </div>
-
-  <br>
-
-  <div>
-    <label for="description"><strong>Описание (необязательно):</strong></label><br>
-    <textarea id="description" name="description" rows="3" cols="50" maxlength="500"
-              placeholder="Расскажите что-нибудь о своей истории..."></textarea>
-    <br><small><span id="charCount">0</span>/500 символов</small>
-  </div>
-
-  <br>
-
-  <div style="border: 1px solid #ccc; padding: 10px;">
-    <h3>Информация об истечении:</h3>
-    <p>Ваша история будет доступна в течение <strong>24 часов</strong> с момента создания.</p>
-    <p>После этого она автоматически удалится.</p>
-  </div>
-
-  <br>
-
-  <div>
-    <button type="submit" id="createBtn">Создать историю</button>
-    <a href="/stories">Отмена</a>
-  </div>
-</form>
-
-<!-- Индикатор загрузки -->
-<div id="loadingIndicator" style="display: none;">
-  <hr>
-  <h3>Загружаем вашу историю...</h3>
-  <p>Пожалуйста, подождите. Не закрывайте страницу.</p>
-</div>
-
-<!-- Результат -->
-<div id="result" style="display: none;">
-  <!-- Результат будет добавлен здесь -->
-</div>
+</main>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('fileInput');
+    const uploadArea = document.getElementById('uploadArea');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImage = document.getElementById('previewImage');
+    const changeImageBtn = document.getElementById('changeImageBtn');
+    const removeImageBtn = document.getElementById('removeImageBtn');
+    const submitBtn = document.getElementById('submitBtn');
     const form = document.getElementById('createStoryForm');
-    const fileInput = document.getElementById('imageFile');
-    const previewContainer = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
     const description = document.getElementById('description');
-    const charCount = document.getElementById('charCount');
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const result = document.getElementById('result');
+    const charCounter = document.getElementById('charCounter');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
 
-    // Предварительный просмотр изображения
-    fileInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        // Проверка размера файла (10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          alert('Файл слишком большой! Максимальный размер: 10MB');
-          fileInput.value = '';
-          previewContainer.style.display = 'none';
-          return;
-        }
+    let selectedEmoji = '';
+    let hasImage = false;
 
-        // Проверка типа файла
-        if (!file.type.startsWith('image/')) {
-          alert('Пожалуйста, выберите изображение!');
-          fileInput.value = '';
-          previewContainer.style.display = 'none';
-          return;
-        }
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
 
-        // Показываем предварительный просмотр
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          previewImg.src = e.target.result;
-          previewContainer.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
+    uploadArea.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFile(files[0]);
       }
     });
 
-    // Счетчик символов в описании
-    description.addEventListener('input', function() {
-      const length = this.value.length;
-      charCount.textContent = length;
+    // Click to upload
+    uploadArea.addEventListener('click', function() {
+      fileInput.click();
     });
 
-    // Отправка формы
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
+    changeImageBtn.addEventListener('click', function() {
+      fileInput.click();
+    });
 
-      // Проверяем, выбран ли файл
-      if (!fileInput.files[0]) {
-        alert('Пожалуйста, выберите изображение!');
+    // File input change
+    fileInput.addEventListener('change', function(e) {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    // Remove image
+    removeImageBtn.addEventListener('click', function() {
+      resetImageUpload();
+    });
+
+    // Handle file upload
+    function handleFile(file) {
+      // Validate file
+      if (!file.type.startsWith('image/')) {
+        showError('Пожалуйста, выберите изображение');
         return;
       }
 
-      console.log('Отправляем форму...');
-
-      // Показываем индикатор загрузки
-      form.style.display = 'none';
-      loadingIndicator.style.display = 'block';
-
-      // Создаем FormData
-      const formData = new FormData(form);
-
-      // Выводим данные формы в консоль для отладки
-      console.log('FormData содержимое:');
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
+      if (file.size > 10 * 1024 * 1024) { // 10MB
+        showError('Размер файла не должен превышать 10MB');
+        return;
       }
 
-      // Отправляем запрос
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        uploadArea.style.display = 'none';
+        imagePreview.style.display = 'block';
+        hasImage = true;
+        updateSubmitButton();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Reset image upload
+    function resetImageUpload() {
+      fileInput.value = '';
+      uploadArea.style.display = 'block';
+      imagePreview.style.display = 'none';
+      hasImage = false;
+      updateSubmitButton();
+    }
+
+    // Description character counter
+    description.addEventListener('input', function() {
+      const length = this.value.length;
+      const maxLength = 500;
+      charCounter.textContent = `${length}/${maxLength}`;
+
+      if (length > maxLength * 0.9) {
+        charCounter.classList.add('warning');
+      } else {
+        charCounter.classList.remove('warning');
+      }
+
+      if (length >= maxLength) {
+        charCounter.classList.add('danger');
+      } else {
+        charCounter.classList.remove('danger');
+      }
+    });
+
+    // Emoji selection
+    document.querySelectorAll('.emoji-option').forEach(option => {
+      option.addEventListener('click', function() {
+        // Remove selected class from all options
+        document.querySelectorAll('.emoji-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+
+        // Add selected class to clicked option
+        this.classList.add('selected');
+        selectedEmoji = this.dataset.emoji || '';
+      });
+    });
+
+    // Update submit button state
+    function updateSubmitButton() {
+      submitBtn.disabled = !hasImage;
+    }
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      if (!hasImage) {
+        showError('Пожалуйста, выберите изображение');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      if (description.value.trim()) {
+        formData.append('description', description.value.trim());
+      }
+
+      if (selectedEmoji) {
+        formData.append('emoji', selectedEmoji);
+      }
+
+      // Show progress
+      uploadProgress.style.display = 'block';
+      submitBtn.disabled = true;
+
+      // Upload story
       fetch('/stories/api/create', {
         method: 'POST',
         body: formData
       })
               .then(response => {
-                console.log('Ответ получен:', response.status);
-                if (response.ok) {
-                  return response.json();
-                } else {
+                if (!response.ok) {
                   return response.text().then(text => {
-                    throw new Error(text);
+                    throw new Error(text || 'Ошибка создания истории');
                   });
                 }
+                return response.json();
               })
               .then(data => {
-                console.log('Успешно:', data);
-                // Успешное создание
-                loadingIndicator.style.display = 'none';
-                result.innerHTML = `
-                        <hr>
-                        <h3>✅ История создана успешно!</h3>
-                        <p>ID истории: ${data.id}</p>
-                        <p>Ваша история будет доступна в течение 24 часов.</p>
-                        <div>
-                            <a href="/stories/${data.id}">👀 Посмотреть историю</a> |
-                            <a href="/stories">📱 К списку историй</a> |
-                            <a href="/stories/create">➕ Создать еще одну</a>
-                        </div>
-                    `;
-                result.style.display = 'block';
+                showSuccess('История успешно создана!');
+                setTimeout(() => {
+                  window.location.href = `/stories/${data.id}`;
+                }, 1500);
               })
               .catch(error => {
-                console.error('Ошибка:', error);
-                // Ошибка создания
-                loadingIndicator.style.display = 'none';
-                result.innerHTML = `
-                        <hr>
-                        <h3>❌ Ошибка создания истории</h3>
-                        <p>${error.message || 'Произошла неизвестная ошибка'}</p>
-                        <div>
-                            <button type="button" onclick="tryAgain()">🔄 Попробовать еще раз</button>
-                            <a href="/stories">← Назад к историям</a>
-                        </div>
-                    `;
-                result.style.display = 'block';
+                console.error('Error:', error);
+                showError(error.message || 'Ошибка создания истории');
+                submitBtn.disabled = false;
+                uploadProgress.style.display = 'none';
               });
     });
 
-    // Функция для повторной попытки
-    window.tryAgain = function() {
-      form.style.display = 'block';
-      result.style.display = 'none';
-      loadingIndicator.style.display = 'none';
+    // Show error message
+    function showError(message) {
+      removeMessages();
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message';
+      errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>${message}</span>`;
+      form.insertBefore(errorDiv, form.firstChild);
 
-      // Очищаем форму
-      fileInput.value = '';
-      previewContainer.style.display = 'none';
-      description.value = '';
-      charCount.textContent = '0';
-      document.getElementById('emoji').selectedIndex = 0;
-    };
+      setTimeout(() => {
+        errorDiv.remove();
+      }, 5000);
+    }
+
+    // Show success message
+    function showSuccess(message) {
+      removeMessages();
+      const successDiv = document.createElement('div');
+      successDiv.className = 'success-message';
+      successDiv.innerHTML = `<i class="fas fa-check-circle"></i><span>${message}</span>`;
+      form.insertBefore(successDiv, form.firstChild);
+    }
+
+    // Remove existing messages
+    function removeMessages() {
+      const existingMessages = form.querySelectorAll('.error-message, .success-message');
+      existingMessages.forEach(msg => msg.remove());
+    }
+
+    // Initialize
+    updateSubmitButton();
   });
 </script>
+
 </body>
 </html>

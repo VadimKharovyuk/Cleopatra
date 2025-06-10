@@ -3,241 +3,1125 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Истории - Cleopatra</title>
+  <title>Все истории - Cleopatra</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #fafafa;
+      --bg-secondary: #ffffff;
+      --bg-accent: #f8f9fa;
+      --surface-elevated: rgba(255, 255, 255, 0.95);
+
+      /* Sophisticated Neutrals */
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --text-light: #d1d5db;
+
+      /* Additional Colors */
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --secondary-color: #64748b;
+      --accent-color: #8b5cf6;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+
+      /* Spacing */
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --spacing-2xl: 3rem;
+
+      /* Border Radius */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      min-height: 100vh;
+      padding: var(--spacing-xl);
+      transition: margin-left 0.3s ease;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--spacing-xl);
+      flex-wrap: wrap;
+    }
+
+    .header-text {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .title-icon {
+      color: var(--primary-color);
+      font-size: 2rem;
+    }
+
+    .page-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-lg);
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--text-light);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-accent);
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .btn-accent {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .btn-accent:hover {
+      background-color: #7c3aed;
+      transform: translateY(-1px);
+    }
+
+    /* Filter Section */
+    .filter-section {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .filter-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .emoji-filters {
+      display: flex;
+      gap: var(--spacing-sm);
+      flex-wrap: wrap;
+    }
+
+    .emoji-filter {
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 2px solid var(--text-light);
+      border-radius: var(--radius-md);
+      background-color: var(--bg-accent);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      font-size: 0.875rem;
+    }
+
+    .emoji-filter:hover {
+      border-color: var(--primary-color);
+      background-color: rgba(59, 130, 246, 0.05);
+    }
+
+    .emoji-filter.active {
+      border-color: var(--primary-color);
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .emoji-filter .emoji {
+      font-size: 1.2rem;
+    }
+
+    /* Stories Content */
+    .stories-content {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-xl);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stories-info {
+      margin-bottom: var(--spacing-xl);
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 1px solid var(--text-light);
+    }
+
+    .stories-stats {
+      display: flex;
+      gap: var(--spacing-lg);
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .stats-group {
+      display: flex;
+      gap: var(--spacing-lg);
+      align-items: center;
+    }
+
+    .stats-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .stats-item i {
+      color: var(--primary-color);
+    }
+
+    .sort-options {
+      display: flex;
+      gap: var(--spacing-sm);
+      align-items: center;
+    }
+
+    .sort-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .sort-select {
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 1px solid var(--text-light);
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-accent);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+
+    /* Stories Grid */
+    .stories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--spacing-xl);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .story-card {
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .story-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .story-card[style*="display: none"] {
+      display: none !important;
+    }
+
+    /* Story Header */
+    .story-header {
+      padding: var(--spacing-lg);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--spacing-md);
+    }
+
+    .user-info {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: center;
+      flex: 1;
+    }
+
+    .user-link {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s ease;
+      border-radius: var(--radius-md);
+      padding: var(--spacing-xs);
+      margin: calc(-1 * var(--spacing-xs));
+    }
+
+    .user-link:hover {
+      background-color: rgba(59, 130, 246, 0.05);
+      transform: translateX(2px);
+    }
+
+    .user-avatar-wrapper {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .user-avatar,
+    .user-avatar-placeholder {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .user-avatar-placeholder {
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .story-indicator {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--bg-secondary);
+    }
+
+    .story-indicator.new {
+      background-color: var(--primary-color);
+    }
+
+    .story-indicator.viewed {
+      background-color: var(--text-muted);
+    }
+
+    .user-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-xs);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .story-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .separator {
+      color: var(--text-light);
+    }
+
+    .story-status {
+      flex-shrink: 0;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      font-size: 0.75rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+    }
+
+    .status-badge.warning {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: var(--warning-color);
+    }
+
+    .status-badge.viewed {
+      background-color: rgba(156, 163, 175, 0.1);
+      color: var(--text-muted);
+    }
+
+    .status-badge.new {
+      background-color: rgba(59, 130, 246, 0.1);
+      color: var(--primary-color);
+    }
+
+    /* Story Image */
+    .story-image-container {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .story-link {
+      display: block;
+      text-decoration: none;
+    }
+
+    .story-image-wrapper {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      overflow: hidden;
+    }
+
+    .story-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .story-card:hover .story-image {
+      transform: scale(1.05);
+    }
+
+    .story-overlay {
+      position: absolute;
+      top: var(--spacing-md);
+      left: var(--spacing-md);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-sm);
+    }
+
+    .story-emoji .emoji-icon {
+      font-size: 1.5rem;
+    }
+
+    /* Story Content */
+    .story-content {
+      padding: 0 var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .story-description-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: color 0.2s ease;
+    }
+
+    .story-description-link:hover {
+      color: var(--primary-color);
+    }
+
+    .story-description {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      transition: color 0.2s ease;
+    }
+
+    /* Story Footer */
+    .story-footer {
+      padding: var(--spacing-lg);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .story-stats {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .stat-item i {
+      color: var(--primary-color);
+    }
+
+    .recent-viewers {
+      display: flex;
+      align-items: center;
+    }
+
+    .viewers-avatars {
+      display: flex;
+      margin-left: var(--spacing-sm);
+    }
+
+    .viewer-avatar-mini {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      margin-left: -8px;
+      border: 2px solid var(--bg-secondary);
+      overflow: hidden;
+    }
+
+    .viewer-avatar-mini:first-child {
+      margin-left: 0;
+    }
+
+    .viewer-avatar-mini img,
+    .viewer-placeholder {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .viewer-placeholder {
+      background: var(--text-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+    }
+
+    .story-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn.primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .action-btn.primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Pagination */
+    .pagination-container {
+      margin-top: var(--spacing-2xl);
+      display: flex;
+      justify-content: center;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      background: var(--bg-secondary);
+      padding: var(--spacing-md) var(--spacing-xl);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pagination-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+    }
+
+    .pagination-btn:hover {
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    .pagination-info {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-2xl) var(--spacing-md);
+    }
+
+    .empty-content {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .empty-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--spacing-xl);
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-icon i {
+      font-size: 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .empty-description {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .empty-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Error State */
+    .error-message {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--danger-color);
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 0;
+        padding: var(--spacing-lg);
+      }
+
+      .stories-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--spacing-lg);
+      }
+
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .header-content {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-actions {
+        justify-content: flex-start;
+      }
+
+      .stories-stats {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-md);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .main-content {
+        padding: var(--spacing-md);
+      }
+
+      .stories-content,
+      .filter-section {
+        padding: var(--spacing-md);
+      }
+
+      .stories-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+      }
+
+      .story-header {
+        padding: var(--spacing-md);
+      }
+
+      .story-footer {
+        padding: var(--spacing-md);
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-md);
+      }
+
+      .story-stats {
+        justify-content: center;
+      }
+
+      .empty-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .pagination {
+        flex-direction: column;
+        gap: var(--spacing-md);
+      }
+
+      .emoji-filters {
+        justify-content: center;
+      }
+
+      .filter-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-md);
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <h1>📸 Истории</h1>
-    <nav>
-      <a href="/stories">Все истории</a>
-      <a href="/stories/create">➕ Создать историю</a>
-      <a th:href="@{'/stories/user/' + ${currentUserId}}">Мои истории</a>
-    </nav>
-  </header>
+<!-- Sidebar из фрагмента -->
+<th:block th:replace="~{fragments/sidebar :: complete-sidebar('stories')}"></th:block>
 
-  <main>
-    <!-- Сообщение об ошибке -->
-    <div th:if="${error}" class="error">
-      <p th:text="${error}"></p>
+<!-- Основной контент -->
+<main class="main-content">
+  <div class="container">
+    <!-- Заголовок -->
+    <header class="page-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="page-title">
+            <i class="fas fa-globe title-icon"></i>
+            Все истории
+          </h1>
+          <p class="page-subtitle">Исследуйте истории от всех пользователей платформы</p>
+        </div>
+        <div class="header-actions">
+          <a href="/stories/create" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            Создать историю
+          </a>
+          <a href="/stories/feed" class="btn btn-secondary">
+            <i class="fas fa-heart"></i>
+            Моя лента
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Показать ошибку, если есть -->
+    <div th:if="${error}" class="error-message">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span th:text="${error}">Произошла ошибка</span>
     </div>
 
-    <!-- Список историй -->
-    <div th:if="${storyList}" class="stories-container">
-      <h2>Активные истории</h2>
-
-      <!-- Информация о пагинации -->
-      <div class="pagination-info">
-        <p>
-          Страница <span th:text="${storyList.currentPage + 1}">1</span>
-          из <span th:text="${storyList.totalPages}">1</span>
-          (всего историй: <span th:text="${storyList.totalElements}">0</span>)
-        </p>
+    <!-- Фильтры по эмодзи -->
+    <div class="filter-section">
+      <div class="filter-header">
+        <h3 class="filter-title">
+          <i class="fas fa-filter"></i>
+          Фильтр по настроению
+        </h3>
       </div>
+      <div class="emoji-filters">
+        <div class="emoji-filter active" data-emoji="">
+          <i class="fas fa-globe"></i>
+          Все
+        </div>
+        <div th:each="emoji : ${storyEmojiValues}"
+             class="emoji-filter"
+             th:data-emoji="${emoji.name()}">
+          <span class="emoji" th:text="${emoji.emoji}">😊</span>
+          <span th:text="${emoji.description}">Радость</span>
+        </div>
+      </div>
+    </div>
 
-      <!-- Истории -->
-      <div class="stories-grid">
-        <div th:each="story : ${storyList.stories}" class="story-card">
-          <div class="story-header">
-            <div class="user-info">
-              <img th:if="${story.userImageUrl}"
-                   th:src="${story.userImageUrl}"
-                   th:alt="${story.userFullName}"
-                   class="user-avatar">
-              <div th:unless="${story.userImageUrl}" class="user-avatar-placeholder">👤</div>
-              <div class="user-details">
-                <h3 th:text="${story.userFullName}">Имя пользователя</h3>
-                <p class="time-info" th:text="${story.timeAgo}">2 часа назад</p>
+    <!-- Контент историй -->
+    <div class="stories-content">
+      <!-- Проверяем наличие историй -->
+      <div th:if="${storyList != null and !storyList.isEmpty}" class="stories-section">
+        <!-- Информация о пагинации -->
+        <div class="stories-info">
+          <div class="stories-stats">
+            <div class="stats-group">
+              <span class="stats-item">
+                <i class="fas fa-images"></i>
+                <span th:text="${storyList.numberOfElements}">12</span> историй на странице
+              </span>
+              <span class="stats-item" th:if="${storyList.totalElements != null}">
+                <i class="fas fa-database"></i>
+                Всего: <span th:text="${storyList.totalElements}">124</span>
+              </span>
+            </div>
+            <div class="sort-options">
+              <span class="sort-label">Сортировка:</span>
+              <select class="sort-select" onchange="changeSorting(this.value)">
+                <option value="newest">Новые</option>
+                <option value="popular">Популярные</option>
+                <option value="trending">Трендовые</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Сетка историй -->
+        <div class="stories-grid">
+          <div th:each="story : ${storyList.stories}"
+               class="story-card"
+               th:data-emoji="${story.emoji != null ? story.emoji.name() : ''}">
+            <!-- Заголовок истории -->
+            <div class="story-header">
+              <div class="user-info">
+                <a th:href="@{'/profile/' + ${story.userId}}" class="user-link">
+                  <div class="user-avatar-wrapper">
+                    <img th:if="${story.userImageUrl}"
+                         th:src="${story.userImageUrl}"
+                         th:alt="${story.userFullName}"
+                         class="user-avatar">
+                    <div th:unless="${story.userImageUrl}" class="user-avatar-placeholder">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    <!-- Индикатор активности -->
+                    <div class="story-indicator" th:classappend="${story.isViewedByCurrentUser} ? 'viewed' : 'new'"></div>
+                  </div>
+                  <div class="user-details">
+                    <h3 class="user-name" th:text="${story.userFullName}">Имя пользователя</h3>
+                    <div class="story-meta">
+                      <span class="time-info" th:text="${story.timeAgo}">2 часа назад</span>
+                      <span class="separator">•</span>
+                      <span class="expires-info" th:text="${story.expiresIn}">истекает через 5 часов</span>
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+              <!-- Статус истории -->
+              <div class="story-status">
+                <span th:if="${story.isExpiringSoon}" class="status-badge warning">
+                  <i class="fas fa-clock"></i>
+                  Скоро истечет
+                </span>
+                <span th:if="${story.isViewedByCurrentUser}" class="status-badge viewed">
+                  <i class="fas fa-eye"></i>
+                  Просмотрено
+                </span>
+                <span th:unless="${story.isViewedByCurrentUser}" class="status-badge new">
+                  <i class="fas fa-star"></i>
+                  Новое
+                </span>
               </div>
             </div>
 
-            <!-- Статус -->
-            <div class="story-status">
-              <span th:if="${story.isOwner}" class="owner-badge">Ваша история</span>
-              <span th:if="${story.isViewedByCurrentUser}" class="viewed-badge">👁️ Просмотрено</span>
-              <span th:if="${story.isExpiringSoon}" class="expiring-badge">⏰ Скоро истечет</span>
+            <!-- Изображение истории -->
+            <div class="story-image-container">
+              <a th:href="@{'/stories/' + ${story.id}}" class="story-link">
+                <div class="story-image-wrapper">
+                  <img th:src="@{'/stories/image/' + ${story.imageId}}"
+                       th:alt="'История от ' + ${story.userFullName}"
+                       class="story-image"
+                       loading="lazy">
+
+                  <!-- Overlay с эмодзи -->
+                  <div th:if="${story.emoji}" class="story-overlay">
+                    <div class="story-emoji">
+                      <span class="emoji-icon" th:text="${story.emoji.emoji}">❤️</span>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            <!-- Контент истории -->
+            <div class="story-content" th:if="${story.description}">
+              <a th:href="@{'/stories/' + ${story.id}}" class="story-description-link">
+                <p class="story-description" th:text="${story.description}">Описание истории</p>
+              </a>
+            </div>
+
+            <!-- Статистика -->
+            <div class="story-footer">
+              <div class="story-stats">
+                <div class="stat-item">
+                  <i class="fas fa-eye"></i>
+                  <span th:text="${story.viewsCount}">0</span>
+                </div>
+                <div th:if="${story.recentViews != null and !story.recentViews.empty}" class="recent-viewers">
+                  <div class="viewers-avatars">
+                    <div th:each="view, iterStat : ${story.recentViews}"
+                         th:if="${iterStat.count <= 3}"
+                         class="viewer-avatar-mini">
+                      <img th:if="${view.viewerImageUrl}"
+                           th:src="${view.viewerImageUrl}"
+                           th:alt="${view.viewerFullName}"
+                           th:title="${view.viewerFullName}">
+                      <div th:unless="${view.viewerImageUrl}"
+                           class="viewer-placeholder"
+                           th:title="${view.viewerFullName}">
+                        <i class="fas fa-user"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <!-- Изображение истории -->
-          <div class="story-image">
-            <a th:href="@{'/stories/' + ${story.id}}">
-              <img th:src="@{'/stories/image/' + ${story.imageId}}"
-                   alt="История"
-                   class="story-img">
+        <!-- Пагинация -->
+        <div th:if="${storyList.hasNext or storyList.hasPrevious}" class="pagination-container">
+          <div class="pagination">
+            <a th:if="${storyList.hasPrevious}"
+               th:href="@{'/stories'(page=${storyList.previousPage})}"
+               class="pagination-btn prev">
+              <i class="fas fa-chevron-left"></i>
+              Предыдущая
             </a>
-          </div>
 
-          <!-- Контент истории -->
-          <div class="story-content">
-            <div th:if="${story.emoji}" class="story-emoji">
-              <span th:text="${story.emoji.emoji}">❤️</span>
-              <span th:text="${story.emoji.description}" class="emoji-description">Сердце</span>
-            </div>
+            <span class="pagination-info">
+              Страница <span th:text="${storyList.currentPage + 1}">1</span>
+              <span th:if="${storyList.totalPages != null}">
+                из <span th:text="${storyList.totalPages}">1</span>
+              </span>
+            </span>
 
-            <p th:if="${story.description}"
-               th:text="${story.description}"
-               class="story-description">Описание истории</p>
-          </div>
-
-          <!-- Статистика -->
-          <div class="story-stats">
-            <div class="views-count">
-              👁️ <span th:text="${story.viewsCount}">0</span> просмотров
-            </div>
-            <div class="expires-info">
-              <span th:text="${story.expiresIn}">истекает через 5 часов</span>
-            </div>
-          </div>
-
-          <!-- Действия -->
-          <div class="story-actions">
-            <a th:href="@{'/stories/' + ${story.id}}" class="btn btn-primary">
-              📖 Смотреть
+            <a th:if="${storyList.hasNext}"
+               th:href="@{'/stories'(page=${storyList.nextPage})}"
+               class="pagination-btn next">
+              Следующая
+              <i class="fas fa-chevron-right"></i>
             </a>
-
-            <div th:if="${story.isOwner}" class="owner-actions">
-              <button type="button"
-                      class="btn btn-secondary edit-emoji-btn"
-                      th:data-story-id="${story.id}">
-                😊 Изменить эмодзи
-              </button>
-
-              <button type="button"
-                      class="btn btn-danger delete-story-btn"
-                      th:data-story-id="${story.id}">
-                🗑️ Удалить
-              </button>
-            </div>
           </div>
         </div>
       </div>
 
-      <!-- Сообщение если нет историй -->
-      <div th:if="${storyList.isEmpty}" class="no-stories">
-        <h3>📭 Нет активных историй</h3>
-        <p>Создайте первую историю или подождите, пока другие пользователи добавят свои!</p>
-        <a href="/stories/create" class="btn btn-primary">➕ Создать историю</a>
-      </div>
-
-      <!-- Пагинация -->
-      <div th:if="${!storyList.isEmpty}" class="pagination">
-        <a th:if="${storyList.hasPrevious}"
-           th:href="@{'/stories'(page=${storyList.previousPage})}"
-           class="btn btn-secondary">← Предыдущая</a>
-
-        <span class="current-page">
-                        Страница <span th:text="${storyList.currentPage + 1}">1</span>
-                    </span>
-
-        <a th:if="${storyList.hasNext}"
-           th:href="@{'/stories'(page=${storyList.nextPage})}"
-           class="btn btn-secondary">Следующая →</a>
-      </div>
-    </div>
-  </main>
-
-  <!-- Модальное окно для изменения эмодзи -->
-  <div id="emojiModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <h3>Выберите эмодзи</h3>
-      <div class="emoji-grid">
-        <button th:each="emoji : ${storyEmojiValues}"
-                type="button"
-                class="emoji-option"
-                th:data-emoji="${emoji.name()}"
-                th:title="${emoji.description}">
-          <span th:text="${emoji.emoji}">❤️</span>
-          <span th:text="${emoji.description}">Сердце</span>
-        </button>
-      </div>
-      <div class="modal-actions">
-        <button type="button" id="cancelEmojiBtn" class="btn btn-secondary">Отмена</button>
+      <!-- Пустое состояние -->
+      <div th:if="${storyList == null or storyList.isEmpty}" class="empty-state">
+        <div class="empty-content">
+          <div class="empty-icon">
+            <i class="fas fa-images"></i>
+          </div>
+          <h3 class="empty-title">Пока нет историй</h3>
+          <p class="empty-description">
+            Станьте первым, кто поделится своей историей с сообществом!
+          </p>
+          <div class="empty-actions">
+            <a href="/stories/create" class="btn btn-primary">
+              <i class="fas fa-plus"></i>
+              Создать первую историю
+            </a>
+            <a href="/recommendations" class="btn btn-secondary">
+              <i class="fas fa-user-plus"></i>
+              Найти людей
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
+</main>
 
 <script>
-  // JavaScript для работы с модальными окнами и AJAX
+  // Фильтрация по эмодзи
+  function filterByEmoji(emoji) {
+    // Убираем активный класс со всех фильтров
+    document.querySelectorAll('.emoji-filter').forEach(filter => {
+      filter.classList.remove('active');
+    });
+
+    // Добавляем активный класс на выбранный фильтр
+    const selectedFilter = document.querySelector(`[data-emoji="${emoji}"]`);
+    if (selectedFilter) {
+      selectedFilter.classList.add('active');
+    }
+
+    // Перенаправляем с параметром фильтра
+    if (emoji === '') {
+      window.location.href = '/stories';
+    } else {
+      window.location.href = `/stories?emoji=${emoji}`;
+    }
+  }
+
+  // Добавляем обработчики событий для фильтров
   document.addEventListener('DOMContentLoaded', function() {
-    const emojiModal = document.getElementById('emojiModal');
-    let currentStoryId = null;
-
-    // Обработчики для кнопок изменения эмодзи
-    document.querySelectorAll('.edit-emoji-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        currentStoryId = this.dataset.storyId;
-        emojiModal.style.display = 'block';
+    document.querySelectorAll('.emoji-filter').forEach(filter => {
+      filter.addEventListener('click', function() {
+        const emoji = this.dataset.emoji || '';
+        filterByEmoji(emoji);
       });
     });
+  });
 
-    // Выбор эмодзи
-    document.querySelectorAll('.emoji-option').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const emoji = this.dataset.emoji;
-        updateStoryEmoji(currentStoryId, emoji);
+  // Изменение сортировки
+  function changeSorting(sortType) {
+    const url = new URL(window.location);
+    url.searchParams.set('sort', sortType);
+    url.searchParams.set('page', '0'); // Сброс на первую страницу
+    window.location.href = url.toString();
+  }
+
+  // Установка активного фильтра при загрузке страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const emojiFilter = urlParams.get('emoji');
+    const sortParam = urlParams.get('sort');
+
+    // Установка активного эмодзи фильтра
+    if (emojiFilter) {
+      document.querySelectorAll('.emoji-filter').forEach(filter => {
+        filter.classList.remove('active');
+      });
+      const activeFilter = document.querySelector(`[data-emoji="${emojiFilter}"]`);
+      if (activeFilter) {
+        activeFilter.classList.add('active');
+      }
+    }
+
+    // Установка выбранной сортировки
+    if (sortParam) {
+      const sortSelect = document.querySelector('.sort-select');
+      if (sortSelect) {
+        sortSelect.value = sortParam;
+      }
+    }
+
+    // Добавляем обработчики событий для фильтров
+    document.querySelectorAll('.emoji-filter').forEach(filter => {
+      filter.addEventListener('click', function() {
+        const emoji = this.dataset.emoji || '';
+        filterByEmoji(emoji);
       });
     });
+  });
 
-    // Закрытие модального окна
-    document.getElementById('cancelEmojiBtn').addEventListener('click', function() {
-      emojiModal.style.display = 'none';
-      currentStoryId = null;
-    });
-
-    // Обработчики для кнопок удаления
-    document.querySelectorAll('.delete-story-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const storyId = this.dataset.storyId;
-        if (confirm('Вы уверены, что хотите удалить эту историю?')) {
-          deleteStory(storyId);
+  // Обработка ошибок изображений
+  document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('.story-image, .user-avatar');
+    images.forEach(img => {
+      img.addEventListener('error', function() {
+        if (this.classList.contains('story-image')) {
+          this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240"><rect width="320" height="240" fill="%23f3f4f6"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%236b7280">Изображение недоступно</text></svg>';
+        } else if (this.classList.contains('user-avatar')) {
+          this.style.display = 'none';
+          this.nextElementSibling.style.display = 'flex';
         }
       });
     });
-
-    // Функция обновления эмодзи
-    function updateStoryEmoji(storyId, emoji) {
-      fetch(`/stories/api/${storyId}/emoji`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `emoji=${emoji}&currentUserId=[[${currentUserId}]]`
-      })
-              .then(response => response.json())
-              .then(data => {
-                emojiModal.style.display = 'none';
-                location.reload(); // Перезагружаем страницу
-              })
-              .catch(error => {
-                console.error('Error:', error);
-                alert('Ошибка обновления эмодзи');
-              });
-    }
-
-    // Функция удаления истории
-    function deleteStory(storyId) {
-      fetch(`/stories/api/${storyId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `currentUserId=[[${currentUserId}]]`
-      })
-              .then(response => {
-                if (response.ok) {
-                  location.reload(); // Перезагружаем страницу
-                } else {
-                  alert('Ошибка удаления истории');
-                }
-              })
-              .catch(error => {
-                console.error('Error:', error);
-                alert('Ошибка удаления истории');
-              });
-    }
   });
 </script>
+
 </body>
 </html>

@@ -1133,11 +1133,18 @@
                 </a>
             </div>
 
+
             <!-- Navigation Tabs -->
             <div class="profile-nav">
                 <div class="nav-tabs-luxury d-flex">
                     <button class="nav-tab-luxury active">Посты</button>
-                    <button class="nav-tab-luxury">Медиа</button>
+
+
+                    <a th:href="@{'/stories/user/' + ${userId}}" class="nav-tab-luxury-link">
+                        <button class="nav-tab-luxury">
+                            Медиа
+                        </button>
+                    </a>
                     <button class="nav-tab-luxury">Нравится</button>
                 </div>
             </div>

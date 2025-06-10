@@ -49,4 +49,6 @@ public interface StoryRepository extends JpaRepository<Story, Long> {
      */
     @Query("SELECT s FROM Story s WHERE s.user.id IN :userIds AND s.expiresAt > :now ORDER BY s.createdAt DESC")
     Page<Story> findActiveStoriesByUserIds(@Param("userIds") List<Long> userIds, @Param("now") LocalDateTime now, Pageable pageable);
+
+
 }

@@ -2,6 +2,7 @@ package com.example.cleopatra.controller;
 import com.example.cleopatra.dto.StoryDTO.StoryDTO;
 import com.example.cleopatra.dto.StoryDTO.StoryList;
 import com.example.cleopatra.dto.StoryView.StoryViewDTO;
+import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.enums.StoryEmoji;
 import com.example.cleopatra.service.StoryService;
 import com.example.cleopatra.service.StoryViewService;
@@ -30,6 +31,38 @@ public class StoryController {
     private final StoryService storyService;
     private final StoryViewService storyViewService;
     private final UserService userService;
+
+
+    /**
+     * Страница историй пользователя
+     */
+    @GetMapping("/user/{userId}")
+    public String userStoriesPage(
+            @PathVariable Long userId,
+            Authentication authentication,
+            Model model) {
+
+        try {
+            String email = authentication.getName();
+            Long currentUserId = userService.getUserIdByEmail(email);
+
+            StoryList userStories = storyService.getUserStories(userId, currentUserId);
+            model.addAttribute("userStories", userStories);
+            model.addAttribute("userId", userId);
+            model.addAttribute("currentUserId", currentUserId);
+
+
+            // В контроллере добавить:
+            UserResponse user = userService.getUserById(userId);
+            model.addAttribute("user", user);
+
+            return "stories/user-stories";
+        } catch (Exception e) {
+            log.error("Error loading user stories", e);
+            model.addAttribute("error", "Ошибка загрузки историй пользователя: " + e.getMessage());
+            return "stories/stories";
+        }
+    }
 
 
 
@@ -71,6 +104,7 @@ public class StoryController {
         }
     }
 
+
     /**
      * Страница создания истории
      */
@@ -106,7 +140,6 @@ public class StoryController {
                 story = storyService.getStoryById(storyId, currentUserId);
             }
 
-            // Получаем список просмотров
             List<StoryViewDTO> views = storyViewService.getStoryViews(storyId);
 
             model.addAttribute("story", story);
@@ -122,31 +155,7 @@ public class StoryController {
         }
     }
 
-    /**
-     * Страница историй пользователя
-     */
-    @GetMapping("/user/{userId}")
-    public String userStoriesPage(
-            @PathVariable Long userId,
-            Authentication authentication,
-            Model model) {
 
-        try {
-            String email = authentication.getName();
-            Long currentUserId = userService.getUserIdByEmail(email);
-
-            StoryList userStories = storyService.getUserStories(userId, currentUserId);
-            model.addAttribute("userStories", userStories);
-            model.addAttribute("userId", userId);
-            model.addAttribute("currentUserId", currentUserId);
-
-            return "stories/user-stories";
-        } catch (Exception e) {
-            log.error("Error loading user stories", e);
-            model.addAttribute("error", "Ошибка загрузки историй пользователя: " + e.getMessage());
-            return "stories/stories";
-        }
-    }
 
     // ===== REST API =====
 

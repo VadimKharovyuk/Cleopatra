@@ -1,3 +1,881 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Лента историй - Cleopatra</title>-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">-->
+<!--  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+
+<!--  <style>-->
+<!--    :root {-->
+<!--      &#45;&#45;bg-primary: #fafafa;-->
+<!--      &#45;&#45;bg-secondary: #ffffff;-->
+<!--      &#45;&#45;bg-accent: #f8f9fa;-->
+<!--      &#45;&#45;surface-elevated: rgba(255, 255, 255, 0.95);-->
+
+<!--      /* Sophisticated Neutrals */-->
+<!--      &#45;&#45;text-primary: #1a1a1a;-->
+<!--      &#45;&#45;text-secondary: #6b7280;-->
+<!--      &#45;&#45;text-muted: #9ca3af;-->
+<!--      &#45;&#45;text-light: #d1d5db;-->
+
+<!--      /* Additional Colors */-->
+<!--      &#45;&#45;primary-color: #3b82f6;-->
+<!--      &#45;&#45;primary-hover: #2563eb;-->
+<!--      &#45;&#45;secondary-color: #64748b;-->
+<!--      &#45;&#45;accent-color: #8b5cf6;-->
+<!--      &#45;&#45;success-color: #10b981;-->
+<!--      &#45;&#45;warning-color: #f59e0b;-->
+<!--      &#45;&#45;danger-color: #ef4444;-->
+
+<!--      /* Spacing */-->
+<!--      &#45;&#45;spacing-xs: 0.25rem;-->
+<!--      &#45;&#45;spacing-sm: 0.5rem;-->
+<!--      &#45;&#45;spacing-md: 1rem;-->
+<!--      &#45;&#45;spacing-lg: 1.5rem;-->
+<!--      &#45;&#45;spacing-xl: 2rem;-->
+<!--      &#45;&#45;spacing-2xl: 3rem;-->
+
+<!--      /* Border Radius */-->
+<!--      &#45;&#45;radius-sm: 0.375rem;-->
+<!--      &#45;&#45;radius-md: 0.5rem;-->
+<!--      &#45;&#45;radius-lg: 0.75rem;-->
+<!--      &#45;&#45;radius-xl: 1rem;-->
+
+<!--      /* Shadows */-->
+<!--      &#45;&#45;shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);-->
+<!--      &#45;&#45;shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);-->
+<!--      &#45;&#45;shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);-->
+<!--    }-->
+
+<!--    * {-->
+<!--      margin: 0;-->
+<!--      padding: 0;-->
+<!--      box-sizing: border-box;-->
+<!--    }-->
+
+<!--    body {-->
+<!--      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;-->
+<!--      background-color: var(&#45;&#45;bg-primary);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      line-height: 1.6;-->
+<!--      min-height: 100vh;-->
+<!--    }-->
+
+<!--    .main-content {-->
+<!--      margin-left: 260px;-->
+<!--      min-height: 100vh;-->
+<!--      padding: var(&#45;&#45;spacing-xl);-->
+<!--      transition: margin-left 0.3s ease;-->
+<!--    }-->
+
+<!--    .container {-->
+<!--      max-width: 1200px;-->
+<!--      margin: 0 auto;-->
+<!--    }-->
+
+<!--    /* Page Header */-->
+<!--    .page-header {-->
+<!--      margin-bottom: var(&#45;&#45;spacing-2xl);-->
+<!--    }-->
+
+<!--    .header-content {-->
+<!--      display: flex;-->
+<!--      justify-content: space-between;-->
+<!--      align-items: flex-start;-->
+<!--      gap: var(&#45;&#45;spacing-xl);-->
+<!--      flex-wrap: wrap;-->
+<!--    }-->
+
+<!--    .header-text {-->
+<!--      flex: 1;-->
+<!--      min-width: 280px;-->
+<!--    }-->
+
+<!--    .page-title {-->
+<!--      font-family: 'Playfair Display', serif;-->
+<!--      font-size: 2.5rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: var(&#45;&#45;spacing-sm);-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: var(&#45;&#45;spacing-md);-->
+<!--    }-->
+
+<!--    .title-icon {-->
+<!--      color: var(&#45;&#45;primary-color);-->
+<!--      font-size: 2rem;-->
+<!--    }-->
+
+<!--    .page-subtitle {-->
+<!--      font-size: 1.125rem;-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-weight: 400;-->
+<!--    }-->
+
+<!--    .header-actions {-->
+<!--      display: flex;-->
+<!--      gap: var(&#45;&#45;spacing-md);-->
+<!--      flex-wrap: wrap;-->
+<!--    }-->
+
+<!--    /* Buttons */-->
+<!--    .btn {-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: var(&#45;&#45;spacing-sm);-->
+<!--      padding: var(&#45;&#45;spacing-md) var(&#45;&#45;spacing-lg);-->
+<!--      font-size: 0.875rem;-->
+<!--      font-weight: 500;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      text-decoration: none;-->
+<!--      border: none;-->
+<!--      cursor: pointer;-->
+<!--      transition: all 0.2s ease;-->
+<!--      white-space: nowrap;-->
+<!--    }-->
+
+<!--    .btn-primary {-->
+<!--      background-color: var(&#45;&#45;primary-color);-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    .btn-primary:hover {-->
+<!--      background-color: var(&#45;&#45;primary-hover);-->
+<!--      transform: translateY(-1px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-md);-->
+<!--    }-->
+
+<!--    .btn-secondary {-->
+<!--      background-color: var(&#45;&#45;bg-secondary);-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      border: 1px solid var(&#45;&#45;text-light);-->
+<!--    }-->
+
+<!--    .btn-secondary:hover {-->
+<!--      background-color: var(&#45;&#45;bg-accent);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      border-color: var(&#45;&#45;text-muted);-->
+<!--    }-->
+
+<!--    .btn-accent {-->
+<!--      background-color: var(&#45;&#45;accent-color);-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    .btn-accent:hover {-->
+<!--      background-color: #7c3aed;-->
+<!--      transform: translateY(-1px);-->
+<!--    }-->
+
+<!--    /* Feed Content */-->
+<!--    .feed-content {-->
+<!--      background-color: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-xl);-->
+<!--      padding: var(&#45;&#45;spacing-xl);-->
+<!--      box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--    }-->
+
+<!--    .feed-info {-->
+<!--      margin-bottom: var(&#45;&#45;spacing-xl);-->
+<!--      padding-bottom: var(&#45;&#45;spacing-lg);-->
+<!--      border-bottom: 1px solid var(&#45;&#45;text-light);-->
+<!--    }-->
+
+<!--    .feed-stats {-->
+<!--      display: flex;-->
+<!--      gap: var(&#45;&#45;spacing-lg);-->
+<!--      align-items: center;-->
+<!--    }-->
+
+<!--    .stats-item {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: var(&#45;&#45;spacing-sm);-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 0.875rem;-->
+<!--      font-weight: 500;-->
+<!--    }-->
+
+<!--    .stats-item i {-->
+<!--      color: var(&#45;&#45;primary-color);-->
+<!--    }-->
+
+<!--    /* Stories Grid */-->
+<!--    .stories-grid {-->
+<!--      display: grid;-->
+<!--      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));-->
+<!--      gap: var(&#45;&#45;spacing-xl);-->
+<!--      margin-bottom: var(&#45;&#45;spacing-xl);-->
+<!--    }-->
+
+<!--    .story-card {-->
+<!--      background-color: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-lg);-->
+<!--      overflow: hidden;-->
+<!--      box-shadow: var(&#45;&#45;shadow-md);-->
+<!--      transition: all 0.3s ease;-->
+<!--      border: 1px solid rgba(0, 0, 0, 0.05);-->
+<!--    }-->
+
+<!--    .story-card:hover {-->
+<!--      transform: translateY(-4px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--    }-->
+
+<!--    /* Story Header */-->
+<!--    .story-header {-->
+<!--      padding: var(&#45;&#45;spacing-lg);-->
+<!--      display: flex;-->
+<!--      justify-content: space-between;-->
+<!--      align-items: flex-start;-->
+<!--      gap: var(&#45;&#45;spacing-md);-->
+<!--    }-->
+
+<!--    .user-info {-->
+<!--      display: flex;-->
+<!--      gap: var(&#45;&#45;spacing-md);-->
+<!--      align-items: center;-->
+<!--      flex: 1;-->
+<!--    }-->
+
+<!--    .user-link {-->
+<!--      display: flex;-->
+<!--      gap: var(&#45;&#45;spacing-md);-->
+<!--      align-items: center;-->
+<!--      text-decoration: none;-->
+<!--      color: inherit;-->
+<!--      transition: all 0.2s ease;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      padding: var(&#45;&#45;spacing-xs);-->
+<!--      margin: calc(-1 * var(&#45;&#45;spacing-xs));-->
+<!--    }-->
+
+<!--    .user-link:hover {-->
+<!--      background-color: rgba(59, 130, 246, 0.05);-->
+<!--      transform: translateX(2px);-->
+<!--    }-->
+
+<!--    .user-avatar-wrapper {-->
+<!--      position: relative;-->
+<!--      flex-shrink: 0;-->
+<!--    }-->
+
+<!--    .user-avatar,-->
+<!--    .user-avatar-placeholder {-->
+<!--      width: 48px;-->
+<!--      height: 48px;-->
+<!--      border-radius: 50%;-->
+<!--      object-fit: cover;-->
+<!--    }-->
+
+<!--    .user-avatar-placeholder {-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;primary-color), var(&#45;&#45;accent-color));-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--      color: white;-->
+<!--      font-size: 1.2rem;-->
+<!--    }-->
+
+<!--    .story-indicator {-->
+<!--      position: absolute;-->
+<!--      bottom: -2px;-->
+<!--      right: -2px;-->
+<!--      width: 16px;-->
+<!--      height: 16px;-->
+<!--      border-radius: 50%;-->
+<!--      border: 2px solid var(&#45;&#45;bg-secondary);-->
+<!--    }-->
+
+<!--    .story-indicator.new {-->
+<!--      background-color: var(&#45;&#45;primary-color);-->
+<!--    }-->
+
+<!--    .story-indicator.viewed {-->
+<!--      background-color: var(&#45;&#45;text-muted);-->
+<!--    }-->
+
+<!--    .user-details {-->
+<!--      flex: 1;-->
+<!--      min-width: 0;-->
+<!--    }-->
+
+<!--    .user-name {-->
+<!--      font-size: 1rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: var(&#45;&#45;spacing-xs);-->
+<!--      white-space: nowrap;-->
+<!--      overflow: hidden;-->
+<!--      text-overflow: ellipsis;-->
+<!--    }-->
+
+<!--    .story-meta {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: var(&#45;&#45;spacing-sm);-->
+<!--      font-size: 0.75rem;-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--    }-->
+
+<!--    .separator {-->
+<!--      color: var(&#45;&#45;text-light);-->
+<!--    }-->
+
+<!--    .story-status {-->
+<!--      flex-shrink: 0;-->
+<!--    }-->
+
+<!--    .status-badge {-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: var(&#45;&#45;spacing-xs);-->
+<!--      padding: var(&#45;&#45;spacing-xs) var(&#45;&#45;spacing-sm);-->
+<!--      font-size: 0.75rem;-->
+<!--      font-weight: 500;-->
+<!--      border-radius: var(&#45;&#45;radius-sm);-->
+<!--    }-->
+
+<!--    .status-badge.warning {-->
+<!--      background-color: rgba(245, 158, 11, 0.1);-->
+<!--      color: var(&#45;&#45;warning-color);-->
+<!--    }-->
+
+<!--    .status-badge.viewed {-->
+<!--      background-color: rgba(156, 163, 175, 0.1);-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--    }-->
+
+<!--    /* Story Image */-->
+<!--    .story-image-container {-->
+<!--      position: relative;-->
+<!--      overflow: hidden;-->
+<!--    }-->
+
+<!--    .story-link {-->
+<!--      display: block;-->
+<!--      text-decoration: none;-->
+<!--    }-->
+
+<!--    .story-image-wrapper {-->
+<!--      position: relative;-->
+<!--      width: 100%;-->
+<!--      height: 240px;-->
+<!--      overflow: hidden;-->
+<!--    }-->
+
+<!--    .story-image {-->
+<!--      width: 100%;-->
+<!--      height: 100%;-->
+<!--      object-fit: cover;-->
+<!--      transition: transform 0.3s ease;-->
+<!--    }-->
+
+<!--    .story-card:hover .story-image {-->
+<!--      transform: scale(1.05);-->
+<!--    }-->
+
+<!--    .story-overlay {-->
+<!--      position: absolute;-->
+<!--      top: var(&#45;&#45;spacing-md);-->
+<!--      left: var(&#45;&#45;spacing-md);-->
+<!--      background: rgba(0, 0, 0, 0.6);-->
+<!--      backdrop-filter: blur(10px);-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      padding: var(&#45;&#45;spacing-sm);-->
+<!--    }-->
+
+<!--    .story-emoji .emoji-icon {-->
+<!--      font-size: 1.5rem;-->
+<!--    }-->
+
+<!--    .play-overlay {-->
+<!--      display: none;-->
+<!--    }-->
+
+<!--    .play-button {-->
+<!--      display: none;-->
+<!--    }-->
+
+<!--    /* Story Content */-->
+<!--    .story-content {-->
+<!--      padding: 0 var(&#45;&#45;spacing-lg);-->
+<!--      margin-bottom: var(&#45;&#45;spacing-md);-->
+<!--    }-->
+
+<!--    .story-description {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 0.875rem;-->
+<!--      line-height: 1.5;-->
+<!--    }-->
+
+<!--    /* Story Footer */-->
+<!--    .story-footer {-->
+<!--      padding: var(&#45;&#45;spacing-lg);-->
+<!--      border-top: 1px solid rgba(0, 0, 0, 0.05);-->
+<!--      display: flex;-->
+<!--      justify-content: space-between;-->
+<!--      align-items: center;-->
+<!--      gap: var(&#45;&#45;spacing-md);-->
+<!--    }-->
+
+<!--    .story-stats {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: var(&#45;&#45;spacing-lg);-->
+<!--    }-->
+
+<!--    .stat-item {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: var(&#45;&#45;spacing-xs);-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--      font-size: 0.875rem;-->
+<!--    }-->
+
+<!--    .stat-item i {-->
+<!--      color: var(&#45;&#45;primary-color);-->
+<!--    }-->
+
+<!--    .recent-viewers {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--    }-->
+
+<!--    .viewers-avatars {-->
+<!--      display: flex;-->
+<!--      margin-left: var(&#45;&#45;spacing-sm);-->
+<!--    }-->
+
+<!--    .viewer-avatar-mini {-->
+<!--      width: 24px;-->
+<!--      height: 24px;-->
+<!--      border-radius: 50%;-->
+<!--      margin-left: -8px;-->
+<!--      border: 2px solid var(&#45;&#45;bg-secondary);-->
+<!--      overflow: hidden;-->
+<!--    }-->
+
+<!--    .viewer-avatar-mini:first-child {-->
+<!--      margin-left: 0;-->
+<!--    }-->
+
+<!--    .viewer-avatar-mini img,-->
+<!--    .viewer-placeholder {-->
+<!--      width: 100%;-->
+<!--      height: 100%;-->
+<!--      object-fit: cover;-->
+<!--    }-->
+
+<!--    .viewer-placeholder {-->
+<!--      background: var(&#45;&#45;text-light);-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--      font-size: 0.6rem;-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--    }-->
+
+<!--    .story-actions {-->
+<!--      display: flex;-->
+<!--      gap: var(&#45;&#45;spacing-sm);-->
+<!--    }-->
+
+<!--    .action-btn {-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: var(&#45;&#45;spacing-xs);-->
+<!--      padding: var(&#45;&#45;spacing-sm) var(&#45;&#45;spacing-md);-->
+<!--      font-size: 0.875rem;-->
+<!--      font-weight: 500;-->
+<!--      border-radius: var(&#45;&#45;radius-sm);-->
+<!--      text-decoration: none;-->
+<!--      transition: all 0.2s ease;-->
+<!--    }-->
+
+<!--    .action-btn.primary {-->
+<!--      background-color: var(&#45;&#45;primary-color);-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    .action-btn.primary:hover {-->
+<!--      background-color: var(&#45;&#45;primary-hover);-->
+<!--    }-->
+
+<!--    /* Pagination */-->
+<!--    .pagination-container {-->
+<!--      margin-top: var(&#45;&#45;spacing-2xl);-->
+<!--      display: flex;-->
+<!--      justify-content: center;-->
+<!--    }-->
+
+<!--    .pagination {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: var(&#45;&#45;spacing-lg);-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      padding: var(&#45;&#45;spacing-md) var(&#45;&#45;spacing-xl);-->
+<!--      border-radius: var(&#45;&#45;radius-lg);-->
+<!--      box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--    }-->
+
+<!--    .pagination-btn {-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: var(&#45;&#45;spacing-sm);-->
+<!--      padding: var(&#45;&#45;spacing-sm) var(&#45;&#45;spacing-md);-->
+<!--      color: var(&#45;&#45;primary-color);-->
+<!--      text-decoration: none;-->
+<!--      font-weight: 500;-->
+<!--      border-radius: var(&#45;&#45;radius-sm);-->
+<!--      transition: all 0.2s ease;-->
+<!--    }-->
+
+<!--    .pagination-btn:hover {-->
+<!--      background-color: rgba(59, 130, 246, 0.1);-->
+<!--    }-->
+
+<!--    .pagination-info {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 0.875rem;-->
+<!--      font-weight: 500;-->
+<!--    }-->
+
+<!--    /* Empty State */-->
+<!--    .empty-state {-->
+<!--      text-align: center;-->
+<!--      padding: var(&#45;&#45;spacing-2xl) var(&#45;&#45;spacing-md);-->
+<!--    }-->
+
+<!--    .empty-content {-->
+<!--      max-width: 480px;-->
+<!--      margin: 0 auto;-->
+<!--    }-->
+
+<!--    .empty-icon {-->
+<!--      width: 80px;-->
+<!--      height: 80px;-->
+<!--      margin: 0 auto var(&#45;&#45;spacing-xl);-->
+<!--      border-radius: 50%;-->
+<!--      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--    }-->
+
+<!--    .empty-icon i {-->
+<!--      font-size: 2rem;-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--    }-->
+
+<!--    .empty-title {-->
+<!--      font-size: 1.5rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: var(&#45;&#45;spacing-md);-->
+<!--    }-->
+
+<!--    .empty-description {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 1rem;-->
+<!--      line-height: 1.6;-->
+<!--      margin-bottom: var(&#45;&#45;spacing-xl);-->
+<!--    }-->
+
+<!--    .empty-actions {-->
+<!--      display: flex;-->
+<!--      gap: var(&#45;&#45;spacing-md);-->
+<!--      justify-content: center;-->
+<!--      flex-wrap: wrap;-->
+<!--    }-->
+
+<!--    /* Responsive Design */-->
+<!--    @media (max-width: 1024px) {-->
+<!--      .main-content {-->
+<!--        margin-left: 0;-->
+<!--        padding: var(&#45;&#45;spacing-lg);-->
+<!--      }-->
+
+<!--      .stories-grid {-->
+<!--        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));-->
+<!--        gap: var(&#45;&#45;spacing-lg);-->
+<!--      }-->
+
+<!--      .page-title {-->
+<!--        font-size: 2rem;-->
+<!--      }-->
+
+<!--      .header-content {-->
+<!--        flex-direction: column;-->
+<!--        align-items: stretch;-->
+<!--      }-->
+
+<!--      .header-actions {-->
+<!--        justify-content: flex-start;-->
+<!--      }-->
+<!--    }-->
+
+<!--    @media (max-width: 640px) {-->
+<!--      .main-content {-->
+<!--        padding: var(&#45;&#45;spacing-md);-->
+<!--      }-->
+
+<!--      .feed-content {-->
+<!--        padding: var(&#45;&#45;spacing-md);-->
+<!--      }-->
+
+<!--      .stories-grid {-->
+<!--        grid-template-columns: 1fr;-->
+<!--        gap: var(&#45;&#45;spacing-md);-->
+<!--      }-->
+
+<!--      .story-header {-->
+<!--        padding: var(&#45;&#45;spacing-md);-->
+<!--      }-->
+
+<!--      .story-footer {-->
+<!--        padding: var(&#45;&#45;spacing-md);-->
+<!--        flex-direction: column;-->
+<!--        align-items: stretch;-->
+<!--        gap: var(&#45;&#45;spacing-md);-->
+<!--      }-->
+
+<!--      .story-stats {-->
+<!--        justify-content: center;-->
+<!--      }-->
+
+<!--      .empty-actions {-->
+<!--        flex-direction: column;-->
+<!--        align-items: stretch;-->
+<!--      }-->
+
+<!--      .pagination {-->
+<!--        flex-direction: column;-->
+<!--        gap: var(&#45;&#45;spacing-md);-->
+<!--      }-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--&lt;!&ndash; Sidebar из фрагмента &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: complete-sidebar('stories')}"></th:block>-->
+
+<!--&lt;!&ndash; Основной контент &ndash;&gt;-->
+<!--<main class="main-content">-->
+<!--  <div class="container">-->
+<!--    &lt;!&ndash; Заголовок &ndash;&gt;-->
+<!--    <header class="page-header">-->
+<!--      <div class="header-content">-->
+<!--        <div class="header-text">-->
+<!--          <h1 class="page-title">-->
+<!--            <i class="fas fa-play-circle title-icon"></i>-->
+<!--            Лента историй-->
+<!--          </h1>-->
+<!--          <p class="page-subtitle">Истории от людей, на которых вы подписаны</p>-->
+<!--        </div>-->
+<!--        <div class="header-actions">-->
+<!--          <a href="/stories/create" class="btn btn-primary">-->
+<!--            <i class="fas fa-plus"></i>-->
+<!--            Создать историю-->
+<!--          </a>-->
+<!--          <a href="/stories" class="btn btn-secondary">-->
+<!--            <i class="fas fa-globe"></i>-->
+<!--            Все истории-->
+<!--          </a>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </header>-->
+
+<!--    &lt;!&ndash; Контент ленты &ndash;&gt;-->
+<!--    <div class="feed-content">-->
+<!--      &lt;!&ndash; Проверяем наличие историй &ndash;&gt;-->
+<!--      <div th:if="${feed != null and !feed.isEmpty}" class="stories-feed">-->
+<!--        &lt;!&ndash; Информация о пагинации &ndash;&gt;-->
+<!--        <div class="feed-info">-->
+<!--          <div class="feed-stats">-->
+<!--                            <span class="stats-item">-->
+<!--                                <i class="fas fa-eye"></i>-->
+<!--                                <span th:text="${feed.numberOfElements}">12</span> историй-->
+<!--                            </span>-->
+<!--            <span class="stats-item" th:if="${feed.totalElements != null}">-->
+<!--                                <i class="fas fa-users"></i>-->
+<!--                                Всего: <span th:text="${feed.totalElements}">45</span>-->
+<!--                            </span>-->
+<!--          </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Сетка историй &ndash;&gt;-->
+<!--        <div class="stories-grid">-->
+<!--          <div th:each="story : ${feed.stories}" class="story-card">-->
+<!--            &lt;!&ndash; Заголовок истории &ndash;&gt;-->
+<!--            <div class="story-header">-->
+<!--              <div class="user-info">-->
+<!--                <a th:href="@{'/profile/' + ${story.userId}}" class="user-link">-->
+<!--                  <div class="user-avatar-wrapper">-->
+<!--                    <img th:if="${story.userImageUrl}"-->
+<!--                         th:src="${story.userImageUrl}"-->
+<!--                         th:alt="${story.userFullName}"-->
+<!--                         class="user-avatar">-->
+<!--                    <div th:unless="${story.userImageUrl}" class="user-avatar-placeholder">-->
+<!--                      <i class="fas fa-user"></i>-->
+<!--                    </div>-->
+<!--                    &lt;!&ndash; Индикатор активности &ndash;&gt;-->
+<!--                    <div class="story-indicator" th:classappend="${story.isViewedByCurrentUser} ? 'viewed' : 'new'"></div>-->
+<!--                  </div>-->
+<!--                  <div class="user-details">-->
+<!--                    <h3 class="user-name" th:text="${story.userFullName}">Имя пользователя</h3>-->
+<!--                    <div class="story-meta">-->
+<!--                      <span class="time-info" th:text="${story.timeAgo}">2 часа назад</span>-->
+<!--                      <span class="separator">•</span>-->
+<!--                      <span class="expires-info" th:text="${story.expiresIn}">истекает через 5 часов</span>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                </a>-->
+<!--              </div>-->
+
+<!--              &lt;!&ndash; Статус истории &ndash;&gt;-->
+<!--              <div class="story-status">-->
+<!--                                    <span th:if="${story.isExpiringSoon}" class="status-badge warning">-->
+<!--                                        <i class="fas fa-clock"></i>-->
+<!--                                        Скоро истечет-->
+<!--                                    </span>-->
+<!--                <span th:if="${story.isViewedByCurrentUser}" class="status-badge viewed">-->
+<!--                                        <i class="fas fa-eye"></i>-->
+<!--                                        Просмотрено-->
+<!--                                    </span>-->
+<!--              </div>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Изображение истории &ndash;&gt;-->
+<!--            <div class="story-image-container">-->
+<!--              <a th:href="@{'/stories/' + ${story.id}}" class="story-link">-->
+<!--                <div class="story-image-wrapper">-->
+<!--                  <img th:src="@{'/stories/image/' + ${story.imageId}}"-->
+<!--                       th:alt="'История от ' + ${story.userFullName}"-->
+<!--                       class="story-image"-->
+<!--                       loading="lazy">-->
+
+<!--                  &lt;!&ndash; Overlay с эмодзи &ndash;&gt;-->
+<!--                  <div th:if="${story.emoji}" class="story-overlay">-->
+<!--                    <div class="story-emoji">-->
+<!--                      <span class="emoji-icon" th:text="${story.emoji.emoji}">❤️</span>-->
+<!--                    </div>-->
+<!--                  </div>-->
+
+<!--                  &lt;!&ndash; Play button overlay &ndash;&gt;-->
+<!--                  <div class="play-overlay">-->
+<!--                    <div class="play-button">-->
+<!--                      <i class="fas fa-play"></i>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--              </a>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Контент истории &ndash;&gt;-->
+<!--            <div class="story-content" th:if="${story.description}">-->
+<!--              <p class="story-description" th:text="${story.description}">Описание истории</p>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Статистика &ndash;&gt;-->
+<!--            <div class="story-footer">-->
+<!--              <div class="story-stats">-->
+<!--                <div class="stat-item">-->
+<!--                  <i class="fas fa-eye"></i>-->
+<!--                  <span th:text="${story.viewsCount}">0</span>-->
+<!--                </div>-->
+<!--                <div th:if="${story.recentViews != null and !story.recentViews.empty}" class="recent-viewers">-->
+<!--                  <div class="viewers-avatars">-->
+<!--                    <div th:each="view, iterStat : ${story.recentViews}"-->
+<!--                         th:if="${iterStat.count <= 3}"-->
+<!--                         class="viewer-avatar-mini">-->
+<!--                      <img th:if="${view.viewerImageUrl}"-->
+<!--                           th:src="${view.viewerImageUrl}"-->
+<!--                           th:alt="${view.viewerFullName}"-->
+<!--                           th:title="${view.viewerFullName}">-->
+<!--                      <div th:unless="${view.viewerImageUrl}"-->
+<!--                           class="viewer-placeholder"-->
+<!--                           th:title="${view.viewerFullName}">-->
+<!--                        <i class="fas fa-user"></i>-->
+<!--                      </div>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--              </div>-->
+
+<!--              <div class="story-actions">-->
+<!--                <a th:href="@{'/stories/' + ${story.id}}" class="action-btn primary">-->
+<!--                  <i class="fas fa-play"></i>-->
+<!--                  Смотреть-->
+<!--                </a>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Пагинация &ndash;&gt;-->
+<!--        <div th:if="${feed.hasNext or feed.hasPrevious}" class="pagination-container">-->
+<!--          <div class="pagination">-->
+<!--            <a th:if="${feed.hasPrevious}"-->
+<!--               th:href="@{'/stories/feed'(page=${feed.previousPage})}"-->
+<!--               class="pagination-btn prev">-->
+<!--              <i class="fas fa-chevron-left"></i>-->
+<!--              Предыдущая-->
+<!--            </a>-->
+
+<!--            <span class="pagination-info">-->
+<!--                                Страница <span th:text="${feed.currentPage + 1}">1</span>-->
+<!--                                <span th:if="${feed.totalPages != null}">-->
+<!--                                    из <span th:text="${feed.totalPages}">1</span>-->
+<!--                                </span>-->
+<!--                            </span>-->
+
+<!--            <a th:if="${feed.hasNext}"-->
+<!--               th:href="@{'/stories/feed'(page=${feed.nextPage})}"-->
+<!--               class="pagination-btn next">-->
+<!--              Следующая-->
+<!--              <i class="fas fa-chevron-right"></i>-->
+<!--            </a>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Пустое состояние &ndash;&gt;-->
+<!--      <div th:if="${feed == null or feed.isEmpty}" class="empty-state">-->
+<!--        <div class="empty-content">-->
+<!--          <div class="empty-icon">-->
+<!--            <i class="fas fa-users-slash"></i>-->
+<!--          </div>-->
+<!--          <h3 class="empty-title">Нет историй в ленте</h3>-->
+<!--          <p class="empty-description">-->
+<!--            Истории появятся здесь, когда люди, на которых вы подписаны, начнут их создавать.-->
+<!--          </p>-->
+<!--          <div class="empty-actions">-->
+<!--            <a href="/recommendations" class="btn btn-primary">-->
+<!--              <i class="fas fa-user-plus"></i>-->
+<!--              Найти людей-->
+<!--            </a>-->
+<!--            <a href="/stories" class="btn btn-secondary">-->
+<!--              <i class="fas fa-globe"></i>-->
+<!--              Посмотреть все истории-->
+<!--            </a>-->
+<!--            <a href="/stories/create" class="btn btn-accent">-->
+<!--              <i class="fas fa-plus"></i>-->
+<!--              Создать свою историю-->
+<!--            </a>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</main>-->
+
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -406,10 +1284,22 @@
       margin-bottom: var(--spacing-md);
     }
 
+    .story-description-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: color 0.2s ease;
+    }
+
+    .story-description-link:hover {
+      color: var(--primary-color);
+    }
+
     .story-description {
       color: var(--text-secondary);
       font-size: 0.875rem;
       line-height: 1.5;
+      transition: color 0.2s ease;
     }
 
     /* Story Footer */
@@ -417,7 +1307,7 @@
       padding: var(--spacing-lg);
       border-top: 1px solid rgba(0, 0, 0, 0.05);
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
       gap: var(--spacing-md);
     }
@@ -426,6 +1316,7 @@
       display: flex;
       align-items: center;
       gap: var(--spacing-lg);
+      width: 100%;
     }
 
     .stat-item {
@@ -434,15 +1325,19 @@
       gap: var(--spacing-xs);
       color: var(--text-muted);
       font-size: 0.875rem;
+      flex-shrink: 0;
     }
 
     .stat-item i {
       color: var(--primary-color);
+      flex-shrink: 0;
     }
 
     .recent-viewers {
       display: flex;
       align-items: center;
+      flex: 1;
+      justify-content: flex-end;
     }
 
     .viewers-avatars {
@@ -777,7 +1672,9 @@
 
             <!-- Контент истории -->
             <div class="story-content" th:if="${story.description}">
-              <p class="story-description" th:text="${story.description}">Описание истории</p>
+              <a th:href="@{'/stories/' + ${story.id}}" class="story-description-link">
+                <p class="story-description" th:text="${story.description}">Описание истории</p>
+              </a>
             </div>
 
             <!-- Статистика -->
@@ -804,13 +1701,6 @@
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div class="story-actions">
-                <a th:href="@{'/stories/' + ${story.id}}" class="action-btn primary">
-                  <i class="fas fa-play"></i>
-                  Смотреть
-                </a>
               </div>
             </div>
           </div>

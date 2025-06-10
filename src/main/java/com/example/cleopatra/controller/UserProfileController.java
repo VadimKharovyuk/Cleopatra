@@ -128,6 +128,7 @@ public class UserProfileController {
                 model.addAttribute("isOwnProfile", false);
             }
 
+
             return "profile/profile";
 
         } catch (Exception e) {
