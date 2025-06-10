@@ -158,6 +158,7 @@ public class StoryController {
                         storyId, totalViewsCount, views.size());
             }
 
+
             model.addAttribute("story", story);
             model.addAttribute("views", views);
             model.addAttribute("totalViewsCount", totalViewsCount);

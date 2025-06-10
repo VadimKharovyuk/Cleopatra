@@ -52,6 +52,7 @@ public class StoryViewController {
                 return "error";
             }
 
+
             // Получаем просмотры
             List<StoryViewDTO> views = storyViewService.getStoryViews(storyId);
             Long totalViews = storyViewService.getViewsCount(storyId);

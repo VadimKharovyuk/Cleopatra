@@ -706,8 +706,9 @@
                 </div>
             </div>
 
-            <!-- Боковая панель -->
-            <div class="story-sidebar">
+
+
+            <div th:if="${story.isOwner}" class="story-sidebar">
                 <!-- Просмотры -->
                 <div class="sidebar-section">
                     <h3 class="sidebar-title">
@@ -727,19 +728,21 @@
                                 </div>
                                 <div class="viewer-info">
                                     <div class="viewer-name" th:text="${view.viewerFullName}">Имя зрителя</div>
-                                    <div class="view-time" th:text="${view.viewedAt}">время просмотра</div>
+                                    <div class="view-time"
+                                         th:text="${#temporals.format(view.viewedAt, 'dd.MM.yyyy HH:mm')}">время
+                                        просмотра
+                                    </div>
                                 </div>
-
                             </a>
                         </div>
-                        <!-- Кнопка "Посмотреть всех" - показывается только автору и если просмотров больше 5 -->
-                        <a th:if="${story.isOwner and #lists.size(views) > 1}"
+
+                        <!-- Кнопка "Посмотреть всех" - показывается если просмотров больше отображаемого лимита -->
+                        <a th:if="${#lists.size(views) > 1}"
                            th:href="@{'/views/' + ${story.id} + '/views'}"
                            class="view-all-btn">
                             <i class="fas fa-list"></i>
                             Посмотреть всех
                         </a>
-
                     </div>
 
                     <div th:if="${#lists.isEmpty(views)}" class="empty-views">
@@ -749,7 +752,7 @@
                 </div>
 
                 <!-- Действия владельца -->
-                <div th:if="${story.isOwner}" class="sidebar-section">
+                <div class="sidebar-section">
                     <h3 class="sidebar-title">
                         <i class="fas fa-cog sidebar-icon"></i>
                         Управление
@@ -767,31 +770,74 @@
                     </div>
                 </div>
 
-                <!-- Информация об истории -->
+                <!-- Статистика истории -->
                 <div class="sidebar-section">
                     <h3 class="sidebar-title">
-                        <i class="fas fa-info-circle sidebar-icon"></i>
-                        Информация
+                        <i class="fas fa-chart-bar sidebar-icon"></i>
+                        Статистика
                     </h3>
 
-                    <div class="story-info">
-<!--                        <div class="stat-item" style="margin-bottom: var(&#45;&#45;spacing-sm);">-->
-<!--                            <i class="fas fa-calendar"></i>-->
-<!--                            <span th:text="${story.createdAt}">Дата создания</span>-->
-<!--                        </div>-->
-<!--                        <div class="stat-item" style="margin-bottom: var(&#45;&#45;spacing-sm);">-->
-<!--                            <i class="fas fa-clock"></i>-->
-<!--                            <span th:text="${story.expiresAt}">Истекает</span>-->
-<!--                        </div>-->
-<!--                        <div class="stat-item">-->
-<!--                            <i class="fas fa-image"></i>-->
-<!--                            <span>Изображение</span>-->
-<!--                        </div>-->
+                    <div class="story-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-eye"></i>
+                            <span class="stat-label">Всего просмотров:</span>
+                            <span class="stat-value" th:text="${totalViewsCount ?: #lists.size(views)}">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-users"></i>
+                            <span class="stat-label">Уникальных зрителей:</span>
+                            <span class="stat-value" th:text="${#lists.size(views)}">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-clock"></i>
+                            <span class="stat-label">Создана:</span>
+                            <span class="stat-value" th:text="${story.timeAgo}">недавно</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span class="stat-label">Истекает:</span>
+                            <span class="stat-value" th:text="${story.expiresIn}">через время</span>
+                        </div>
                     </div>
                 </div>
+
             </div>
+            <style>
+                .story-stats {
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--spacing-md);
+                }
+
+                .stat-item {
+                    display: flex;
+                    align-items: center;
+                    gap: var(--spacing-sm);
+                    font-size: 0.875rem;
+                }
+
+                .stat-item i {
+                    color: var(--primary-color);
+                    width: 16px;
+                    text-align: center;
+                }
+
+                .stat-label {
+                    color: var(--text-secondary);
+                    flex: 1;
+                }
+
+                .stat-value {
+                    font-weight: 600;
+                    color: var(--text-primary);
+                }
+            </style>
+
+
+
         </div>
     </div>
+
 </main>
 
 <!-- Модальное окно для изменения эмодзи -->
