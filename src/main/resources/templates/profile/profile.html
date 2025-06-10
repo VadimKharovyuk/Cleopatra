@@ -1151,14 +1151,16 @@
         </div>
 
 
+
+
         <!-- Content Area - заменить существующий блок -->
-        <div class="content-area">
+        <div class="content-area" id="profileContentArea">
 
             <!-- Если есть посты -->
-            <div th:if="${posts != null and !posts.posts.empty}">
+            <div th:if="${posts != null and !posts.posts.empty}" id="postsSection">
 
                 <!-- Список постов -->
-                <div class="posts-container">
+                <div class="posts-container" id="postsContainer">
                     <!-- Обновленная статья поста с навигацией -->
                     <article class="post-card" th:each="post : ${posts.posts}">
 
@@ -1190,8 +1192,8 @@
                                     <span class="author-handle" th:text="'@' + ${post.author.firstName?.toLowerCase()}">@автор</span>
                                     <!-- Дата теперь ссылка на пост -->
                                     <a th:href="@{/posts/{id}(id=${post.id})}" class="post-date-link">
-                                <span class="post-date"
-                                      th:text="${#temporals.format(post.createdAt, 'dd MMM', new java.util.Locale('ru'))}">1 янв</span>
+                        <span class="post-date"
+                              th:text="${#temporals.format(post.createdAt, 'dd MMM', new java.util.Locale('ru'))}">1 янв</span>
                                     </a>
                                 </div>
                             </div>
@@ -1230,8 +1232,8 @@
                             <div class="post-text" th:if="${post.content != null and !#strings.isEmpty(post.content)}">
                                 <p th:text="${post.content}">Текст поста...</p>
                                 <span th:if="${post.isLongContent}" class="read-more-link">
-                            <a th:href="@{/posts/{id}(id=${post.id})}">Читать далее</a>
-                        </span>
+                    <a th:href="@{/posts/{id}(id=${post.id})}">Читать далее</a>
+                </span>
                             </div>
 
                             <!-- Изображение поста -->
@@ -1271,17 +1273,17 @@
 
                             <!-- Текст с информацией о лайках -->
                             <div class="likes-text">
-                        <span th:if="${post.likesCount == 1}">
-                            Нравится <strong th:text="${post.recentLikes[0].fullName}">пользователю</strong>
-                        </span>
+                <span th:if="${post.likesCount == 1}">
+                    Нравится <strong th:text="${post.recentLikes[0].fullName}">пользователю</strong>
+                </span>
                                 <span th:if="${post.likesCount == 2}">
-                            Нравится <strong th:text="${post.recentLikes[0].fullName}">пользователю 1</strong>
-                            и <strong th:text="${post.recentLikes[1].fullName}">пользователю 2</strong>
-                        </span>
+                    Нравится <strong th:text="${post.recentLikes[0].fullName}">пользователю 1</strong>
+                    и <strong th:text="${post.recentLikes[1].fullName}">пользователю 2</strong>
+                </span>
                                 <span th:if="${post.likesCount > 2}">
-                            Нравится <strong th:text="${post.recentLikes[0].fullName}">пользователю 1</strong>
-                            и еще <strong th:text="${post.likesCount - 1}">N</strong> пользователям
-                        </span>
+                    Нравится <strong th:text="${post.recentLikes[0].fullName}">пользователю 1</strong>
+                    и еще <strong th:text="${post.likesCount - 1}">N</strong> пользователям
+                </span>
                             </div>
                         </div>
 
@@ -1293,7 +1295,6 @@
                                     onclick="openComments(event, this)"
                                     th:data-post-id="${post.id}">
                                 <i class="far fa-comment"></i>
-
                                 <span th:text="${post.commentsCount}">0</span>
                             </button>
 
@@ -1312,52 +1313,23 @@
                             </button>
 
                             <div class="action-stats">
-                           <span class="views-count">
-                            <i class="far fa-eye"></i>
-                            <span th:text="${post.viewsCount}">0</span>
-                            </span>
+               <span class="views-count">
+                <i class="far fa-eye"></i>
+                <span th:text="${post.viewsCount}">0</span>
+                </span>
                             </div>
 
                         </div>
 
-
                     </article>
                 </div>
 
-                <!-- Пагинация -->
-                <div class="pagination-container" th:if="${posts.hasNext or posts.hasPrevious}">
-                    <button th:if="${posts.hasPrevious}"
-                            th:onclick="'loadPage(' + ${posts.previousPage} + ')'"
-                            class="btn-luxury btn-secondary-luxury">
-                        <i class="fas fa-chevron-left"></i>
-                        Предыдущая
-                    </button>
+                <!-- Индикаторы состояния загрузки (будут добавлены динамически) -->
 
-                    <span class="page-info">
-                Страница <span th:text="${posts.currentPage + 1}">1</span>
-            </span>
-
-                    <button th:if="${posts.hasNext}"
-                            th:onclick="'loadPage(' + ${posts.nextPage} + ')'"
-                            class="btn-luxury btn-primary-luxury">
-                        Следующая
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-
-                <!-- Кнопка "Загрузить еще" для бесконечного скролла -->
-                <div class="load-more-container" th:if="${posts.hasNext}">
-                    <button id="loadMoreBtn"
-                            onclick="loadMorePosts()"
-                            class="btn-luxury btn-secondary-luxury load-more-btn">
-                        <i class="fas fa-plus"></i>
-                        Загрузить еще посты
-                    </button>
-                </div>
             </div>
 
             <!-- Если постов нет -->
-            <div th:unless="${posts != null and !posts.posts.empty}" class="empty-state">
+            <div th:unless="${posts != null and !posts.posts.empty}" class="empty-state" id="emptyState">
                 <div class="empty-icon">
                     <i class="fas fa-feather-alt"></i>
                 </div>
@@ -1376,6 +1348,730 @@
                 </a>
             </div>
         </div>
+
+        <!-- Скрытые данные для JavaScript -->
+        <script th:inline="javascript">
+            // Данные профиля для JavaScript
+            window.profileData = {
+                userId: /*[[${user.id}]]*/ 0,
+                currentUserId: /*[[${currentUserId}]]*/ 0,
+                isOwnProfile: /*[[${isOwnProfile}]]*/ false,
+                initialPostsCount: /*[[${posts?.posts?.size() ?: 0}]]*/ 0,
+                hasMorePosts: /*[[${posts?.hasNext ?: false}]]*/ false
+            };
+        </script>
+
+        <!-- CSS стили для бесконечного скролла -->
+        <style>
+            /* Стили для индикаторов загрузки в профиле */
+            .profile-loading-indicator {
+                display: none;
+                padding: 30px;
+                text-align: center;
+                border-top: 1px solid var(--border-secondary);
+                margin-top: 20px;
+            }
+
+            .profile-loading-spinner {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                color: #666;
+            }
+
+            .profile-loading-spinner i {
+                font-size: 28px;
+                color: var(--accent-primary);
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            .profile-loading-spinner span {
+                font-size: 16px;
+                font-weight: 500;
+            }
+
+            /* Стили для сообщения об окончании постов */
+            .profile-no-more-posts {
+                display: none;
+                padding: 30px;
+                text-align: center;
+                border-top: 1px solid var(--border-secondary);
+                margin-top: 20px;
+                color: #666;
+            }
+
+            .profile-no-more-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .profile-no-more-content i {
+                font-size: 24px;
+                color: #4caf50;
+            }
+
+            .profile-no-more-content span {
+                font-size: 16px;
+                font-weight: 500;
+            }
+
+            /* Стили для сообщения об ошибке */
+            .profile-error-message {
+                display: none;
+                padding: 25px;
+                text-align: center;
+                border-top: 1px solid var(--border-secondary);
+                margin-top: 20px;
+                background-color: #ffebee;
+                border-radius: 12px;
+                margin-left: 20px;
+                margin-right: 20px;
+            }
+
+            .profile-error-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                color: #d32f2f;
+            }
+
+            .profile-error-content i {
+                font-size: 24px;
+            }
+
+            .profile-retry-btn {
+                background-color: var(--accent-primary);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                margin-top: 10px;
+                transition: all 0.2s;
+            }
+
+            .profile-retry-btn:hover {
+                background-color: var(--accent-secondary);
+                transform: translateY(-1px);
+            }
+
+            /* Анимация появления новых постов */
+            .post-card {
+                animation: slideInProfile 0.4s ease-out;
+            }
+
+            @keyframes slideInProfile {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Адаптивность */
+            @media (max-width: 768px) {
+                .profile-loading-indicator,
+                .profile-no-more-posts,
+                .profile-error-message {
+                    margin: 15px;
+                    padding: 20px;
+                }
+
+                .profile-loading-spinner,
+                .profile-no-more-content,
+                .profile-error-content {
+                    gap: 10px;
+                }
+
+                .profile-loading-spinner i,
+                .profile-no-more-content i,
+                .profile-error-content i {
+                    font-size: 20px;
+                }
+
+                .profile-loading-spinner span,
+                .profile-no-more-content span {
+                    font-size: 14px;
+                }
+            }
+        </style>
+
+        <!-- JavaScript для бесконечного скролла профиля -->
+        <script>
+            // ============================================
+            // ПЕРЕМЕННЫЕ ДЛЯ БЕСКОНЕЧНОЙ ЗАГРУЗКИ ПРОФИЛЯ
+            // ============================================
+            let profileCurrentPage = 1; // Начинаем с 1, так как страница 0 уже загружена
+            let profileIsLoading = false;
+            let profileHasMorePosts = window.profileData?.hasMorePosts || false;
+            const profilePostsPerPage = 6;
+            const profileUserId = window.profileData?.userId || 0;
+
+            // ============================================
+            // ФУНКЦИИ ДЛЯ БЕСКОНЕЧНОЙ ЗАГРУЗКИ ПРОФИЛЯ
+            // ============================================
+
+            // Вспомогательная функция для безопасного получения данных пользователя
+            function getSafeUserData(user) {
+                if (!user) {
+                    return {
+                        firstName: 'Пользователь',
+                        lastName: '',
+                        fullName: 'Пользователь',
+                        imageUrl: null,
+                        id: '#'
+                    };
+                }
+
+                const firstName = user.firstName || 'Пользователь';
+                const lastName = user.lastName || '';
+                const fullName = user.fullName || `${firstName}${lastName ? ' ' + lastName : ''}`;
+
+                return {
+                    firstName,
+                    lastName,
+                    fullName,
+                    imageUrl: user.imageUrl || null,
+                    id: user.id || '#'
+                };
+            }
+
+            // Функция для создания HTML поста в профиле
+            function createProfilePostHTML(post) {
+                // Безопасное получение данных поста
+                if (!post) {
+                    console.error('Пост не определен');
+                    return '';
+                }
+
+                // Безопасное получение данных автора
+                const author = getSafeUserData(post.author);
+                const authorInitials = author.firstName.substring(0, 1) +
+                    (author.lastName ? author.lastName.substring(0, 1) : '');
+
+                let postDate = 'Недавно';
+                try {
+                    postDate = new Date(post.createdAt).toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'short'
+                    });
+                } catch (e) {
+                    console.warn('Ошибка форматирования даты:', e);
+                }
+
+                return `
+            <article class="post-card">
+                <div class="post-header">
+                    <a href="/profile/${author.id}" class="author-avatar-link">
+                        <div class="author-avatar">
+                            ${author.imageUrl ?
+                    `<img src="${author.imageUrl}" alt="${author.fullName}" class="avatar-img">` :
+                    `<div class="default-avatar-small"><span>${authorInitials}</span></div>`
+                }
+                        </div>
+                    </a>
+
+                    <div class="author-info">
+                        <div class="author-main">
+                            <a href="/profile/${author.id}" class="author-name">
+                                <span>${author.firstName}</span>
+                                ${author.lastName ? `<span> ${author.lastName}</span>` : ''}
+                            </a>
+                            <span class="author-handle">@${author.firstName.toLowerCase()}</span>
+                            <a href="/posts/${post.id}" class="post-date-link">
+                                <span class="post-date">${postDate}</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="post-menu">
+                        <button class="post-menu-btn" onclick="togglePostMenu(this)">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                        <div class="post-menu-dropdown">
+                            <a href="/posts/${post.id}" class="menu-item">
+                                <i class="fas fa-link"></i>
+                                Перейти к посту
+                            </a>
+                            <a href="#" class="menu-item" onclick="copyPostLink(this)" data-post-id="${post.id}">
+                                <i class="fas fa-copy"></i>
+                                Копировать ссылку
+                            </a>
+                            ${window.profileData.isOwnProfile ? `
+                                <a href="#" class="menu-item">
+                                    <i class="fas fa-edit"></i>
+                                    Редактировать
+                                </a>
+                                <a href="#" class="menu-item danger" onclick="deletePost(event, this)" data-post-id="${post.id}">
+                                    <i class="fas fa-trash"></i>
+                                    Удалить
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="post-content" onclick="navigateToPost(event, this)" data-post-id="${post.id || ''}">
+                    ${post.content ? `
+                        <div class="post-text">
+                            <p>${post.content}</p>
+                            ${post.isLongContent ? `<span class="read-more-link"><a href="/posts/${post.id}">Читать далее</a></span>` : ''}
+                        </div>
+                    ` : ''}
+
+                    ${post.hasImage && post.imageUrl ? `
+                        <div class="post-media">
+                            <div class="media-container">
+                                <img src="${post.imageUrl}" alt="Изображение поста" class="post-image">
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+
+                ${post.recentLikes && Array.isArray(post.recentLikes) && post.recentLikes.length > 0 && post.likesCount > 0 ? `
+                    <div class="post-likes-info">
+                        <div class="likes-avatars">
+                            ${post.recentLikes.slice(0, 3).map(likeUser => {
+                    const user = getSafeUserData(likeUser);
+                    const userInitial = user.firstName.substring(0, 1);
+
+                    return `
+                                    <div class="like-avatar">
+                                        ${user.imageUrl ?
+                        `<img src="${user.imageUrl}" alt="${user.fullName}" title="${user.fullName}" class="like-avatar-img">` :
+                        `<div class="like-avatar-default" title="${user.fullName}"><span>${userInitial}</span></div>`
+                    }
+                                    </div>
+                                `;
+                }).join('')}
+                            ${post.likesCount > 3 ? `<div class="like-more"><span>+${post.likesCount - 3}</span></div>` : ''}
+                        </div>
+                        <div class="likes-text">
+                            ${(() => {
+                    const firstUser = getSafeUserData(post.recentLikes[0]);
+                    const secondUser = post.recentLikes[1] ? getSafeUserData(post.recentLikes[1]) : null;
+
+                    if (post.likesCount === 1) {
+                        return `<span>Нравится <strong>${firstUser.fullName}</strong></span>`;
+                    } else if (post.likesCount === 2) {
+                        return `<span>Нравится <strong>${firstUser.fullName}</strong> и <strong>${secondUser.fullName}</strong></span>`;
+                    } else {
+                        return `<span>Нравится <strong>${firstUser.fullName}</strong> и еще <strong>${post.likesCount - 1}</strong> пользователям</span>`;
+                    }
+                })()}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="post-actions">
+                    <button class="action-btn comment-btn" onclick="openComments(event, this)" data-post-id="${post.id || ''}">
+                        <i class="far fa-comment"></i>
+                        <span>${post.commentsCount || 0}</span>
+                    </button>
+
+                    <button class="action-btn like-btn ${post.isLikedByCurrentUser ? 'liked' : ''}"
+                            onclick="toggleLike(this)" data-post-id="${post.id || ''}">
+                        <i class="${post.isLikedByCurrentUser ? 'fas fa-heart' : 'far fa-heart'}"></i>
+                        <span>${post.likesCount || 0}</span>
+                    </button>
+
+                    <button class="action-btn share-btn" onclick="sharePost(this)" data-post-id="${post.id || ''}">
+                        <i class="fas fa-share"></i>
+                    </button>
+
+                    <div class="action-stats">
+                        <span class="views-count">
+                            <i class="far fa-eye"></i>
+                            <span>${post.viewsCount || 0}</span>
+                        </span>
+                    </div>
+                </div>
+            </article>
+        `;
+            }
+
+            // Функция загрузки постов профиля
+            async function loadMoreProfilePosts() {
+                if (profileIsLoading || !profileHasMorePosts || !profileUserId) {
+                    return;
+                }
+
+                profileIsLoading = true;
+                showProfileLoadingIndicator();
+
+                console.log(`🔄 Загружаем посты профиля ${profileUserId}, страница ${profileCurrentPage}`);
+
+                try {
+                    const url = `/profile/${profileUserId}/posts/api?page=${profileCurrentPage}&size=${profilePostsPerPage}`;
+                    console.log('📡 Отправляем запрос:', url);
+
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    console.log('📥 Получен ответ:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        ok: response.ok
+                    });
+
+                    if (!response.ok) {
+                        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+
+                        try {
+                            const errorData = await response.json();
+                            console.error('💥 Детали ошибки сервера:', errorData);
+
+                            if (errorData.message) {
+                                errorMessage = errorData.message;
+                            } else if (errorData.error) {
+                                errorMessage = errorData.error;
+                            }
+                        } catch (e) {
+                            console.warn('Не удалось разобрать JSON ошибки');
+                        }
+
+                        if (response.status === 401) {
+                            showNotification('Необходимо войти в систему', 'error');
+                            setTimeout(() => {
+                                window.location.href = '/login';
+                            }, 2000);
+                            return;
+                        }
+
+                        if (response.status === 403) {
+                            showNotification('Доступ к профилю ограничен', 'error');
+                            return;
+                        }
+
+                        throw new Error(errorMessage);
+                    }
+
+                    const data = await response.json();
+                    console.log('📊 Получены данные профиля:', {
+                        postsCount: data.posts ? data.posts.length : 0,
+                        hasData: !!data,
+                        hasNext: data.hasNext
+                    });
+
+                    if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
+                        console.log('✅ Добавляем посты в профиль');
+                        // Фильтруем посты, чтобы убрать невалидные
+                        const validPosts = data.posts.filter(post => {
+                            if (!post) {
+                                console.warn('Найден пустой пост, пропускаем');
+                                return false;
+                            }
+                            if (!post.id) {
+                                console.warn('Пост без ID, пропускаем:', post);
+                                return false;
+                            }
+                            if (!post.author) {
+                                console.warn('Пост без автора, пропускаем:', post);
+                                return false;
+                            }
+                            return true;
+                        });
+
+                        if (validPosts.length > 0) {
+                            appendPostsToProfile(validPosts);
+                            profileCurrentPage++;
+
+                            // Проверяем, есть ли еще посты
+                            profileHasMorePosts = data.hasNext || false;
+                            console.log('📄 Следующая страница:', profileCurrentPage, 'Есть еще посты:', profileHasMorePosts);
+                        } else {
+                            console.log('📭 Все полученные посты невалидны');
+                            profileHasMorePosts = false;
+                            showProfileNoMorePostsMessage();
+                        }
+                    } else {
+                        console.log('📭 Больше постов в профиле нет');
+                        profileHasMorePosts = false;
+                        showProfileNoMorePostsMessage();
+                    }
+
+                } catch (error) {
+                    console.error('💥 Ошибка при загрузке постов профиля:', error);
+
+                    let userMessage = 'Ошибка загрузки постов';
+
+                    if (error.message.includes('Failed to fetch')) {
+                        userMessage = 'Проблема с подключением к серверу';
+                    } else if (error.message.includes('401')) {
+                        userMessage = 'Необходимо войти в систему';
+                    } else if (error.message.includes('403')) {
+                        userMessage = 'Доступ к профилю ограничен';
+                    } else if (error.message.includes('500')) {
+                        userMessage = 'Внутренняя ошибка сервера';
+                    } else if (error.message) {
+                        userMessage = error.message;
+                    }
+
+                    showProfileErrorMessage(userMessage);
+                } finally {
+                    profileIsLoading = false;
+                    hideProfileLoadingIndicator();
+                    console.log('🏁 Загрузка постов профиля завершена');
+                }
+            }
+
+            // Функция добавления постов в профиль
+            function appendPostsToProfile(posts) {
+                if (!posts || !Array.isArray(posts)) {
+                    console.warn('Невалидный массив постов:', posts);
+                    return;
+                }
+
+                const contentArea = document.getElementById('profileContentArea');
+                if (!contentArea) {
+                    console.error('Контейнер профиля не найден');
+                    return;
+                }
+
+                let postsContainer = document.getElementById('postsContainer');
+
+                // Если контейнер не существует, создаем его
+                if (!postsContainer) {
+                    const postsSection = document.createElement('div');
+                    postsSection.id = 'postsSection';
+
+                    postsContainer = document.createElement('div');
+                    postsContainer.className = 'posts-container';
+                    postsContainer.id = 'postsContainer';
+
+                    postsSection.appendChild(postsContainer);
+
+                    // Скрываем empty state если он есть
+                    const emptyState = document.getElementById('emptyState');
+                    if (emptyState) {
+                        emptyState.style.display = 'none';
+                    }
+
+                    contentArea.appendChild(postsSection);
+                }
+
+                posts.forEach((post, index) => {
+                    try {
+                        if (!post || !post.id) {
+                            console.warn(`Пост ${index} невалиден:`, post);
+                            return;
+                        }
+
+                        const postHTML = createProfilePostHTML(post);
+                        if (!postHTML) {
+                            console.warn(`Не удалось создать HTML для поста ${post.id}`);
+                            return;
+                        }
+
+                        const postElement = document.createElement('article');
+                        postElement.className = 'post-card';
+                        postElement.innerHTML = postHTML;
+                        postsContainer.appendChild(postElement);
+
+                    } catch (error) {
+                        console.error(`Ошибка при добавлении поста ${index}:`, error, post);
+                    }
+                });
+            }
+
+            // Функция показа индикатора загрузки профиля
+            function showProfileLoadingIndicator() {
+                let loadingIndicator = document.getElementById('profile-loading-indicator');
+
+                if (!loadingIndicator) {
+                    loadingIndicator = document.createElement('div');
+                    loadingIndicator.id = 'profile-loading-indicator';
+                    loadingIndicator.className = 'profile-loading-indicator';
+                    loadingIndicator.innerHTML = `
+                <div class="profile-loading-spinner">
+                    <i class="fas fa-spinner"></i>
+                    <span>Загрузка постов...</span>
+                </div>
+            `;
+                    document.getElementById('profileContentArea').appendChild(loadingIndicator);
+                }
+
+                loadingIndicator.style.display = 'block';
+            }
+
+            // Функция скрытия индикатора загрузки профиля
+            function hideProfileLoadingIndicator() {
+                const loadingIndicator = document.getElementById('profile-loading-indicator');
+                if (loadingIndicator) {
+                    loadingIndicator.style.display = 'none';
+                }
+            }
+
+            // Функция показа сообщения об отсутствии постов в профиле
+            function showProfileNoMorePostsMessage() {
+                let noMoreMessage = document.getElementById('profile-no-more-posts');
+
+                if (!noMoreMessage) {
+                    noMoreMessage = document.createElement('div');
+                    noMoreMessage.id = 'profile-no-more-posts';
+                    noMoreMessage.className = 'profile-no-more-posts';
+                    noMoreMessage.innerHTML = `
+                <div class="profile-no-more-content">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Вы просмотрели все посты</span>
+                </div>
+            `;
+                    document.getElementById('profileContentArea').appendChild(noMoreMessage);
+                }
+
+                noMoreMessage.style.display = 'block';
+            }
+
+            // Функция показа сообщения об ошибке в профиле
+            function showProfileErrorMessage(customMessage = null) {
+                let errorMessage = document.getElementById('profile-error-message');
+
+                if (!errorMessage) {
+                    errorMessage = document.createElement('div');
+                    errorMessage.id = 'profile-error-message';
+                    errorMessage.className = 'profile-error-message';
+                    document.getElementById('profileContentArea').appendChild(errorMessage);
+                }
+
+                const message = customMessage || 'Ошибка загрузки. Попробуйте позже.';
+
+                errorMessage.innerHTML = `
+            <div class="profile-error-content">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>${message}</span>
+                <button onclick="retryProfileLoading()" class="profile-retry-btn">Повторить</button>
+            </div>
+        `;
+
+                errorMessage.style.display = 'block';
+            }
+
+            // Функция повторной загрузки профиля
+            function retryProfileLoading() {
+                console.log('🔄 Повторная попытка загрузки постов профиля');
+
+                const errorMessage = document.getElementById('profile-error-message');
+                if (errorMessage) {
+                    errorMessage.style.display = 'none';
+                }
+
+                profileIsLoading = false;
+                loadMoreProfilePosts();
+            }
+
+            // Функция определения достижения конца страницы
+            function isNearBottomProfile() {
+                const threshold = 300; // Загружать за 300px до конца
+                return window.innerHeight + window.scrollY >= document.body.offsetHeight - threshold;
+            }
+
+            // Обработчик скролла для профиля
+            let profileScrollTimeout;
+            function handleProfileScroll() {
+                if (profileScrollTimeout) {
+                    clearTimeout(profileScrollTimeout);
+                }
+
+                profileScrollTimeout = setTimeout(() => {
+                    if (isNearBottomProfile() && window.location.pathname.includes('/profile/')) {
+                        loadMoreProfilePosts();
+                    }
+                }, 100);
+            }
+
+            // Инициализация бесконечной загрузки профиля
+            function initProfileInfiniteScroll() {
+                console.log('🚀 Инициализация бесконечной загрузки профиля...');
+
+                if (!window.profileData || !window.profileData.userId) {
+                    console.warn('❌ Данные профиля не найдены');
+                    return;
+                }
+
+                const existingPosts = document.querySelectorAll('.post-card');
+                console.log('📋 Найдено существующих постов в профиле:', existingPosts.length);
+
+                if (existingPosts.length > 0) {
+                    profileCurrentPage = 1;
+                    profileHasMorePosts = window.profileData.hasMorePosts;
+                    console.log('📄 Начинаем с страницы 1, есть еще посты:', profileHasMorePosts);
+                } else {
+                    profileCurrentPage = 0;
+                    profileHasMorePosts = true;
+                    console.log('📄 Начинаем с страницы 0');
+                }
+
+                // Добавляем обработчик скролла
+                window.addEventListener('scroll', handleProfileScroll);
+
+                console.log('✅ Бесконечная загрузка профиля инициализирована');
+            }
+
+            // Функция очистки обработчиков профиля
+            function destroyProfileInfiniteScroll() {
+                window.removeEventListener('scroll', handleProfileScroll);
+                if (profileScrollTimeout) {
+                    clearTimeout(profileScrollTimeout);
+                }
+            }
+
+            // ============================================
+            // ИНИЦИАЛИЗАЦИЯ ПРОФИЛЯ
+            // ============================================
+
+            // Инициализация при загрузке страницы
+            document.addEventListener('DOMContentLoaded', function() {
+                // Проверяем, что мы на странице профиля
+                if (window.location.pathname.includes('/profile/')) {
+                    initProfileInfiniteScroll();
+                    console.log('📱 Бесконечная загрузка профиля активирована');
+                }
+            });
+
+            // Инициализация если DOM уже загружен
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (window.location.pathname.includes('/profile/')) {
+                        initProfileInfiniteScroll();
+                    }
+                });
+            } else {
+                if (window.location.pathname.includes('/profile/')) {
+                    initProfileInfiniteScroll();
+                }
+            }
+
+            // Экспорт функций для использования
+            window.profileInfiniteScroll = {
+                init: initProfileInfiniteScroll,
+                destroy: destroyProfileInfiniteScroll,
+                loadMore: loadMoreProfilePosts
+            };
+
+            console.log('📝 Скрипт бесконечной загрузки профиля загружен');
+        </script>
+
+
 
         <!-- Модальное окно подтверждения удаления -->
         <div id="deleteConfirmModal" class="modal-overlay" style="display: none;">

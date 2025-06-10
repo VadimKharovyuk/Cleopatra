@@ -9,6 +9,7 @@ import com.example.cleopatra.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -21,8 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Controller
 @RequestMapping("/profile")
@@ -134,8 +134,96 @@ public class UserProfileController {
         }
     }
 
+
+
+
     /**
      * AJAX загрузка постов для бесконечного скролла
+     */
+    @GetMapping("/{userId}/posts/api")
+    @ResponseBody
+    public ResponseEntity<?> getUserPostsApi(@PathVariable Long userId,
+                                             @RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = "6") int size,
+                                             Authentication authentication) {
+        log.info("API запрос постов пользователя {}: page={}, size={}", userId, page, size);
+
+        try {
+            // Проверяем существование пользователя
+            if (!userService.userExists(userId)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Пользователь не найден"));
+            }
+
+            // Проверяем доступ к профилю
+            if (authentication != null && authentication.isAuthenticated()) {
+                UserResponse currentUser = userService.getUserByEmail(authentication.getName());
+
+                if (!userService.canViewProfile(userId, currentUser.getId())) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(Map.of("error", "Доступ к профилю ограничен"));
+                }
+
+                // Проверяем блокировки
+                boolean userBlockedMe = userBlockService.isBlocked(userId, currentUser.getId());
+                if (userBlockedMe) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(Map.of("error", "Пользователь заблокировал вас"));
+                }
+            }
+
+            // Валидация параметров
+            if (page < 0) page = 0;
+            if (size <= 0 || size > 20) size = 6;
+
+            // Получаем посты
+            PostListDto userPosts = postService.getUserPosts(userId, page, size);
+
+            if (userPosts == null) {
+                userPosts = PostListDto.builder()
+                        .posts(new ArrayList<>())
+                        .hasNext(false)
+                        .hasPrevious(false)
+                        .currentPage(page)
+                        .pageSize(size)
+                        .isEmpty(true)
+                        .numberOfElements(0)
+                        .build();
+            }
+
+            if (userPosts.getPosts() == null) {
+                userPosts.setPosts(new ArrayList<>());
+            }
+
+            log.info("Возвращаем {} постов пользователя {} для страницы {}",
+                    userPosts.getPosts().size(), userId, page);
+
+            return ResponseEntity.ok(userPosts);
+
+        } catch (Exception e) {
+            log.error("Ошибка API загрузки постов пользователя {}: {}", userId, e.getMessage(), e);
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Внутренняя ошибка сервера");
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("userId", userId);
+            errorResponse.put("page", page);
+            errorResponse.put("size", size);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorResponse);
+        }
+    }
+
+
+
+
+    /**
+     * AJAX загрузка постов для бесконечного скролла
+     */
+    /**
+     * Устаревший метод - оставляем для совместимости
+     * @deprecated Используйте getUserPostsApi
      */
     @GetMapping("/{userId}/posts")
     @ResponseBody

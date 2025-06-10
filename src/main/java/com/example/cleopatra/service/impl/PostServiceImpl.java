@@ -13,15 +13,11 @@ import com.example.cleopatra.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -108,19 +104,95 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostListDto getUserPosts(Long userId, int page, int size) {
-//        log.info("Получение постов пользователя с ID: {}, страница: {}, размер: {}", userId, page, size);
+        log.info("Получение постов пользователя: {}, страница: {}, размер: {}", userId, page, size);
 
-        if (!userService.userExists(userId)) {
-            throw new RuntimeException("Пользователь с ID " + userId + " не найден");
+        try {
+            // Проверяем валидность параметров
+            if (userId == null) {
+                log.error("userId не может быть null");
+                return createEmptyPostListDto(page, size);
+            }
+
+            if (!userService.userExists(userId)) {
+                log.error("Пользователь с ID {} не найден", userId);
+                throw new RuntimeException("Пользователь с ID " + userId + " не найден");
+            }
+
+            if (page < 0) {
+                log.warn("Отрицательный номер страницы: {}, устанавливаем 0", page);
+                page = 0;
+            }
+
+            if (size <= 0 || size > 20) {
+                log.warn("Некорректный размер страницы: {}, устанавливаем 6", size);
+                size = 6;
+            }
+
+            // Создаем Pageable
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+            // Получаем посты пользователя
+            Slice<Post> postSlice = null;
+            try {
+                postSlice = postRepository.findByAuthor_IdAndIsDeletedFalse(userId, pageable);
+            } catch (Exception e) {
+                log.error("Ошибка запроса к БД для постов пользователя {}: {}", userId, e.getMessage());
+                return createEmptyPostListDto(page, size);
+            }
+
+            if (postSlice == null) {
+                log.warn("Получен null от postRepository для пользователя {}", userId);
+                postSlice = new SliceImpl<>(new ArrayList<>(), pageable, false);
+            }
+
+            log.info("Найдено {} постов пользователя {} на странице {}",
+                    postSlice.getNumberOfElements(), userId, page);
+
+            // Конвертируем в DTO
+            PostListDto result = convertPostSliceToListDto(postSlice, page);
+
+            if (result == null) {
+                log.warn("convertPostSliceToListDto вернул null для пользователя {}", userId);
+                result = createEmptyPostListDto(page, size);
+            }
+
+            if (result.getPosts() == null) {
+                result.setPosts(new ArrayList<>());
+            }
+
+            // Дополняем информацию
+            result.setPageSize(size);
+            result.setIsEmpty(result.getPosts().isEmpty());
+            result.setNumberOfElements(result.getPosts().size());
+
+            return result;
+
+        } catch (Exception e) {
+            log.error("Неожиданная ошибка в getUserPosts для пользователя {}: {}", userId, e.getMessage(), e);
+
+            // Если это наше исключение (пользователь не найден), пробрасываем его
+            if (e.getMessage().contains("не найден")) {
+                throw e;
+            }
+
+            // Для других ошибок возвращаем пустой результат
+            return createEmptyPostListDto(page, size);
         }
+    }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Slice<Post> postSlice = postRepository.findByAuthor_IdAndIsDeletedFalse(userId, pageable);
-
-//        log.info("Найдено {} постов для пользователя {}", postSlice.getNumberOfElements(), userId);
-
-        // ✅ ОБНОВЛЕННЫЙ МЕТОД с логикой лайков
-        return convertPostSliceToListDto(postSlice, page);
+    // Вспомогательный метод для создания пустого PostListDto
+    private PostListDto createEmptyPostListDto(int page, int size) {
+        return PostListDto.builder()
+                .posts(new ArrayList<>())
+                .hasNext(false)
+                .hasPrevious(page > 0)
+                .currentPage(page)
+                .nextPage(null)
+                .previousPage(page > 0 ? page - 1 : null)
+                .pageSize(size)
+                .isEmpty(true)
+                .numberOfElements(0)
+                .build();
     }
 
     @Override
