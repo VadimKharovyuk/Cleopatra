@@ -36,4 +36,5 @@ public interface StoryViewService {
      * @return количество просмотров
      */
     Long getViewsCount(Long storyId);
+
 }

@@ -4,102 +4,712 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Просмотры истории</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #fafafa;
+      --bg-secondary: #ffffff;
+      --bg-accent: #f8f9fa;
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --text-light: #d1d5db;
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--spacing-xl);
+    }
+
+    /* Header */
+    .page-header {
+      background-color: var(--bg-secondary);
+      padding: var(--spacing-xl);
+      border-radius: var(--radius-xl);
+      margin-bottom: var(--spacing-xl);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-md);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .title-icon {
+      color: var(--primary-color);
+      font-size: 1.8rem;
+    }
+
+    .story-info {
+      background-color: var(--bg-accent);
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-lg);
+      margin: var(--spacing-lg) 0;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .story-info h3 {
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-md);
+      font-size: 1.2rem;
+    }
+
+    .story-info p {
+      margin-bottom: var(--spacing-sm);
+      color: var(--text-secondary);
+    }
+
+    .story-info strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .navigation {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-lg);
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background-color: var(--bg-secondary);
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      transition: all 0.2s ease;
+      border: 1px solid var(--text-light);
+    }
+
+    .nav-link:hover {
+      background-color: var(--primary-color);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    /* Messages */
+    .message {
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .message.success {
+      background-color: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--success-color);
+    }
+
+    .message.error {
+      background-color: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--danger-color);
+    }
+
+    /* Statistics */
+    .stats-section {
+      background-color: var(--bg-secondary);
+      padding: var(--spacing-xl);
+      border-radius: var(--radius-xl);
+      margin-bottom: var(--spacing-xl);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stats-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-lg);
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, var(--primary-color), #6366f1);
+      color: white;
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-lg);
+      text-align: center;
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    /* Views List */
+    .views-section {
+      background-color: var(--bg-secondary);
+      padding: var(--spacing-xl);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-xl);
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: var(--spacing-md);
+      color: var(--text-light);
+    }
+
+    /* Views Grid */
+    .views-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--spacing-lg);
+    }
+
+    .view-card {
+      background-color: var(--bg-accent);
+      border: 1px solid var(--text-light);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .view-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-color);
+    }
+
+    .viewer-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .viewer-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .viewer-avatar-placeholder {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .viewer-info {
+      flex: 1;
+    }
+
+    .viewer-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .viewer-id {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .view-details {
+      padding-top: var(--spacing-md);
+      border-top: 1px solid var(--text-light);
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-sm);
+      font-size: 0.875rem;
+    }
+
+    .detail-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .detail-value {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .view-time {
+      background-color: rgba(59, 130, 246, 0.1);
+      color: var(--primary-color);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Table Alternative */
+    .views-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .views-table th {
+      background-color: var(--bg-accent);
+      padding: var(--spacing-md);
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-primary);
+      border-bottom: 2px solid var(--text-light);
+    }
+
+    .views-table td {
+      padding: var(--spacing-md);
+      border-bottom: 1px solid var(--text-light);
+      vertical-align: middle;
+    }
+
+    .views-table tr:hover {
+      background-color: var(--bg-accent);
+    }
+
+    .table-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary-color);
+    }
+
+    .table-avatar-placeholder {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .table-user-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .table-user-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .table-user-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .table-user-id {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Controls */
+    .controls-section {
+      background-color: var(--bg-secondary);
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--spacing-xl);
+      border: 2px dashed var(--text-light);
+    }
+
+    .controls-title {
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-md);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-accent);
+      color: var(--text-secondary);
+      border: 1px solid var(--text-light);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--text-light);
+      color: var(--text-primary);
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .toggle-btn {
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 1px solid var(--text-light);
+      background-color: var(--bg-secondary);
+      color: var(--text-secondary);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: var(--spacing-md);
+      }
+
+      .views-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .navigation {
+        flex-direction: column;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .views-table {
+        font-size: 0.875rem;
+      }
+
+      .views-table th,
+      .views-table td {
+        padding: var(--spacing-sm);
+      }
+    }
+  </style>
 </head>
 <body>
-<header>
-  <h1>Просмотры истории #<span th:text="${storyId}"></span></h1>
-  <div th:if="${story}" style="margin: 10px 0; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
-    <h3>Информация об истории</h3>
-    <p><strong>Автор:</strong> <span th:text="${story.userFullName}"></span></p>
-    <p><strong>Описание:</strong> <span th:text="${story.description ?: 'Без описания'}"></span></p>
-    <p><strong>Создана:</strong> <span th:text="${story.timeAgo}"></span></p>
-    <p><strong>Статус:</strong>
-      <span th:if="${story.isExpired}" style="color: red;">Истекла</span>
-      <span th:unless="${story.isExpired}" style="color: green;">Активна</span>
-    </p>
-  </div>
-  <nav>
-    <a href="/stories/list">← Назад к историям</a>
-    <a th:href="@{'/stories/user/' + ${story.userId}}">← К историям автора</a>
-  </nav>
-</header>
+<div class="container">
+  <!-- Header -->
+  <header class="page-header">
+    <h1 class="page-title">
+      <i class="fas fa-eye title-icon"></i>
+      Просмотры истории #<span th:text="${storyId}"></span>
+    </h1>
 
-<main>
-  <!-- Сообщения об ошибках или успехе -->
-  <div th:if="${message}" style="background-color: #d4edda; border: 1px solid #c3e6cb; padding: 10px; margin: 10px 0; border-radius: 4px;">
+    <div th:if="${story}" class="story-info">
+      <h3>Информация об истории</h3>
+      <p><strong>Автор:</strong> <span th:text="${story.userFullName}"></span></p>
+      <p><strong>Описание:</strong> <span th:text="${story.description ?: 'Без описания'}"></span></p>
+      <p><strong>Создана:</strong> <span th:text="${story.timeAgo}"></span></p>
+      <p><strong>Статус:</strong>
+        <span th:if="${story.isExpired}" style="color: var(--danger-color);">Истекла</span>
+        <span th:unless="${story.isExpired}" style="color: var(--success-color);">Активна</span>
+      </p>
+    </div>
+
+    <nav class="navigation">
+      <a href="/stories" class="nav-link">
+        <i class="fas fa-arrow-left"></i>
+        Все истории
+      </a>
+      <a th:href="@{'/stories/user/' + ${story.userId}}" class="nav-link">
+        <i class="fas fa-user"></i>
+        К историям автора
+      </a>
+      <a th:href="@{'/stories/' + ${storyId}}" class="nav-link">
+        <i class="fas fa-eye"></i>
+        Посмотреть историю
+      </a>
+    </nav>
+  </header>
+
+  <!-- Messages -->
+  <div th:if="${message}" class="message success">
+    <i class="fas fa-check-circle"></i>
     <span th:text="${message}"></span>
   </div>
 
-  <div th:if="${error}" style="background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; margin: 10px 0; border-radius: 4px;">
+  <div th:if="${error}" class="message error">
+    <i class="fas fa-exclamation-triangle"></i>
     <span th:text="${error}"></span>
   </div>
 
-  <!-- Статистика просмотров -->
-  <section>
-    <h2>Статистика</h2>
-    <p><strong>Общее количество просмотров:</strong> <span th:text="${totalViews}"></span></p>
-    <p><strong>Уникальных просмотров:</strong> <span th:text="${#lists.size(views)}"></span></p>
+  <!-- Statistics -->
+  <section class="stats-section">
+    <h2 class="stats-title">
+      <i class="fas fa-chart-bar"></i>
+      Статистика просмотров
+    </h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" th:text="${totalViews}">0</div>
+        <div class="stat-label">Общие просмотры</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" th:text="${#lists.size(views)}">0</div>
+        <div class="stat-label">Уникальные зрители</div>
+      </div>
+    </div>
   </section>
 
-  <!-- Форма для добавления просмотра (только для разработки/тестирования) -->
-  <section th:if="${#authentication.name == 'admin@example.com'}" style="border: 2px dashed #ddd; padding: 15px; margin: 20px 0;">
-    <h3>🧪 Режим разработчика</h3>
-    <p><em>Эта секция видна только администраторам для тестирования</em></p>
-    <form th:action="@{/stories/{storyId}/view(storyId=${storyId})}" method="post">
-      <button type="submit">Отметить просмотр (текущий пользователь)</button>
-    </form>
+  <!-- Admin Controls -->
+  <section th:if="${#authentication.name == 'admin@example.com'}" class="controls-section">
+    <h3 class="controls-title">
+      🧪 Режим разработчика
+    </h3>
+    <p style="margin-bottom: var(--spacing-md);"><em>Эта секция видна только администраторам</em></p>
+    <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;">
+      <form th:action="@{/stories/{storyId}/view(storyId=${storyId})}" method="post" style="display: inline;">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-plus"></i>
+          Отметить просмотр
+        </button>
+      </form>
+      <button onclick="checkCurrentUserView()" class="btn btn-secondary">
+        <i class="fas fa-search"></i>
+        Проверить статус
+      </button>
+      <button onclick="updateCount()" class="btn btn-secondary">
+        <i class="fas fa-sync"></i>
+        Обновить счетчик
+      </button>
+      <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" class="btn btn-secondary">
+        <i class="fas fa-play"></i>
+        Автообновление
+      </button>
+    </div>
+    <div id="checkResult" style="margin-top: var(--spacing-md); padding: var(--spacing-md); border: 1px solid var(--text-light); border-radius: var(--radius-md); display: none;"></div>
   </section>
 
-  <!-- Список просмотров -->
-  <section>
-    <h3>Кто просматривал</h3>
+  <!-- Views List -->
+  <section class="views-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
+      <h2 class="section-title">
+        <i class="fas fa-users"></i>
+        Кто просматривал
+      </h2>
 
-    <div th:if="${!hasViews}">
-      <p><em>Пока никто не просматривал эту историю</em></p>
+      <!-- View Toggle -->
+      <div class="view-toggle">
+        <button class="toggle-btn active" onclick="showCards()">
+          <i class="fas fa-th-large"></i>
+          Карточки
+        </button>
+        <button class="toggle-btn" onclick="showTable()">
+          <i class="fas fa-table"></i>
+          Таблица
+        </button>
+      </div>
     </div>
 
-    <div th:if="${hasViews}">
-      <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <!-- Empty State -->
+    <div th:if="${!hasViews}" class="empty-state">
+      <i class="fas fa-eye-slash"></i>
+      <h3>Пока никто не просмотрел эту историю</h3>
+      <p>Как только кто-то посмотрит вашу историю, информация появится здесь</p>
+    </div>
+
+    <!-- Cards View -->
+    <div id="cardsView" th:if="${hasViews}" class="views-grid">
+      <div th:each="view : ${views}" class="view-card">
+        <div class="viewer-header">
+          <img th:if="${view.viewerImageUrl}"
+               th:src="${view.viewerImageUrl}"
+               th:alt="${view.viewerFullName}"
+               class="viewer-avatar">
+          <div th:unless="${view.viewerImageUrl}" class="viewer-avatar-placeholder">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="viewer-info">
+            <div class="viewer-name" th:text="${view.viewerFullName}">Имя зрителя</div>
+            <div class="viewer-id">ID: <span th:text="${view.viewerId}">123</span></div>
+          </div>
+        </div>
+        <div class="view-details">
+          <div class="detail-row">
+            <span class="detail-label">ID просмотра:</span>
+            <span class="detail-value" th:text="${view.id}">1</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Время просмотра:</span>
+            <span class="view-time" th:text="${#temporals.format(view.viewedAt, 'dd.MM.yyyy HH:mm')}">время</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table View -->
+    <div id="tableView" th:if="${hasViews}" style="display: none;">
+      <table class="views-table">
         <thead>
-        <tr style="background-color: #f8f9fa;">
-          <th>ID Просмотра</th>
-          <th>ID Пользователя</th>
-          <th>Имя пользователя</th>
+        <tr>
+          <th>ID</th>
+          <th>Пользователь</th>
           <th>Время просмотра</th>
+          <th>Действия</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="view : ${views}">
-          <td th:text="${view.id}"></td>
-          <td th:text="${view.viewerId}"></td>
-          <td th:text="${view.getId()}"></td>
-          <td th:text="${#temporals.format(view.viewedAt, 'dd.MM.yyyy HH:mm:ss')}"></td>
+          <td th:text="${view.id}">1</td>
+          <td>
+            <div class="table-user-info">
+              <img th:if="${view.viewerImageUrl}"
+                   th:src="${view.viewerImageUrl}"
+                   th:alt="${view.viewerFullName}"
+                   class="table-avatar">
+              <div th:unless="${view.viewerImageUrl}" class="table-avatar-placeholder">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="table-user-details">
+                <div class="table-user-name" th:text="${view.viewerFullName}">Имя пользователя</div>
+                <div class="table-user-id">ID: <span th:text="${view.viewerId}">123</span></div>
+              </div>
+            </div>
+          </td>
+          <td th:text="${#temporals.format(view.viewedAt, 'dd.MM.yyyy HH:mm:ss')}">время</td>
+          <td>
+            <a th:href="@{'/profile/' + ${view.viewerId}}" class="btn btn-secondary">
+              <i class="fas fa-user"></i>
+              Профиль
+            </a>
+          </td>
         </tr>
         </tbody>
       </table>
     </div>
   </section>
-
-  <!-- Инструменты для проверки (только для администраторов) -->
-  <section th:if="${#authentication.name == 'admin@example.com'}" style="border: 2px dashed #ddd; padding: 15px;">
-    <h3>🔍 Проверить статус просмотра</h3>
-    <p><em>Инструменты разработчика</em></p>
-    <button onclick="checkCurrentUserView()">Проверить мой статус просмотра</button>
-    <div id="checkResult" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; display: none;"></div>
-  </section>
-
-  <!-- Автообновление счетчика -->
-  <section>
-    <h3>Актуальный счетчик просмотров</h3>
-    <p>Просмотров: <span id="liveCount">загрузка...</span></p>
-    <button onclick="updateCount()">Обновить</button>
-    <button id="autoRefreshBtn" onclick="toggleAutoRefresh()">Включить автообновление</button>
-  </section>
-</main>
+</div>
 
 <script>
   let autoRefreshInterval;
   let autoRefreshActive = false;
+
+  // View toggle functions
+  function showCards() {
+    document.getElementById('cardsView').style.display = 'grid';
+    document.getElementById('tableView').style.display = 'none';
+
+    // Update toggle buttons
+    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  function showTable() {
+    document.getElementById('cardsView').style.display = 'none';
+    document.getElementById('tableView').style.display = 'block';
+
+    // Update toggle buttons
+    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+  }
 
   // Загрузить актуальное количество просмотров
   function updateCount() {
@@ -125,25 +735,30 @@
             .then(result => {
               resultDiv.style.display = 'block';
               if (result === 'viewed') {
-                resultDiv.style.backgroundColor = '#d4edda';
-                resultDiv.style.borderColor = '#c3e6cb';
-                resultDiv.textContent = 'Вы УЖЕ просматривали эту историю';
+                resultDiv.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                resultDiv.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+                resultDiv.style.color = 'var(--success-color)';
+                resultDiv.innerHTML = '<i class="fas fa-check-circle"></i> Вы УЖЕ просматривали эту историю';
               } else if (result === 'not-viewed') {
-                resultDiv.style.backgroundColor = '#fff3cd';
-                resultDiv.style.borderColor = '#ffeeba';
-                resultDiv.textContent = 'Вы НЕ просматривали эту историю';
+                resultDiv.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
+                resultDiv.style.borderColor = 'rgba(245, 158, 11, 0.2)';
+                resultDiv.style.color = 'var(--warning-color)';
+                resultDiv.innerHTML = '<i class="fas fa-info-circle"></i> Вы НЕ просматривали эту историю';
               } else {
-                resultDiv.style.backgroundColor = '#f8d7da';
-                resultDiv.style.borderColor = '#f5c6cb';
-                resultDiv.textContent = 'Ошибка при проверке';
+                resultDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                resultDiv.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                resultDiv.style.color = 'var(--danger-color)';
+                resultDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Ошибка при проверке';
               }
             })
             .catch(error => {
               console.error('Ошибка:', error);
+              const resultDiv = document.getElementById('checkResult');
               resultDiv.style.display = 'block';
-              resultDiv.style.backgroundColor = '#f8d7da';
-              resultDiv.style.borderColor = '#f5c6cb';
-              resultDiv.textContent = 'Ошибка при проверке';
+              resultDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+              resultDiv.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+              resultDiv.style.color = 'var(--danger-color)';
+              resultDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Ошибка при проверке';
             });
   }
 
@@ -153,18 +768,153 @@
     if (autoRefreshActive) {
       clearInterval(autoRefreshInterval);
       autoRefreshActive = false;
-      btn.textContent = 'Включить автообновление';
+      btn.innerHTML = '<i class="fas fa-play"></i> Включить автообновление';
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-secondary');
     } else {
       autoRefreshInterval = setInterval(updateCount, 5000); // каждые 5 секунд
       autoRefreshActive = true;
-      btn.textContent = 'Выключить автообновление';
+      btn.innerHTML = '<i class="fas fa-pause"></i> Выключить автообновление';
+      btn.classList.remove('btn-secondary');
+      btn.classList.add('btn-primary');
     }
   }
 
-  // Загрузить счетчик при загрузке страницы
+  // Анимация появления карточек
+  function animateCards() {
+    const cards = document.querySelectorAll('.view-card');
+    cards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+      setTimeout(() => {
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, index * 100);
+    });
+  }
+
+  // Обработка ошибок изображений
+  function handleImageError() {
+    const images = document.querySelectorAll('.viewer-avatar, .table-avatar');
+    images.forEach(img => {
+      img.addEventListener('error', function() {
+        this.style.display = 'none';
+        const placeholder = this.nextElementSibling;
+        if (placeholder && (placeholder.classList.contains('viewer-avatar-placeholder') ||
+                placeholder.classList.contains('table-avatar-placeholder'))) {
+          placeholder.style.display = 'flex';
+        }
+      });
+    });
+  }
+
+  // Поиск по просмотрам
+  function setupSearch() {
+    // Создаем поле поиска
+    const searchContainer = document.createElement('div');
+    searchContainer.style.marginBottom = 'var(--spacing-lg)';
+    searchContainer.innerHTML = `
+                <input type="text" id="searchInput" placeholder="Поиск по имени пользователя..."
+                       style="width: 100%; padding: var(--spacing-sm) var(--spacing-md);
+                              border: 1px solid var(--text-light); border-radius: var(--radius-md);
+                              font-size: 0.875rem;">
+            `;
+
+    const viewsSection = document.querySelector('.views-section');
+    const sectionTitle = viewsSection.querySelector('.section-title').parentElement;
+    sectionTitle.parentNode.insertBefore(searchContainer, sectionTitle.nextSibling);
+
+    // Обработчик поиска
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const cards = document.querySelectorAll('.view-card');
+      const rows = document.querySelectorAll('.views-table tbody tr');
+
+      // Фильтрация карточек
+      cards.forEach(card => {
+        const name = card.querySelector('.viewer-name').textContent.toLowerCase();
+        card.style.display = name.includes(searchTerm) ? 'block' : 'none';
+      });
+
+      // Фильтрация строк таблицы
+      rows.forEach(row => {
+        const name = row.querySelector('.table-user-name').textContent.toLowerCase();
+        row.style.display = name.includes(searchTerm) ? 'table-row' : 'none';
+      });
+    });
+  }
+
+  // Инициализация при загрузке страницы
   window.onload = function() {
     updateCount();
+    animateCards();
+    handleImageError();
+
+    // Добавляем поиск только если есть просмотры
+    if (document.querySelector('.view-card') || document.querySelector('.views-table')) {
+      setupSearch();
+    }
+
+    // Сохраняем предпочтение вида в localStorage
+    const savedView = localStorage.getItem('viewsDisplayMode');
+    if (savedView === 'table') {
+      showTable();
+    }
   };
+
+  // Сохранение предпочтения вида
+  function showCards() {
+    document.getElementById('cardsView').style.display = 'grid';
+    document.getElementById('tableView').style.display = 'none';
+
+    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    localStorage.setItem('viewsDisplayMode', 'cards');
+  }
+
+  function showTable() {
+    document.getElementById('cardsView').style.display = 'none';
+    document.getElementById('tableView').style.display = 'block';
+
+    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    localStorage.setItem('viewsDisplayMode', 'table');
+  }
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + F для фокуса на поиске
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      e.preventDefault();
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.focus();
+      }
+    }
+
+    // Escape для очистки поиска
+    if (e.key === 'Escape') {
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput && searchInput.value) {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+      }
+    }
+
+    // Tab для переключения вида
+    if (e.key === 'Tab' && e.shiftKey) {
+      e.preventDefault();
+      const activeToggle = document.querySelector('.toggle-btn.active');
+      const buttons = document.querySelectorAll('.toggle-btn');
+      const currentIndex = Array.from(buttons).indexOf(activeToggle);
+      const nextIndex = currentIndex === 0 ? 1 : 0;
+      buttons[nextIndex].click();
+    }
+  });
 </script>
 </body>
 </html>

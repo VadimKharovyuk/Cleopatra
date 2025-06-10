@@ -42,8 +42,15 @@ public class StoryViewController {
             String email = authentication.getName();
             Long currentUserId = userService.getUserIdByEmail(email);
 
+
+            UserResponse currentUser = userService.getUserById(currentUserId);
+
             // Получаем информацию об истории
             StoryDTO story = storyService.getStoryById(storyId, currentUserId);
+
+            story.setImageUrl(currentUser.getImageUrl());
+            story.setUserFirstName(currentUser.getFirstName());
+            story.setUserLastName(currentUser.getLastName());
 
             // Проверяем, является ли текущий пользователь автором истории
             if (!story.getUserId().equals(currentUserId)) {
@@ -56,6 +63,7 @@ public class StoryViewController {
             // Получаем просмотры
             List<StoryViewDTO> views = storyViewService.getStoryViews(storyId);
             Long totalViews = storyViewService.getViewsCount(storyId);
+
 
 
             model.addAttribute("story", story);

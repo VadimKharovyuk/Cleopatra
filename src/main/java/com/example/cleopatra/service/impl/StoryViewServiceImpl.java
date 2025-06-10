@@ -30,6 +30,8 @@ public class StoryViewServiceImpl implements StoryViewService {
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
     private final StoryViewManualMapper mapper;
+    private static final int DEFAULT_VIEWS_LIMIT = 100; // Лимит по умолчанию
+    private static final int PREVIEW_VIEWS_LIMIT = 5;
 
     @Override
     public StoryViewDTO createView(Long storyId, Long viewerId) {
@@ -84,13 +86,16 @@ public class StoryViewServiceImpl implements StoryViewService {
             throw new IllegalArgumentException("История не найдена с ID: " + storyId);
         }
 
-        // Получаем последние 100 просмотров, отсортированные по времени (новые сначала)
-        PageRequest pageRequest = PageRequest.of(0, 100, Sort.by("viewedAt").descending());
-        Page<StoryView> viewsPage = storyViewRepository.findByStoryId(storyId, pageRequest);
+        // Получаем ограниченное количество просмотров с пользователями
+        PageRequest pageRequest = PageRequest.of(0, DEFAULT_VIEWS_LIMIT, Sort.by("viewedAt").descending());
+        Page<StoryView> viewsPage = storyViewRepository.findByStoryIdWithViewer(storyId, pageRequest);
         List<StoryView> views = viewsPage.getContent();
 
+        log.info("Found {} views for story {} (limit: {})", views.size(), storyId, DEFAULT_VIEWS_LIMIT);
         return mapper.toDTO(views);
     }
+
+
 
     @Override
     @Transactional(readOnly = true)

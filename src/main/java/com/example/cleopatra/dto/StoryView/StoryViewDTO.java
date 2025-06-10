@@ -1,7 +1,6 @@
 package com.example.cleopatra.dto.StoryView;
 
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,24 +12,24 @@ public class StoryViewDTO {
 
     private Long id;
 
+    // Информация об истории
     private Long storyId;
 
-    // Информация о просмотревшем пользователе
+    // Информация о просматривающем пользователе
     private Long viewerId;
     private String viewerFirstName;
     private String viewerLastName;
     private String viewerImageUrl;
+    private String viewerImgId;
 
     // Время просмотра
     private LocalDateTime viewedAt;
+    private LocalDateTime createdAt;
 
-    // Вспомогательные поля для UI
-    private String timeAgo; // "2 часа назад"
-
-    // Полное имя для удобства
+    // Вспомогательные методы
     public String getViewerFullName() {
         if (viewerFirstName == null && viewerLastName == null) {
-            return "Пользователь"; // fallback
+            return "Неизвестный пользователь";
         }
 
         StringBuilder fullName = new StringBuilder();
@@ -45,5 +44,10 @@ public class StoryViewDTO {
         }
 
         return fullName.toString();
+    }
+
+    public String getViewerDisplayName() {
+        String fullName = getViewerFullName();
+        return fullName.isEmpty() ? "Пользователь #" + viewerId : fullName;
     }
 }
