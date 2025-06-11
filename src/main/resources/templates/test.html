@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Тест рекламного виджета</title>
+  <style>
+    .ad-widget {
+      max-width: 300px;
+      margin: 20px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .ad-content {
+      position: relative;
+    }
+
+    .ad-loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      margin: 0;
+    }
+
+    .ad-container {
+      background: #fff;
+    }
+
+    .ad-label {
+      background: #f5f5f5;
+      padding: 4px 8px;
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      border-bottom: 1px solid #eee;
+    }
+
+    .ad-body {
+      padding: 15px;
+    }
+
+    .ad-image {
+      width: 100%;
+      height: auto;
+      max-height: 150px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .ad-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 8px 0;
+      color: #333;
+    }
+
+    .ad-description {
+      font-size: 14px;
+      color: #666;
+      margin: 0 0 10px 0;
+      line-height: 1.4;
+    }
+
+    .ad-footer {
+      padding: 10px 15px;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #eee;
+    }
+
+    .ad-link {
+      background: #007bff;
+      color: white;
+      padding: 6px 12px;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+
+    .ad-link:hover {
+      background: #0056b3;
+    }
+
+    .ad-category {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .error-message {
+      color: red;
+      padding: 10px;
+      border: 1px solid red;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+      .ad-widget {
+        max-width: 100%;
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+<h1>Тест рекламного виджета</h1>
+<p>Эта страница тестирует показ рекламы через серверную модель</p>
+
+<!-- Показ ошибки, если есть -->
+<div th:if="${error}" class="error-message" th:text="${error}"></div>
+
+<!-- ВИДЖЕТ РЕКЛАМЫ ИЗ МОДЕЛИ -->
+<div th:if="${hasAdvertisement}" class="ad-widget">
+  <div class="ad-content">
+    <div class="ad-container" th:attr="data-ad-id=${advertisement.id}">
+      <div class="ad-label">Реклама</div>
+      <div class="ad-body">
+        <!-- Изображение, если есть -->
+        <img th:if="${advertisement.imageUrl}"
+             th:src="${advertisement.imageUrl}"
+             th:alt="${advertisement.title}"
+             class="ad-image">
+
+        <div class="ad-text">
+          <h4 class="ad-title" th:text="${advertisement.title}">Заголовок рекламы</h4>
+          <p class="ad-description" th:text="${advertisement.shortDescription}">Описание рекламы</p>
+        </div>
+      </div>
+      <div class="ad-footer">
+        <a th:href="${advertisement.url}"
+           target="_blank"
+           class="ad-link"
+           th:onclick="'registerClick(' + ${advertisement.id} + ')'">
+          Перейти →
+        </a>
+        <span class="ad-category" th:text="${advertisement.category}">Категория</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Сообщение, если рекламы нет -->
+<div th:unless="${hasAdvertisement}" class="ad-widget">
+  <div class="ad-content">
+    <p class="ad-loading">Активная реклама не найдена</p>
+  </div>
+</div>
+
+<p>Остальной контент страницы...</p>
+
+<!-- JavaScript для регистрации просмотров и кликов -->
+<script th:if="${hasAdvertisement}">
+  // Автоматически регистрируем просмотр при загрузке страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    registerView([[${advertisement.id}]]);
+  });
+
+  // Функция для регистрации просмотра
+  async function registerView(adId) {
+    try {
+      await fetch(`/advertisements/api/${adId}/view`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      console.log('Просмотр зарегистрирован для рекламы:', adId);
+    } catch (error) {
+      console.error('Ошибка регистрации просмотра:', error);
+    }
+  }
+
+  // Функция для регистрации клика
+  async function registerClick(adId) {
+    try {
+      await fetch(`/advertisements/api/${adId}/click`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      console.log('Клик зарегистрирован для рекламы:', adId);
+    } catch (error) {
+      console.error('Ошибка регистрации клика:', error);
+    }
+  }
+</script>
+</body>
+</html>

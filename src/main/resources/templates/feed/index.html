@@ -361,6 +361,7 @@
             }
         }
     </style>
+    <link th:href="@{/css/AdWidget/widget.css}" rel="stylesheet" type="text/css">
 </head>
 <body>
 
@@ -470,8 +471,11 @@
             <h3 class="widget-title">Актуальные темы</h3>
         </div>
         <div class="widget-content">
-            <div style="color: var(--text-secondary); text-align: center; padding: 1rem;">
-                Функция в разработке
+            <!-- ВИДЖЕТ РЕКЛАМЫ -->
+            <div id="advertisement-widget" class="ad-widget">
+                <div id="ad-content" class="ad-content">
+                    <p class="ad-loading">Загрузка рекламы...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -685,6 +689,7 @@
 </script>
 <script th:src="@{/js/online-status.js}"></script>
 <script th:src="@{/js/notifications.js}"></script>
+<script th:src="@{/js/AdvertisementWidget/AdvertisementWidget.js}"></script>
 
 </body>
 </html>

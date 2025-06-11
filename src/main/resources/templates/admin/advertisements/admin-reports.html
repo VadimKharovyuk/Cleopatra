@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Рекламы с жалобами</title>
+</head>
+<body>
+<h1>Рекламы с жалобами</h1>
+
+<nav>
+  <a href="/admin/advertisements">Все рекламы</a> |
+  <a href="/admin/advertisements/moderation">На модерации</a> |
+  <a href="/admin/advertisements/reports">С жалобами</a>
+</nav>
+
+<div th:if="${successMessage}">
+  <p><strong>Успех:</strong> <span th:text="${successMessage}"></span></p>
+</div>
+<div th:if="${errorMessage}">
+  <p><strong>Ошибка:</strong> <span th:text="${errorMessage}"></span></p>
+</div>
+
+<h2>Статистика жалоб</h2>
+<p>Требуют внимания: <strong th:text="${advertisementList.totalItems}">0</strong> реклам с жалобами</p>
+
+<div th:if="${advertisementList.advertisementListDTOS.empty}">
+  <h3>Жалоб нет!</h3>
+  <p>В данный момент нет рекламных объявлений с жалобами от пользователей.</p>
+  <a href="/admin/advertisements">Перейти ко всем рекламам</a>
+</div>
+
+<div th:if="${!advertisementList.advertisementListDTOS.empty}">
+  <h2>Список реклам с жалобами</h2>
+
+  <div th:each="ad : ${advertisementList.advertisementListDTOS}">
+    <hr>
+    <h3 th:text="${ad.title}">Название рекламы</h3>
+
+    <div th:if="${ad.reportCount >= 5}">
+      <p><strong style="color: red;">КРИТИЧНО: <span th:text="${ad.reportCount}">8</span> жалоб</strong></p>
+    </div>
+    <div th:if="${ad.reportCount >= 3 and ad.reportCount < 5}">
+      <p><strong style="color: orange;">ВЫСОКИЙ: <span th:text="${ad.reportCount}">4</span> жалобы</strong></p>
+    </div>
+    <div th:if="${ad.reportCount < 3}">
+      <p><strong>СРЕДНИЙ: <span th:text="${ad.reportCount}">2</span> жалобы</strong></p>
+    </div>
+
+    <h4>Информация о рекламе:</h4>
+    <ul>
+      <li><strong>ID:</strong> <span th:text="${ad.id}">123</span></li>
+      <li><strong>Создатель:</strong> <span th:text="${ad.createdByName}">Имя</span> (<span th:text="${ad.createdByEmail}">email</span>)</li>
+      <li><strong>Статус:</strong> <span th:text="${ad.status.displayName}">Статус</span></li>
+      <li><strong>Категория:</strong> <span th:text="${ad.category.getDescription()}">Категория</span></li>
+      <li><strong>Просмотры/Клики:</strong> <span th:text="${ad.viewsCount} + '/' + ${ad.clicksCount}">100/15</span></li>
+    </ul>
+
+    <h4>Содержание рекламы:</h4>
+    <p th:text="${ad.shortDescription}">Краткое описание рекламы</p>
+
+    <h4>Действия администратора:</h4>
+    <a th:href="@{/advertisements/details/{id}(id=${ad.id})}" target="_blank">Просмотреть детали</a>
+
+    <button onclick="showModerationActions(${ad.id})">Принять решение</button>
+
+    <!-- Панель действий модерации (скрыта по умолчанию) -->
+    <div th:id="'moderation-panel-' + ${ad.id}" style="display: none; margin-top: 10px; border: 1px solid #ccc; padding: 10px;">
+      <h5>Действия модерации:</h5>
+
+      <!-- Приостановить рекламу -->
+      <form method="post" th:action="@{/admin/advertisements/pause/{id}(id=${ad.id})}" style="display: inline;">
+        <button type="submit" onclick="return confirm('Приостановить рекламу?')">
+          Приостановить
+        </button>
+      </form>
+
+      <!-- Заблокировать рекламу -->
+      <button onclick="showBlockForm(${ad.id})">Заблокировать</button>
+
+      <!-- Отклонить жалобы -->
+      <form method="post" th:action="@{/admin/advertisements/dismiss-reports/{id}(id=${ad.id})}" style="display: inline;">
+        <button type="submit" onclick="return confirm('Отклонить все жалобы?')">
+          Жалобы необоснованы
+        </button>
+      </form>
+
+      <!-- Форма блокировки (скрыта) -->
+      <div th:id="'block-form-' + ${ad.id}" style="display: none; margin-top: 10px; border: 1px solid #ddd; padding: 10px;">
+        <form method="post" th:action="@{/admin/advertisements/block/{id}(id=${ad.id})}">
+          <h5>Причина блокировки:</h5>
+          <select name="blockReason" required>
+            <option value="">Выберите причину</option>
+            <option value="MULTIPLE_REPORTS">Множественные жалобы</option>
+            <option value="SPAM">Спам</option>
+            <option value="INAPPROPRIATE_CONTENT">Неподходящий контент</option>
+            <option value="VIOLATION">Нарушение правил</option>
+            <option value="FRAUD">Мошенничество</option>
+          </select>
+
+          <h5>Комментарий:</h5>
+          <textarea name="blockComment" rows="3" placeholder="Обоснование решения..."></textarea>
+
+          <br><br>
+          <button type="submit">Заблокировать рекламу</button>
+          <button type="button" onclick="hideBlockForm(${ad.id})">Отмена</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>Пагинация</h2>
+<div th:if="${!advertisementList.advertisementListDTOS.empty}">
+  <a th:if="${advertisementList.hasPrevious}"
+     th:href="@{/admin/advertisements/reports(page=${advertisementList.previousPage}, size=${advertisementList.itemsPerPage})}">
+    ← Предыдущая
+  </a>
+
+  <span>
+            Страница <span th:text="${advertisementList.currentPage + 1}">1</span>
+            из <span th:text="${advertisementList.totalPages}">3</span>
+            (всего <span th:text="${advertisementList.totalItems}">25</span> с жалобами)
+        </span>
+
+  <a th:if="${advertisementList.hasNext}"
+     th:href="@{/admin/advertisements/reports(page=${advertisementList.nextPage}, size=${advertisementList.itemsPerPage})}">
+    Следующая →
+  </a>
+</div>
+
+<script>
+  function showModerationActions(adId) {
+    var panel = document.getElementById('moderation-panel-' + adId);
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function showBlockForm(adId) {
+    document.getElementById('block-form-' + adId).style.display = 'block';
+  }
+
+  function hideBlockForm(adId) {
+    document.getElementById('block-form-' + adId).style.display = 'none';
+  }
+</script>
+</body>
+</html>

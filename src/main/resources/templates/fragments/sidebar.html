@@ -576,6 +576,14 @@
                 <span class="nav-text">Просмотры</span>
             </a>
 
+
+            <a href="/advertisements/create"
+               class="nav-item"
+               th:classappend="${activeSection == 'advertisements'} ? 'active' : ''">
+                <i class="fas fa-bullhorn nav-icon"></i>
+                <span class="nav-text">Реклама</span>
+            </a>
+
             <a href="/stories/feed"
                class="nav-item"
                th:classappend="${activeSection == 'stories'} ? 'active' : ''">

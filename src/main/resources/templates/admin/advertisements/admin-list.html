@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Админ панель - Рекламы</title>
+</head>
+<body>
+<h1>Управление рекламами</h1>
+
+<nav>
+  <a href="/admin/advertisements">Все рекламы</a> |
+  <a href="/admin/advertisements/moderation">На модерации</a> |
+  <a href="/admin/advertisements/reports">С жалобами</a>
+</nav>
+
+<div th:if="${successMessage}">
+  <p><strong>Успех:</strong> <span th:text="${successMessage}"></span></p>
+</div>
+<div th:if="${errorMessage}">
+  <p><strong>Ошибка:</strong> <span th:text="${errorMessage}"></span></p>
+</div>
+
+<h2>Поиск</h2>
+<form method="get">
+  <input type="text" name="search" th:value="${search}" placeholder="Поиск по названию или описанию...">
+  <button type="submit">Найти</button>
+  <a th:if="${search}" href="/admin/advertisements">Сбросить</a>
+</form>
+
+<h2>Статистика</h2>
+<p>Всего реклам: <strong th:text="${advertisementList.totalItems}">0</strong></p>
+
+<h2>Список реклам</h2>
+<table border="1">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Название</th>
+    <th>Категория</th>
+    <th>Статус</th>
+    <th>Создатель</th>
+    <th>Бюджет</th>
+    <th>Остаток</th>
+    <th>Просмотры</th>
+    <th>Клики</th>
+    <th>CTR</th>
+    <th>Жалобы</th>
+    <th>Создана</th>
+    <th>Действия</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="ad : ${advertisementList.advertisementListDTOS}">
+    <td th:text="${ad.id}">1</td>
+    <td>
+      <strong th:text="${ad.title}">Название</strong><br>
+      <small th:text="${ad.shortDescription}">Описание</small>
+    </td>
+    <td th:text="${ad.category.getDescription()}">Категория</td>
+    <td th:text="${ad.status.displayName}">Статус</td>
+    <td>
+      <span th:text="${ad.createdByName}">Имя</span><br>
+      <small th:text="${ad.createdByEmail}">email</small>
+    </td>
+    <td th:text="${ad.totalBudget} + ' ₽'">1000 ₽</td>
+    <td th:text="${ad.remainingBudget} + ' ₽'">800 ₽</td>
+    <td th:text="${ad.viewsCount}">100</td>
+    <td th:text="${ad.clicksCount}">15</td>
+    <td th:text="${#numbers.formatDecimal(ad.ctr, 0, 2)} + '%'">15%</td>
+    <td>
+      <span th:if="${ad.reportCount > 0}" th:text="${ad.reportCount}">2</span>
+      <span th:if="${ad.reportCount == 0}">0</span>
+    </td>
+    <td th:text="${#temporals.format(ad.createdAt, 'dd.MM.yyyy')}">01.01.2024</td>
+    <td>
+      <a th:href="@{/advertisements/details/{id}(id=${ad.id})}">Детали</a>
+
+      <div th:if="${ad.status.name() == 'PENDING'}">
+        <form method="post" th:action="@{/admin/advertisements/approve/{id}(id=${ad.id})}" style="display: inline;">
+          <button type="submit">Одобрить</button>
+        </form>
+        <form method="post" th:action="@{/admin/advertisements/reject/{id}(id=${ad.id})}" style="display: inline;">
+          <input type="hidden" name="rejectionReason" value="MANUAL_REVIEW">
+          <button type="submit">Отклонить</button>
+        </form>
+      </div>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+<h2>Пагинация</h2>
+<div>
+  <a th:if="${advertisementList.hasPrevious}"
+     th:href="@{/admin/advertisements(page=${advertisementList.previousPage}, size=${advertisementList.itemsPerPage}, search=${search})}">
+    ← Предыдущая
+  </a>
+
+  <span>
+            Страница <span th:text="${advertisementList.currentPage + 1}">1</span>
+            из <span th:text="${advertisementList.totalPages}">5</span>
+        </span>
+
+  <a th:if="${advertisementList.hasNext}"
+     th:href="@{/admin/advertisements(page=${advertisementList.nextPage}, size=${advertisementList.itemsPerPage}, search=${search})}">
+    Следующая →
+  </a>
+</div>
+</body>
+</html>

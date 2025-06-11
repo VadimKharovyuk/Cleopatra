@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Виджет рекламы - Пример использования</title>
+</head>
+<body>
+<h1>Пример страницы с рекламным виджетом</h1>
+<p>Это обычный контент страницы...</p>
+
+<!-- ВИДЖЕТ РЕКЛАМЫ - ВСТАВЬТЕ ЭТОТ БЛОК НА ЛЮБУЮ СТРАНИЦУ -->
+<div id="advertisement-widget" class="ad-widget">
+    <div id="ad-content" class="ad-content">
+        <p class="ad-loading">Загрузка рекламы...</p>
+    </div>
+</div>
+
+<p>Продолжение контента страницы...</p>
+
+<script>
+    class AdvertisementWidget {
+        constructor() {
+            this.loadAdvertisement();
+        }
+
+        async loadAdvertisement() {
+            try {
+                const response = await fetch('/advertisements/api/random');
+                if (response.ok) {
+                    const ad = await response.json();
+                    if (ad && ad.id) {
+                        this.displayAdvertisement(ad);
+                        this.registerView(ad.id);
+                    } else {
+                        this.hideWidget();
+                    }
+                } else {
+                    this.hideWidget();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки рекламы:', error);
+                this.hideWidget();
+            }
+        }
+
+        displayAdvertisement(ad) {
+            const adContent = document.getElementById('ad-content');
+
+            adContent.innerHTML = `
+                    <div class="ad-container" data-ad-id="${ad.id}">
+                        <div class="ad-label">Реклама</div>
+                        <div class="ad-body">
+                            ${ad.imageUrl ? `<img src="${ad.imageUrl}" alt="${ad.title}" class="ad-image">` : ''}
+                            <div class="ad-text">
+                                <h4 class="ad-title">${this.escapeHtml(ad.title)}</h4>
+                                <p class="ad-description">${this.escapeHtml(ad.shortDescription)}</p>
+                            </div>
+                        </div>
+                        <div class="ad-footer">
+                            <a href="${ad.url}" target="_blank" class="ad-link" onclick="advertisementWidget.registerClick(${ad.id})">
+                                Перейти →
+                            </a>
+                            <span class="ad-category">${ad.category}</span>
+                        </div>
+                    </div>
+                `;
+        }
+
+        async registerView(adId) {
+            try {
+                await fetch(`/advertisements/api/${adId}/view`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+            } catch (error) {
+                console.error('Ошибка регистрации просмотра:', error);
+            }
+        }
+
+        async registerClick(adId) {
+            try {
+                await fetch(`/advertisements/api/${adId}/click`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+            } catch (error) {
+                console.error('Ошибка регистрации клика:', error);
+            }
+        }
+
+        hideWidget() {
+            const widget = document.getElementById('advertisement-widget');
+            widget.style.display = 'none';
+        }
+
+        escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    }
+
+    // Инициализация виджета при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        window.advertisementWidget = new AdvertisementWidget();
+    });
+</script>
+
+<style>
+    .ad-widget {
+        max-width: 300px;
+        margin: 20px 0;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .ad-content {
+        position: relative;
+    }
+
+    .ad-loading {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        margin: 0;
+    }
+
+    .ad-container {
+        background: #fff;
+    }
+
+    .ad-label {
+        background: #f5f5f5;
+        padding: 4px 8px;
+        font-size: 11px;
+        color: #666;
+        text-transform: uppercase;
+        border-bottom: 1px solid #eee;
+    }
+
+    .ad-body {
+        padding: 15px;
+    }
+
+    .ad-image {
+        width: 100%;
+        height: auto;
+        max-height: 150px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+
+    .ad-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 0 0 8px 0;
+        color: #333;
+    }
+
+    .ad-description {
+        font-size: 14px;
+        color: #666;
+        margin: 0 0 10px 0;
+        line-height: 1.4;
+    }
+
+    .ad-footer {
+        padding: 10px 15px;
+        background: #f9f9f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #eee;
+    }
+
+    .ad-link {
+        background: #007bff;
+        color: white;
+        padding: 6px 12px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: background-color 0.2s;
+    }
+
+    .ad-link:hover {
+        background: #0056b3;
+    }
+
+    .ad-category {
+        font-size: 12px;
+        color: #888;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .ad-widget {
+            max-width: 100%;
+            margin: 10px 0;
+        }
+    }
+</style>
+</body>
+</html>

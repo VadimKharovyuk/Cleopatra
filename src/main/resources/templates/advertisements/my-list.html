@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Мои рекламы</title>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Мои рекламы</h1>
+    <a href="/advertisements/create" class="btn-primary">Создать рекламу</a>
+  </header>
+
+  <!-- Сообщения -->
+  <div th:if="${successMessage}" class="alert-success">
+    <p th:text="${successMessage}"></p>
+  </div>
+  <div th:if="${errorMessage}" class="alert-error">
+    <p th:text="${errorMessage}"></p>
+  </div>
+
+  <!-- Список реклам -->
+  <div class="ads-container">
+    <div th:if="${advertisementList.advertisementListDTOS.empty}" class="empty-state">
+      <h3>У вас пока нет реклам</h3>
+      <p>Создайте свою первую рекламу прямо сейчас!</p>
+      <a href="/advertisements/create" class="btn-primary">Создать рекламу</a>
+    </div>
+
+    <div th:each="ad : ${advertisementList.advertisementListDTOS}" class="ad-card">
+      <div class="ad-header">
+        <h3 th:text="${ad.title}">Название рекламы</h3>
+        <span th:text="${ad.status}" th:class="|status-${ad.status.name().toLowerCase()}|">Статус</span>
+      </div>
+
+      <div class="ad-content">
+        <p th:text="${ad.shortDescription}">Краткое описание</p>
+        <p><strong>Категория:</strong> <span th:text="${ad.category.getDescription()}">Категория</span></p>
+      </div>
+
+      <div class="ad-stats">
+        <div class="stat">
+          <span class="stat-label">Бюджет:</span>
+          <span th:text="${ad.totalBudget} + ' руб.'">1000 руб.</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Остаток:</span>
+          <span th:text="${ad.remainingBudget} + ' руб.'">800 руб.</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Просмотры:</span>
+          <span th:text="${ad.viewsCount}">100</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Клики:</span>
+          <span th:text="${ad.clicksCount}">15</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">CTR:</span>
+          <span th:text="${#numbers.formatDecimal(ad.ctr, 0, 2)} + '%'">15.00%</span>
+        </div>
+      </div>
+
+      <div class="ad-actions">
+        <a th:href="@{/advertisements/details/{id}(id=${ad.id})}" class="btn-secondary">Детали</a>
+        <a th:href="@{/advertisements/edit/{id}(id=${ad.id})}" class="btn-primary">Редактировать</a>
+        <form th:action="@{/advertisements/delete/{id}(id=${ad.id})}" method="post" style="display: inline;"
+              onsubmit="return confirm('Вы уверены, что хотите удалить рекламу?')">
+          <button type="submit" class="btn-danger">Удалить</button>
+        </form>
+      </div>
+
+      <div class="ad-dates">
+        <small>Создана: <span th:text="${#temporals.format(ad.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2024</span></small>
+        <small th:if="${ad.lastViewedAt}">
+          Последний просмотр: <span th:text="${#temporals.format(ad.lastViewedAt, 'dd.MM.yyyy HH:mm')}">01.01.2024</span>
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Пагинация -->
+  <div th:if="${!advertisementList.advertisementListDTOS.empty}" class="pagination">
+    <a th:if="${advertisementList.hasPrevious}"
+       th:href="@{/advertisements/my(page=${advertisementList.previousPage}, size=${advertisementList.itemsPerPage})}"
+       class="btn-secondary">← Предыдущая</a>
+
+    <span class="page-info">
+                Страница <span th:text="${advertisementList.currentPage + 1}">1</span>
+                из <span th:text="${advertisementList.totalPages}">5</span>
+                (всего <span th:text="${advertisementList.totalItems}">50</span> реклам)
+            </span>
+
+    <a th:if="${advertisementList.hasNext}"
+       th:href="@{/advertisements/my(page=${advertisementList.nextPage}, size=${advertisementList.itemsPerPage})}"
+       class="btn-secondary">Следующая →</a>
+  </div>
+</div>
+</body>
+</html>

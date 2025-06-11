@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Модерация рекламы</title>
+</head>
+<body>
+<h1>Модерация рекламы</h1>
+
+<nav>
+  <a href="/admin/advertisements">Все рекламы</a> |
+  <a href="/admin/advertisements/moderation">На модерации</a> |
+  <a href="/admin/advertisements/reports">С жалобами</a>
+</nav>
+
+<div th:if="${successMessage}">
+  <p><strong>Успех:</strong> <span th:text="${successMessage}"></span></p>
+</div>
+<div th:if="${errorMessage}">
+  <p><strong>Ошибка:</strong> <span th:text="${errorMessage}"></span></p>
+</div>
+
+<h2>Статистика модерации</h2>
+<p>Ожидают модерации: <strong th:text="${advertisementList.totalItems}">0</strong> объявлений</p>
+
+<div th:if="${advertisementList.advertisementListDTOS.empty}">
+  <h3>Все рекламы проверены!</h3>
+  <p>В данный момент нет рекламных объявлений, ожидающих модерации.</p>
+  <a href="/admin/advertisements">Перейти ко всем рекламам</a>
+</div>
+
+<div th:if="${!advertisementList.advertisementListDTOS.empty}">
+  <h2>Список реклам на модерации</h2>
+
+  <div th:each="ad : ${advertisementList.advertisementListDTOS}">
+    <hr>
+    <h3 th:text="${ad.title}">Название рекламы</h3>
+    <p><strong>ID:</strong> <span th:text="${ad.id}">123</span></p>
+
+    <h4>Информация о рекламе:</h4>
+    <ul>
+      <li><strong>Создатель:</strong> <span th:text="${ad.createdByName}">Имя</span> (<span th:text="${ad.createdByEmail}">email</span>)</li>
+      <li><strong>Категория:</strong> <span th:text="${ad.category.getDescription()}">Категория</span></li>
+      <li><strong>Бюджет:</strong> <span th:text="${ad.totalBudget} + ' руб.'">1000 руб.</span></li>
+      <li><strong>Создана:</strong> <span th:text="${#temporals.format(ad.createdAt, 'dd.MM.yyyy HH:mm')}">дата</span></li>
+    </ul>
+
+    <h4>Описание:</h4>
+    <p th:text="${ad.shortDescription}">Краткое описание рекламы</p>
+
+    <h4>Действия модерации:</h4>
+    <form method="post" th:action="@{/admin/advertisements/approve/{id}(id=${ad.id})}" style="display: inline;">
+      <button type="submit" onclick="return confirm('Вы уверены, что хотите одобрить эту рекламу?')">
+        Одобрить
+      </button>
+    </form>
+
+    <button onclick="showRejectForm(${ad.id})">Отклонить</button>
+
+    <a th:href="@{/advertisements/details/{id}(id=${ad.id})}" target="_blank">Просмотреть детали</a>
+
+    <!-- Форма отклонения (скрыта по умолчанию) -->
+    <div th:id="'reject-form-' + ${ad.id}" style="display: none; margin-top: 10px; border: 1px solid #ccc; padding: 10px;">
+      <form method="post" th:action="@{/admin/advertisements/reject/{id}(id=${ad.id})}">
+        <h5>Причина отклонения:</h5>
+        <select name="rejectionReason" required>
+          <option value="">Выберите причину</option>
+          <option value="SPAM">Спам</option>
+          <option value="INAPPROPRIATE_CONTENT">Неподходящий контент</option>
+          <option value="ADULT_CONTENT">Контент 18+</option>
+          <option value="VIOLENCE">Пропаганда насилия</option>
+          <option value="MISLEADING">Ложная информация</option>
+          <option value="COPYRIGHT">Нарушение авторских прав</option>
+          <option value="OTHER">Другое</option>
+        </select>
+
+        <h5>Комментарий (необязательно):</h5>
+        <textarea name="rejectionComment" rows="3"
+                  placeholder="Дополнительные пояснения для рекламодателя..."></textarea>
+
+        <br><br>
+        <button type="submit">Отклонить рекламу</button>
+        <button type="button" onclick="hideRejectForm(${ad.id})">Отмена</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<h2>Пагинация</h2>
+<div th:if="${!advertisementList.advertisementListDTOS.empty}">
+  <a th:if="${advertisementList.hasPrevious}"
+     th:href="@{/admin/advertisements/moderation(page=${advertisementList.previousPage}, size=${advertisementList.itemsPerPage})}">
+    ← Предыдущая
+  </a>
+
+  <span>
+            Страница <span th:text="${advertisementList.currentPage + 1}">1</span>
+            из <span th:text="${advertisementList.totalPages}">5</span>
+            (всего <span th:text="${advertisementList.totalItems}">50</span> на модерации)
+        </span>
+
+  <a th:if="${advertisementList.hasNext}"
+     th:href="@{/admin/advertisements/moderation(page=${advertisementList.nextPage}, size=${advertisementList.itemsPerPage})}">
+    Следующая →
+  </a>
+</div>
+
+<script>
+  function showRejectForm(adId) {
+    document.getElementById('reject-form-' + adId).style.display = 'block';
+  }
+
+  function hideRejectForm(adId) {
+    document.getElementById('reject-form-' + adId).style.display = 'none';
+  }
+</script>
+</body>
+</html>

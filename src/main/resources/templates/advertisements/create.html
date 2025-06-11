@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Создать рекламу</title>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Создать рекламу</h1>
+    <a href="/advertisements/my" class="btn-secondary">← Назад к списку</a>
+  </header>
+
+
+
+  <form th:action="@{/advertisements/create}" th:object="${createDto}" method="post" enctype="multipart/form-data" class="ad-form">
+
+    <!-- Основная информация -->
+    <fieldset>
+      <legend>Основная информация</legend>
+
+      <div class="form-group">
+        <label for="title">Название рекламы*:</label>
+        <input type="text" id="title" th:field="*{title}" maxlength="100" required>
+        <span th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="error-message"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="shortDescription">Краткое описание*:</label>
+        <textarea id="shortDescription" th:field="*{shortDescription}" rows="2" maxlength="150" required></textarea>
+        <span th:if="${#fields.hasErrors('shortDescription')}" th:errors="*{shortDescription}" class="error-message"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Полное описание*:</label>
+        <textarea id="description" th:field="*{description}" rows="4" maxlength="500" required></textarea>
+        <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="error-message"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="url">Ссылка*:</label>
+        <input type="url" id="url" th:field="*{url}" required>
+        <span th:if="${#fields.hasErrors('url')}" th:errors="*{url}" class="error-message"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="category">Категория*:</label>
+        <select id="category" th:field="*{category}" required>
+          <option value="">Выберите категорию</option>
+          <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat.getDescription()}">Категория</option>
+        </select>
+        <span th:if="${#fields.hasErrors('category')}" th:errors="*{category}" class="error-message"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="image">Изображение:</label>
+        <input type="file" id="image" name="image" accept="image/*">
+        <small>Максимальный размер: 10 MB. Поддерживаемые форматы: JPG, PNG, HEIF</small>
+      </div>
+    </fieldset>
+
+    <!-- Бюджет -->
+    <fieldset>
+      <legend>Бюджет и стоимость</legend>
+
+      <div class="form-group">
+        <label for="totalBudget">Общий бюджет (руб.)*:</label>
+        <input type="number" id="totalBudget" th:field="*{totalBudget}" min="1" max="100000" step="0.01" required>
+        <span th:if="${#fields.hasErrors('totalBudget')}" th:errors="*{totalBudget}" class="error-message"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="costPerView">Стоимость за просмотр (руб.):</label>
+        <input type="number" id="costPerView" th:field="*{costPerView}" min="0.01" max="10" step="0.01" value="0.20">
+        <span th:if="${#fields.hasErrors('costPerView')}" th:errors="*{costPerView}" class="error-message"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="costPerClick">Стоимость за клик (руб.):</label>
+        <input type="number" id="costPerClick" th:field="*{costPerClick}" min="0.01" max="50" step="0.01" value="0.50">
+        <span th:if="${#fields.hasErrors('costPerClick')}" th:errors="*{costPerClick}" class="error-message"></span>
+      </div>
+    </fieldset>
+
+    <!-- Таргетинг -->
+    <fieldset>
+      <legend>Таргетинг (необязательно)</legend>
+
+      <div class="form-group">
+        <label for="targetGender">Пол:</label>
+        <select id="targetGender" th:field="*{targetGender}">
+          <option value="">Любой</option>
+          <option th:each="gender : ${genders}" th:value="${gender}" th:text="${gender.displayName}">Пол</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="minAge">Возраст от:</label>
+          <input type="number" id="minAge" th:field="*{minAge}" min="13" max="100">
+        </div>
+        <div class="form-group">
+          <label for="maxAge">Возраст до:</label>
+          <input type="number" id="maxAge" th:field="*{maxAge}" min="13" max="100">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="targetCity">Город:</label>
+        <input type="text" id="targetCity" th:field="*{targetCity}" placeholder="Оставьте пустым для всех городов">
+      </div>
+    </fieldset>
+
+    <!-- Время показа -->
+    <fieldset>
+      <legend>Время показа (необязательно)</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="startTime">Время начала:</label>
+          <input type="time" id="startTime" th:field="*{startTime}">
+        </div>
+        <div class="form-group">
+          <label for="endTime">Время окончания:</label>
+          <input type="time" id="endTime" th:field="*{endTime}">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="startDate">Дата начала*:</label>
+          <input type="date" id="startDate" th:field="*{startDate}" required>
+          <span th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}" class="error-message"></span>
+        </div>
+        <div class="form-group">
+          <label for="endDate">Дата окончания*:</label>
+          <input type="date" id="endDate" th:field="*{endDate}" required>
+          <span th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}" class="error-message"></span>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Кнопки -->
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">Создать рекламу</button>
+      <a href="/advertisements/my" class="btn-secondary">Отмена</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Автоматическое заполнение даты окончания
+  document.getElementById('startDate').addEventListener('change', function() {
+    const startDate = new Date(this.value);
+    if (!isNaN(startDate)) {
+      // Устанавливаем дату окончания на месяц позже
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+      document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+    }
+  });
+
+  // Валидация возраста
+  document.getElementById('minAge').addEventListener('change', function() {
+    const maxAge = document.getElementById('maxAge');
+    if (this.value && maxAge.value && parseInt(this.value) > parseInt(maxAge.value)) {
+      maxAge.value = this.value;
+    }
+  });
+</script>
+</body>
+</html>
