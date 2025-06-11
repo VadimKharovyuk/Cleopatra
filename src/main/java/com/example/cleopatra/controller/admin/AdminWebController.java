@@ -34,6 +34,28 @@ public class AdminWebController {
     public String searchPage(Model model) {
         return "admin/blocked-users/user-search";
     }
+    /**
+     * Разблокировка пользователя
+     */
+    @PostMapping("/{userId}/unblock")
+    public String unblockUser(@PathVariable Long userId,
+                              @RequestParam String reason,
+                              Authentication authentication, // Изменено
+                              RedirectAttributes redirectAttributes) {
+        try {
+            // Получаем текущего админа по email
+            String adminEmail = authentication.getName();
+            User currentAdmin = userRepository.findByEmail(adminEmail)
+                    .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+            userBlockingService.unblockUser(userId, reason, currentAdmin.getId());
+            redirectAttributes.addFlashAttribute("success", "Пользователь успешно разблокирован");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Ошибка разблокировки: " + e.getMessage());
+            log.error("Error unblocking user {}: {}", userId, e.getMessage(), e);
+        }
+        return "redirect:/admin/users/search";
+    }
 
     /**
      * Поиск пользователя
@@ -75,28 +97,7 @@ public class AdminWebController {
         return "redirect:/admin/users/search";
     }
 
-    /**
-     * Разблокировка пользователя
-     */
-    @PostMapping("/{userId}/unblock")
-    public String unblockUser(@PathVariable Long userId,
-                              @RequestParam String reason,
-                              Authentication authentication, // Изменено
-                              RedirectAttributes redirectAttributes) {
-        try {
-            // Получаем текущего админа по email
-            String adminEmail = authentication.getName();
-            User currentAdmin = userRepository.findByEmail(adminEmail)
-                    .orElseThrow(() -> new RuntimeException("Admin not found"));
 
-            userBlockingService.unblockUser(userId, reason, currentAdmin.getId());
-            redirectAttributes.addFlashAttribute("success", "Пользователь успешно разблокирован");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Ошибка разблокировки: " + e.getMessage());
-            log.error("Error unblocking user {}: {}", userId, e.getMessage(), e);
-        }
-        return "redirect:/admin/users/search";
-    }
 
     /**
      * Список заблокированных пользователей
@@ -112,7 +113,7 @@ public class AdminWebController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", blockedUsers.getTotalPages());
 
-        return "admin/blocked-users";
+        return "admin/blocked-users/blocked-users";
     }
 
     /**
@@ -124,7 +125,7 @@ public class AdminWebController {
             var history = userBlockingService.getUserBlockHistory(userId);
             model.addAttribute("history", history);
             model.addAttribute("userId", userId);
-            return "admin/user-block-history";
+            return "admin/blocked-users/user-block-history";
         } catch (Exception e) {
             model.addAttribute("error", "Ошибка получения истории: " + e.getMessage());
             return "redirect:/admin/users/search";
