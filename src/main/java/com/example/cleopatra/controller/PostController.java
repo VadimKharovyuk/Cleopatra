@@ -74,22 +74,11 @@ public class PostController {
         }
     }
 
-
     @GetMapping("/{id}")
     public String showPost(@PathVariable Long id, Model model) {
-
-
         PostResponseDto post = postService.getPostById(id);
 
-        // Логируем размер контента
-        if (post != null) {
-            log.info("Длина контента: {} символов",
-                    post.getContent() != null ? post.getContent().length() : 0);
-            log.info("Первые 100 символов: {}",
-                    post.getContent() != null && post.getContent().length() > 100
-                            ? post.getContent().substring(0, 100) + "..."
-                            : post.getContent());
-        } else {
+        if (post == null) {
             log.warn("Пост с ID {} не найден!", id);
         }
 

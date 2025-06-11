@@ -298,27 +298,21 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostListDto getFeedPosts(Long userId, int page, int size) {
-        log.info("Получение ленты новостей для пользователя: {}, страница: {}, размер: {}", userId, page, size);
 
         List<Long> subscriptionIds = subscriptionService.getSubscriptionIds(userId);
 
         if (subscriptionIds.isEmpty()) {
-            log.info("У пользователя {} нет подписок, показываем рекомендованные посты", userId);
             return getRecommendedPosts(userId, page, size);
         }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Slice<Post> postSlice = postRepository.findByAuthor_IdInAndIsDeletedFalse(subscriptionIds, pageable);
-
-        log.info("Найдено {} постов в ленте для пользователя {}", postSlice.getNumberOfElements(), userId);
-
         // ✅ ОБНОВЛЕННЫЙ МЕТОД с логикой лайков
         return convertPostSliceToListDto(postSlice, page);
     }
 
     @Override
     public PostListDto getRecommendedPosts(Long userId, int page, int size) {
-        log.info("Получение рекомендованных постов для пользователя: {}", userId);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Slice<Post> postSlice = postRepository.findByIsDeletedFalseOrderByLikesCountDescCreatedAtDesc(pageable);
@@ -358,7 +352,7 @@ public class PostServiceImpl implements PostService {
                 .build();
     }
 
-    // ✅ ПРИВАТНЫЕ ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+
 
     /**
      * Конвертирует Slice<Post> в PostListDto с логикой лайков
