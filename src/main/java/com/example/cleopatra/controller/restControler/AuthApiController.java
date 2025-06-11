@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -39,15 +40,9 @@ public class AuthApiController {
     /**
      * Аутентификация пользователя
      */
-
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request,
                                                      HttpServletRequest httpRequest) {
-
-//        // ДОБАВИТЬ детальное логирование
-//        log.info("🔍 === НАЧАЛО ПРОЦЕССА ЛОГИНА ===");
-//        log.info("🔍 Email: {}", request.getEmail());
-//        log.info("🔍 Password length: {}", request.getPassword() != null ? request.getPassword().length() : "null");
 
         try {
             // Шаг 1: Проверяем входные данные
@@ -62,10 +57,36 @@ public class AuthApiController {
                 return createErrorResponse("Пароль не может быть пустым", HttpStatus.BAD_REQUEST);
             }
 
+            // ДОБАВЛЯЕМ: Проверяем, не заблокирован ли пользователь ДО аутентификации
+            try {
+                Optional<User> blockedUserOpt = userRepository.findByEmail(request.getEmail());
+                if (blockedUserOpt.isPresent() && Boolean.TRUE.equals(blockedUserOpt.get().getIsBlocked())) {
+                    User blockedUser = blockedUserOpt.get();
+                    log.warn("🚫 User {} is blocked, sending blocked response", request.getEmail());
+
+                    Map<String, Object> blockedResponse = new HashMap<>();
+                    blockedResponse.put("success", false);
+                    blockedResponse.put("blocked", true);
+                    blockedResponse.put("message", "Ваш аккаунт заблокирован. Обратитесь в поддержку.");
+                    blockedResponse.put("redirectUrl", "/blocked-account");
+
+                    // Добавляем дополнительную информацию о блокировке
+                    blockedResponse.put("blockInfo", Map.of(
+                            "blockedAt", blockedUser.getBlockedAt() != null ? blockedUser.getBlockedAt().toString() : null,
+                            "reason", blockedUser.getBlockReason() != null ? blockedUser.getBlockReason() : "Причина не указана",
+                            "supportEmail", "support@cleopatra.com"
+                    ));
+
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(blockedResponse);
+                }
+            } catch (Exception e) {
+                log.error("❌ Ошибка при проверке блокировки: {}", e.getMessage());
+                // Продолжаем выполнение, если проверка блокировки не удалась
+            }
+
             log.info("✅ Входные данные валидны");
 
             // Шаг 2: Аутентификация
-//            log.info("🔍 ШАГ 2: Вызов authenticationService.authenticate()");
             Optional<User> userOpt;
 
             try {
@@ -78,22 +99,54 @@ public class AuthApiController {
             }
 
             // Шаг 3: Проверяем результат аутентификации
-//            log.info("🔍 ШАГ 3: Проверка результата аутентификации");
             if (userOpt.isEmpty()) {
                 log.warn("🔒 Аутентификация не прошла для email: {}", request.getEmail());
+
+                // Дополнительная проверка - может быть пользователь заблокирован
+                try {
+                    Optional<User> userCheckOpt = userRepository.findByEmail(request.getEmail());
+                    if (userCheckOpt.isPresent() && Boolean.TRUE.equals(userCheckOpt.get().getIsBlocked())) {
+                        log.warn("🚫 User {} is blocked (detected in step 3)", request.getEmail());
+
+                        Map<String, Object> blockedResponse = new HashMap<>();
+                        blockedResponse.put("success", false);
+                        blockedResponse.put("blocked", true);
+                        blockedResponse.put("message", "Ваш аккаунт заблокирован. Обратитесь в поддержку.");
+                        blockedResponse.put("redirectUrl", "/blocked-account");
+
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(blockedResponse);
+                    }
+                } catch (Exception e) {
+                    log.error("❌ Ошибка при дополнительной проверке блокировки: {}", e.getMessage());
+                }
+
                 return createErrorResponse("Неверный email или пароль", HttpStatus.UNAUTHORIZED);
             }
 
             User user = userOpt.get();
-//            log.info("✅ Пользователь найден: ID={}, Email={}", user.getId(), user.getEmail());
 
             // Шаг 4: Загрузка UserDetails
-//            log.info("🔍 ШАГ 4: Загрузка UserDetails");
             UserDetails userDetails;
 
             try {
                 userDetails = authenticationService.loadUserByUsername(user.getEmail());
                 log.info("✅ UserDetails загружены успешно: {}", userDetails.getUsername());
+            } catch (UsernameNotFoundException e) {
+                // Проверяем, не связано ли это с блокировкой
+                if (e.getMessage().contains("blocked")) {
+                    log.warn("🚫 User {} blocked during UserDetails loading", user.getEmail());
+
+                    Map<String, Object> blockedResponse = new HashMap<>();
+                    blockedResponse.put("success", false);
+                    blockedResponse.put("blocked", true);
+                    blockedResponse.put("message", "Ваш аккаунт был заблокирован.");
+                    blockedResponse.put("redirectUrl", "/blocked-account");
+
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(blockedResponse);
+                }
+
+                log.error("❌ ОШИБКА в loadUserByUsername(): {}", e.getMessage(), e);
+                return createErrorResponse("Пользователь не найден: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
             } catch (Exception e) {
                 log.error("❌ ОШИБКА в loadUserByUsername(): {}", e.getMessage(), e);
                 log.error("❌ Exception class: {}", e.getClass().getName());
@@ -101,60 +154,42 @@ public class AuthApiController {
             }
 
             // Шаг 5: Создание Authentication
-//            log.info("🔍 ШАГ 5: Создание Authentication");
             Authentication authentication;
 
             try {
                 authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
-//                log.info("✅ Authentication создан: {}", authentication.getName());
             } catch (Exception e) {
                 log.error("❌ ОШИБКА при создании Authentication: {}", e.getMessage(), e);
                 return createErrorResponse("Ошибка создания токена аутентификации: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-//            // Отладка - ДО установки
-//            log.info("🔍 === ДО установки Authentication ===");
-//            log.info("Current SecurityContext: {}", SecurityContextHolder.getContext().getAuthentication());
-
             // Шаг 6: Установка в SecurityContext
-//            log.info("🔍 ШАГ 6: Установка в SecurityContext");
             try {
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
                 securityContext.setAuthentication(authentication);
                 SecurityContextHolder.setContext(securityContext);
-//                log.info("✅ SecurityContext установлен");
             } catch (Exception e) {
                 log.error("❌ ОШИБКА при установке SecurityContext: {}", e.getMessage(), e);
                 return createErrorResponse("Ошибка установки контекста безопасности: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
             // Шаг 7: Работа с сессией
-//            log.info("🔍 ШАГ 7: Работа с сессией");
             HttpSession session;
 
             try {
                 session = httpRequest.getSession(true);
                 session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-//                log.info("✅ Сессия создана: {}", session.getId());
             } catch (Exception e) {
                 log.error("❌ ОШИБКА при работе с сессией: {}", e.getMessage(), e);
                 return createErrorResponse("Ошибка создания сессии: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-//            // Отладка - ПОСЛЕ установки
-//            log.info("🔍 === ПОСЛЕ установки Authentication ===");
-//            log.info("New SecurityContext: {}", SecurityContextHolder.getContext().getAuthentication());
-//            log.info("Session ID: {}", session.getId());
-//            log.info("Session attribute: {}", session.getAttribute("SPRING_SECURITY_CONTEXT"));
-//
-//            // Шаг 8: Создание ответа
-//            log.info("🔍 ШАГ 8: Создание ответа");
+            // Шаг 8: Создание ответа
             Map<String, Object> userInfo;
 
             try {
                 userInfo = createUserInfo(user);
-//                log.info("✅ UserInfo создан");
             } catch (Exception e) {
                 log.error("❌ ОШИБКА при создании UserInfo: {}", e.getMessage(), e);
                 return createErrorResponse("Ошибка формирования данных пользователя: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -168,7 +203,6 @@ public class AuthApiController {
             response.put("debugAuth", SecurityContextHolder.getContext().getAuthentication() != null ?
                     SecurityContextHolder.getContext().getAuthentication().getName() : "null");
 
-//            log.info("✅ === ЛОГИН ЗАВЕРШЕН УСПЕШНО ===");
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
@@ -181,13 +215,28 @@ public class AuthApiController {
         }
     }
 
-    // ДОБАВИТЬ вспомогательные методы
+    // Вспомогательные методы
     private ResponseEntity<Map<String, Object>> createErrorResponse(String message, HttpStatus status) {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("success", false);
         errorResponse.put("message", message);
         errorResponse.put("timestamp", java.time.LocalDateTime.now());
         return ResponseEntity.status(status).body(errorResponse);
+    }
+
+    private Map<String, Object> createUserInfo(User user) {
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("id", user.getId());
+        userInfo.put("email", user.getEmail());
+        userInfo.put("firstName", user.getFirstName());
+        userInfo.put("lastName", user.getLastName());
+        userInfo.put("role", user.getRole().name());
+        userInfo.put("imageUrl", user.getImageUrl());
+        userInfo.put("isPrivateProfile", user.getIsPrivateProfile());
+        userInfo.put("followersCount", user.getFollowersCount());
+        userInfo.put("followingCount", user.getFollowingCount());
+
+        return userInfo;
     }
 //    @PostMapping("/login")
 //    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request,
@@ -350,19 +399,6 @@ public class AuthApiController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
-    }
-
-    /**
-     * Создает краткую информацию о пользователе для ответа
-     */
-    private Map<String, Object> createUserInfo(User user) {
-        Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("id", user.getId());
-        userInfo.put("email", user.getEmail());
-        userInfo.put("firstName", user.getFirstName());
-        userInfo.put("lastName", user.getLastName());
-        userInfo.put("role", user.getRole().name());
-        return userInfo;
     }
 
     /**

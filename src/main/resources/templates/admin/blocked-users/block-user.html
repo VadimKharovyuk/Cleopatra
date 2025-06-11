@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Блокировка пользователя - Админ панель</title>
+</head>
+<body>
+<h1>Блокировка пользователя</h1>
+
+<nav>
+  <a href="/admin/users/search">Поиск пользователей</a> |
+  <a href="/admin/users/blocked">Заблокированные пользователи</a> |
+  <a href="/dashboard">Главная</a>
+</nav>
+
+<hr>
+
+<!-- Сообщения об ошибках -->
+<div th:if="${error}" style="color: red; border: 1px solid red; padding: 10px; margin: 10px 0;">
+  <strong>Ошибка:</strong> <span th:text="${error}"></span>
+</div>
+
+<!-- Информация о пользователе -->
+<div th:if="${user}">
+  <h2>Информация о пользователе</h2>
+
+  <table border="1" cellpadding="10" cellspacing="0" style="margin-bottom: 20px;">
+    <tr>
+      <th style="background-color: #f5f5f5; text-align: left;">ID пользователя</th>
+      <td th:text="${user.id}"></td>
+    </tr>
+    <tr>
+      <th style="background-color: #f5f5f5; text-align: left;">Email</th>
+      <td th:text="${user.email}"></td>
+    </tr>
+    <tr>
+      <th style="background-color: #f5f5f5; text-align: left;">Имя</th>
+      <td th:text="${user.firstName}"></td>
+    </tr>
+    <tr>
+      <th style="background-color: #f5f5f5; text-align: left;">Фамилия</th>
+      <td th:text="${user.lastName}"></td>
+    </tr>
+    <tr>
+      <th style="background-color: #f5f5f5; text-align: left;">Приватный профиль</th>
+      <td>
+        <span th:if="${user.isPrivateProfile}" style="color: orange;">Да</span>
+        <span th:unless="${user.isPrivateProfile}" style="color: green;">Нет</span>
+      </td>
+    </tr>
+    <tr>
+      <th style="background-color: #f5f5f5; text-align: left;">Текущий статус</th>
+      <td>
+        <span th:if="${user.isBlocked}" style="color: red; font-weight: bold;">ЗАБЛОКИРОВАН</span>
+        <span th:unless="${user.isBlocked}" style="color: green; font-weight: bold;">АКТИВЕН</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Предупреждение если пользователь уже заблокирован -->
+  <div th:if="${user.isBlocked}" style="color: red; border: 2px solid red; padding: 15px; margin: 20px 0;">
+    <h3>⚠️ ВНИМАНИЕ!</h3>
+    <p><strong>Пользователь уже заблокирован!</strong></p>
+    <p>Для изменения статуса используйте функцию разблокировки.</p>
+
+    <div style="margin-top: 15px;">
+      <a href="/admin/users/blocked" style="text-decoration: none;">
+        <button style="background-color: green; color: white; padding: 10px 20px;">
+          Перейти к списку заблокированных
+        </button>
+      </a>
+
+      <a th:href="@{'/admin/users/' + ${user.id} + '/history'}" style="text-decoration: none; margin-left: 10px;">
+        <button style="background-color: blue; color: white; padding: 10px 20px;">
+          Посмотреть историю
+        </button>
+      </a>
+    </div>
+  </div>
+
+  <!-- Форма блокировки (только если пользователь не заблокирован) -->
+  <div th:unless="${user.isBlocked}">
+    <h2 style="color: red;">🚫 Блокировка пользователя</h2>
+
+    <div style="border: 2px solid red; padding: 20px; margin: 20px 0;">
+      <h3>⚠️ Подтверждение блокировки</h3>
+      <p><strong>Вы собираетесь заблокировать пользователя:</strong></p>
+      <ul>
+        <li><strong>ID:</strong> <span th:text="${user.id}"></span></li>
+        <li><strong>Email:</strong> <span th:text="${user.email}"></span></li>
+        <li><strong>Имя:</strong> <span th:text="${user.firstName + ' ' + user.lastName}"></span></li>
+      </ul>
+
+      <p style="color: red; font-weight: bold;">
+        После блокировки пользователь не сможет войти в систему!
+      </p>
+
+      <form th:action="@{'/admin/users/' + ${user.id} + '/block'}" method="post" onsubmit="return confirmBlock()">
+        <h4>Причина блокировки:</h4>
+        <select id="reasonSelect" onchange="handleReasonChange()" style="width: 100%; padding: 5px; margin-bottom: 10px;">
+          <option value="">-- Выберите причину --</option>
+          <option value="Нарушение правил сообщества">Нарушение правил сообщества</option>
+          <option value="Спам и нежелательная реклама">Спам и нежелательная реклама</option>
+          <option value="Оскорбления и харассмент">Оскорбления и харассмент</option>
+          <option value="Публикация неподходящего контента">Публикация неподходящего контента</option>
+          <option value="Мошенничество или обман">Мошенничество или обман</option>
+          <option value="Технические нарушения">Технические нарушения</option>
+          <option value="Жалобы пользователей">Жалобы пользователей</option>
+          <option value="custom">Другая причина (указать вручную)</option>
+        </select>
+
+        <textarea id="reasonText" name="reason" rows="4" cols="50"
+                  placeholder="Укажите подробную причину блокировки..."
+                  required style="width: 100%; padding: 10px; margin-bottom: 15px;"></textarea>
+
+        <div style="margin-top: 20px;">
+          <button type="submit" style="background-color: red; color: white; padding: 15px 30px; font-size: 16px; font-weight: bold;">
+            🚫 ЗАБЛОКИРОВАТЬ ПОЛЬЗОВАТЕЛЯ
+          </button>
+
+          <button type="button" onclick="goBack()" style="background-color: gray; color: white; padding: 15px 30px; margin-left: 15px;">
+            Отмена
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Дополнительные действия -->
+  <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px;">
+    <h3>Дополнительные действия</h3>
+
+    <a th:href="@{'/admin/users/' + ${user.id} + '/history'}" style="text-decoration: none; margin-right: 10px;">
+      <button style="background-color: blue; color: white; padding: 10px 20px;">
+        📋 История блокировок
+      </button>
+    </a>
+
+    <a href="/admin/users/search" style="text-decoration: none; margin-right: 10px;">
+      <button style="background-color: green; color: white; padding: 10px 20px;">
+        🔍 Поиск других пользователей
+      </button>
+    </a>
+
+    <a href="/admin/users/blocked" style="text-decoration: none;">
+      <button style="background-color: orange; color: white; padding: 10px 20px;">
+        📊 Список заблокированных
+      </button>
+    </a>
+  </div>
+</div>
+
+<script>
+  function handleReasonChange() {
+    const select = document.getElementById('reasonSelect');
+    const textarea = document.getElementById('reasonText');
+
+    if (select.value === 'custom') {
+      textarea.value = '';
+      textarea.placeholder = 'Укажите причину блокировки...';
+      textarea.focus();
+    } else if (select.value !== '') {
+      textarea.value = select.value;
+    } else {
+      textarea.value = '';
+    }
+  }
+
+  function confirmBlock() {
+    const reason = document.getElementById('reasonText').value.trim();
+
+    if (reason === '') {
+      alert('Пожалуйста, укажите причину блокировки!');
+      return false;
+    }
+
+    if (reason.length < 10) {
+      alert('Причина блокировки должна содержать минимум 10 символов!');
+      return false;
+    }
+
+    const userEmail = '[[${user.email}]]';
+    const userName = '[[${user.firstName}]] [[${user.lastName}]]';
+
+    return confirm(
+            'Вы уверены, что хотите заблокировать пользователя?\n\n' +
+            'Пользователь: ' + userName + '\n' +
+            'Email: ' + userEmail + '\n' +
+            'Причина: ' + reason + '\n\n' +
+            'Это действие можно будет отменить через функцию разблокировки.'
+    );
+  }
+
+  function goBack() {
+    if (confirm('Вы уверены, что хотите отменить блокировку?')) {
+      window.history.back();
+    }
+  }
+
+  // Автофокус на textarea при загрузке страницы
+  window.onload = function() {
+    const isBlocked = [[${user.isBlocked}]];
+    if (!isBlocked) {
+      document.getElementById('reasonText').focus();
+    }
+  };
+</script>
+</body>
+</html>

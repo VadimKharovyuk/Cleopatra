@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Аккаунт заблокирован</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .icon {
+      font-size: 80px;
+      color: #ff3838;
+      margin-bottom: 20px;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+    .message {
+      color: #666;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+    .support-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid #ff3838;
+    }
+    .support-info h3 {
+      color: #333;
+      margin-top: 0;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 30px;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 25px;
+      margin: 10px;
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background: #0056b3;
+    }
+    .logout-btn {
+      background: #6c757d;
+    }
+    .logout-btn:hover {
+      background: #545b62;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="icon">🚫</div>
+
+  <h1>Ваш аккаунт заблокирован</h1>
+
+  <div class="message">
+    <p>К сожалению, ваш аккаунт был временно заблокирован администрацией сайта.</p>
+    <p>Это могло произойти по следующим причинам:</p>
+    <ul style="text-align: left; display: inline-block;">
+      <li>Нарушение правил сообщества</li>
+      <li>Размещение неподходящего контента</li>
+      <li>Спам или нежелательная реклама</li>
+      <li>Жалобы от других пользователей</li>
+    </ul>
+  </div>
+
+  <div class="support-info">
+    <h3>Как разблокировать аккаунт?</h3>
+    <p>Если вы считаете, что блокировка была ошибочной, обратитесь в службу поддержки:</p>
+    <p><strong>Email:</strong> support@cleopatra.com</p>
+    <p><strong>Телефон:</strong> +7 (xxx) xxx-xx-xx</p>
+  </div>
+
+  <div style="margin-top: 30px;">
+    <a href="mailto:support@cleopatra.com" class="btn">
+      📧 Написать в поддержку
+    </a>
+
+    <a href="/logout" class="btn logout-btn">
+      🚪 Выйти из аккаунта
+    </a>
+  </div>
+
+  <div style="margin-top: 20px; font-size: 14px; color: #999;">
+    <p>Спасибо за понимание!</p>
+  </div>
+</div>
+
+<script>
+  // Автоматически очищаем сессию через 5 секунд
+  setTimeout(function() {
+    if (confirm('Сессия будет завершена автоматически. Хотите остаться на странице?')) {
+      // Пользователь хочет остаться
+    } else {
+      window.location.href = '/logout';
+    }
+  }, 30000); // 30 секунд
+</script>
+</body>
+</html>

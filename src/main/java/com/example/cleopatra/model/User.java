@@ -91,6 +91,27 @@ public class User {
     private Boolean receiveVisitNotifications = true;
 
 
+
+    @Column(name = "is_blocked")
+    @Builder.Default
+    private Boolean isBlocked = false;
+
+    @Column(name = "blocked_at")
+    private LocalDateTime blockedAt;
+
+    @Column(name = "block_reason")
+    private String blockReason;
+
+    @Column(name = "blocked_by_admin_id")
+    private Long blockedByAdminId;
+
+
+    @OneToMany(mappedBy = "blockedUser", fetch = FetchType.LAZY)
+    @OrderBy("blockedAt DESC")
+    @Builder.Default
+    private List<SystemBlock> systemBlocks = new ArrayList<>();
+
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<TrustedDevice> trustedDevices = new ArrayList<>();
 

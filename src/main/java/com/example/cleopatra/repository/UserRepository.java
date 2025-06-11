@@ -1,6 +1,7 @@
 package com.example.cleopatra.repository;
 
 import com.example.cleopatra.model.User;
+import org.hibernate.query.SelectionQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,16 +29,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * Работает как для поиска, так и для просмотра всех пользователей
      */
     @Query("""
-        SELECT u FROM User u 
-        WHERE u.id != :currentUserId 
-        AND u.firstName IS NOT NULL 
-        AND u.lastName IS NOT NULL
+
+            SELECT u FROM User u
+            WHERE u.id != :currentUserId
+            AND u.firstName IS NOT NULL
+            AND u.lastName IS NOT NULL
         AND (:searchQuery = '' OR 
              LOWER(u.firstName) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
              LOWER(u.lastName) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
              LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :searchQuery, '%')))
-        ORDER BY u.followersCount DESC, u.createdAt DESC
-        """)
+            ORDER BY u.followersCount DESC, u.createdAt DESC
+        """
+            )
     Slice<User> findRecommendationsWithSearch(
             @Param("currentUserId") Long currentUserId,
             @Param("searchQuery") String searchQuery,
@@ -90,18 +93,26 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByIdInWithOnlineStatus(@Param("userIds") List<Long> userIds);
 
     /**
-     * Рекомендации с онлайн статусами (оптимизированная версия)
+     * Рекомендации с онлайн статусами (опти
+            ная версия)
      */
-    @Query("""
-        SELECT u FROM User u 
-        LEFT JOIN FETCH u.onlineStatus
-        WHERE u.id != :currentUserId 
+    @Query
+            ("""
+        SELECT u FROM
+            User u 
+        LEFT JOIN FETCH u
+            .onlineStatus
+        WHERE
+            u.id != :currentUserId 
         AND u.firstName IS NOT NULL 
         AND u.lastName IS NOT NULL
         AND (:searchQuery = '' OR 
              LOWER(u.firstName) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
              LOWER(u.lastName) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
-             LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :searchQuery, '%')))
+             LOWER(CONCAT(u.
+            firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%',
+            :
+    searchQuery, '%')))
         ORDER BY u.followersCount DESC, u.createdAt DESC
         """)
 
@@ -128,18 +139,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     int setOfflineForInactiveUsers(@Param("threshold") LocalDateTime threshold);
 
 
-//    /**
-//     * Батчевое обновление - один SQL запрос для всех пользователей
-//     */
-//    @Modifying
-//    @Transactional
-//    @Query("UPDATE User u SET " +
-//            "u.isOnline = false, " +
-//            "u.lastSeen = CURRENT_TIMESTAMP " +
-//            "WHERE u.isOnline = true " +
-//            "AND u.lastActivity < :threshold")
-//    int markUsersOfflineByLastActivity(@Param("threshold") LocalDateTime threshold);
-
 
     // Батчевое обновление
     @Modifying
@@ -165,4 +164,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT COUNT(*) FROM users WHERE is_online = true AND last_activity < :threshold", nativeQuery = true)
     long countInactiveUsers(@Param("threshold") LocalDateTime threshold);
 
+
+    // Поиск по имени или фамилии (частичное совпадение)
+    List<User> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
+            String firstName, String lastName);
 }
+

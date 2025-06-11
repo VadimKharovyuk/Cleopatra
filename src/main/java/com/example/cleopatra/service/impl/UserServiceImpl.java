@@ -10,13 +10,12 @@ import com.example.cleopatra.dto.user.RegisterDto;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.maper.UserMapper;
+import com.example.cleopatra.model.SystemBlock;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.model.UserOnlineStatus;
-import com.example.cleopatra.repository.PostRepository;
-import com.example.cleopatra.repository.SubscriptionRepository;
-import com.example.cleopatra.repository.UserOnlineStatusRepository;
-import com.example.cleopatra.repository.UserRepository;
+import com.example.cleopatra.repository.*;
 import com.example.cleopatra.service.*;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -48,6 +47,7 @@ public class UserServiceImpl implements UserService {
     private final PostRepository postRepository;
     private final UserOnlineStatusRepository onlineStatusRepository;
     private final SubscriptionService subscriptionService;
+    private final SystemBlockRepository systemBlockRepository;
 
 
     @Override
@@ -449,6 +449,8 @@ public User getCurrentUserEntity(Authentication authentication) {
 
         log.info("Пароль успешно сброшен для пользователя с email: {}", email);
     }
+
+
 
     /**
      * Получить пользователей онлайн

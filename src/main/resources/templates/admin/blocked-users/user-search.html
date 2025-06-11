@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Поиск пользователей для блокировки - Админ панель</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .header { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .search-form { background-color: #e3f2fd; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+    .user-card { background-color: #fff; border: 2px solid #ddd; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+    .blocked-user { border-color: #f44336; background-color: #ffebee; }
+    .active-user { border-color: #4caf50; background-color: #f1f8e9; }
+    .error { color: #f44336; background-color: #ffebee; border: 1px solid #f44336; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    .success { color: #4caf50; background-color: #f1f8e9; border: 1px solid #4caf50; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    .btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; text-decoration: none; display: inline-block; }
+    .btn-danger { background-color: #f44336; color: white; }
+    .btn-success { background-color: #4caf50; color: white; }
+    .btn-primary { background-color: #2196f3; color: white; }
+    .btn-secondary { background-color: #757575; color: white; }
+    .form-group { margin-bottom: 15px; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 3px; box-sizing: border-box; }
+    .table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .table th, .table td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+    .table th { background-color: #f5f5f5; font-weight: bold; }
+    .status-blocked { color: #f44336; font-weight: bold; }
+    .status-active { color: #4caf50; font-weight: bold; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+    .modal-content { background-color: white; margin: 5% auto; padding: 20px; border-radius: 5px; width: 80%; max-width: 600px; }
+    .navbar { background-color: #333; padding: 10px 0; margin-bottom: 20px; }
+    .navbar a { color: white; text-decoration: none; margin: 0 15px; }
+    .navbar a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<!-- Навигация -->
+<nav class="navbar">
+  <a href="/dashboard">🏠 Главная</a>
+  <a href="/admin/users/search">🔍 Поиск пользователей</a>
+  <a href="/admin/users/blocked">🚫 Заблокированные</a>
+  <a href="/admin">⚙️ Админ панель</a>
+</nav>
+
+<!-- Заголовок -->
+<div class="header">
+  <h1>🔍 Поиск пользователей для блокировки</h1>
+  <p>Найдите пользователя по email или имени для управления блокировкой</p>
+</div>
+
+<!-- Форма поиска -->
+<div class="search-form">
+  <h2>Поиск пользователя</h2>
+  <form method="post" action="/admin/users/search">
+    <div class="form-group">
+      <label for="query">Email или имя пользователя:</label>
+      <input type="text"
+             id="query"
+             name="query"
+             class="form-control"
+             th:value="${query}"
+             placeholder="Введите email (например: user@example.com) или имя пользователя"
+             required>
+    </div>
+    <button type="submit" class="btn btn-primary">🔍 Найти пользователя</button>
+    <button type="button" onclick="clearSearch()" class="btn btn-secondary">🗑️ Очистить</button>
+  </form>
+</div>
+
+<!-- Сообщения об ошибках -->
+<div th:if="${error}" class="error">
+
+
+  <strong>❌ Ошибка поиска:</strong> <span th:text="${error}"></span>
+  <br><br>
+  <strong>Советы по поиску:</strong>
+  <ul>
+    <li>Убедитесь, что email введен правильно</li>
+    <li>Попробуйте поиск только по имени или фамилии</li>
+    <li>Проверьте раскладку клавиатуры</li>
+  </ul>
+</div>
+
+
+<!-- Результат поиска -->
+<div th:if="${user}" class="user-card" th:classappend="${user.isBlocked != null and user.isBlocked} ? 'blocked-user' : 'active-user'">
+  <h2>👤 Найденный пользователь</h2>
+
+  <table class="table">
+    <tr>
+      <th>ID пользователя</th>
+      <td th:text="${user.id}"></td>
+    </tr>
+    <tr>
+      <th>Email</th>
+      <td th:text="${user.email}"></td>
+    </tr>
+    <tr>
+      <th>Имя</th>
+      <td th:text="${user.firstName != null ? user.firstName : 'Не указано'}"></td>
+    </tr>
+    <tr>
+      <th>Фамилия</th>
+      <td th:text="${user.lastName != null ? user.lastName : 'Не указано'}"></td>
+    </tr>
+    <tr>
+      <th>Полное имя</th>
+      <td>
+        <strong th:text="${(user.firstName != null ? user.firstName : '') + ' ' + (user.lastName != null ? user.lastName : '')}"></strong>
+      </td>
+    </tr>
+    <tr>
+      <th>Приватный профиль</th>
+      <td>
+        <span th:if="${user.isPrivateProfile != null and user.isPrivateProfile}" style="color: orange;">🔒 Да</span>
+        <span th:if="${user.isPrivateProfile == null or !user.isPrivateProfile}" style="color: green;">🌐 Нет</span>
+      </td>
+    </tr>
+    <tr>
+      <th>Статус аккаунта</th>
+      <td>
+        <span th:if="${user.isBlocked != null and user.isBlocked}" class="status-blocked">🚫 ЗАБЛОКИРОВАН</span>
+        <span th:if="${user.isBlocked == null or !user.isBlocked}" class="status-active">✅ АКТИВЕН</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Действия с пользователем -->
+  <div style="margin-top: 25px; border-top: 2px solid #ddd; padding-top: 20px;">
+    <h3>Действия с пользователем</h3>
+
+    <!-- Если пользователь НЕ заблокирован -->
+    <div th:if="${user.isBlocked == null or !user.isBlocked}">
+      <p style="color: green; font-weight: bold;">✅ Пользователь активен и может быть заблокирован</p>
+
+      <button onclick="showBlockModal()" class="btn btn-danger">
+        🚫 Заблокировать пользователя
+      </button>
+    </div>
+
+    <!-- Если пользователь ЗАБЛОКИРОВАН -->
+    <div th:if="${user.isBlocked != null and user.isBlocked}">
+      <p style="color: red; font-weight: bold;">🚫 Пользователь уже заблокирован</p>
+
+      <button onclick="showUnblockModal()" class="btn btn-success">
+        ✅ Разблокировать пользователя
+      </button>
+    </div>
+
+    <!-- Общие действия -->
+    <a th:href="@{'/admin/users/' + ${user.id} + '/history'}" class="btn btn-primary">
+      📋 История блокировок
+    </a>
+
+    <button onclick="searchAnother()" class="btn btn-secondary">
+      🔍 Найти другого пользователя
+    </button>
+  </div>
+</div>
+
+<!-- Модальное окно блокировки -->
+<div id="blockModal" class="modal">
+  <div class="modal-content">
+    <h3 style="color: red;">🚫 Блокировка пользователя</h3>
+    <p>Вы собираетесь заблокировать пользователя:</p>
+    <div th:if="${user}">
+      <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+      <p><strong>Имя:</strong> <span th:text="${user.firstName + ' ' + user.lastName}"></span></p>
+    </div>
+
+    <form th:if="${user}" th:action="@{'/admin/users/' + ${user.id} + '/block'}" method="post">
+      <div class="form-group">
+        <label for="blockReason">Причина блокировки:</label>
+        <select id="blockReasonSelect" onchange="handleBlockReasonChange()" class="form-control" style="margin-bottom: 10px;">
+          <option value="">-- Выберите причину --</option>
+          <option value="Нарушение правил сообщества">Нарушение правил сообщества</option>
+          <option value="Спам и нежелательная реклама">Спам и нежелательная реклама</option>
+          <option value="Оскорбления и харассмент">Оскорбления и харассмент</option>
+          <option value="Публикация неподходящего контента">Публикация неподходящего контента</option>
+          <option value="Мошенничество или обман">Мошенничество или обман</option>
+          <option value="Технические нарушения">Технические нарушения</option>
+          <option value="Жалобы пользователей">Жалобы пользователей</option>
+          <option value="custom">Другая причина (указать вручную)</option>
+        </select>
+
+        <textarea id="blockReason"
+                  name="reason"
+                  class="form-control"
+                  rows="4"
+                  placeholder="Укажите подробную причину блокировки..."
+                  required></textarea>
+      </div>
+
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" onclick="hideBlockModal()" class="btn btn-secondary">Отмена</button>
+        <button type="submit" class="btn btn-danger" onclick="return confirmBlock()">🚫 Заблокировать</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Модальное окно разблокировки -->
+<div id="unblockModal" class="modal">
+  <div class="modal-content">
+    <h3 style="color: green;">✅ Разблокировка пользователя</h3>
+    <p>Вы собираетесь разблокировать пользователя:</p>
+    <div th:if="${user}">
+      <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+      <p><strong>Имя:</strong> <span th:text="${user.firstName + ' ' + user.lastName}"></span></p>
+    </div>
+
+    <form th:if="${user}" th:action="@{'/admin/users/' + ${user.id} + '/unblock'}" method="post">
+      <div class="form-group">
+        <label for="unblockReason">Причина разблокировки:</label>
+        <select id="unblockReasonSelect" onchange="handleUnblockReasonChange()" class="form-control" style="margin-bottom: 10px;">
+          <option value="">-- Выберите причину --</option>
+          <option value="Ошибочная блокировка">Ошибочная блокировка</option>
+          <option value="Пользователь исправился">Пользователь исправился</option>
+          <option value="Жалобы сняты">Жалобы сняты</option>
+          <option value="Техническая разблокировка">Техническая разблокировка</option>
+          <option value="По просьбе пользователя">По просьбе пользователя</option>
+          <option value="custom">Другая причина (указать вручную)</option>
+        </select>
+
+        <textarea id="unblockReason"
+                  name="reason"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Укажите причину разблокировки..."
+                  required></textarea>
+      </div>
+
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" onclick="hideUnblockModal()" class="btn btn-secondary">Отмена</button>
+        <button type="submit" class="btn btn-success" onclick="return confirmUnblock()">✅ Разблокировать</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Функции для модальных окон
+  function showBlockModal() {
+    document.getElementById('blockModal').style.display = 'block';
+    document.getElementById('blockReason').focus();
+  }
+
+  function hideBlockModal() {
+    document.getElementById('blockModal').style.display = 'none';
+    document.getElementById('blockReason').value = '';
+    document.getElementById('blockReasonSelect').value = '';
+  }
+
+  function showUnblockModal() {
+    document.getElementById('unblockModal').style.display = 'block';
+    document.getElementById('unblockReason').focus();
+  }
+
+  function hideUnblockModal() {
+    document.getElementById('unblockModal').style.display = 'none';
+    document.getElementById('unblockReason').value = '';
+    document.getElementById('unblockReasonSelect').value = '';
+  }
+
+  // Обработка выбора причин
+  function handleBlockReasonChange() {
+    const select = document.getElementById('blockReasonSelect');
+    const textarea = document.getElementById('blockReason');
+
+    if (select.value === 'custom') {
+      textarea.value = '';
+      textarea.placeholder = 'Укажите причину блокировки...';
+    } else if (select.value !== '') {
+      textarea.value = select.value;
+    }
+    textarea.focus();
+  }
+
+  function handleUnblockReasonChange() {
+    const select = document.getElementById('unblockReasonSelect');
+    const textarea = document.getElementById('unblockReason');
+
+    if (select.value === 'custom') {
+      textarea.value = '';
+      textarea.placeholder = 'Укажите причину разблокировки...';
+    } else if (select.value !== '') {
+      textarea.value = select.value;
+    }
+    textarea.focus();
+  }
+
+  // Подтверждения действий
+  function confirmBlock() {
+    const reason = document.getElementById('blockReason').value.trim();
+    if (reason.length < 10) {
+      alert('Причина блокировки должна содержать минимум 10 символов!');
+      return false;
+    }
+    return confirm('Вы уверены, что хотите заблокировать этого пользователя?\n\nПричина: ' + reason);
+  }
+
+  function confirmUnblock() {
+    const reason = document.getElementById('unblockReason').value.trim();
+    if (reason.length < 10) {
+      alert('Причина разблокировки должна содержать минимум 10 символов!');
+      return false;
+    }
+    return confirm('Вы уверены, что хотите разблокировать этого пользователя?\n\nПричина: ' + reason);
+  }
+
+  // Дополнительные функции
+  function clearSearch() {
+    document.getElementById('query').value = '';
+    document.getElementById('query').focus();
+  }
+
+  function searchAnother() {
+    document.getElementById('query').value = '';
+    document.getElementById('query').focus();
+    window.scrollTo(0, 0);
+  }
+
+  // Закрытие модальных окон по клику вне их
+  window.onclick = function(event) {
+    const blockModal = document.getElementById('blockModal');
+    const unblockModal = document.getElementById('unblockModal');
+
+    if (event.target === blockModal) {
+      hideBlockModal();
+    }
+    if (event.target === unblockModal) {
+      hideUnblockModal();
+    }
+  }
+
+  // Автофокус на поле поиска
+  window.onload = function() {
+    document.getElementById('query').focus();
+  }
+</script>
+</body>
+</html>

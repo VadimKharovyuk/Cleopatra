@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>История блокировок - Админ панель</title>
+</head>
+<body>
+<h1>История блокировок пользователя</h1>
+
+<nav>
+  <a href="/admin/users/search">Поиск пользователей</a> |
+  <a href="/admin/users/blocked">Заблокированные пользователи</a> |
+  <a href="/dashboard">Главная</a>
+</nav>
+
+<hr>
+
+<p><strong>ID пользователя:</strong> <span th:text="${userId}"></span></p>
+
+<!-- Сообщения об ошибках -->
+<div th:if="${error}" style="color: red; border: 1px solid red; padding: 10px; margin: 10px 0;">
+  <strong>Ошибка:</strong> <span th:text="${error}"></span>
+</div>
+
+<!-- История блокировок -->
+<div th:if="${history != null and history.size() > 0}">
+  <h2>История блокировок</h2>
+  <p>Всего записей: <strong th:text="${history.size()}"></strong></p>
+
+  <table border="1" cellpadding="10" cellspacing="0" style="width: 100%;">
+    <thead>
+    <tr style="background-color: #f5f5f5;">
+      <th>№</th>
+      <th>Статус</th>
+      <th>Заблокирован</th>
+      <th>Разблокирован</th>
+      <th>Администратор (блокировка)</th>
+      <th>Администратор (разблокировка)</th>
+      <th>Причина блокировки</th>
+      <th>Причина разблокировки</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="block, iterStat : ${history}">
+      <td th:text="${iterStat.count}"></td>
+      <td>
+        <span th:if="${block.isActive}" style="color: red; font-weight: bold;">АКТИВНА</span>
+        <span th:unless="${block.isActive}" style="color: gray;">ЗАВЕРШЕНА</span>
+      </td>
+      <td th:text="${#temporals.format(block.blockedAt, 'dd.MM.yyyy HH:mm:ss')}"></td>
+      <td>
+        <span th:if="${block.unblockedAt != null}" th:text="${#temporals.format(block.unblockedAt, 'dd.MM.yyyy HH:mm:ss')}"></span>
+        <span th:if="${block.unblockedAt == null}" style="color: gray;">-</span>
+      </td>
+      <td>
+        <strong th:text="${block.blockedByAdmin.firstName + ' ' + block.blockedByAdmin.lastName}"></strong><br>
+        <small th:text="${block.blockedByAdmin.email}"></small>
+      </td>
+      <td>
+                        <span th:if="${block.unblockedByAdmin != null}">
+                            <strong th:text="${block.unblockedByAdmin.firstName + ' ' + block.unblockedByAdmin.lastName}"></strong><br>
+                            <small th:text="${block.unblockedByAdmin.email}"></small>
+                        </span>
+        <span th:if="${block.unblockedByAdmin == null}" style="color: gray;">-</span>
+      </td>
+      <td>
+        <div style="max-width: 200px; word-wrap: break-word;" th:text="${block.blockReason}"></div>
+      </td>
+      <td>
+                        <span th:if="${block.unblockReason != null}">
+                            <div style="max-width: 200px; word-wrap: break-word;" th:text="${block.unblockReason}"></div>
+                        </span>
+        <span th:if="${block.unblockReason == null}" style="color: gray;">-</span>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- Статистика -->
+  <div style="margin-top: 20px; border: 1px solid #ccc; padding: 15px;">
+    <h3>Статистика</h3>
+    <ul>
+      <li>Общее количество блокировок: <strong th:text="${history.size()}"></strong></li>
+      <li>Активных блокировок: <strong th:text="${#lists.size(#lists.select(history, 'isActive'))}"></strong></li>
+      <li>Завершенных блокировок: <strong th:text="${#lists.size(#lists.select(history, '!isActive'))}"></strong></li>
+    </ul>
+  </div>
+</div>
+
+<!-- Сообщение о пустой истории -->
+<div th:if="${history == null or history.size() == 0}">
+  <h2>История пуста</h2>
+  <p>У данного пользователя нет истории блокировок.</p>
+</div>
+
+<div style="margin-top: 30px;">
+  <a href="javascript:history.back()" style="text-decoration: none;">
+    <button style="padding: 10px 20px;">← Назад</button>
+  </a>
+</div>
+</body>
+</html>
