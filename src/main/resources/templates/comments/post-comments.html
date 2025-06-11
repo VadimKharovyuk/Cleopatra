@@ -1,258 +1,272 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Комментарии к посту</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    /* Основная сетка с сайдбаром */
-    .main-layout {
-      margin-left: 280px;
-      min-height: 100vh;
-      display: flex;
-      background-color: #f8f9fa;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Комментарии к посту</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Основная сетка с сайдбаром */
+        .main-layout {
+            margin-left: 280px;
+            min-height: 100vh;
+            display: flex;
+            background-color: #f8f9fa;
+        }
 
-    .content-area {
-      flex: 1;
-      padding: 20px;
-      max-width: calc(100% - 320px);
-    }
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            max-width: calc(100% - 320px);
+        }
 
-    .aside-section {
-      width: 320px;
-      padding: 20px 20px 20px 0;
-      position: sticky;
-      top: 20px;
-      height: fit-content;
-    }
+        .aside-section {
+            width: 320px;
+            padding: 20px 20px 20px 0;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
 
-    /* Стили комментариев */
-    .comment-item {
-      border-bottom: 1px solid #e9ecef;
-      padding: 15px 0;
-    }
-    .comment-item:last-child {
-      border-bottom: none;
-    }
-    .comment-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .comment-content {
-      background-color: #f8f9fa;
-      border-radius: 10px;
-      padding: 10px 15px;
-      margin-bottom: 8px;
-    }
-    .comment-actions {
-      font-size: 0.875rem;
-      color: #6c757d;
-    }
-    .comment-form {
-      background-color: #f8f9fa;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 30px;
-    }
-    .post-info {
-      background-color: #fff;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .post-image {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-    }
-    .loading {
-      text-align: center;
-      padding: 20px;
-    }
-    .error {
-      color: #dc3545;
-      background-color: #f8d7da;
-      border: 1px solid #f5c6cb;
-      border-radius: 5px;
-      padding: 10px;
-      margin: 10px 0;
-    }
-    .success {
-      color: #155724;
-      background-color: #d4edda;
-      border: 1px solid #c3e6cb;
-      border-radius: 5px;
-      padding: 10px;
-      margin: 10px 0;
-    }
-    .edit-form {
-      display: none;
-      margin-top: 10px;
-    }
-    .btn-sm {
-      font-size: 0.75rem;
-      padding: 2px 8px;
-    }
+        /* Стили комментариев */
+        .comment-item {
+            border-bottom: 1px solid #e9ecef;
+            padding: 15px 0;
+        }
 
-    /* Стили для aside виджетов */
-    .widget {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border: 1px solid #e9ecef;
-    }
+        .comment-item:last-child {
+            border-bottom: none;
+        }
 
-    .widget-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-    }
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
 
-    .widget-title i {
-      margin-right: 8px;
-      color: #2563eb;
-    }
+        .comment-content {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+        }
 
-    .latest-comment {
-      display: flex;
-      align-items: start;
-      padding: 10px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
+        .comment-actions {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
 
-    .latest-comment:last-child {
-      border-bottom: none;
-    }
+        .comment-form {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
 
-    .latest-comment-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      margin-right: 10px;
-      object-fit: cover;
-    }
+        .post-info {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-    .latest-comment-content {
-      flex: 1;
-    }
+        .post-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
 
-    .latest-comment-author {
-      font-weight: 500;
-      font-size: 0.875rem;
-      color: #333;
-    }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
 
-    .latest-comment-text {
-      font-size: 0.8rem;
-      color: #666;
-      margin: 2px 0;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
 
-    .latest-comment-time {
-      font-size: 0.75rem;
-      color: #999;
-    }
+        .success {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
 
-    .post-stats {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+        }
 
-    .post-stats:last-child {
-      border-bottom: none;
-    }
+        .btn-sm {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+        }
 
-    .stat-label {
-      font-size: 0.875rem;
-      color: #666;
-    }
+        /* Стили для aside виджетов */
+        .widget {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e9ecef;
+        }
 
-    .stat-value {
-      font-weight: 600;
-      color: #333;
-    }
+        .widget-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
 
-    .author-card {
-      text-align: center;
-    }
+        .widget-title i {
+            margin-right: 8px;
+            color: #2563eb;
+        }
 
-    .author-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      margin: 0 auto 15px;
-      object-fit: cover;
-      border: 3px solid #e9ecef;
-    }
+        .latest-comment {
+            display: flex;
+            align-items: start;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
 
-    .author-name {
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 5px;
-    }
+        .latest-comment:last-child {
+            border-bottom: none;
+        }
 
-    .author-followers {
-      font-size: 0.875rem;
-      color: #666;
-      margin-bottom: 15px;
-    }
+        .latest-comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
 
-    .follow-btn {
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      color: white;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+        .latest-comment-content {
+            flex: 1;
+        }
 
-    .follow-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
+        .latest-comment-author {
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: #333;
+        }
 
-    /* Адаптивность */
-    @media (max-width: 1200px) {
-      .aside-section {
-        display: none;
-      }
-      .content-area {
-        max-width: 100%;
-      }
-    }
+        .latest-comment-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin: 2px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
 
-    @media (max-width: 768px) {
-      .main-layout {
-        margin-left: 0;
-        padding-top: 60px;
-      }
-      .content-area {
-        padding: 15px;
-        max-width: 100%;
-      }
-    }
-  </style>
+        .latest-comment-time {
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        .post-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .post-stats:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .author-card {
+            text-align: center;
+        }
+
+        .author-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            object-fit: cover;
+            border: 3px solid #e9ecef;
+        }
+
+        .author-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .author-followers {
+            font-size: 0.875rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .follow-btn {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .follow-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1200px) {
+            .aside-section {
+                display: none;
+            }
+
+            .content-area {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                margin-left: 0;
+                padding-top: 60px;
+            }
+
+            .content-area {
+                padding: 15px;
+                max-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -260,256 +274,863 @@
 <div th:replace="~{fragments/sidebar :: complete-sidebar('comments')}"></div>
 
 <div class="main-layout">
-  <!-- Основной контент -->
-  <div class="content-area">
-    <!-- Информация о посте -->
-    <div class="post-info" th:if="${post}">
-      <div class="d-flex align-items-start">
-        <img th:src="${post.author.imageUrl}"
-             th:alt="${post.author.firstName + ' ' + post.author.lastName}"
-             class="comment-avatar me-3"
-             onerror="this.src='/images/default-avatar.png'">
-        <div class="flex-grow-1">
-          <h5 class="mb-1" th:text="${post.author.firstName + ' ' + post.author.lastName}">Автор</h5>
-          <small class="text-muted" th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</small>
+    <!-- Основной контент -->
+    <div class="content-area">
+        <!-- Информация о посте -->
+        <div class="post-info" th:if="${post}">
+            <div class="d-flex align-items-start">
+                <img th:src="${post.author.imageUrl}"
+                     th:alt="${post.author.firstName + ' ' + post.author.lastName}"
+                     class="comment-avatar me-3"
+                     onerror="this.src='/images/default-avatar.png'">
+                <div class="flex-grow-1">
+                    <h5 class="mb-1" th:text="${post.author.firstName + ' ' + post.author.lastName}">Автор</h5>
+                    <small class="text-muted"
+                           th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</small>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <p th:text="${post.content}" class="mb-3">Содержание поста</p>
+                <img th:if="${post.imageUrl}"
+                     th:src="${post.imageUrl}"
+                     class="post-image mb-3"
+                     alt="Изображение поста">
+            </div>
+
+            <div class="d-flex justify-content-between text-muted">
+                <span><i class="fas fa-heart"></i> <span th:text="${post.likesCount}">0</span> лайков</span>
+                <span><i class="fas fa-comment"></i> <span id="total-comments" th:text="${totalComments}">0</span> комментариев</span>
+                <span><i class="fas fa-eye"></i> <span th:text="${post.viewsCount}">0</span> просмотров</span>
+            </div>
         </div>
-      </div>
 
-      <div class="mt-3">
-        <p th:text="${post.content}" class="mb-3">Содержание поста</p>
-        <img th:if="${post.imageUrl}"
-             th:src="${post.imageUrl}"
-             class="post-image mb-3"
-             alt="Изображение поста">
-      </div>
-
-      <div class="d-flex justify-content-between text-muted">
-        <span><i class="fas fa-heart"></i> <span th:text="${post.likesCount}">0</span> лайков</span>
-        <span><i class="fas fa-comment"></i> <span id="total-comments" th:text="${totalComments}">0</span> комментариев</span>
-        <span><i class="fas fa-eye"></i> <span th:text="${post.viewsCount}">0</span> просмотров</span>
-      </div>
-    </div>
-
-    <!-- Форма добавления комментария -->
-    <div class="comment-form" th:if="${currentUser}">
-      <h5 class="mb-3">Добавить комментарий</h5>
-      <form id="comment-form">
-        <div class="mb-3">
+        <!-- Форма добавления комментария -->
+        <div class="comment-form" th:if="${currentUser}">
+            <h5 class="mb-3">Добавить комментарий</h5>
+            <form id="comment-form">
+                <div class="mb-3">
                         <textarea id="comment-content"
                                   class="form-control"
                                   rows="3"
                                   placeholder="Напишите ваш комментарий..."
                                   required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Отправить
+                </button>
+            </form>
         </div>
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-paper-plane"></i> Отправить
-        </button>
-      </form>
-    </div>
 
-    <!-- Сообщение для неавторизованных пользователей -->
-    <div class="alert alert-info" th:unless="${currentUser}">
-      <i class="fas fa-info-circle"></i>
-      Войдите в систему, чтобы оставлять комментарии.
-    </div>
 
-    <!-- Уведомления -->
-    <div id="notifications"></div>
 
-    <!-- Заголовок комментариев -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h4>Комментарии (<span id="comments-count" th:text="${totalComments}">0</span>)</h4>
-      <div class="btn-group btn-group-sm">
-        <button class="btn btn-outline-secondary" onclick="sortComments('newest')">
-          <i class="fas fa-sort-amount-down"></i> Новые
-        </button>
-        <button class="btn btn-outline-secondary" onclick="sortComments('oldest')">
-          <i class="fas fa-sort-amount-up"></i> Старые
-        </button>
-      </div>
-    </div>
 
-    <!-- Список комментариев -->
-    <div id="comments-container">
-      <div class="loading">
-        <i class="fas fa-spinner fa-spin"></i> Загрузка комментариев...
-      </div>
-    </div>
+        <!-- AI Помощник для комментариев -->
+        <div class="ai-assistant-section" th:if="${currentUser}" style="margin-top: 20px;">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-robot"></i> AI Помощник для комментариев
+                        <span class="badge bg-light text-primary ms-2" id="ai-status-badge">Проверка...</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="ai-prompt" class="form-label">Что вы хотите написать?</label>
+                                <input type="text"
+                                       id="ai-prompt"
+                                       class="form-control"
+                                       placeholder="Например: напиши положительный отзыв о статье"
+                                       maxlength="200">
+                                <div class="form-text">Опишите, какой комментарий хотите получить</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Тип комментария</label>
+                            <select id="comment-type" class="form-select">
+                                <option value="GENERAL">Общий</option>
+                                <option value="POSITIVE">Положительный</option>
+                                <option value="QUESTION">Вопрос</option>
+                                <option value="CONSTRUCTIVE">Конструктивный</option>
+                                <option value="TECHNICAL">Технический</option>
+                                <option value="CREATIVE">Креативный</option>
+                            </select>
+                        </div>
+                    </div>
 
-    <!-- Пагинация -->
-    <nav aria-label="Пагинация комментариев" class="mt-4">
-      <ul id="pagination" class="pagination justify-content-center">
-        <!-- Пагинация будет сгенерирована JavaScript -->
-      </ul>
-    </nav>
-  </div>
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="button" class="btn btn-outline-primary" onclick="generateCommentPreview()">
+                            <i class="fas fa-eye"></i> Предпросмотр
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="generateAndPostComment()">
+                            <i class="fas fa-magic"></i> Создать комментарий
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="showAITemplates()">
+                            <i class="fas fa-list"></i> Шаблоны
+                        </button>
+                        <button type="button" class="btn btn-outline-info" onclick="showAIExamples()">
+                            <i class="fas fa-lightbulb"></i> Примеры
+                        </button>
+                    </div>
 
-  <!-- Боковая панель -->
-  <aside class="aside-section">
-    <!-- Информация об авторе поста -->
-    <div class="widget" th:if="${post}">
-      <div class="widget-title">
-        <i class="fas fa-user"></i>
-        Автор поста
-      </div>
-      <div class="author-card">
-        <img th:src="${post.author.imageUrl}"
-             th:alt="${post.author.firstName + ' ' + post.author.lastName}"
-             class="author-avatar"
-             onerror="this.src='/images/default-avatar.png'">
-        <div class="author-name" th:text="${post.author.firstName + ' ' + post.author.lastName}">Имя автора</div>
-        <div class="author-followers">1.2K подписчиков</div>
-<!--        <button class="follow-btn" th:if="${currentUser and currentUser.id != post.author.id}">-->
-<!--          <i class="fas fa-plus"></i> Подписаться-->
-<!--        </button>-->
-      </div>
-    </div>
+                    <!-- Превью комментария -->
+                    <div id="ai-preview-section" style="display: none;">
+                        <div class="alert alert-info">
+                            <strong>Предпросмотр:</strong>
+                            <div id="ai-preview-text" style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;"></div>
+                            <div class="mt-2">
+                                <button class="btn btn-success btn-sm" onclick="useGeneratedComment()">
+                                    <i class="fas fa-check"></i> Использовать
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="hidePreview()">
+                                    <i class="fas fa-times"></i> Отмена
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-    <!-- Статистика поста -->
-    <div class="widget" th:if="${post}">
-      <div class="widget-title">
-        <i class="fas fa-chart-bar"></i>
-        Статистика
-      </div>
-      <div class="post-stats">
-        <span class="stat-label">Лайки</span>
-        <span class="stat-value" th:text="${post.likesCount}">0</span>
-      </div>
-      <div class="post-stats">
-        <span class="stat-label">Комментарии</span>
-        <span class="stat-value" id="sidebar-comments-count" th:text="${totalComments}">0</span>
-      </div>
-      <div class="post-stats">
-        <span class="stat-label">Просмотры</span>
-        <span class="stat-value" th:text="${post.viewsCount}">0</span>
-      </div>
-      <div class="post-stats">
-        <span class="stat-label">Создан</span>
-        <span class="stat-value" th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy')}">01.01.2024</span>
-      </div>
-    </div>
-
-    <!-- Последние комментарии -->
-    <div class="widget">
-      <div class="widget-title">
-        <i class="fas fa-comments"></i>
-        Последние комментарии
-      </div>
-      <div id="latest-comments-widget">
-        <div class="loading">
-          <i class="fas fa-spinner fa-spin"></i> Загрузка...
+                    <!-- Статус AI -->
+                    <div id="ai-loading" style="display: none;">
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                            <span>AI генерирует комментарий...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <!-- Модальное окно шаблонов -->
+        <div class="modal fade" id="templatesModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-list"></i> Шаблоны комментариев
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="templates-content">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary"></div>
+                                <p class="mt-2">Загрузка шаблонов...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно примеров -->
+        <div class="modal fade" id="examplesModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-lightbulb"></i> Примеры промптов
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="examples-content">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary"></div>
+                                <p class="mt-2">Загрузка примеров...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно улучшения комментария -->
+        <div class="modal fade" id="improveModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-magic"></i> Улучшить комментарий
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="improve-text" class="form-label">Ваш комментарий:</label>
+                            <textarea id="improve-text" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="improve-type" class="form-label">Тип улучшения:</label>
+                            <select id="improve-type" class="form-select">
+                                <option value="GENERAL">Общее улучшение</option>
+                                <option value="GRAMMAR">Исправить грамматику</option>
+                                <option value="TONE">Улучшить тон</option>
+                                <option value="CLARITY">Повысить ясность</option>
+                                <option value="POLITENESS">Сделать вежливее</option>
+                            </select>
+                        </div>
+                        <div id="improve-result" style="display: none;">
+                            <div class="alert alert-success">
+                                <strong>Улучшенный вариант:</strong>
+                                <div id="improved-text" style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary" onclick="improveComment()">
+                            <i class="fas fa-magic"></i> Улучшить
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="useImprovedComment()" style="display: none;" id="use-improved-btn">
+                            <i class="fas fa-check"></i> Использовать
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Глобальные переменные для AI
+            let aiServiceAvailable = false;
+            let lastGeneratedComment = '';
+            let commentToImprove = '';
+
+            // Инициализация AI функций
+            document.addEventListener('DOMContentLoaded', function() {
+                checkAIServiceStatus();
+                addImproveButtonsToComments();
+            });
+
+            // Проверка статуса AI сервиса
+            async function checkAIServiceStatus() {
+                try {
+                    const response = await fetch(`/api/posts/${postId}/comments/ai/status`);
+                    const data = await response.json();
+
+                    aiServiceAvailable = data.aiServiceAvailable;
+
+                    const statusBadge = document.getElementById('ai-status-badge');
+                    const aiSection = document.querySelector('.ai-assistant-section');
+
+                    if (aiServiceAvailable) {
+                        statusBadge.textContent = 'Готов';
+                        statusBadge.className = 'badge bg-success text-white ms-2';
+                        aiSection.style.display = 'block';
+                    } else {
+                        statusBadge.textContent = 'Недоступен';
+                        statusBadge.className = 'badge bg-danger text-white ms-2';
+                        aiSection.style.opacity = '0.6';
+                        aiSection.style.pointerEvents = 'none';
+                    }
+                } catch (error) {
+                    console.error('Ошибка проверки AI сервиса:', error);
+                    document.getElementById('ai-status-badge').textContent = 'Ошибка';
+                    document.getElementById('ai-status-badge').className = 'badge bg-warning text-dark ms-2';
+                }
+            }
+
+            // Генерация превью комментария
+            async function generateCommentPreview() {
+                const prompt = document.getElementById('ai-prompt').value.trim();
+                const commentType = document.getElementById('comment-type').value;
+
+                if (!prompt) {
+                    showError('Введите описание желаемого комментария');
+                    return;
+                }
+
+                if (!aiServiceAvailable) {
+                    showError('AI сервис недоступен');
+                    return;
+                }
+
+                showAILoading(true);
+                hidePreview();
+
+                try {
+                    const response = await fetch(`/api/posts/${postId}/comments/ai/preview`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            commentType: commentType
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        lastGeneratedComment = data.data.generatedComment;
+                        document.getElementById('ai-preview-text').textContent = lastGeneratedComment;
+                        document.getElementById('ai-preview-section').style.display = 'block';
+                        showSuccess('Комментарий сгенерирован! Время: ' + data.data.generationTimeMs + ' мс');
+                    } else {
+                        showError('Ошибка генерации: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    showError('Ошибка при генерации комментария: ' + error.message);
+                } finally {
+                    showAILoading(false);
+                }
+            }
+
+            // Генерация и публикация комментария
+            async function generateAndPostComment() {
+                const prompt = document.getElementById('ai-prompt').value.trim();
+                const commentType = document.getElementById('comment-type').value;
+
+                if (!prompt) {
+                    showError('Введите описание желаемого комментария');
+                    return;
+                }
+
+                if (!aiServiceAvailable) {
+                    showError('AI сервис недоступен');
+                    return;
+                }
+
+                if (!confirm('Создать и опубликовать комментарий с помощью AI?')) {
+                    return;
+                }
+
+                showAILoading(true);
+                hidePreview();
+
+                try {
+                    const response = await fetch(`/api/posts/${postId}/comments/ai/create`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            commentType: commentType
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showSuccess('AI комментарий успешно создан и опубликован!');
+
+                        // Очищаем форму
+                        document.getElementById('ai-prompt').value = '';
+                        document.getElementById('comment-type').value = 'GENERAL';
+
+                        // Обновляем комментарии
+                        updateCommentsCount();
+                        loadLatestComments();
+                        loadComments(0); // Загружаем первую страницу
+
+                    } else {
+                        showError('Ошибка создания комментария: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    showError('Ошибка при создании комментария: ' + error.message);
+                } finally {
+                    showAILoading(false);
+                }
+            }
+
+            // Использование сгенерированного комментария
+            function useGeneratedComment() {
+                if (lastGeneratedComment) {
+                    document.getElementById('comment-content').value = lastGeneratedComment;
+                    hidePreview();
+                    showSuccess('Комментарий добавлен в форму. Нажмите "Отправить" для публикации.');
+
+                    // Прокручиваем к форме комментария
+                    document.getElementById('comment-content').scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('comment-content').focus();
+                }
+            }
+
+            // Скрытие превью
+            function hidePreview() {
+                document.getElementById('ai-preview-section').style.display = 'none';
+            }
+
+            // Показ/скрытие загрузки AI
+            function showAILoading(show) {
+                document.getElementById('ai-loading').style.display = show ? 'block' : 'none';
+            }
+
+            // Показ шаблонов
+            async function showAITemplates() {
+                const modal = new bootstrap.Modal(document.getElementById('templatesModal'));
+                modal.show();
+
+                try {
+                    const response = await fetch(`/api/posts/${postId}/comments/ai/templates`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        let templatesHtml = '<div class="row">';
+
+                        Object.entries(data.templates).forEach(([key, template]) => {
+                            templatesHtml += `
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h6 class="card-title text-capitalize">${key.replace('_', ' ')}</h6>
+                <p class="card-text small text-muted">${template.example}</p>
+                <button class="btn btn-sm btn-primary" onclick="useTemplate('${template.prompt}')">
+                  <i class="fas fa-copy"></i> Использовать
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+                        });
+
+                        templatesHtml += '</div>';
+                        templatesHtml += `<div class="alert alert-info mt-3"><i class="fas fa-info-circle"></i> ${data.usage}</div>`;
+
+                        document.getElementById('templates-content').innerHTML = templatesHtml;
+                    }
+                } catch (error) {
+                    document.getElementById('templates-content').innerHTML =
+                        '<div class="alert alert-danger">Ошибка загрузки шаблонов</div>';
+                }
+            }
+
+            // Показ примеров
+            async function showAIExamples() {
+                const modal = new bootstrap.Modal(document.getElementById('examplesModal'));
+                modal.show();
+
+                try {
+                    const response = await fetch(`/api/posts/${postId}/comments/ai/examples`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        let examplesHtml = '<div class="row">';
+
+                        Object.entries(data.examples).forEach(([key, example]) => {
+                            examplesHtml += `
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h6 class="card-title text-capitalize">${key}</h6>
+                <p class="card-text">"${example.prompt}"</p>
+                <small class="text-muted">${example.description}</small>
+                <div class="mt-2">
+                  <button class="btn btn-sm btn-primary" onclick="useExample('${example.prompt}', '${key.toUpperCase()}')">
+                    <i class="fas fa-copy"></i> Использовать
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+                        });
+
+                        examplesHtml += '</div>';
+
+                        // Добавляем советы
+                        if (data.tips) {
+                            examplesHtml += '<div class="alert alert-info mt-3"><h6>💡 Советы:</h6><ul class="mb-0">';
+                            Object.entries(data.tips).forEach(([key, tip]) => {
+                                examplesHtml += `<li><strong>${key}:</strong> ${tip}</li>`;
+                            });
+                            examplesHtml += '</ul></div>';
+                        }
+
+                        document.getElementById('examples-content').innerHTML = examplesHtml;
+                    }
+                } catch (error) {
+                    document.getElementById('examples-content').innerHTML =
+                        '<div class="alert alert-danger">Ошибка загрузки примеров</div>';
+                }
+            }
+
+            // Использование шаблона
+            function useTemplate(prompt) {
+                document.getElementById('ai-prompt').value = prompt;
+                bootstrap.Modal.getInstance(document.getElementById('templatesModal')).hide();
+                showSuccess('Шаблон добавлен в поле промпта');
+            }
+
+            // Использование примера
+            function useExample(prompt, type) {
+                document.getElementById('ai-prompt').value = prompt;
+                document.getElementById('comment-type').value = type;
+                bootstrap.Modal.getInstance(document.getElementById('examplesModal')).hide();
+                showSuccess('Пример добавлен в форму');
+            }
+
+            // Добавление кнопок улучшения к существующим комментариям
+            function addImproveButtonsToComments() {
+                // Обновляем функцию renderCommentActions
+                const originalRenderCommentActions = window.renderCommentActions;
+                window.renderCommentActions = function(comment) {
+                    if (!currentUser) return '';
+
+                    const isOwner = currentUser.id === comment.author.id;
+                    let actions = '';
+
+                    if (isOwner) {
+                        actions += `
+        <button class="btn btn-sm btn-outline-primary me-2" onclick="editComment(${comment.id})">
+          <i class="fas fa-edit"></i> Редактировать
+        </button>
+        <button class="btn btn-sm btn-outline-danger me-2" onclick="deleteComment(${comment.id})">
+          <i class="fas fa-trash"></i> Удалить
+        </button>
+      `;
+                    }
+
+                    // Добавляем кнопку улучшения для всех комментариев
+                    if (aiServiceAvailable) {
+                        actions += `
+        <button class="btn btn-sm btn-outline-info" onclick="showImproveModal('${comment.content.replace(/'/g, "\\'")}')">
+          <i class="fas fa-magic"></i> Улучшить с AI
+        </button>
+      `;
+                    }
+
+                    return actions ? `<div class="comment-actions mt-2">${actions}</div>` : '';
+                };
+            }
+
+            // Показ модального окна улучшения
+            function showImproveModal(commentText) {
+                commentToImprove = commentText;
+                document.getElementById('improve-text').value = commentText;
+                document.getElementById('improve-result').style.display = 'none';
+                document.getElementById('use-improved-btn').style.display = 'none';
+
+                const modal = new bootstrap.Modal(document.getElementById('improveModal'));
+                modal.show();
+            }
+
+            // Улучшение комментария
+            async function improveComment() {
+                const originalComment = document.getElementById('improve-text').value.trim();
+                const improvementType = document.getElementById('improve-type').value;
+
+                if (!originalComment) {
+                    showError('Введите текст для улучшения');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/posts/${postId}/comments/ai/improve`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            originalComment: originalComment,
+                            improvementType: improvementType
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        document.getElementById('improved-text').textContent = data.data.generatedComment;
+                        document.getElementById('improve-result').style.display = 'block';
+                        document.getElementById('use-improved-btn').style.display = 'inline-block';
+                        showSuccess('Комментарий улучшен за ' + data.data.generationTimeMs + ' мс');
+                    } else {
+                        showError('Ошибка улучшения: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    showError('Ошибка при улучшении комментария: ' + error.message);
+                }
+            }
+
+            // Использование улучшенного комментария
+            function useImprovedComment() {
+                const improvedText = document.getElementById('improved-text').textContent;
+                document.getElementById('comment-content').value = improvedText;
+
+                bootstrap.Modal.getInstance(document.getElementById('improveModal')).hide();
+                showSuccess('Улучшенный комментарий добавлен в форму');
+
+                // Прокручиваем к форме
+                document.getElementById('comment-content').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('comment-content').focus();
+            }
+
+            // Добавляем CSS стили для AI секции
+            const aiStyles = `
+<style>
+.ai-assistant-section {
+  margin-top: 20px;
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#ai-preview-section {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.card {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn {
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.ai-template-card {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.ai-template-card:hover {
+  transform: scale(1.02);
+}
+
+</style>
+`;
+
+            // Добавляем стили в head
+            document.head.insertAdjacentHTML('beforeend', aiStyles);
+
+            console.log('🤖 AI комментарии инициализированы');
+        </script>
+
+
+
+
+
+
+
+
+
+
+        <!-- Сообщение для неавторизованных пользователей -->
+        <div class="alert alert-info" th:unless="${currentUser}">
+            <i class="fas fa-info-circle"></i>
+            Войдите в систему, чтобы оставлять комментарии.
+        </div>
+
+        <!-- Уведомления -->
+        <div id="notifications"></div>
+
+        <!-- Заголовок комментариев -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4>Комментарии (<span id="comments-count" th:text="${totalComments}">0</span>)</h4>
+            <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-secondary" onclick="sortComments('newest')">
+                    <i class="fas fa-sort-amount-down"></i> Новые
+                </button>
+                <button class="btn btn-outline-secondary" onclick="sortComments('oldest')">
+                    <i class="fas fa-sort-amount-up"></i> Старые
+                </button>
+            </div>
+        </div>
+
+        <!-- Список комментариев -->
+        <div id="comments-container">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Загрузка комментариев...
+            </div>
+        </div>
+
+        <!-- Пагинация -->
+        <nav aria-label="Пагинация комментариев" class="mt-4">
+            <ul id="pagination" class="pagination justify-content-center">
+                <!-- Пагинация будет сгенерирована JavaScript -->
+            </ul>
+        </nav>
     </div>
 
-    <!-- Похожие посты -->
-    <div class="widget">
-      <div class="widget-title">
-        <i class="fas fa-bookmark"></i>
-        Действия
-      </div>
-      <div class="d-grid gap-2">
-        <button class="btn btn-outline-primary btn-sm" onclick="sharePost()">
-          <i class="fas fa-share"></i> Поделиться
-        </button>
-        <button class="btn btn-outline-secondary btn-sm" onclick="reportPost()">
-          <i class="fas fa-flag"></i> Пожаловаться
-        </button>
-        <a th:href="@{'/posts/' + ${postId}}" class="btn btn-outline-info btn-sm">
-          <i class="fas fa-arrow-left"></i> К посту
-        </a>
-      </div>
-    </div>
-  </aside>
+    <!-- Боковая панель -->
+    <aside class="aside-section">
+        <!-- Информация об авторе поста -->
+        <div class="widget" th:if="${post}">
+            <div class="widget-title">
+                <i class="fas fa-user"></i>
+                Автор поста
+            </div>
+            <div class="author-card">
+                <img th:src="${post.author.imageUrl}"
+                     th:alt="${post.author.firstName + ' ' + post.author.lastName}"
+                     class="author-avatar"
+                     onerror="this.src='/images/default-avatar.png'">
+                <div class="author-name" th:text="${post.author.firstName + ' ' + post.author.lastName}">Имя автора
+                </div>
+                <div class="author-followers">1.2K подписчиков</div>
+                <!--        <button class="follow-btn" th:if="${currentUser and currentUser.id != post.author.id}">-->
+                <!--          <i class="fas fa-plus"></i> Подписаться-->
+                <!--        </button>-->
+            </div>
+        </div>
+
+        <!-- Статистика поста -->
+        <div class="widget" th:if="${post}">
+            <div class="widget-title">
+                <i class="fas fa-chart-bar"></i>
+                Статистика
+            </div>
+            <div class="post-stats">
+                <span class="stat-label">Лайки</span>
+                <span class="stat-value" th:text="${post.likesCount}">0</span>
+            </div>
+            <div class="post-stats">
+                <span class="stat-label">Комментарии</span>
+                <span class="stat-value" id="sidebar-comments-count" th:text="${totalComments}">0</span>
+            </div>
+            <div class="post-stats">
+                <span class="stat-label">Просмотры</span>
+                <span class="stat-value" th:text="${post.viewsCount}">0</span>
+            </div>
+            <div class="post-stats">
+                <span class="stat-label">Создан</span>
+                <span class="stat-value" th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy')}">01.01.2024</span>
+            </div>
+        </div>
+
+        <!-- Последние комментарии -->
+        <div class="widget">
+            <div class="widget-title">
+                <i class="fas fa-comments"></i>
+                Последние комментарии
+            </div>
+            <div id="latest-comments-widget">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Загрузка...
+                </div>
+            </div>
+        </div>
+
+        <!-- Похожие посты -->
+        <div class="widget">
+            <div class="widget-title">
+                <i class="fas fa-bookmark"></i>
+                Действия
+            </div>
+            <div class="d-grid gap-2">
+                <button class="btn btn-outline-primary btn-sm" onclick="sharePost()">
+                    <i class="fas fa-share"></i> Поделиться
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="reportPost()">
+                    <i class="fas fa-flag"></i> Пожаловаться
+                </button>
+                <a th:href="@{'/posts/' + ${postId}}" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-arrow-left"></i> К посту
+                </a>
+            </div>
+        </div>
+    </aside>
 </div>
 
 <!-- Модальное окно подтверждения удаления -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Подтверждение удаления</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        Вы уверены, что хотите удалить этот комментарий?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-        <button type="button" class="btn btn-danger" id="confirm-delete">Удалить</button>
-      </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить этот комментарий?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete">Удалить</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
-  // Глобальные переменные
-  const postId = /*[[${postId}]]*/ 1;
-  const currentUser = /*[[${currentUser}]]*/ null;
-  let currentPage = /*[[${currentPage}]]*/ 0;
-  let pageSize = /*[[${pageSize}]]*/ 10;
-  let sortOrder = 'newest';
-  let editingCommentId = null;
+    // Глобальные переменные
+    const postId = /*[[${postId}]]*/ 1;
+    const currentUser = /*[[${currentUser}]]*/ null;
+    let currentPage = /*[[${currentPage}]]*/ 0;
+    let pageSize = /*[[${pageSize}]]*/ 10;
+    let sortOrder = 'newest';
+    let editingCommentId = null;
 
-  // Инициализация страницы
-  document.addEventListener('DOMContentLoaded', function() {
-    loadComments();
-    loadLatestComments();
-    setupEventListeners();
-  });
+    // Инициализация страницы
+    document.addEventListener('DOMContentLoaded', function () {
+        loadComments();
+        loadLatestComments();
+        setupEventListeners();
+    });
 
-  // Настройка обработчиков событий
-  function setupEventListeners() {
-    // Форма добавления комментария
-    const commentForm = document.getElementById('comment-form');
-    if (commentForm) {
-      commentForm.addEventListener('submit', handleCommentSubmit);
+    // Настройка обработчиков событий
+    function setupEventListeners() {
+        // Форма добавления комментария
+        const commentForm = document.getElementById('comment-form');
+        if (commentForm) {
+            commentForm.addEventListener('submit', handleCommentSubmit);
+        }
+
+        // Подтверждение удаления
+        document.getElementById('confirm-delete').addEventListener('click', confirmDelete);
     }
 
-    // Подтверждение удаления
-    document.getElementById('confirm-delete').addEventListener('click', confirmDelete);
-  }
+    // Загрузка комментариев
+    async function loadComments(page = 0) {
+        try {
+            showLoading();
 
-  // Загрузка комментариев
-  async function loadComments(page = 0) {
-    try {
-      showLoading();
+            const response = await fetch(`/api/posts/${postId}/comments?page=${page}&size=${pageSize}`);
 
-      const response = await fetch(`/api/posts/${postId}/comments?page=${page}&size=${pageSize}`);
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки комментариев');
+            }
 
-      if (!response.ok) {
-        throw new Error('Ошибка загрузки комментариев');
-      }
+            const data = await response.json();
+            renderComments(data);
+            renderPagination(data);
 
-      const data = await response.json();
-      renderComments(data);
-      renderPagination(data);
+            // Обновляем счетчик комментариев
+            updateCommentsCount();
 
-      // Обновляем счетчик комментариев
-      updateCommentsCount();
-
-    } catch (error) {
-      console.error('Ошибка:', error);
-      showError('Ошибка при загрузке комментариев: ' + error.message);
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showError('Ошибка при загрузке комментариев: ' + error.message);
+        }
     }
-  }
 
-  // Отображение комментариев
-  function renderComments(data) {
-    const container = document.getElementById('comments-container');
+    // Отображение комментариев
+    function renderComments(data) {
+        const container = document.getElementById('comments-container');
 
-    if (!data.comments || data.comments.length === 0) {
-      container.innerHTML = `
+        if (!data.comments || data.comments.length === 0) {
+            container.innerHTML = `
                     <div class="text-center text-muted py-4">
                         <i class="fas fa-comments fa-3x mb-3"></i>
                         <p>Пока нет комментариев. Будьте первым!</p>
                     </div>
                 `;
-      return;
-    }
+            return;
+        }
 
-    const commentsHtml = data.comments.map(comment => `
+        const commentsHtml = data.comments.map(comment => `
                 <div class="comment-item" data-comment-id="${comment.id}">
                     <div class="d-flex align-items-start">
                         <img src="${comment.author.imageUrl || '/images/default-avatar.png'}"
@@ -546,18 +1167,18 @@
                 </div>
             `).join('');
 
-    container.innerHTML = commentsHtml;
-  }
+        container.innerHTML = commentsHtml;
+    }
 
-  // Действия для комментария
-  function renderCommentActions(comment) {
-    if (!currentUser) return '';
+    // Действия для комментария
+    function renderCommentActions(comment) {
+        if (!currentUser) return '';
 
-    const isOwner = currentUser.id === comment.author.id;
+        const isOwner = currentUser.id === comment.author.id;
 
-    if (!isOwner) return '';
+        if (!isOwner) return '';
 
-    return `
+        return `
                 <div class="comment-actions mt-2">
                     <button class="btn btn-sm btn-outline-primary me-2" onclick="editComment(${comment.id})">
                         <i class="fas fa-edit"></i> Редактировать
@@ -567,33 +1188,33 @@
                     </button>
                 </div>
             `;
-  }
-
-  // Отображение пагинации
-  function renderPagination(data) {
-    const pagination = document.getElementById('pagination');
-    const pageInfo = data.pageInfo;
-
-    if (!pageInfo.hasNext && !pageInfo.hasPrevious) {
-      pagination.innerHTML = '';
-      return;
     }
 
-    let paginationHtml = '';
+    // Отображение пагинации
+    function renderPagination(data) {
+        const pagination = document.getElementById('pagination');
+        const pageInfo = data.pageInfo;
 
-    // Предыдущая страница
-    if (pageInfo.hasPrevious) {
-      paginationHtml += `
+        if (!pageInfo.hasNext && !pageInfo.hasPrevious) {
+            pagination.innerHTML = '';
+            return;
+        }
+
+        let paginationHtml = '';
+
+        // Предыдущая страница
+        if (pageInfo.hasPrevious) {
+            paginationHtml += `
                     <li class="page-item">
                         <a class="page-link" href="#" onclick="changePage(${pageInfo.currentPage - 1})">
                             <i class="fas fa-chevron-left"></i> Предыдущая
                         </a>
                     </li>
                 `;
-    }
+        }
 
-    // Текущая страница
-    paginationHtml += `
+        // Текущая страница
+        paginationHtml += `
                 <li class="page-item active">
                     <span class="page-link">
                         Страница ${pageInfo.currentPage + 1}
@@ -601,198 +1222,198 @@
                 </li>
             `;
 
-    // Следующая страница
-    if (pageInfo.hasNext) {
-      paginationHtml += `
+        // Следующая страница
+        if (pageInfo.hasNext) {
+            paginationHtml += `
                     <li class="page-item">
                         <a class="page-link" href="#" onclick="changePage(${pageInfo.currentPage + 1})">
                             Следующая <i class="fas fa-chevron-right"></i>
                         </a>
                     </li>
                 `;
-    }
-
-    pagination.innerHTML = paginationHtml;
-  }
-
-  // Смена страницы
-  function changePage(page) {
-    if (page < 0) return;
-    currentPage = page;
-    loadComments(page);
-  }
-
-  // Сортировка комментариев
-  function sortComments(order) {
-    sortOrder = order;
-    // Здесь можно добавить параметр сортировки в API запрос
-    loadComments(0);
-  }
-
-  // Обработка отправки комментария
-  async function handleCommentSubmit(event) {
-    event.preventDefault();
-
-    const content = document.getElementById('comment-content').value.trim();
-
-    if (!content) {
-      showError('Введите текст комментария');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/posts/${postId}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: content })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showSuccess('Комментарий успешно добавлен');
-        document.getElementById('comment-content').value = '';
-        // Обновляем счетчик комментариев
-        updateCommentsCount();
-        // Обновляем виджет последних комментариев
-        loadLatestComments();
-        // Перезагружаем комментарии на первой странице
-        currentPage = 0;
-        loadComments(0);
-      } else {
-        throw new Error(data.error || 'Ошибка при создании комментария');
-      }
-
-    } catch (error) {
-      console.error('Ошибка:', error);
-      showError('Ошибка при добавлении комментария: ' + error.message);
-    }
-  }
-
-  // Редактирование комментария
-  function editComment(commentId) {
-    const editForm = document.getElementById(`edit-form-${commentId}`);
-    const commentText = editForm.parentElement.querySelector('.comment-text');
-
-    editForm.style.display = 'block';
-    commentText.style.display = 'none';
-    editingCommentId = commentId;
-  }
-
-  // Сохранение изменений
-  async function saveEdit(commentId) {
-    const content = document.getElementById(`edit-content-${commentId}`).value.trim();
-
-    if (!content) {
-      showError('Введите текст комментария');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: content })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showSuccess('Комментарий успешно обновлен');
-        loadComments(currentPage);
-      } else {
-        throw new Error(data.error || 'Ошибка при обновлении комментария');
-      }
-
-    } catch (error) {
-      console.error('Ошибка:', error);
-      showError('Ошибка при обновлении комментария: ' + error.message);
-    }
-  }
-
-  // Отмена редактирования
-  function cancelEdit(commentId) {
-    const editForm = document.getElementById(`edit-form-${commentId}`);
-    const commentText = editForm.parentElement.querySelector('.comment-text');
-
-    editForm.style.display = 'none';
-    commentText.style.display = 'block';
-    editingCommentId = null;
-  }
-
-  // Удаление комментария
-  function deleteComment(commentId) {
-    editingCommentId = commentId;
-    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    deleteModal.show();
-  }
-
-  // Подтверждение удаления
-  async function confirmDelete() {
-    if (!editingCommentId) return;
-
-    try {
-      const response = await fetch(`/api/posts/${postId}/comments/${editingCommentId}`, {
-        method: 'DELETE'
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showSuccess('Комментарий успешно удален');
-        // Обновляем счетчик комментариев
-        updateCommentsCount();
-        // Перезагружаем текущую страницу комментариев
-        loadComments(currentPage);
-      } else {
-        throw new Error(data.error || 'Ошибка при удалении комментария');
-      }
-
-    } catch (error) {
-      console.error('Ошибка:', error);
-      showError('Ошибка при удалении комментария: ' + error.message);
-    } finally {
-      const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
-      deleteModal.hide();
-      editingCommentId = null;
-    }
-  }
-
-  // Обновление счетчика комментариев
-  async function updateCommentsCount() {
-    try {
-      const response = await fetch(`/api/posts/${postId}/comments/count`);
-      const data = await response.json();
-
-      if (data.success) {
-        document.getElementById('total-comments').textContent = data.count;
-        document.getElementById('comments-count').textContent = data.count;
-
-        // Обновляем счетчик в сайдбаре
-        const sidebarCount = document.getElementById('sidebar-comments-count');
-        if (sidebarCount) {
-          sidebarCount.textContent = data.count;
         }
-      }
-    } catch (error) {
-      console.error('Ошибка при обновлении счетчика:', error);
+
+        pagination.innerHTML = paginationHtml;
     }
-  }
 
-  // Загрузка последних комментариев для виджета
-  async function loadLatestComments() {
-    try {
-      const response = await fetch(`/api/posts/${postId}/comments/latest?limit=3`);
-      const data = await response.json();
+    // Смена страницы
+    function changePage(page) {
+        if (page < 0) return;
+        currentPage = page;
+        loadComments(page);
+    }
 
-      const widget = document.getElementById('latest-comments-widget');
+    // Сортировка комментариев
+    function sortComments(order) {
+        sortOrder = order;
+        // Здесь можно добавить параметр сортировки в API запрос
+        loadComments(0);
+    }
 
-      if (data.success && data.comments && data.comments.length > 0) {
-        const commentsHtml = data.comments.map(comment => `
+    // Обработка отправки комментария
+    async function handleCommentSubmit(event) {
+        event.preventDefault();
+
+        const content = document.getElementById('comment-content').value.trim();
+
+        if (!content) {
+            showError('Введите текст комментария');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({content: content})
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showSuccess('Комментарий успешно добавлен');
+                document.getElementById('comment-content').value = '';
+                // Обновляем счетчик комментариев
+                updateCommentsCount();
+                // Обновляем виджет последних комментариев
+                loadLatestComments();
+                // Перезагружаем комментарии на первой странице
+                currentPage = 0;
+                loadComments(0);
+            } else {
+                throw new Error(data.error || 'Ошибка при создании комментария');
+            }
+
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showError('Ошибка при добавлении комментария: ' + error.message);
+        }
+    }
+
+    // Редактирование комментария
+    function editComment(commentId) {
+        const editForm = document.getElementById(`edit-form-${commentId}`);
+        const commentText = editForm.parentElement.querySelector('.comment-text');
+
+        editForm.style.display = 'block';
+        commentText.style.display = 'none';
+        editingCommentId = commentId;
+    }
+
+    // Сохранение изменений
+    async function saveEdit(commentId) {
+        const content = document.getElementById(`edit-content-${commentId}`).value.trim();
+
+        if (!content) {
+            showError('Введите текст комментария');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({content: content})
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showSuccess('Комментарий успешно обновлен');
+                loadComments(currentPage);
+            } else {
+                throw new Error(data.error || 'Ошибка при обновлении комментария');
+            }
+
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showError('Ошибка при обновлении комментария: ' + error.message);
+        }
+    }
+
+    // Отмена редактирования
+    function cancelEdit(commentId) {
+        const editForm = document.getElementById(`edit-form-${commentId}`);
+        const commentText = editForm.parentElement.querySelector('.comment-text');
+
+        editForm.style.display = 'none';
+        commentText.style.display = 'block';
+        editingCommentId = null;
+    }
+
+    // Удаление комментария
+    function deleteComment(commentId) {
+        editingCommentId = commentId;
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+    }
+
+    // Подтверждение удаления
+    async function confirmDelete() {
+        if (!editingCommentId) return;
+
+        try {
+            const response = await fetch(`/api/posts/${postId}/comments/${editingCommentId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showSuccess('Комментарий успешно удален');
+                // Обновляем счетчик комментариев
+                updateCommentsCount();
+                // Перезагружаем текущую страницу комментариев
+                loadComments(currentPage);
+            } else {
+                throw new Error(data.error || 'Ошибка при удалении комментария');
+            }
+
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showError('Ошибка при удалении комментария: ' + error.message);
+        } finally {
+            const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            deleteModal.hide();
+            editingCommentId = null;
+        }
+    }
+
+    // Обновление счетчика комментариев
+    async function updateCommentsCount() {
+        try {
+            const response = await fetch(`/api/posts/${postId}/comments/count`);
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('total-comments').textContent = data.count;
+                document.getElementById('comments-count').textContent = data.count;
+
+                // Обновляем счетчик в сайдбаре
+                const sidebarCount = document.getElementById('sidebar-comments-count');
+                if (sidebarCount) {
+                    sidebarCount.textContent = data.count;
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка при обновлении счетчика:', error);
+        }
+    }
+
+    // Загрузка последних комментариев для виджета
+    async function loadLatestComments() {
+        try {
+            const response = await fetch(`/api/posts/${postId}/comments/latest?limit=3`);
+            const data = await response.json();
+
+            const widget = document.getElementById('latest-comments-widget');
+
+            if (data.success && data.comments && data.comments.length > 0) {
+                const commentsHtml = data.comments.map(comment => `
                         <div class="latest-comment">
                             <img src="${comment.author.imageUrl || '/images/default-avatar.png'}"
                                  alt="${comment.author.firstName} ${comment.author.lastName}"
@@ -806,81 +1427,81 @@
                         </div>
                     `).join('');
 
-        widget.innerHTML = commentsHtml;
-      } else {
-        widget.innerHTML = '<div class="text-center text-muted py-3">Нет комментариев</div>';
-      }
-    } catch (error) {
-      console.error('Ошибка при загрузке последних комментариев:', error);
-      document.getElementById('latest-comments-widget').innerHTML =
-              '<div class="text-center text-muted py-3">Ошибка загрузки</div>';
+                widget.innerHTML = commentsHtml;
+            } else {
+                widget.innerHTML = '<div class="text-center text-muted py-3">Нет комментариев</div>';
+            }
+        } catch (error) {
+            console.error('Ошибка при загрузке последних комментариев:', error);
+            document.getElementById('latest-comments-widget').innerHTML =
+                '<div class="text-center text-muted py-3">Ошибка загрузки</div>';
+        }
     }
-  }
 
-  // Функции для действий в сайдбаре
-  function sharePost() {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Комментарии к посту',
-        url: window.location.href
-      });
-    } else {
-      // Fallback - копирование ссылки
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        showSuccess('Ссылка скопирована в буфер обмена');
-      });
+    // Функции для действий в сайдбаре
+    function sharePost() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Комментарии к посту',
+                url: window.location.href
+            });
+        } else {
+            // Fallback - копирование ссылки
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showSuccess('Ссылка скопирована в буфер обмена');
+            });
+        }
     }
-  }
 
-  function reportPost() {
-    if (confirm('Вы уверены, что хотите пожаловаться на этот пост?')) {
-      // Здесь можно добавить отправку жалобы на сервер
-      showSuccess('Жалоба отправлена на рассмотрение');
+    function reportPost() {
+        if (confirm('Вы уверены, что хотите пожаловаться на этот пост?')) {
+            // Здесь можно добавить отправку жалобы на сервер
+            showSuccess('Жалоба отправлена на рассмотрение');
+        }
     }
-  }
 
-  // Вспомогательные функции
-  function showLoading() {
-    document.getElementById('comments-container').innerHTML = `
+    // Вспомогательные функции
+    function showLoading() {
+        document.getElementById('comments-container').innerHTML = `
                 <div class="loading">
                     <i class="fas fa-spinner fa-spin"></i> Загрузка комментариев...
                 </div>
             `;
-  }
+    }
 
-  function showError(message) {
-    const notifications = document.getElementById('notifications');
-    notifications.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i> ${message}</div>`;
-    setTimeout(() => notifications.innerHTML = '', 5000);
-  }
+    function showError(message) {
+        const notifications = document.getElementById('notifications');
+        notifications.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i> ${message}</div>`;
+        setTimeout(() => notifications.innerHTML = '', 5000);
+    }
 
-  function showSuccess(message) {
-    const notifications = document.getElementById('notifications');
-    notifications.innerHTML = `<div class="success"><i class="fas fa-check-circle"></i> ${message}</div>`;
-    setTimeout(() => notifications.innerHTML = '', 3000);
-  }
+    function showSuccess(message) {
+        const notifications = document.getElementById('notifications');
+        notifications.innerHTML = `<div class="success"><i class="fas fa-check-circle"></i> ${message}</div>`;
+        setTimeout(() => notifications.innerHTML = '', 3000);
+    }
 
-  function formatDate(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'только что';
-    if (diffMins < 60) return `${diffMins} мин. назад`;
-    if (diffHours < 24) return `${diffHours} ч. назад`;
-    if (diffDays < 7) return `${diffDays} дн. назад`;
+        if (diffMins < 1) return 'только что';
+        if (diffMins < 60) return `${diffMins} мин. назад`;
+        if (diffHours < 24) return `${diffHours} ч. назад`;
+        if (diffDays < 7) return `${diffDays} дн. назад`;
 
-    return date.toLocaleDateString('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
+        return date.toLocaleDateString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
 </script>
 </body>
 </html>

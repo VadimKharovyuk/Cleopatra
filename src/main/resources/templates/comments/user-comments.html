@@ -2,210 +2,218 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Мои комментарии</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    .comment-card {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .comment-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    .post-link {
-      color: #6c757d;
-      text-decoration: none;
-      font-size: 0.9em;
-    }
-    .post-link:hover {
-      color: #007bff;
-    }
-    .comment-date {
-      font-size: 0.85em;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои комментарии</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .comment-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .comment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-link {
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .post-link:hover {
+            color: #007bff;
+        }
+
+        .comment-date {
+            font-size: 0.85em;
+        }
+    </style>
 </head>
 <body>
 <div class="container mt-4">
-  <!-- Заголовок -->
-  <div class="row mb-4">
-    <div class="col-12">
-      <h2 class="mb-3">
-        <i class="fas fa-user-comments text-primary"></i>
-        Мои комментарии
-      </h2>
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/">Главная</a></li>
-          <li class="breadcrumb-item"><a href="/profile">Профиль</a></li>
-          <li class="breadcrumb-item active">Мои комментарии</li>
-        </ol>
-      </nav>
+    <!-- Заголовок -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-3">
+                <i class="fas fa-user-comments text-primary"></i>
+                Мои комментарии
+            </h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Главная</a></li>
+                    <li class="breadcrumb-item"><a href="/profile">Профиль</a></li>
+                    <li class="breadcrumb-item active">Мои комментарии</li>
+                </ol>
+            </nav>
+        </div>
     </div>
-  </div>
 
-  <!-- Список комментариев пользователя -->
-  <div class="row">
-    <div class="col-12">
-      <div th:if="${comments.comments.empty}" class="text-center py-5">
-        <i class="fas fa-comment-slash fa-4x text-muted mb-4"></i>
-        <h4 class="text-muted">У вас пока нет комментариев</h4>
-        <p class="text-muted">Начните участвовать в обсуждениях!</p>
-        <a href="/posts" class="btn btn-primary">
-          <i class="fas fa-search"></i>
-          Найти интересные посты
-        </a>
-      </div>
-
-      <div th:each="comment : ${comments.comments}" class="card comment-card mb-3">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <div class="flex-grow-1">
-              <h6 class="card-title mb-1">
-                <a th:href="@{/posts/{postId}(postId=${comment.postId})}"
-                   class="post-link">
-                  <i class="fas fa-external-link-alt me-1"></i>
-                  Перейти к посту #<span th:text="${comment.postId}">123</span>
+    <!-- Список комментариев пользователя -->
+    <div class="row">
+        <div class="col-12">
+            <div th:if="${comments.comments.empty}" class="text-center py-5">
+                <i class="fas fa-comment-slash fa-4x text-muted mb-4"></i>
+                <h4 class="text-muted">У вас пока нет комментариев</h4>
+                <p class="text-muted">Начните участвовать в обсуждениях!</p>
+                <a href="/posts" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Найти интересные посты
                 </a>
-              </h6>
-              <small class="text-muted comment-date">
-                <i class="fas fa-clock me-1"></i>
-                <span th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}">
+            </div>
+
+            <div th:each="comment : ${comments.comments}" class="card comment-card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">
+                                <a th:href="@{/posts/{postId}(postId=${comment.postId})}"
+                                   class="post-link">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    Перейти к посту #<span th:text="${comment.postId}">123</span>
+                                </a>
+                            </h6>
+                            <small class="text-muted comment-date">
+                                <i class="fas fa-clock me-1"></i>
+                                <span th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}">
                                         Дата создания
                                     </span>
-                <span th:if="${comment.updatedAt != comment.createdAt}" class="ms-2">
+                                <span th:if="${comment.updatedAt != comment.createdAt}" class="ms-2">
                                         <i class="fas fa-edit text-warning me-1"></i>
-                                        (изменен <span th:text="${#temporals.format(comment.updatedAt, 'dd.MM.yyyy HH:mm')}">дата</span>)
+                                        (изменен <span
+                                        th:text="${#temporals.format(comment.updatedAt, 'dd.MM.yyyy HH:mm')}">дата</span>)
                                     </span>
-              </small>
-            </div>
-            <div class="dropdown">
-              <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                      type="button"
-                      data-bs-toggle="dropdown">
-                <i class="fas fa-ellipsis-v"></i>
-              </button>
-              <ul class="dropdown-menu">
-                <li>
-                  <a class="dropdown-item edit-comment-btn"
-                     href="#"
-                     th:attr="data-comment-id=${comment.id}">
-                    <i class="fas fa-edit text-primary"></i>
-                    Редактировать
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item delete-comment-btn"
-                     href="#"
-                     th:attr="data-comment-id=${comment.id}">
-                    <i class="fas fa-trash text-danger"></i>
-                    Удалить
-                  </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                  <a class="dropdown-item"
-                     th:href="@{/posts/{postId}/comments(postId=${comment.postId})}">
-                    <i class="fas fa-comments text-info"></i>
-                    Все комментарии к посту
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
+                            </small>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                    type="button"
+                                    data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item edit-comment-btn"
+                                       href="#"
+                                       th:attr="data-comment-id=${comment.id}">
+                                        <i class="fas fa-edit text-primary"></i>
+                                        Редактировать
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item delete-comment-btn"
+                                       href="#"
+                                       th:attr="data-comment-id=${comment.id}">
+                                        <i class="fas fa-trash text-danger"></i>
+                                        Удалить
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item"
+                                       th:href="@{/posts/{postId}/comments(postId=${comment.postId})}">
+                                        <i class="fas fa-comments text-info"></i>
+                                        Все комментарии к посту
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
 
-          <div class="comment-content" th:attr="data-comment-id=${comment.id}">
-            <p class="card-text" th:text="${comment.content}">
-              Текст комментария
-            </p>
-          </div>
+                    <div class="comment-content" th:attr="data-comment-id=${comment.id}">
+                        <p class="card-text" th:text="${comment.content}">
+                            Текст комментария
+                        </p>
+                    </div>
 
-          <!-- Форма редактирования (скрыта по умолчанию) -->
-          <div class="edit-form" th:attr="data-comment-id=${comment.id}" style="display: none;">
-            <div class="mb-3">
+                    <!-- Форма редактирования (скрыта по умолчанию) -->
+                    <div class="edit-form" th:attr="data-comment-id=${comment.id}" style="display: none;">
+                        <div class="mb-3">
                                 <textarea class="form-control edit-textarea"
                                           rows="3"
                                           maxlength="500"
                                           th:text="${comment.content}"></textarea>
-              <div class="form-text">
-                <span class="char-counter">0</span>/500 символов
-              </div>
+                            <div class="form-text">
+                                <span class="char-counter">0</span>/500 символов
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success btn-sm save-edit-btn"
+                                    th:attr="data-comment-id=${comment.id}, data-post-id=${comment.postId}">
+                                <i class="fas fa-check"></i>
+                                Сохранить
+                            </button>
+                            <button class="btn btn-secondary btn-sm cancel-edit-btn">
+                                <i class="fas fa-times"></i>
+                                Отмена
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-success btn-sm save-edit-btn"
-                      th:attr="data-comment-id=${comment.id}, data-post-id=${comment.postId}">
-                <i class="fas fa-check"></i>
-                Сохранить
-              </button>
-              <button class="btn btn-secondary btn-sm cancel-edit-btn">
-                <i class="fas fa-times"></i>
-                Отмена
-              </button>
+
+            <!-- Пагинация -->
+            <div th:if="${comments.pageInfo.hasNext || comments.pageInfo.hasPrevious}">
+                <nav aria-label="Навигация по комментариям">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${comments.pageInfo.first} ? 'disabled'">
+                            <a class="page-link"
+                               th:href="@{/users/{userId}/comments(userId=${userId}, page=${currentPage - 1}, size=${pageSize})}"
+                               aria-label="Предыдущая">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+
+                        <li class="page-item active">
+                            <span class="page-link" th:text="${currentPage + 1}">1</span>
+                        </li>
+
+                        <li class="page-item" th:classappend="${comments.pageInfo.last} ? 'disabled'">
+                            <a class="page-link"
+                               th:href="@{/users/{userId}/comments(userId=${userId}, page=${currentPage + 1}, size=${pageSize})}"
+                               aria-label="Следующая">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
-          </div>
         </div>
-      </div>
-
-      <!-- Пагинация -->
-      <div th:if="${comments.pageInfo.hasNext || comments.pageInfo.hasPrevious}">
-        <nav aria-label="Навигация по комментариям">
-          <ul class="pagination justify-content-center">
-            <li class="page-item" th:classappend="${comments.pageInfo.first} ? 'disabled'">
-              <a class="page-link"
-                 th:href="@{/users/{userId}/comments(userId=${userId}, page=${currentPage - 1}, size=${pageSize})}"
-                 aria-label="Предыдущая">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-
-            <li class="page-item active">
-              <span class="page-link" th:text="${currentPage + 1}">1</span>
-            </li>
-
-            <li class="page-item" th:classappend="${comments.pageInfo.last} ? 'disabled'">
-              <a class="page-link"
-                 th:href="@{/users/{userId}/comments(userId=${userId}, page=${currentPage + 1}, size=${pageSize})}"
-                 aria-label="Следующая">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </div>
     </div>
-  </div>
 </div>
+
 
 <!-- Модальное окно подтверждения удаления -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="fas fa-exclamation-triangle text-warning"></i>
-          Подтверждение удаления
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p class="mb-0">Вы уверены, что хотите удалить этот комментарий?</p>
-        <small class="text-muted">Это действие нельзя будет отменить.</small>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          <i class="fas fa-times"></i>
-          Отмена
-        </button>
-        <button type="button" class="btn btn-danger" id="confirm-delete-btn">
-          <i class="fas fa-trash"></i>
-          Удалить комментарий
-        </button>
-      </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                    Подтверждение удаления
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Вы уверены, что хотите удалить этот комментарий?</p>
+                <small class="text-muted">Это действие нельзя будет отменить.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                    Отмена
+                </button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">
+                    <i class="fas fa-trash"></i>
+                    Удалить комментарий
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Уведомления -->
@@ -213,12 +221,12 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-  let deleteCommentId = null;
-  let deletePostId = null;
+    let deleteCommentId = null;
+    let deletePostId = null;
 
-  // Функция для показа уведомлений
-  function showToast(message, type = 'success') {
-    const toastHtml = `
+    // Функция для показа уведомлений
+    function showToast(message, type = 'success') {
+        const toastHtml = `
                 <div class="toast" role="alert">
                     <div class="toast-header">
                         <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} text-${type}"></i>
@@ -229,180 +237,180 @@
                 </div>
             `;
 
-    document.getElementById('toast-container').insertAdjacentHTML('beforeend', toastHtml);
-    const toast = new bootstrap.Toast(document.querySelector('.toast:last-child'));
-    toast.show();
-  }
-
-  // Подсчет символов во всех текстареях
-  function updateCharCounter(textarea) {
-    const charCounter = textarea.parentElement.querySelector('.char-counter');
-    if (charCounter) {
-      charCounter.textContent = textarea.value.length;
+        document.getElementById('toast-container').insertAdjacentHTML('beforeend', toastHtml);
+        const toast = new bootstrap.Toast(document.querySelector('.toast:last-child'));
+        toast.show();
     }
-  }
 
-  // Инициализация счетчиков символов
-  document.querySelectorAll('.edit-textarea').forEach(textarea => {
-    updateCharCounter(textarea);
-    textarea.addEventListener('input', () => updateCharCounter(textarea));
-  });
-
-  // Обработка кнопок редактирования
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('edit-comment-btn') || e.target.closest('.edit-comment-btn')) {
-      e.preventDefault();
-      const commentId = e.target.closest('.edit-comment-btn').dataset.commentId;
-      const contentDiv = document.querySelector(`.comment-content[data-comment-id="${commentId}"]`);
-      const editForm = document.querySelector(`.edit-form[data-comment-id="${commentId}"]`);
-
-      if (contentDiv && editForm) {
-        contentDiv.style.display = 'none';
-        editForm.style.display = 'block';
-
-        // Фокус на текстарею
-        const textarea = editForm.querySelector('.edit-textarea');
-        textarea.focus();
-        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-      }
-    }
-  });
-
-  // Отмена редактирования
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('cancel-edit-btn') || e.target.closest('.cancel-edit-btn')) {
-      e.preventDefault();
-      const editForm = e.target.closest('.edit-form');
-      const commentId = editForm.dataset.commentId;
-      const contentDiv = document.querySelector(`.comment-content[data-comment-id="${commentId}"]`);
-
-      if (contentDiv && editForm) {
-        contentDiv.style.display = 'block';
-        editForm.style.display = 'none';
-      }
-    }
-  });
-
-  // Сохранение редактирования
-  document.addEventListener('click', async function(e) {
-    if (e.target.classList.contains('save-edit-btn') || e.target.closest('.save-edit-btn')) {
-      e.preventDefault();
-      const saveBtn = e.target.closest('.save-edit-btn');
-      const commentId = saveBtn.dataset.commentId;
-      const postId = saveBtn.dataset.postId;
-      const editForm = document.querySelector(`.edit-form[data-comment-id="${commentId}"]`);
-      const textarea = editForm.querySelector('.edit-textarea');
-      const content = textarea.value.trim();
-
-      if (!content) {
-        showToast('Комментарий не может быть пустым', 'danger');
-        return;
-      }
-
-      const originalText = saveBtn.innerHTML;
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
-
-      try {
-        const response = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ content })
-        });
-
-        if (response.ok) {
-          showToast('Комментарий успешно обновлен');
-
-          // Обновляем отображение
-          const contentDiv = document.querySelector(`.comment-content[data-comment-id="${commentId}"]`);
-          const contentP = contentDiv.querySelector('p');
-          contentP.textContent = content;
-
-          // Скрываем форму редактирования
-          contentDiv.style.display = 'block';
-          editForm.style.display = 'none';
-
-        } else {
-          const error = await response.json();
-          showToast(error.message || 'Ошибка при обновлении комментария', 'danger');
+    // Подсчет символов во всех текстареях
+    function updateCharCounter(textarea) {
+        const charCounter = textarea.parentElement.querySelector('.char-counter');
+        if (charCounter) {
+            charCounter.textContent = textarea.value.length;
         }
-      } catch (error) {
-        showToast('Ошибка соединения с сервером', 'danger');
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = originalText;
-      }
     }
-  });
 
-  // Подготовка к удалению
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('delete-comment-btn') || e.target.closest('.delete-comment-btn')) {
-      e.preventDefault();
-      const deleteBtn = e.target.closest('.delete-comment-btn');
-      deleteCommentId = deleteBtn.dataset.commentId;
+    // Инициализация счетчиков символов
+    document.querySelectorAll('.edit-textarea').forEach(textarea => {
+        updateCharCounter(textarea);
+        textarea.addEventListener('input', () => updateCharCounter(textarea));
+    });
 
-      // Найдем postId для этого комментария
-      const saveBtn = document.querySelector(`.save-edit-btn[data-comment-id="${deleteCommentId}"]`);
-      deletePostId = saveBtn ? saveBtn.dataset.postId : null;
+    // Обработка кнопок редактирования
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('edit-comment-btn') || e.target.closest('.edit-comment-btn')) {
+            e.preventDefault();
+            const commentId = e.target.closest('.edit-comment-btn').dataset.commentId;
+            const contentDiv = document.querySelector(`.comment-content[data-comment-id="${commentId}"]`);
+            const editForm = document.querySelector(`.edit-form[data-comment-id="${commentId}"]`);
 
-      const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-      deleteModal.show();
-    }
-  });
+            if (contentDiv && editForm) {
+                contentDiv.style.display = 'none';
+                editForm.style.display = 'block';
 
-  // Подтверждение удаления
-  document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
-    if (!deleteCommentId || !deletePostId) return;
+                // Фокус на текстарею
+                const textarea = editForm.querySelector('.edit-textarea');
+                textarea.focus();
+                textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+            }
+        }
+    });
 
-    const originalText = this.innerHTML;
-    this.disabled = true;
-    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
+    // Отмена редактирования
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('cancel-edit-btn') || e.target.closest('.cancel-edit-btn')) {
+            e.preventDefault();
+            const editForm = e.target.closest('.edit-form');
+            const commentId = editForm.dataset.commentId;
+            const contentDiv = document.querySelector(`.comment-content[data-comment-id="${commentId}"]`);
 
-    try {
-      const response = await fetch(`/api/posts/${deletePostId}/comments/${deleteCommentId}`, {
-        method: 'DELETE'
-      });
+            if (contentDiv && editForm) {
+                contentDiv.style.display = 'block';
+                editForm.style.display = 'none';
+            }
+        }
+    });
 
-      if (response.ok) {
-        showToast('Комментарий успешно удален');
-        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
-        modal.hide();
+    // Сохранение редактирования
+    document.addEventListener('click', async function (e) {
+        if (e.target.classList.contains('save-edit-btn') || e.target.closest('.save-edit-btn')) {
+            e.preventDefault();
+            const saveBtn = e.target.closest('.save-edit-btn');
+            const commentId = saveBtn.dataset.commentId;
+            const postId = saveBtn.dataset.postId;
+            const editForm = document.querySelector(`.edit-form[data-comment-id="${commentId}"]`);
+            const textarea = editForm.querySelector('.edit-textarea');
+            const content = textarea.value.trim();
 
-        // Удаляем карточку комментария из DOM
-        const commentCard = document.querySelector(`[data-comment-id="${deleteCommentId}"]`).closest('.card');
-        commentCard.style.transition = 'opacity 0.3s ease';
-        commentCard.style.opacity = '0';
+            if (!content) {
+                showToast('Комментарий не может быть пустым', 'danger');
+                return;
+            }
 
-        setTimeout(() => {
-          commentCard.remove();
+            const originalText = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Сохранение...';
 
-          // Проверяем, остались ли комментарии
-          const remainingComments = document.querySelectorAll('.comment-card');
-          if (remainingComments.length === 0) {
-            location.reload(); // Показать сообщение "нет комментариев"
-          }
-        }, 300);
+            try {
+                const response = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({content})
+                });
 
-      } else {
-        const error = await response.json();
-        showToast(error.message || 'Ошибка при удалении комментария', 'danger');
-      }
-    } catch (error) {
-      showToast('Ошибка соединения с сервером', 'danger');
-    } finally {
-      this.disabled = false;
-      this.innerHTML = originalText;
-    }
-  });
+                if (response.ok) {
+                    showToast('Комментарий успешно обновлен');
 
-  // Закрытие модального окна - сброс переменных
-  document.getElementById('deleteModal').addEventListener('hidden.bs.modal', function() {
-    deleteCommentId = null;
-    deletePostId = null;
-  });
+                    // Обновляем отображение
+                    const contentDiv = document.querySelector(`.comment-content[data-comment-id="${commentId}"]`);
+                    const contentP = contentDiv.querySelector('p');
+                    contentP.textContent = content;
+
+                    // Скрываем форму редактирования
+                    contentDiv.style.display = 'block';
+                    editForm.style.display = 'none';
+
+                } else {
+                    const error = await response.json();
+                    showToast(error.message || 'Ошибка при обновлении комментария', 'danger');
+                }
+            } catch (error) {
+                showToast('Ошибка соединения с сервером', 'danger');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            }
+        }
+    });
+
+    // Подготовка к удалению
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('delete-comment-btn') || e.target.closest('.delete-comment-btn')) {
+            e.preventDefault();
+            const deleteBtn = e.target.closest('.delete-comment-btn');
+            deleteCommentId = deleteBtn.dataset.commentId;
+
+            // Найдем postId для этого комментария
+            const saveBtn = document.querySelector(`.save-edit-btn[data-comment-id="${deleteCommentId}"]`);
+            deletePostId = saveBtn ? saveBtn.dataset.postId : null;
+
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+    });
+
+    // Подтверждение удаления
+    document.getElementById('confirm-delete-btn').addEventListener('click', async function () {
+        if (!deleteCommentId || !deletePostId) return;
+
+        const originalText = this.innerHTML;
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Удаление...';
+
+        try {
+            const response = await fetch(`/api/posts/${deletePostId}/comments/${deleteCommentId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                showToast('Комментарий успешно удален');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+                modal.hide();
+
+                // Удаляем карточку комментария из DOM
+                const commentCard = document.querySelector(`[data-comment-id="${deleteCommentId}"]`).closest('.card');
+                commentCard.style.transition = 'opacity 0.3s ease';
+                commentCard.style.opacity = '0';
+
+                setTimeout(() => {
+                    commentCard.remove();
+
+                    // Проверяем, остались ли комментарии
+                    const remainingComments = document.querySelectorAll('.comment-card');
+                    if (remainingComments.length === 0) {
+                        location.reload(); // Показать сообщение "нет комментариев"
+                    }
+                }, 300);
+
+            } else {
+                const error = await response.json();
+                showToast(error.message || 'Ошибка при удалении комментария', 'danger');
+            }
+        } catch (error) {
+            showToast('Ошибка соединения с сервером', 'danger');
+        } finally {
+            this.disabled = false;
+            this.innerHTML = originalText;
+        }
+    });
+
+    // Закрытие модального окна - сброс переменных
+    document.getElementById('deleteModal').addEventListener('hidden.bs.modal', function () {
+        deleteCommentId = null;
+        deletePostId = null;
+    });
 </script>
 </body>
 </html>
