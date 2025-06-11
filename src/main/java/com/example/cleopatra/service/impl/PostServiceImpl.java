@@ -190,8 +190,6 @@ public class PostServiceImpl implements PostService {
 
         User currentUser = getCurrentUser();
 
-        log.info("Пост найден: {}", post.getContent().substring(0, Math.min(50, post.getContent().length())));
-
         // ✅ ОБНОВЛЕННЫЙ ВЫЗОВ с логикой лайков
         Boolean isLiked = postLikeService.isPostLikedByUser(post, currentUser.getId());
         List<PostResponseDto.LikeUserDto> recentLikes =
@@ -202,8 +200,6 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostListDto getUserPosts(Long userId, int page, int size) {
-        log.info("Получение постов пользователя: {}, страница: {}, размер: {}", userId, page, size);
-
         try {
             // Проверяем валидность параметров
             if (userId == null) {
