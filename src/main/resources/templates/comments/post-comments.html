@@ -326,7 +326,8 @@
 
 
         <!-- AI Помощник для комментариев -->
-        <div class="ai-assistant-section" th:if="${currentUser}" style="margin-top: 20px;">
+        <!-- AI Помощник для комментариев -->
+        <div class="ai-assistant-section" th:if="${currentUser}">
             <div class="card border-primary">
                 <div class="card-header bg-primary text-white">
                     <h6 class="mb-0">
@@ -343,7 +344,8 @@
                                        id="ai-prompt"
                                        class="form-control"
                                        placeholder="Например: напиши положительный отзыв о статье"
-                                       maxlength="200">
+                                       maxlength="200"
+                                       autocomplete="off">
                                 <div class="form-text">Опишите, какой комментарий хотите получить</div>
                             </div>
                         </div>
@@ -360,7 +362,7 @@
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2 mb-3">
+                    <div class="d-flex gap-2 mb-3 flex-wrap">
                         <button type="button" class="btn btn-outline-primary" onclick="generateCommentPreview()">
                             <i class="fas fa-eye"></i> Предпросмотр
                         </button>
@@ -378,10 +380,10 @@
                     <!-- Превью комментария -->
                     <div id="ai-preview-section" style="display: none;">
                         <div class="alert alert-info">
-                            <strong>Предпросмотр:</strong>
-                            <div id="ai-preview-text" style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;"></div>
-                            <div class="mt-2">
-                                <button class="btn btn-success btn-sm" onclick="useGeneratedComment()">
+                            <strong><i class="fas fa-eye"></i> Предпросмотр:</strong>
+                            <div id="ai-preview-text" class="mt-2"></div>
+                            <div class="mt-3">
+                                <button class="btn btn-success btn-sm me-2" onclick="useGeneratedComment()">
                                     <i class="fas fa-check"></i> Использовать
                                 </button>
                                 <button class="btn btn-outline-secondary btn-sm" onclick="hidePreview()">
@@ -393,8 +395,10 @@
 
                     <!-- Статус AI -->
                     <div id="ai-loading" style="display: none;">
-                        <div class="d-flex align-items-center">
-                            <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                                <span class="visually-hidden">Загрузка...</span>
+                            </div>
                             <span>AI генерирует комментарий...</span>
                         </div>
                     </div>
@@ -403,63 +407,80 @@
         </div>
 
         <!-- Модальное окно шаблонов -->
-        <div class="modal fade" id="templatesModal" tabindex="-1">
+        <div class="modal fade" id="templatesModal" tabindex="-1" aria-labelledby="templatesModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">
+                        <h5 class="modal-title" id="templatesModalLabel">
                             <i class="fas fa-list"></i> Шаблоны комментариев
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                     </div>
                     <div class="modal-body">
                         <div id="templates-content">
-                            <div class="text-center">
-                                <div class="spinner-border text-primary"></div>
-                                <p class="mt-2">Загрузка шаблонов...</p>
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Загрузка...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Загрузка шаблонов...</p>
                             </div>
                         </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Закрыть
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Модальное окно примеров -->
-        <div class="modal fade" id="examplesModal" tabindex="-1">
+        <div class="modal fade" id="examplesModal" tabindex="-1" aria-labelledby="examplesModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">
+                        <h5 class="modal-title" id="examplesModalLabel">
                             <i class="fas fa-lightbulb"></i> Примеры промптов
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                     </div>
                     <div class="modal-body">
                         <div id="examples-content">
-                            <div class="text-center">
-                                <div class="spinner-border text-primary"></div>
-                                <p class="mt-2">Загрузка примеров...</p>
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Загрузка...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Загрузка примеров...</p>
                             </div>
                         </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Закрыть
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Модальное окно улучшения комментария -->
-        <div class="modal fade" id="improveModal" tabindex="-1">
+        <div class="modal fade" id="improveModal" tabindex="-1" aria-labelledby="improveModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">
+                        <h5 class="modal-title" id="improveModalLabel">
                             <i class="fas fa-magic"></i> Улучшить комментарий
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="improve-text" class="form-label">Ваш комментарий:</label>
-                            <textarea id="improve-text" class="form-control" rows="3"></textarea>
+                            <textarea id="improve-text"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="Введите текст комментария для улучшения..."></textarea>
                         </div>
                         <div class="mb-3">
                             <label for="improve-type" class="form-label">Тип улучшения:</label>
@@ -473,17 +494,23 @@
                         </div>
                         <div id="improve-result" style="display: none;">
                             <div class="alert alert-success">
-                                <strong>Улучшенный вариант:</strong>
-                                <div id="improved-text" style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;"></div>
+                                <strong><i class="fas fa-check-circle"></i> Улучшенный вариант:</strong>
+                                <div id="improved-text" class="mt-2"></div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Отмена
+                        </button>
                         <button type="button" class="btn btn-primary" onclick="improveComment()">
                             <i class="fas fa-magic"></i> Улучшить
                         </button>
-                        <button type="button" class="btn btn-success" onclick="useImprovedComment()" style="display: none;" id="use-improved-btn">
+                        <button type="button"
+                                class="btn btn-success"
+                                onclick="useImprovedComment()"
+                                style="display: none;"
+                                id="use-improved-btn">
                             <i class="fas fa-check"></i> Использовать
                         </button>
                     </div>
@@ -491,436 +518,10 @@
             </div>
         </div>
 
-        <script>
-            // Глобальные переменные для AI
-            let aiServiceAvailable = false;
-            let lastGeneratedComment = '';
-            let commentToImprove = '';
 
-            // Инициализация AI функций
-            document.addEventListener('DOMContentLoaded', function() {
-                checkAIServiceStatus();
-                addImproveButtonsToComments();
-            });
-
-            // Проверка статуса AI сервиса
-            async function checkAIServiceStatus() {
-                try {
-                    const response = await fetch(`/api/posts/${postId}/comments/ai/status`);
-                    const data = await response.json();
-
-                    aiServiceAvailable = data.aiServiceAvailable;
-
-                    const statusBadge = document.getElementById('ai-status-badge');
-                    const aiSection = document.querySelector('.ai-assistant-section');
-
-                    if (aiServiceAvailable) {
-                        statusBadge.textContent = 'Готов';
-                        statusBadge.className = 'badge bg-success text-white ms-2';
-                        aiSection.style.display = 'block';
-                    } else {
-                        statusBadge.textContent = 'Недоступен';
-                        statusBadge.className = 'badge bg-danger text-white ms-2';
-                        aiSection.style.opacity = '0.6';
-                        aiSection.style.pointerEvents = 'none';
-                    }
-                } catch (error) {
-                    console.error('Ошибка проверки AI сервиса:', error);
-                    document.getElementById('ai-status-badge').textContent = 'Ошибка';
-                    document.getElementById('ai-status-badge').className = 'badge bg-warning text-dark ms-2';
-                }
-            }
-
-            // Генерация превью комментария
-            async function generateCommentPreview() {
-                const prompt = document.getElementById('ai-prompt').value.trim();
-                const commentType = document.getElementById('comment-type').value;
-
-                if (!prompt) {
-                    showError('Введите описание желаемого комментария');
-                    return;
-                }
-
-                if (!aiServiceAvailable) {
-                    showError('AI сервис недоступен');
-                    return;
-                }
-
-                showAILoading(true);
-                hidePreview();
-
-                try {
-                    const response = await fetch(`/api/posts/${postId}/comments/ai/preview`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            prompt: prompt,
-                            commentType: commentType
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        lastGeneratedComment = data.data.generatedComment;
-                        document.getElementById('ai-preview-text').textContent = lastGeneratedComment;
-                        document.getElementById('ai-preview-section').style.display = 'block';
-                        showSuccess('Комментарий сгенерирован! Время: ' + data.data.generationTimeMs + ' мс');
-                    } else {
-                        showError('Ошибка генерации: ' + data.error);
-                    }
-                } catch (error) {
-                    console.error('Ошибка:', error);
-                    showError('Ошибка при генерации комментария: ' + error.message);
-                } finally {
-                    showAILoading(false);
-                }
-            }
-
-            // Генерация и публикация комментария
-            async function generateAndPostComment() {
-                const prompt = document.getElementById('ai-prompt').value.trim();
-                const commentType = document.getElementById('comment-type').value;
-
-                if (!prompt) {
-                    showError('Введите описание желаемого комментария');
-                    return;
-                }
-
-                if (!aiServiceAvailable) {
-                    showError('AI сервис недоступен');
-                    return;
-                }
-
-                if (!confirm('Создать и опубликовать комментарий с помощью AI?')) {
-                    return;
-                }
-
-                showAILoading(true);
-                hidePreview();
-
-                try {
-                    const response = await fetch(`/api/posts/${postId}/comments/ai/create`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            prompt: prompt,
-                            commentType: commentType
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        showSuccess('AI комментарий успешно создан и опубликован!');
-
-                        // Очищаем форму
-                        document.getElementById('ai-prompt').value = '';
-                        document.getElementById('comment-type').value = 'GENERAL';
-
-                        // Обновляем комментарии
-                        updateCommentsCount();
-                        loadLatestComments();
-                        loadComments(0); // Загружаем первую страницу
-
-                    } else {
-                        showError('Ошибка создания комментария: ' + data.error);
-                    }
-                } catch (error) {
-                    console.error('Ошибка:', error);
-                    showError('Ошибка при создании комментария: ' + error.message);
-                } finally {
-                    showAILoading(false);
-                }
-            }
-
-            // Использование сгенерированного комментария
-            function useGeneratedComment() {
-                if (lastGeneratedComment) {
-                    document.getElementById('comment-content').value = lastGeneratedComment;
-                    hidePreview();
-                    showSuccess('Комментарий добавлен в форму. Нажмите "Отправить" для публикации.');
-
-                    // Прокручиваем к форме комментария
-                    document.getElementById('comment-content').scrollIntoView({ behavior: 'smooth' });
-                    document.getElementById('comment-content').focus();
-                }
-            }
-
-            // Скрытие превью
-            function hidePreview() {
-                document.getElementById('ai-preview-section').style.display = 'none';
-            }
-
-            // Показ/скрытие загрузки AI
-            function showAILoading(show) {
-                document.getElementById('ai-loading').style.display = show ? 'block' : 'none';
-            }
-
-            // Показ шаблонов
-            async function showAITemplates() {
-                const modal = new bootstrap.Modal(document.getElementById('templatesModal'));
-                modal.show();
-
-                try {
-                    const response = await fetch(`/api/posts/${postId}/comments/ai/templates`);
-                    const data = await response.json();
-
-                    if (data.success) {
-                        let templatesHtml = '<div class="row">';
-
-                        Object.entries(data.templates).forEach(([key, template]) => {
-                            templatesHtml += `
-          <div class="col-md-6 mb-3">
-            <div class="card">
-              <div class="card-body">
-                <h6 class="card-title text-capitalize">${key.replace('_', ' ')}</h6>
-                <p class="card-text small text-muted">${template.example}</p>
-                <button class="btn btn-sm btn-primary" onclick="useTemplate('${template.prompt}')">
-                  <i class="fas fa-copy"></i> Использовать
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-                        });
-
-                        templatesHtml += '</div>';
-                        templatesHtml += `<div class="alert alert-info mt-3"><i class="fas fa-info-circle"></i> ${data.usage}</div>`;
-
-                        document.getElementById('templates-content').innerHTML = templatesHtml;
-                    }
-                } catch (error) {
-                    document.getElementById('templates-content').innerHTML =
-                        '<div class="alert alert-danger">Ошибка загрузки шаблонов</div>';
-                }
-            }
-
-            // Показ примеров
-            async function showAIExamples() {
-                const modal = new bootstrap.Modal(document.getElementById('examplesModal'));
-                modal.show();
-
-                try {
-                    const response = await fetch(`/api/posts/${postId}/comments/ai/examples`);
-                    const data = await response.json();
-
-                    if (data.success) {
-                        let examplesHtml = '<div class="row">';
-
-                        Object.entries(data.examples).forEach(([key, example]) => {
-                            examplesHtml += `
-          <div class="col-md-6 mb-3">
-            <div class="card">
-              <div class="card-body">
-                <h6 class="card-title text-capitalize">${key}</h6>
-                <p class="card-text">"${example.prompt}"</p>
-                <small class="text-muted">${example.description}</small>
-                <div class="mt-2">
-                  <button class="btn btn-sm btn-primary" onclick="useExample('${example.prompt}', '${key.toUpperCase()}')">
-                    <i class="fas fa-copy"></i> Использовать
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-                        });
-
-                        examplesHtml += '</div>';
-
-                        // Добавляем советы
-                        if (data.tips) {
-                            examplesHtml += '<div class="alert alert-info mt-3"><h6>💡 Советы:</h6><ul class="mb-0">';
-                            Object.entries(data.tips).forEach(([key, tip]) => {
-                                examplesHtml += `<li><strong>${key}:</strong> ${tip}</li>`;
-                            });
-                            examplesHtml += '</ul></div>';
-                        }
-
-                        document.getElementById('examples-content').innerHTML = examplesHtml;
-                    }
-                } catch (error) {
-                    document.getElementById('examples-content').innerHTML =
-                        '<div class="alert alert-danger">Ошибка загрузки примеров</div>';
-                }
-            }
-
-            // Использование шаблона
-            function useTemplate(prompt) {
-                document.getElementById('ai-prompt').value = prompt;
-                bootstrap.Modal.getInstance(document.getElementById('templatesModal')).hide();
-                showSuccess('Шаблон добавлен в поле промпта');
-            }
-
-            // Использование примера
-            function useExample(prompt, type) {
-                document.getElementById('ai-prompt').value = prompt;
-                document.getElementById('comment-type').value = type;
-                bootstrap.Modal.getInstance(document.getElementById('examplesModal')).hide();
-                showSuccess('Пример добавлен в форму');
-            }
-
-            // Добавление кнопок улучшения к существующим комментариям
-            function addImproveButtonsToComments() {
-                // Обновляем функцию renderCommentActions
-                const originalRenderCommentActions = window.renderCommentActions;
-                window.renderCommentActions = function(comment) {
-                    if (!currentUser) return '';
-
-                    const isOwner = currentUser.id === comment.author.id;
-                    let actions = '';
-
-                    if (isOwner) {
-                        actions += `
-        <button class="btn btn-sm btn-outline-primary me-2" onclick="editComment(${comment.id})">
-          <i class="fas fa-edit"></i> Редактировать
-        </button>
-        <button class="btn btn-sm btn-outline-danger me-2" onclick="deleteComment(${comment.id})">
-          <i class="fas fa-trash"></i> Удалить
-        </button>
-      `;
-                    }
-
-                    // Добавляем кнопку улучшения для всех комментариев
-                    if (aiServiceAvailable) {
-                        actions += `
-        <button class="btn btn-sm btn-outline-info" onclick="showImproveModal('${comment.content.replace(/'/g, "\\'")}')">
-          <i class="fas fa-magic"></i> Улучшить с AI
-        </button>
-      `;
-                    }
-
-                    return actions ? `<div class="comment-actions mt-2">${actions}</div>` : '';
-                };
-            }
-
-            // Показ модального окна улучшения
-            function showImproveModal(commentText) {
-                commentToImprove = commentText;
-                document.getElementById('improve-text').value = commentText;
-                document.getElementById('improve-result').style.display = 'none';
-                document.getElementById('use-improved-btn').style.display = 'none';
-
-                const modal = new bootstrap.Modal(document.getElementById('improveModal'));
-                modal.show();
-            }
-
-            // Улучшение комментария
-            async function improveComment() {
-                const originalComment = document.getElementById('improve-text').value.trim();
-                const improvementType = document.getElementById('improve-type').value;
-
-                if (!originalComment) {
-                    showError('Введите текст для улучшения');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`/api/posts/${postId}/comments/ai/improve`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            originalComment: originalComment,
-                            improvementType: improvementType
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        document.getElementById('improved-text').textContent = data.data.generatedComment;
-                        document.getElementById('improve-result').style.display = 'block';
-                        document.getElementById('use-improved-btn').style.display = 'inline-block';
-                        showSuccess('Комментарий улучшен за ' + data.data.generationTimeMs + ' мс');
-                    } else {
-                        showError('Ошибка улучшения: ' + data.error);
-                    }
-                } catch (error) {
-                    console.error('Ошибка:', error);
-                    showError('Ошибка при улучшении комментария: ' + error.message);
-                }
-            }
-
-            // Использование улучшенного комментария
-            function useImprovedComment() {
-                const improvedText = document.getElementById('improved-text').textContent;
-                document.getElementById('comment-content').value = improvedText;
-
-                bootstrap.Modal.getInstance(document.getElementById('improveModal')).hide();
-                showSuccess('Улучшенный комментарий добавлен в форму');
-
-                // Прокручиваем к форме
-                document.getElementById('comment-content').scrollIntoView({ behavior: 'smooth' });
-                document.getElementById('comment-content').focus();
-            }
-
-            // Добавляем CSS стили для AI секции
-            const aiStyles = `
-<style>
-.ai-assistant-section {
-  margin-top: 20px;
-  animation: slideIn 0.3s ease-in-out;
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-#ai-preview-section {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.card {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: box-shadow 0.3s ease;
-}
-
-.card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.btn {
-  transition: all 0.2s ease;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-}
-
-.ai-template-card {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.ai-template-card:hover {
-  transform: scale(1.02);
-}
-
-</style>
-`;
-
-            // Добавляем стили в head
-            document.head.insertAdjacentHTML('beforeend', aiStyles);
-
-            console.log('🤖 AI комментарии инициализированы');
-        </script>
-
-
-
-
+        <!-- Подключение стилей и скриптов -->
+        <link rel="stylesheet" th:href="@{/css/ai-comments.css}">
+        <script th:src="@{/js/ai-comments.js}"></script>
 
 
 
