@@ -43,20 +43,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostResponseDto createPost(PostCreateDto postCreateDto) {
-        log.info("=== НАЧАЛО СОЗДАНИЯ ПОСТА ===");
-        log.info("Содержимое поста: {}", postCreateDto.getContent());
 
-        // ✅ ДОБАВЛЯЕМ детальные логи для геолокации
-        log.info("=== ПРОВЕРКА ГЕОЛОКАЦИИ ===");
-        log.info("LocationId: {}", postCreateDto.getLocationId());
-        log.info("Latitude: {}", postCreateDto.getLatitude());
-        log.info("Longitude: {}", postCreateDto.getLongitude());
-        log.info("PlaceName: {}", postCreateDto.getPlaceName());
 
         User currentUser = getCurrentUser();
         Post post = postMapper.toEntity(postCreateDto, currentUser);
-
-        log.info("Пост создан в маппере, ID: {}", post.getId());
 
         // ✅ ДОБАВЛЯЕМ логику для необязательной геолокации
         handleLocationForPost(post, postCreateDto);
@@ -79,13 +69,6 @@ public class PostServiceImpl implements PostService {
                 throw new RuntimeException("Не удалось загрузить изображение: " + e.getMessage());
             }
         }
-
-        // ✅ ЛОГИРУЕМ СОСТОЯНИЕ ПОСТА ПЕРЕД СОХРАНЕНИЕМ
-        log.info("=== СОСТОЯНИЕ ПОСТА ПЕРЕД СОХРАНЕНИЕМ ===");
-        log.info("Post ID: {}", post.getId());
-        log.info("Post Content: {}", post.getContent());
-        log.info("Post Author: {}", post.getAuthor().getFirstName());
-        log.info("Post Location: {}", post.getLocation());
         if (post.getLocation() != null) {
             log.info("Location ID: {}", post.getLocation().getId());
             log.info("Location Coordinates: ({}, {})",
@@ -95,20 +78,11 @@ public class PostServiceImpl implements PostService {
 
         Post savedPost = postRepository.save(post);
         userRepository.save(currentUser);
-
-        // ✅ ЛОГИРУЕМ СОСТОЯНИЕ ПОСЛЕ СОХРАНЕНИЯ
-        log.info("=== СОСТОЯНИЕ ПОСЛЕ СОХРАНЕНИЯ ===");
-        log.info("Saved Post ID: {}", savedPost.getId());
-        log.info("Saved Post Location: {}", savedPost.getLocation());
         if (savedPost.getLocation() != null) {
             log.info("Saved Location ID: {}", savedPost.getLocation().getId());
             log.info("Saved Location Coordinates: ({}, {})",
                     savedPost.getLocation().getLatitude(), savedPost.getLocation().getLongitude());
         }
-
-        log.info("Пост успешно создан с ID: {}", savedPost.getId());
-
-        // ✅ ОБНОВЛЕННЫЙ ВЫЗОВ с логикой лайков
         Boolean isLiked = postLikeService.isPostLikedByUser(savedPost, currentUser.getId());
         List<PostResponseDto.LikeUserDto> recentLikes =
                 postLikeService.getRecentLikes(savedPost, 5);
@@ -116,15 +90,12 @@ public class PostServiceImpl implements PostService {
         PostResponseDto responseDto = postMapper.toResponseDto(savedPost, isLiked, recentLikes);
 
         // ✅ ЛОГИРУЕМ ФИНАЛЬНЫЙ DTO
-        log.info("=== ФИНАЛЬНЫЙ RESPONSE DTO ===");
         log.info("Response DTO Location: {}", responseDto.getLocation());
         if (responseDto.getLocation() != null) {
             log.info("Response Location ID: {}", responseDto.getLocation().getId());
             log.info("Response Location Coordinates: ({}, {})",
                     responseDto.getLocation().getLatitude(), responseDto.getLocation().getLongitude());
         }
-        log.info("=== КОНЕЦ СОЗДАНИЯ ПОСТА ===");
-
         return responseDto;
     }
 

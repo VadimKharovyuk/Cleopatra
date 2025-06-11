@@ -1,6 +1,9 @@
 package com.example.cleopatra.service;
 
+import com.example.cleopatra.dto.AICommentResponse;
 import com.example.cleopatra.dto.Comment.*;
+import com.example.cleopatra.dto.CreateCommentWithAIRequest;
+import com.example.cleopatra.dto.ImproveCommentRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -10,6 +13,11 @@ import java.util.List;
  */
 public interface CommentService {
 
+    AICommentResponse improveComment(Long postId, ImproveCommentRequest request);
+
+    AICommentResponse generateCommentPreview(Long postId, CreateCommentWithAIRequest request);
+
+    CommentResponse createCommentWithAI(Long postId, CreateCommentWithAIRequest request, String userEmail);
     /**
      * Получить комментарии к посту с пагинацией
      *

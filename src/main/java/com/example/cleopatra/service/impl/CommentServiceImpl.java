@@ -4,7 +4,10 @@ import com.example.cleopatra.EVENT.PostCommentEvent;
 import com.example.cleopatra.ExistsException.CommentNotFoundException;
 import com.example.cleopatra.ExistsException.PostNotFoundException;
 import com.example.cleopatra.ExistsException.UnauthorizedException;
+import com.example.cleopatra.dto.AICommentResponse;
 import com.example.cleopatra.dto.Comment.*;
+import com.example.cleopatra.dto.CreateCommentWithAIRequest;
+import com.example.cleopatra.dto.ImproveCommentRequest;
 import com.example.cleopatra.maper.CommentMapper;
 import com.example.cleopatra.model.Comment;
 import com.example.cleopatra.model.Post;
@@ -12,6 +15,7 @@ import com.example.cleopatra.model.User;
 import com.example.cleopatra.repository.CommentRepository;
 import com.example.cleopatra.repository.PostRepository;
 import com.example.cleopatra.repository.UserRepository;
+import com.example.cleopatra.service.CommentAIService;
 import com.example.cleopatra.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +41,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final CommentAIService commentAIService;
 
     @Override
     public CommentPageResponse getCommentsByPost(Long postId, Pageable pageable) {
@@ -56,6 +61,199 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.toCommentPageResponse(commentSlice, totalComments);
     }
 
+
+
+
+
+
+    /**
+     * 🤖 НОВЫЙ: Создание комментария с помощью AI
+     */
+    @Override
+    @Transactional
+    public CommentResponse createCommentWithAI(Long postId, CreateCommentWithAIRequest request, String userEmail) {
+        log.debug("Создание AI комментария к посту {} пользователем {} с промптом: {}",
+                postId, userEmail, request.getPrompt());
+
+        // Проверяем доступность AI сервиса
+        if (!commentAIService.isAIServiceAvailable()) {
+            throw new RuntimeException("AI сервис недоступен. Попробуйте создать комментарий вручную.");
+        }
+
+        long startTime = System.currentTimeMillis();
+
+        // Находим пост
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Пост с ID " + postId + " не найден"));
+
+        // Находим пользователя
+        User author = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь с email " + userEmail + " не найден"));
+
+        try {
+            // Генерируем комментарий с помощью AI
+            String generatedComment = commentAIService.generateComment(
+                    buildPromptWithType(request), post);
+
+            // Создаем комментарий
+            Comment comment = Comment.builder()
+                    .content(generatedComment)
+                    .post(post)
+                    .author(author)
+                    .isDeleted(false)
+                    .build();
+
+            // Сохраняем комментарий
+            Comment savedComment = commentRepository.save(comment);
+
+            // Публикуем событие
+            eventPublisher.publishEvent(new PostCommentEvent(
+                    post.getId(),
+                    post.getAuthor().getId(),
+                    author.getId(),
+                    savedComment.getId(),
+                    generatedComment
+            ));
+
+            long endTime = System.currentTimeMillis();
+            log.info("AI комментарий с ID {} успешно создан пользователем {} за {} мс",
+                    savedComment.getId(), userEmail, endTime - startTime);
+
+            return commentMapper.toCommentResponse(savedComment);
+
+        } catch (Exception e) {
+            log.error("Ошибка при создании AI комментария: {}", e.getMessage());
+            throw new RuntimeException("Не удалось создать комментарий с помощью AI: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 🤖 НОВЫЙ: Генерация комментария без сохранения (для предпросмотра)
+     */
+    @Override
+    public AICommentResponse generateCommentPreview(Long postId, CreateCommentWithAIRequest request) {
+        log.debug("Генерация превью комментария для поста {} с промптом: {}", postId, request.getPrompt());
+
+        if (!commentAIService.isAIServiceAvailable()) {
+            return AICommentResponse.builder()
+                    .success(false)
+                    .errorMessage("AI сервис недоступен")
+                    .build();
+        }
+
+        long startTime = System.currentTimeMillis();
+
+        try {
+            // Находим пост
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new PostNotFoundException("Пост с ID " + postId + " не найден"));
+
+            // Генерируем комментарий
+            String generatedComment = commentAIService.generateComment(
+                    buildPromptWithType(request), post);
+
+            long endTime = System.currentTimeMillis();
+
+            return AICommentResponse.builder()
+                    .generatedComment(generatedComment)
+                    .usedPrompt(request.getPrompt())
+                    .generationTimeMs(endTime - startTime)
+                    .success(true)
+                    .additionalInfo("Комментарий сгенерирован для превью. Нажмите 'Опубликовать' для сохранения.")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Ошибка при генерации превью комментария: {}", e.getMessage());
+            return AICommentResponse.builder()
+                    .success(false)
+                    .errorMessage("Ошибка генерации: " + e.getMessage())
+                    .usedPrompt(request.getPrompt())
+                    .build();
+        }
+    }
+
+    /**
+     * 🤖 НОВЫЙ: Улучшение существующего комментария
+     */
+    @Override
+    public AICommentResponse improveComment(Long postId, ImproveCommentRequest request) {
+        log.debug("Улучшение комментария для поста {}", postId);
+
+        if (!commentAIService.isAIServiceAvailable()) {
+            return AICommentResponse.builder()
+                    .success(false)
+                    .errorMessage("AI сервис недоступен")
+                    .build();
+        }
+
+        long startTime = System.currentTimeMillis();
+
+        try {
+            // Находим пост
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new PostNotFoundException("Пост с ID " + postId + " не найден"));
+
+            // Улучшаем комментарий
+            String improvedComment = commentAIService.improveComment(
+                    request.getOriginalComment(), post);
+
+            long endTime = System.currentTimeMillis();
+
+            return AICommentResponse.builder()
+                    .generatedComment(improvedComment)
+                    .usedPrompt("Улучшение: " + request.getImprovementType().getDescription())
+                    .generationTimeMs(endTime - startTime)
+                    .success(true)
+                    .additionalInfo("Комментарий улучшен с помощью AI")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Ошибка при улучшении комментария: {}", e.getMessage());
+            return AICommentResponse.builder()
+                    .success(false)
+                    .errorMessage("Ошибка улучшения: " + e.getMessage())
+                    .generatedComment(request.getOriginalComment()) // Возвращаем оригинал
+                    .build();
+        }
+    }
+
+    /**
+     * Строит промпт с учетом типа комментария
+     */
+    private String buildPromptWithType(CreateCommentWithAIRequest request) {
+        StringBuilder prompt = new StringBuilder();
+
+        // Добавляем тип комментария к промпту
+        switch (request.getCommentType()) {
+            case QUESTION:
+                prompt.append("Задай вопрос автору поста: ");
+                break;
+            case POSITIVE:
+                prompt.append("Напиши положительный комментарий: ");
+                break;
+            case CONSTRUCTIVE:
+                prompt.append("Напиши конструктивную критику: ");
+                break;
+            case TECHNICAL:
+                prompt.append("Напиши технический комментарий: ");
+                break;
+            case CREATIVE:
+                prompt.append("Напиши креативный комментарий: ");
+                break;
+            default:
+                // Для GENERAL ничего не добавляем
+                break;
+        }
+
+        prompt.append(request.getPrompt());
+
+        // Добавляем дополнительный контекст, если есть
+        if (request.getAdditionalContext() != null && !request.getAdditionalContext().trim().isEmpty()) {
+            prompt.append(". Дополнительно: ").append(request.getAdditionalContext().trim());
+        }
+
+        return prompt.toString();
+    }
     @Override
     @Transactional
     public CommentResponse createComment(Long postId, CreateCommentRequest request, String userEmail) {

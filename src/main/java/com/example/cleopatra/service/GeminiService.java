@@ -25,6 +25,7 @@ public class GeminiService {
     @Value("${gemini.api.model}")
     private String model;
 
+
     @Value("${gemini.api.action}")
     private String action;
 
