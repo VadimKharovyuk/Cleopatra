@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Управление ролями пользователей - Админ панель</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; }
+    .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #eee; }
+    .header h1 { margin: 0; color: #333; }
+    .filters { display: flex; gap: 15px; margin-bottom: 20px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; flex-wrap: wrap; }
+    .filter-group { display: flex; flex-direction: column; }
+    .filter-group label { font-weight: bold; margin-bottom: 5px; color: #555; }
+    .filter-input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; font-weight: 500; transition: all 0.3s ease; }
+    .btn-primary { background-color: #007bff; color: white; }
+    .btn-success { background-color: #28a745; color: white; }
+    .btn-warning { background-color: #ffc107; color: #212529; }
+    .btn-danger { background-color: #dc3545; color: white; }
+    .btn-secondary { background-color: #6c757d; color: white; }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .table-container { overflow-x: auto; }
+    .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    .table th { background-color: #f8f9fa; font-weight: bold; color: #555; }
+    .table tr:hover { background-color: #f8f9fa; }
+    .role-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+    .role-admin { background-color: #e74c3c; color: white; }
+    .role-performer { background-color: #f39c12; color: white; }
+    .role-user { background-color: #3498db; color: white; }
+    .status-badge { padding: 4px 8px; border-radius: 15px; font-size: 11px; font-weight: bold; }
+    .status-active { background-color: #d4edda; color: #155724; }
+    .status-blocked { background-color: #f8d7da; color: #721c24; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; }
+    .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; position: relative; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+    .success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    .error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; }
+    .pagination a, .pagination span { padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; text-decoration: none; color: #007bff; }
+    .pagination .current { background-color: #007bff; color: white; font-weight: bold; }
+    .bulk-actions { background-color: #fff3cd; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #ffeaa7; }
+    .checkbox-column { width: 40px; text-align: center; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+    .user-details { display: flex; flex-direction: column; }
+    .user-name { font-weight: bold; color: #333; }
+    .user-email { font-size: 12px; color: #666; }
+    .navbar { background-color: #333; padding: 10px 0; margin-bottom: 20px; }
+    .navbar a { color: white; text-decoration: none; margin: 0 15px; }
+    .navbar a:hover { text-decoration: underline; }
+
+    @media (max-width: 768px) {
+      .container { margin: 10px; padding: 20px; }
+      .filters { flex-direction: column; }
+      .header { flex-direction: column; gap: 15px; text-align: center; }
+      .table-container { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+<!-- Навигация -->
+<nav class="navbar">
+  <a href="/admin/dashboard">🏠 Dashboard</a>
+  <a href="/admin/users/search">🔍 Поиск пользователей</a>
+  <a href="/admin/users/blocked">🚫 Заблокированные</a>
+  <a href="/admin/users/manage-roles">👑 Управление ролями</a>
+</nav>
+
+<div class="container">
+  <!-- Заголовок -->
+  <div class="header">
+    <h1>👑 Управление ролями пользователей</h1>
+    <div>
+      <button onclick="toggleBulkActions()" class="btn btn-secondary">Массовые действия</button>
+      <button onclick="showRoleInfo()" class="btn btn-primary">Справка по ролям</button>
+    </div>
+  </div>
+
+  <!-- Сообщения -->
+  <div th:if="${success}" class="success">
+    <strong>✅ Успех:</strong> <span th:text="${success}"></span>
+  </div>
+  <div th:if="${error}" class="error">
+    <strong>❌ Ошибка:</strong> <span th:text="${error}"></span>
+  </div>
+
+  <!-- Фильтры и поиск -->
+  <form method="post" action="/admin/users/manage-roles/search" class="filters">
+    <div class="filter-group">
+      <label for="search">Поиск пользователей:</label>
+      <input type="text" id="search" name="search" th:value="${search}"
+             placeholder="Email, имя или фамилия" class="filter-input" style="width: 250px;">
+    </div>
+    <div class="filter-group">
+      <label for="roleFilter">Фильтр по роли:</label>
+      <select id="roleFilter" name="roleFilter" class="filter-input">
+        <option value="">Все роли</option>
+        <option th:each="role : ${roles}"
+                th:value="${role.name()}"
+                th:text="${role.displayName}"
+                th:selected="${roleFilter == role.name()}"></option>
+      </select>
+    </div>
+    <div class="filter-group" style="justify-content: flex-end; margin-top: auto;">
+      <button type="submit" class="btn btn-primary">🔍 Найти</button>
+      <a href="/admin/users/manage-roles" class="btn btn-secondary">🗑️ Сбросить</a>
+    </div>
+  </form>
+
+  <!-- Массовые действия -->
+  <div id="bulkActions" class="bulk-actions" style="display: none;">
+    <h4>Массовые действия с выбранными пользователями:</h4>
+    <form id="bulkForm" method="post" action="/admin/users/bulk-role-change">
+      <div style="display: flex; gap: 15px; align-items: end; flex-wrap: wrap;">
+        <div class="filter-group">
+          <label for="bulkNewRole">Новая роль:</label>
+          <select id="bulkNewRole" name="newRole" class="filter-input" required>
+            <option value="">Выберите роль</option>
+            <option th:each="role : ${roles}" th:value="${role.name()}" th:text="${role.displayName}"></option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="bulkReason">Причина:</label>
+          <input type="text" id="bulkReason" name="reason" placeholder="Причина изменения" class="filter-input">
+        </div>
+        <button type="submit" class="btn btn-warning" onclick="return confirmBulkChange()">
+          Применить к выбранным
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Таблица пользователей -->
+  <div class="table-container">
+    <table class="table">
+      <thead>
+      <tr>
+        <th class="checkbox-column">
+          <input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes()">
+        </th>
+        <th>Пользователь</th>
+        <th>Текущая роль</th>
+        <th>Статус</th>
+        <th>Подписчики</th>
+        <th>Дата регистрации</th>
+        <th>Действия</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="user : ${users.content}">
+        <td class="checkbox-column">
+          <input type="checkbox" th:value="${user.id}" class="user-checkbox" name="userIds">
+        </td>
+        <td>
+          <div class="user-info">
+            <div class="user-avatar" th:text="${user.firstName != null ? user.firstName.substring(0,1).toUpperCase() : 'U'}"></div>
+            <div class="user-details">
+              <div class="user-name" th:text="${user.firstName + ' ' + user.lastName}"></div>
+              <div class="user-email" th:text="${user.email}"></div>
+            </div>
+          </div>
+        </td>
+        <td>
+                            <span class="role-badge"
+                                  th:classappend="${user.role.name().toLowerCase()} == 'admin' ? 'role-admin' : (${user.role.name().toLowerCase()} == 'performer' ? 'role-performer' : 'role-user')"
+                                  th:text="${user.role.displayName}"></span>
+        </td>
+        <td>
+                            <span class="status-badge"
+                                  th:classappend="${user.isBlocked != null and user.isBlocked} ? 'status-blocked' : 'status-active'"
+                                  th:text="${user.isBlocked != null and user.isBlocked} ? 'Заблокирован' : 'Активен'"></span>
+        </td>
+        <td th:text="${user.followersCount != null ? user.followersCount : 0}"></td>
+        <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd.MM.yyyy') : 'Н/Д'}"></td>
+        <td>
+          <button onclick="showChangeRoleModal([[${user.id}]], '[[${user.firstName}]] [[${user.lastName}]]', '[[${user.email}]]', '[[${user.role.name()}]]')"
+                  class="btn btn-warning" style="font-size: 12px; padding: 5px 10px;">
+            Изменить роль
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Сообщение о пустом списке -->
+  <div th:if="${users.content.size() == 0}" style="text-align: center; padding: 40px; color: #666;">
+    <h3>👥 Пользователи не найдены</h3>
+    <p>Попробуйте изменить параметры поиска или фильтры</p>
+  </div>
+
+  <!-- Пагинация -->
+  <div th:if="${users.totalPages > 1}" class="pagination">
+    <a th:if="${currentPage > 0}"
+       th:href="@{'/admin/users/manage-roles?page=' + ${currentPage - 1} + ${search != null ? '&search=' + search : ''} + ${roleFilter != null ? '&roleFilter=' + roleFilter : ''}}">&laquo; Предыдущая</a>
+
+    <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                <span th:if="${i == currentPage}" class="current" th:text="${i + 1}"></span>
+                <a th:unless="${i == currentPage}"
+                   th:href="@{'/admin/users/manage-roles?page=' + ${i} + ${search != null ? '&search=' + search : ''} + ${roleFilter != null ? '&roleFilter=' + roleFilter : ''}}"
+                   th:text="${i + 1}"></a>
+            </span>
+
+    <a th:if="${currentPage < totalPages - 1}"
+       th:href="@{'/admin/users/manage-roles?page=' + ${currentPage + 1} + ${search != null ? '&search=' + search : ''} + ${roleFilter != null ? '&roleFilter=' + roleFilter : ''}}">Следующая &raquo;</a>
+  </div>
+</div>
+
+<!-- Модальное окно изменения роли -->
+<div id="changeRoleModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>👑 Изменение роли пользователя</h3>
+      <button class="modal-close" onclick="hideChangeRoleModal()">&times;</button>
+    </div>
+
+    <div id="userInfo" style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+      <div><strong>Пользователь:</strong> <span id="modalUserName"></span></div>
+      <div><strong>Email:</strong> <span id="modalUserEmail"></span></div>
+      <div><strong>Текущая роль:</strong> <span id="modalCurrentRole"></span></div>
+    </div>
+
+    <form id="changeRoleForm" method="post">
+      <div class="form-group">
+        <label for="newRole">Новая роль:</label>
+        <select id="newRole" name="newRole" class="form-control" required>
+          <option value="">Выберите роль</option>
+          <option th:each="role : ${roles}" th:value="${role.name()}">
+            <span th:text="${role.displayName}"></span> - <span th:text="${role.description}"></span>
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="reason">Причина изменения:</label>
+        <textarea id="reason" name="reason" class="form-control" rows="3"
+                  placeholder="Укажите причину изменения роли..."></textarea>
+      </div>
+
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" onclick="hideChangeRoleModal()" class="btn btn-secondary">Отмена</button>
+        <button type="submit" class="btn btn-warning">👑 Изменить роль</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Модальное окно справки по ролям -->
+<div id="roleInfoModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>📖 Справка по ролям</h3>
+      <button class="modal-close" onclick="hideRoleInfoModal()">&times;</button>
+    </div>
+
+    <div th:each="role : ${roles}" style="margin-bottom: 20px; padding: 15px; border-radius: 5px; border-left: 4px solid #007bff;">
+      <h4 style="margin: 0 0 10px 0; color: #333;">
+                    <span class="role-badge"
+                          th:classappend="${role.name().toLowerCase()} == 'admin' ? 'role-admin' : (${role.name().toLowerCase()} == 'performer' ? 'role-performer' : 'role-user')"
+                          th:text="${role.displayName}"></span>
+      </h4>
+      <p style="margin: 0; color: #666;" th:text="${role.description}"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Модальные окна
+  function showChangeRoleModal(userId, userName, userEmail, currentRole) {
+    document.getElementById('modalUserName').textContent = userName;
+    document.getElementById('modalUserEmail').textContent = userEmail;
+    document.getElementById('modalCurrentRole').textContent = currentRole;
+    document.getElementById('changeRoleForm').action = '/admin/users/' + userId + '/change-role';
+    document.getElementById('changeRoleModal').style.display = 'block';
+  }
+
+  function hideChangeRoleModal() {
+    document.getElementById('changeRoleModal').style.display = 'none';
+    document.getElementById('changeRoleForm').reset();
+  }
+
+  function showRoleInfo() {
+    document.getElementById('roleInfoModal').style.display = 'block';
+  }
+
+  function hideRoleInfoModal() {
+    document.getElementById('roleInfoModal').style.display = 'none';
+  }
+
+  // Массовые действия
+  function toggleBulkActions() {
+    const bulkActions = document.getElementById('bulkActions');
+    bulkActions.style.display = bulkActions.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function toggleAllCheckboxes() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = selectAll.checked;
+    });
+    updateBulkForm();
+  }
+
+  function updateBulkForm() {
+    const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
+    const bulkForm = document.getElementById('bulkForm');
+
+    // Удаляем старые скрытые поля
+    bulkForm.querySelectorAll('input[name="userIds"]').forEach(input => input.remove());
+
+    // Добавляем новые скрытые поля для выбранных пользователей
+    checkedBoxes.forEach(checkbox => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'userIds';
+      input.value = checkbox.value;
+      bulkForm.appendChild(input);
+    });
+  }
+
+  function confirmBulkChange() {
+    const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
+    const newRole = document.getElementById('bulkNewRole').value;
+
+    if (checkedBoxes.length === 0) {
+      alert('Выберите пользователей для изменения роли');
+      return false;
+    }
+
+    if (!newRole) {
+      alert('Выберите новую роль');
+      return false;
+    }
+
+    return confirm(`Вы уверены, что хотите изменить роль для ${checkedBoxes.length} пользователей?`);
+  }
+
+  // Закрытие модальных окон по клику вне их
+  window.addEventListener('click', function(event) {
+    const changeRoleModal = document.getElementById('changeRoleModal');
+    const roleInfoModal = document.getElementById('roleInfoModal');
+
+    if (event.target === changeRoleModal) {
+      hideChangeRoleModal();
+    }
+    if (event.target === roleInfoModal) {
+      hideRoleInfoModal();
+    }
+  });
+
+  // Закрытие по Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      hideChangeRoleModal();
+      hideRoleInfoModal();
+    }
+  });
+
+  // Обновление массовых действий при изменении чекбоксов
+  document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('user-checkbox')) {
+      updateBulkForm();
+    }
+  });
+
+  // Подтверждение изменения роли
+  document.getElementById('changeRoleForm').addEventListener('submit', function(e) {
+    const newRole = document.getElementById('newRole').value;
+    const userName = document.getElementById('modalUserName').textContent;
+
+    if (!newRole) {
+      e.preventDefault();
+      alert('Выберите новую роль');
+      return false;
+    }
+
+    if (!confirm(`Вы уверены, что хотите изменить роль пользователя "${userName}"?`)) {
+      e.preventDefault();
+      return false;
+    }
+
+    return true;
+  });
+
+  // Инициализация при загрузке страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    // Автофокус на поле поиска
+    const searchInput = document.getElementById('search');
+    if (searchInput && !searchInput.value) {
+      searchInput.focus();
+    }
+
+    // Показать количество найденных пользователей
+    const totalUsers = /*[[${users.totalElements}]]*/ 0;
+    console.log(`Найдено пользователей: ${totalUsers}`);
+  });
+
+  // Функция для сброса фильтров
+  function resetFilters() {
+    document.getElementById('search').value = '';
+    document.getElementById('roleFilter').value = '';
+    window.location.href = '/admin/users/manage-roles';
+  }
+
+  // Функция для быстрого поиска (без отправки формы)
+  function quickSearch() {
+    const search = document.getElementById('search').value;
+    const roleFilter = document.getElementById('roleFilter').value;
+
+    let url = '/admin/users/manage-roles?';
+    if (search) url += 'search=' + encodeURIComponent(search) + '&';
+    if (roleFilter) url += 'roleFilter=' + encodeURIComponent(roleFilter);
+
+    window.location.href = url;
+  }
+
+  // Обработка Enter в поле поиска
+  document.getElementById('search').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      quickSearch();
+    }
+  });
+</script>
+</body>
+</html>

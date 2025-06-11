@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ панель - Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+      line-height: 1.6;
+    }
+
+    /* Основной контейнер */
+    .admin-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Боковая панель */
+    .admin-sidebar {
+      width: 280px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .admin-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    .sidebar-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .sidebar-subtitle {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .sidebar-menu {
+      padding: 20px 0;
+    }
+
+    .menu-section {
+      margin-bottom: 30px;
+    }
+
+    .menu-section-title {
+      padding: 0 20px 10px;
+      font-size: 12px;
+      text-transform: uppercase;
+      opacity: 0.7;
+      letter-spacing: 1px;
+    }
+
+    .menu-item {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 12px 20px;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .menu-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-left-color: #fff;
+      transform: translateX(5px);
+    }
+
+    .menu-item.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-left-color: #fff;
+    }
+
+    .menu-item i {
+      width: 20px;
+      margin-right: 10px;
+      text-align: center;
+    }
+
+    /* Основной контент */
+    .admin-main {
+      flex: 1;
+      margin-left: 0;
+      transition: margin-left 0.3s ease;
+    }
+
+    .admin-main.sidebar-open {
+      margin-left: 280px;
+    }
+
+    /* Хедер */
+    .admin-header {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 0 20px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .burger-menu {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      margin-right: 20px;
+      padding: 10px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    .burger-menu:hover {
+      background-color: #f8f9fa;
+    }
+
+    .header-title {
+      font-size: 24px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 10px;
+      border-radius: 25px;
+      background-color: #f8f9fa;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    /* Контент */
+    .admin-content {
+      padding: 30px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .dashboard-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      border-color: #667eea;
+    }
+
+    .card-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .card-description {
+      color: #666;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .card-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .card-trend {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .trend-up {
+      background-color: #e8f5e8;
+      color: #4caf50;
+    }
+
+    .trend-down {
+      background-color: #ffeaea;
+      color: #f44336;
+    }
+
+    /* Цвета карточек */
+    .card-users .card-icon { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-content .card-icon { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .card-security .card-icon { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .card-analytics .card-icon { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .card-settings .card-icon { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .card-support .card-icon { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+
+    /* Overlay для мобильных */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Адаптивность */
+    @media (min-width: 768px) {
+      .admin-sidebar {
+        position: relative;
+        transform: translateX(0);
+      }
+
+      .admin-main {
+        margin-left: 280px;
+      }
+
+      .burger-menu {
+        display: none;
+      }
+
+      .sidebar-overlay {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-content {
+        padding: 20px;
+      }
+
+      .header-title {
+        font-size: 20px;
+      }
+    }
+
+    /* Анимации */
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .dashboard-card {
+      animation: slideInRight 0.6s ease forwards;
+    }
+
+    .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+    .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+    .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+    .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+    .dashboard-card:nth-child(5) { animation-delay: 0.5s; }
+    .dashboard-card:nth-child(6) { animation-delay: 0.6s; }
+  </style>
+</head>
+<body>
+<!-- Overlay для мобильных -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="admin-container">
+  <!-- Боковая панель -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">🛡️ Admin Panel</div>
+      <div class="sidebar-subtitle">Центр управления</div>
+    </div>
+
+    <nav class="sidebar-menu">
+      <div class="menu-section">
+        <div class="menu-section-title">Основное</div>
+        <a href="/admin/dashboard" class="menu-item active">
+          <i>📊</i> Dashboard
+        </a>
+        <a href="/admin/analytics" class="menu-item">
+          <i>📈</i> Аналитика
+        </a>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-section-title">Пользователи</div>
+        <a href="/admin/users/search" class="menu-item">
+          <i>🔍</i> Поиск пользователей
+        </a>
+        <a href="/admin/users/blocked" class="menu-item">
+          <i>🚫</i> Заблокированные
+        </a>
+        <a href="/admin/users/manage" class="menu-item">
+          <i>👥</i> Управление пользователями
+        </a>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-section-title">Контент</div>
+        <a href="/admin/posts" class="menu-item">
+          <i>📝</i> Посты
+        </a>
+        <a href="/admin/comments" class="menu-item">
+          <i>💬</i> Комментарии
+        </a>
+        <a href="/admin/reports" class="menu-item">
+          <i>⚠️</i> Жалобы
+        </a>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-section-title">Система</div>
+        <a href="/admin/settings" class="menu-item">
+          <i>⚙️</i> Настройки
+        </a>
+        <a href="/admin/logs" class="menu-item">
+          <i>📋</i> Логи
+        </a>
+        <a href="/admin/backup" class="menu-item">
+          <i>💾</i> Резервные копии
+        </a>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-section-title">Поддержка</div>
+        <a href="/admin/support" class="menu-item">
+          <i>🎧</i> Поддержка
+        </a>
+        <a href="/admin/tickets" class="menu-item">
+          <i>🎫</i> Тикеты
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Основной контент -->
+  <main class="admin-main" id="adminMain">
+    <!-- Хедер -->
+    <header class="admin-header">
+      <div class="header-left">
+        <button class="burger-menu" id="burgerMenu">☰</button>
+        <h1 class="header-title">Admin Dashboard</h1>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <div class="user-avatar">A</div>
+          <div>
+            <div style="font-weight: 600;">Admin</div>
+            <div style="font-size: 12px; color: #666;">admin@cleopatra.com</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Контент -->
+    <div class="admin-content">
+      <div class="dashboard-grid">
+        <!-- Карточка управления пользователями -->
+        <div class="dashboard-card card-users" onclick="navigateToUsers()">
+          <div class="card-icon">👥</div>
+          <div class="card-title">Управление пользователями</div>
+          <div class="card-description">Поиск, блокировка и управление пользователями платформы</div>
+          <div class="card-stats">
+            <div class="card-number">1,247</div>
+            <div class="card-trend trend-up">+12%</div>
+          </div>
+        </div>
+
+        <!-- Карточка контента -->
+        <div class="dashboard-card card-content" onclick="navigateToContent()">
+          <div class="card-icon">📝</div>
+          <div class="card-title">Управление контентом</div>
+          <div class="card-description">Модерация постов, комментариев и жалоб пользователей</div>
+          <div class="card-stats">
+            <div class="card-number">3,892</div>
+            <div class="card-trend trend-up">+8%</div>
+          </div>
+        </div>
+
+        <!-- Карточка безопасности -->
+        <div class="dashboard-card card-security" onclick="navigateToSecurity()">
+          <div class="card-icon">🛡️</div>
+          <div class="card-title">Безопасность</div>
+          <div class="card-description">Мониторинг безопасности, логи и блокировки</div>
+          <div class="card-stats">
+            <div class="card-number">24</div>
+            <div class="card-trend trend-down">-3%</div>
+          </div>
+        </div>
+
+        <!-- Карточка аналитики -->
+        <div class="dashboard-card card-analytics" onclick="navigateToAnalytics()">
+          <div class="card-icon">📊</div>
+          <div class="card-title">Аналитика</div>
+          <div class="card-description">Статистика, отчеты и метрики платформы</div>
+          <div class="card-stats">
+            <div class="card-number">98.5%</div>
+            <div class="card-trend trend-up">+2.1%</div>
+          </div>
+        </div>
+
+        <!-- Карточка настроек -->
+        <div class="dashboard-card card-settings" onclick="navigateToSettings()">
+          <div class="card-icon">⚙️</div>
+          <div class="card-title">Настройки системы</div>
+          <div class="card-description">Конфигурация сервера, базы данных и приложения</div>
+          <div class="card-stats">
+            <div class="card-number">16</div>
+            <div class="card-trend trend-up">+1</div>
+          </div>
+        </div>
+
+        <!-- Карточка поддержки -->
+        <div class="dashboard-card card-support" onclick="navigateToSupport()">
+          <div class="card-icon">🎧</div>
+          <div class="card-title">Поддержка</div>
+          <div class="card-description">Тикеты поддержки и обращения пользователей</div>
+          <div class="card-stats">
+            <div class="card-number">42</div>
+            <div class="card-trend trend-down">-5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Элементы DOM
+  const burgerMenu = document.getElementById('burgerMenu');
+  const adminSidebar = document.getElementById('adminSidebar');
+  const adminMain = document.getElementById('adminMain');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+  // Состояние сайдбара
+  let sidebarOpen = false;
+
+  // Функция переключения сайдбара
+  function toggleSidebar() {
+    sidebarOpen = !sidebarOpen;
+
+    if (sidebarOpen) {
+      adminSidebar.classList.add('open');
+      adminMain.classList.add('sidebar-open');
+      sidebarOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    } else {
+      adminSidebar.classList.remove('open');
+      adminMain.classList.remove('sidebar-open');
+      sidebarOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Закрытие сайдбара
+  function closeSidebar() {
+    if (sidebarOpen) {
+      toggleSidebar();
+    }
+  }
+
+  // События
+  burgerMenu.addEventListener('click', toggleSidebar);
+  sidebarOverlay.addEventListener('click', closeSidebar);
+
+  // Закрытие по Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeSidebar();
+    }
+  });
+
+  // Обработка изменения размера окна
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      closeSidebar();
+    }
+  });
+
+  // Функции навигации по карточкам
+  function navigateToUsers() {
+    window.location.href = '/admin/users/search';
+  }
+
+  function navigateToContent() {
+    window.location.href = '/admin/content';
+  }
+
+  function navigateToSecurity() {
+    window.location.href = '/admin/security';
+  }
+
+  function navigateToAnalytics() {
+    window.location.href = '/admin/analytics';
+  }
+
+  function navigateToSettings() {
+    window.location.href = '/admin/settings';
+  }
+
+  function navigateToSupport() {
+    window.location.href = '/admin/support';
+  }
+
+  // Активация текущего пункта меню
+  function setActiveMenuItem() {
+    const currentPath = window.location.pathname;
+    const menuItems = document.querySelectorAll('.menu-item');
+
+    menuItems.forEach(item => {
+      item.classList.remove('active');
+      if (item.getAttribute('href') === currentPath) {
+        item.classList.add('active');
+      }
+    });
+  }
+
+  // Инициализация при загрузке
+  document.addEventListener('DOMContentLoaded', () => {
+    setActiveMenuItem();
+  });
+
+  // Анимация карточек при скролле
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, observerOptions);
+
+  // Наблюдение за карточками
+  document.querySelectorAll('.dashboard-card').forEach(card => {
+    observer.observe(card);
+  });
+</script>
+</body>
+</html>
