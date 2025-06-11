@@ -127,15 +127,6 @@ public class PostController {
         return "posts/view";
     }
 
-//
-//    @GetMapping("/{id}")
-//    public String showPost(@PathVariable Long id, Model model) {
-//        PostResponseDto post = postService.getPostById(id);
-//        model.addAttribute("post", post);
-//
-//        return "posts/view";
-//    }
-
 
 
 

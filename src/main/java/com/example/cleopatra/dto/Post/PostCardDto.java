@@ -1,5 +1,6 @@
 package com.example.cleopatra.dto.Post;
 
+import com.example.cleopatra.dto.Location.LocationDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class PostCardDto {
     private Long viewsCount;
 
 
+
     // Дополнительные поля для UI
     private Boolean hasImage;
     private Boolean isLongContent; // true если контент обрезан
@@ -32,6 +34,16 @@ public class PostCardDto {
     // ✅ ДОБАВИТЬ поля для лайков
     private Boolean isLikedByCurrentUser; // Лайкнул ли текущий пользователь
     private List<LikeUserDto> recentLikes; // Последние 2-3 пользователя для карточки
+
+
+
+    private LocationDto location;
+    private Boolean hasLocation;
+
+    public Boolean hasLocation() {
+        return location != null && location.hasValidLocation();
+    }
+
 
     @Data
     @Builder

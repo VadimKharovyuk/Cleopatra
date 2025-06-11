@@ -1,6 +1,7 @@
 package com.example.cleopatra.controller;
 
 import com.example.cleopatra.ExistsException.ImageValidationException;
+import com.example.cleopatra.dto.Post.PostCardDto;
 import com.example.cleopatra.dto.Post.PostListDto;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserRecommendationDto;

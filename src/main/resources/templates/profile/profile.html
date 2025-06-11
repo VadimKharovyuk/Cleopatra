@@ -1236,6 +1236,7 @@
                 </span>
                             </div>
 
+
                             <!-- Изображение поста -->
                             <div class="post-media" th:if="${post.hasImage}">
                                 <div class="media-container">
@@ -1244,7 +1245,13 @@
                                          class="post-image">
                                 </div>
                             </div>
+                            <!-- Компактная версия для мобильных -->
+                            <div th:if="${post.hasLocation()}" class="post-location-compact">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span th:text="${post.location.displayName}"></span>
+                            </div>
                         </div>
+
 
                         <!-- Информация о лайках (новый блок) -->
                         <div class="post-likes-info"
@@ -1323,8 +1330,6 @@
 
                     </article>
                 </div>
-
-                <!-- Индикаторы состояния загрузки (будут добавлены динамически) -->
 
             </div>
 
