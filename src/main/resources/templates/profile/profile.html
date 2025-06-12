@@ -1229,8 +1229,12 @@
                         <!-- Содержимое поста - теперь кликабельное -->
                         <div class="post-content" onclick="navigateToPost(event, this)" th:data-post-id="${post.id}">
                             <!-- Текст поста -->
+
+
                             <div class="post-text" th:if="${post.content != null and !#strings.isEmpty(post.content)}">
-                                <p th:text="${post.content}">Текст поста...</p>
+                                <p th:utext="${post.content}" class="post-text">
+                                    Содержимое поста...
+                                </p>
                                 <span th:if="${post.isLongContent}" class="read-more-link">
                     <a th:href="@{/posts/{id}(id=${post.id})}">Читать далее</a>
                 </span>
@@ -1333,6 +1337,8 @@
                 </div>
 
             </div>
+            <link th:href="@{/css/feed/mention-suggestions.css}" rel="stylesheet">
+            <script th:src="@{/js/post/mention-indicator.js}"></script>
 
             <!-- Если постов нет -->
             <div th:unless="${posts != null and !posts.posts.empty}" class="empty-state" id="emptyState">

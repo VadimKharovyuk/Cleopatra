@@ -43,6 +43,7 @@ public class PostResponseDto {
         private String firstName;
         private String lastName;
         private String imageUrl;
+        private Long followersCount;
     }
 
     // ✅ ДОБАВИТЬ DTO для пользователей, которые лайкнули

@@ -646,6 +646,9 @@
             }
         }
     </style>
+
+    <link th:href="@{/css/feed/mention-suggestions.css}" rel="stylesheet">
+    <script th:src="@{/js/post/mention-indicator.js}"></script>
 </head>
 <body th:data-current-user-id="${currentUserId}"
       th:data-profile-user-id="${post?.author?.id}"
@@ -721,10 +724,9 @@
                  alt="Изображение поста"
                  class="post-image">
 
-            <!-- Post Text -->
-            <div class="post-text" th:text="${post.content}">
-                Содержание поста будет отображено здесь...
-            </div>
+            <p th:utext="${post.content}" class="post-text">
+                Содержимое поста...
+            </p>
         </div>
 
         <!-- Информация о лайках -->

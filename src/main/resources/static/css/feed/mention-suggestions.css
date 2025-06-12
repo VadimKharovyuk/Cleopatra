@@ -359,3 +359,86 @@
         color: #fff;
     }
 }
+
+
+
+
+
+
+
+
+
+/* Стили для упоминаний в постах главной страницы */
+.post-content .mention-link {
+    background: linear-gradient(135deg, rgba(29, 161, 242, 0.1), rgba(25, 145, 219, 0.1));
+    color: #1da1f2;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 500;
+    border: 1px solid rgba(29, 161, 242, 0.2);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.post-content .mention-link:hover {
+    background: linear-gradient(135deg, rgba(29, 161, 242, 0.2), rgba(25, 145, 219, 0.2));
+    border-color: rgba(29, 161, 242, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(29, 161, 242, 0.2);
+    text-decoration: none;
+    color: #1da1f2;
+}
+
+.post-content .mention-link:focus {
+    outline: 2px solid #1da1f2;
+    outline-offset: 2px;
+}
+
+/* Неактивные упоминания */
+.post-content .mention-inactive {
+    background: rgba(156, 163, 175, 0.1);
+    color: #9ca3af;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-weight: 500;
+    border: 1px solid rgba(156, 163, 175, 0.2);
+    font-style: italic;
+}
+
+/* Текст поста */
+.post-text {
+    line-height: 1.6;
+    color: var(--text-primary);
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    margin: 0;
+}
+
+/* Кнопка "Показать больше" */
+.show-more-container {
+    margin-top: 8px;
+}
+
+.show-more-btn {
+    background: none;
+    border: none;
+    color: #1da1f2;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 4px 0;
+}
+
+.show-more-btn:hover {
+    text-decoration: underline;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .post-content .mention-link {
+        padding: 1px 4px;
+        font-size: 0.9em;
+    }
+}

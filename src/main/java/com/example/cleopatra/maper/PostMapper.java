@@ -383,6 +383,7 @@ public class PostMapper {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .imageUrl(user.getImageUrl())
+                .followersCount(user.getFollowersCount())
                 .build();
     }
 

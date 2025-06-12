@@ -34,7 +34,6 @@ public class CommentController {
     private final UserService userService;
 
 
-
     @GetMapping("/posts/{postId}/comments")
     public String showPostComments(@PathVariable Long postId,
                                    @RequestParam(defaultValue = "0") int page,
