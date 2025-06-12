@@ -22,8 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -159,27 +158,140 @@ public class AdvertisementServiceImpl implements AdvertisementService {
         return true;
     }
 
+
     @Override
     @Transactional(readOnly = true)
     public Optional<AdvertisementResponseDTO> getRandomActiveAdvertisement(User user) {
-        log.debug("Получение случайной рекламы для пользователя: {}",
-                user != null ? user.getEmail() : "анонимный");
+        log.info("=== ОТЛАДКА getRandomActiveAdvertisement ===");
+        log.info("Пользователь: {} (пол: {})",
+                user != null ? user.getEmail() : "null",
+                user != null && user.getGender() != null ? user.getGender().name() : "null");
 
         try {
-            // Сначала пробуем получить с учетом всех параметров пользователя
-            if (user != null) {
-                Optional<AdvertisementResponseDTO> targetedAd = getTargetedAdvertisement(user);
-                if (targetedAd.isPresent()) {
-                    return targetedAd;
-                }
+            // Шаг 1: Получаем все активные объявления
+            log.info("Шаг 1: Получаем все активные объявления...");
+            List<Advertisement> allActiveAds = advertisementRepository.findByStatus(AdStatus.ACTIVE);
+            log.info("Найдено активных объявлений: {}", allActiveAds.size());
+
+            if (allActiveAds.isEmpty()) {
+                log.warn("❌ В базе нет активных объявлений!");
+                return Optional.empty();
             }
 
-            // Если не получилось или пользователь = null, получаем любую активную
-            return getAnyActiveAdvertisement();
+            // Выводим информацию о найденных объявлениях
+            for (Advertisement ad : allActiveAds) {
+                log.info("  - ID: {}, Заголовок: '{}', Target Gender: {}, Start Time: {}, End Time: {}, End Date: {}",
+                        ad.getId(),
+                        ad.getTitle(),
+                        ad.getTargetGender() != null ? ad.getTargetGender().name() : "null",
+                        ad.getStartTime(),
+                        ad.getEndTime(),
+                        ad.getEndDate());
+            }
+
+            // Шаг 2: Фильтруем подходящие объявления
+            log.info("Шаг 2: Фильтруем подходящие для пользователя...");
+            List<Advertisement> suitableAds = allActiveAds.stream()
+                    .filter(ad -> {
+                        boolean suitable = isAdSuitableForUser(ad, user);
+                        log.info("  Объявление ID {}: подходит = {}", ad.getId(), suitable);
+                        return suitable;
+                    })
+                    .collect(Collectors.toList());
+
+            log.info("После фильтрации по пользователю: {}", suitableAds.size());
+
+            // Шаг 3: Фильтруем по времени
+            log.info("Шаг 3: Фильтруем по времени и дате...");
+            LocalTime now = LocalTime.now();
+            LocalDate today = LocalDate.now();
+            log.info("Текущее время: {}, дата: {}", now, today);
+
+            List<Advertisement> activeNow = suitableAds.stream()
+                    .filter(ad -> {
+                        boolean active = isAdCurrentlyActive(ad);
+                        if (!active) {
+                            log.info("  Объявление ID {} НЕ активно сейчас:", ad.getId());
+                            if (ad.getEndDate() != null && ad.getEndDate().isBefore(today)) {
+                                log.info("    - Дата окончания прошла: {} < {}", ad.getEndDate(), today);
+                            }
+                            if (ad.getStartTime() != null && ad.getStartTime().isAfter(now)) {
+                                log.info("    - Время начала в будущем: {} > {}", ad.getStartTime(), now);
+                            }
+                            if (ad.getEndTime() != null && ad.getEndTime().isBefore(now)) {
+                                log.info("    - Время окончания прошло: {} < {}", ad.getEndTime(), now);
+                            }
+                            if (ad.getRemainingBudget() != null && ad.getCostPerView() != null &&
+                                    ad.getRemainingBudget().compareTo(ad.getCostPerView()) < 0) {
+                                log.info("    - Недостаточно бюджета: {} < {}", ad.getRemainingBudget(), ad.getCostPerView());
+                            }
+                        } else {
+                            log.info("  Объявление ID {} активно сейчас ✓", ad.getId());
+                        }
+                        return active;
+                    })
+                    .collect(Collectors.toList());
+
+            log.info("После фильтрации по времени: {}", activeNow.size());
+
+            if (activeNow.isEmpty()) {
+                log.warn("❌ Нет объявлений, активных в данный момент");
+
+                // Fallback: показываем любое активное, игнорируя фильтры
+                log.info("Пробуем fallback - любое активное объявление...");
+                if (!allActiveAds.isEmpty()) {
+                    Advertisement fallbackAd = allActiveAds.get(0);
+                    log.info("✅ Используем fallback объявление: ID {}", fallbackAd.getId());
+                    return Optional.of(AdvertisementResponseDTO.fromEntity(fallbackAd));
+                }
+
+                return Optional.empty();
+            }
+
+            // Шаг 4: Выбираем случайное
+            Advertisement randomAd = activeNow.get(new Random().nextInt(activeNow.size()));
+            log.info("✅ Выбрано объявление: ID {}, Заголовок: '{}'", randomAd.getId(), randomAd.getTitle());
+
+            return Optional.of(AdvertisementResponseDTO.fromEntity(randomAd));
 
         } catch (Exception e) {
-            log.error("Ошибка получения случайной рекламы: {}", e.getMessage());
+            log.error("❌ Ошибка в getRandomActiveAdvertisement: {}", e.getMessage(), e);
             return Optional.empty();
+        }
+    }
+
+    // Также добавим отладку в вспомогательные методы:
+    private boolean isAdSuitableForUser(Advertisement ad, User user) {
+        try {
+            log.debug("Проверяем соответствие объявления ID {} пользователю", ad.getId());
+
+            if (user == null) {
+                boolean suitable = ad.getTargetGender() == null;
+                log.debug("  Пользователь null, объявление подходит: {} (target_gender: {})",
+                        suitable, ad.getTargetGender());
+                return suitable;
+            }
+
+            // Проверка пола
+            if (ad.getTargetGender() != null && user.getGender() != null) {
+                boolean genderMatch = ad.getTargetGender().equals(user.getGender());
+                log.debug("  Проверка пола: объявление {} vs пользователь {} = {}",
+                        ad.getTargetGender().name(), user.getGender().name(), genderMatch);
+                if (!genderMatch) {
+                    return false;
+                }
+            } else {
+                log.debug("  Пол: объявление target_gender={}, пользователь gender={} - пропускаем проверку",
+                        ad.getTargetGender(), user.getGender());
+            }
+
+            // Другие проверки (возраст, город) - пока упростим
+            log.debug("  Объявление ID {} подходит пользователю", ad.getId());
+            return true;
+
+        } catch (Exception e) {
+            log.warn("Ошибка проверки соответствия объявления пользователю: {}", e.getMessage());
+            return false;
         }
     }
 
@@ -452,6 +564,85 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
         log.info("Жалобы для рекламы {} отклонены как необоснованные", advertisementId);
     }
+
+    @Override
+    public Map<String, Object> debugAdvertisements() {
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            // 1. Общее количество объявлений
+            long totalCount = advertisementRepository.count();
+            result.put("total_advertisements", totalCount);
+
+            // 2. Количество по статусам
+            long activeCount = advertisementRepository.countByStatus(AdStatus.ACTIVE);
+            long pendingCount = advertisementRepository.countByStatus(AdStatus.PENDING);
+            long rejectedCount = advertisementRepository.countByStatus(AdStatus.REJECTED);
+
+            result.put("active_count", activeCount);
+            result.put("pending_count", pendingCount);
+            result.put("rejected_count", rejectedCount);
+
+            // 3. Первые несколько активных объявлений
+            List<Advertisement> activeAds = advertisementRepository.findByStatus(AdStatus.ACTIVE);
+            result.put("active_ads_details", activeAds.stream()
+                    .limit(5)
+                    .map(ad -> {
+                        Map<String, Object> adInfo = new HashMap<>();
+                        adInfo.put("id", ad.getId());
+                        adInfo.put("title", ad.getTitle());
+                        adInfo.put("status", ad.getStatus().name());
+                        adInfo.put("target_gender", ad.getTargetGender() != null ? ad.getTargetGender().name() : null);
+                        adInfo.put("start_time", ad.getStartTime());
+                        adInfo.put("end_time", ad.getEndTime());
+                        adInfo.put("end_date", ad.getEndDate());
+                        adInfo.put("remaining_budget", ad.getRemainingBudget());
+                        return adInfo;
+                    })
+                    .collect(Collectors.toList()));
+
+            // 4. Проверяем фильтрацию
+            List<Advertisement> filteredAds = activeAds.stream()
+                    .filter(this::isAdCurrentlyActive)
+                    .toList();
+            result.put("filtered_active_count", filteredAds.size());
+
+            // 5. Причины фильтрации
+            List<String> filterReasons = new ArrayList<>();
+            LocalTime now = LocalTime.now();
+            LocalDate today = LocalDate.now();
+
+            for (Advertisement ad : activeAds) {
+                List<String> reasons = new ArrayList<>();
+
+                if (ad.getEndDate() != null && ad.getEndDate().isBefore(today)) {
+                    reasons.add("end_date_passed");
+                }
+                if (ad.getStartTime() != null && ad.getStartTime().isAfter(now)) {
+                    reasons.add("start_time_future");
+                }
+                if (ad.getEndTime() != null && ad.getEndTime().isBefore(now)) {
+                    reasons.add("end_time_passed");
+                }
+                if (ad.getRemainingBudget() != null && ad.getCostPerView() != null &&
+                        ad.getRemainingBudget().compareTo(ad.getCostPerView()) < 0) {
+                    reasons.add("insufficient_budget");
+                }
+
+                if (!reasons.isEmpty()) {
+                    filterReasons.add("ID " + ad.getId() + ": " + String.join(", ", reasons));
+                }
+            }
+            result.put("filter_reasons", filterReasons);
+
+        } catch (Exception e) {
+            result.put("debug_error", e.getMessage());
+            log.error("Ошибка диагностики рекламы: {}", e.getMessage(), e);
+        }
+
+        return result;
+    }
+
 
     // Приватные методы-помощники
 
