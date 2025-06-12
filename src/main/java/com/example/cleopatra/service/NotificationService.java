@@ -33,4 +33,7 @@ public interface NotificationService {
 
 
     void createMentionNotificationWithPost(Long mentionedUserId, Long mentionerUserId, Long postId);
+
+
+    void deleteAllNotifications(Long userId);
 }

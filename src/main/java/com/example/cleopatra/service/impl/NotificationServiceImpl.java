@@ -497,6 +497,16 @@ public class NotificationServiceImpl implements NotificationService {
                     mentionerUserId, mentionedUserId, postId, e.getMessage(), e);
         }
     }
+
+    @Override
+    public void deleteAllNotifications(Long userId) {
+        try {
+            notificationRepository.deleteByRecipientId(userId);
+        } catch (Exception e) {
+            log.error("Error deleting notifications for user: " + userId, e);
+            throw new RuntimeException("Failed to delete notifications", e);
+        }
+    }
     // ===================== ПРИВАТНЫЕ МЕТОДЫ =====================
 
     private Notification createNotification(User recipient, User actor, NotificationType type,
