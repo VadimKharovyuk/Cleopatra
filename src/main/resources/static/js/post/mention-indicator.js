@@ -373,6 +373,7 @@ window.initializeMentionSystem = initializeMentionSystem;
 
 // ===== ДОПОЛНИТЕЛЬНЫЕ УТИЛИТЫ =====
 
+
 // Функция для ручной инициализации с кастомными параметрами
 window.createMentionSystem = function(textareaId, suggestionsId) {
     return new MentionSystem(textareaId, suggestionsId);

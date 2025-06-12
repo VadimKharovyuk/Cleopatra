@@ -30,4 +30,7 @@ public interface NotificationService {
     // Служебные методы
     void sendPendingNotifications();
     void cleanupOldNotifications();
+
+
+    void createMentionNotificationWithPost(Long mentionedUserId, Long mentionerUserId, Long postId);
 }

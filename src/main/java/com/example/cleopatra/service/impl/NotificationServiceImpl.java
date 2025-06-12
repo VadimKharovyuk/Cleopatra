@@ -427,6 +427,76 @@ public class NotificationServiceImpl implements NotificationService {
     public void cleanupOldNotifications() {
 
     }
+
+    @Override
+    @Transactional
+    public void createMentionNotificationWithPost(Long mentionedUserId, Long mentionerUserId, Long postId) {
+        try {
+            log.info("🔔 Creating mention notification with post: {} mentioned {} in post {}",
+                    mentionerUserId, mentionedUserId, postId);
+
+            // Валидация параметров
+            if (mentionedUserId == null || mentionerUserId == null || postId == null) {
+                log.warn("Invalid parameters for mention notification: mentionedUserId={}, mentionerUserId={}, postId={}",
+                        mentionedUserId, mentionerUserId, postId);
+                return;
+            }
+
+            if (mentionedUserId.equals(mentionerUserId)) {
+                log.debug("User {} tried to mention themselves, skipping notification", mentionerUserId);
+                return;
+            }
+
+            // Получаем пользователей
+            User mentionedUser = userRepository.findById(mentionedUserId)
+                    .orElseThrow(() -> new RuntimeException("Упомянутый пользователь с ID " + mentionedUserId + " не найден"));
+
+            User mentionerUser = userRepository.findById(mentionerUserId)
+                    .orElseThrow(() -> new RuntimeException("Пользователь-автор с ID " + mentionerUserId + " не найден"));
+
+            // Формируем сообщения
+            String title = String.format("%s %s упомянул вас в посте",
+                    mentionerUser.getFirstName(),
+                    mentionerUser.getLastName());
+
+            String message = String.format("%s %s упомянул вас в своем посте",
+                    mentionerUser.getFirstName(),
+                    mentionerUser.getLastName());
+
+            // ✅ Создаем уведомление с relatedEntityId = postId
+            Notification notification = Notification.builder()
+                    .recipient(mentionedUser)
+                    .actor(mentionerUser)
+                    .type(NotificationType.MENTION)
+                    .title(title)
+                    .message(message)
+                    .relatedEntityId(postId)           // ✅ ВАЖНО: устанавливаем ID поста
+                    .relatedEntityType("POST")         // ✅ Тип сущности для ясности
+                    .isRead(false)
+                    .isSent(false)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            // Сохраняем уведомление
+            Notification savedNotification = notificationRepository.save(notification);
+
+            log.info("✅ Mention notification created: ID={}, {} → {} for post {}",
+                    savedNotification.getId(), mentionerUserId, mentionedUserId, postId);
+
+            // Публикуем событие для отправки
+            NotificationCreatedEvent event = new NotificationCreatedEvent(
+                    savedNotification.getId(),
+                    mentionedUserId
+            );
+            eventPublisher.publishEvent(event);
+
+            log.info("📤 NotificationCreatedEvent published for mention: {}", savedNotification.getId());
+
+        } catch (Exception e) {
+            log.error("❌ Error creating mention notification with post: {} → {} in post {}: {}",
+                    mentionerUserId, mentionedUserId, postId, e.getMessage(), e);
+        }
+    }
     // ===================== ПРИВАТНЫЕ МЕТОДЫ =====================
 
     private Notification createNotification(User recipient, User actor, NotificationType type,

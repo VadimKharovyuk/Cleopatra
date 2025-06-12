@@ -139,7 +139,7 @@ public class MentionService {
         // Сохраняем все упоминания одним запросом
         List<PostMention> savedMentions = postMentionRepository.saveAll(mentionsToSave);
 
-        // ✅ СОЗДАЕМ И ПУБЛИКУЕМ BATCH СОБЫТИЕ
+        // ✅ СОЗДАЕМ И ПУБЛИКУЕМ BATCH СОБЫТИЕ с правильным postId
         if (!savedMentions.isEmpty()) {
             try {
                 // Создаем список MentionInfo для события
@@ -150,15 +150,15 @@ public class MentionService {
                         ))
                         .toList();
 
-                // Создаем batch событие
+                // ✅ Создаем batch событие с правильным postId
                 PostMentionsBatchEvent batchEvent = new PostMentionsBatchEvent(
-                        post.getId(),
-                        author.getId(),
-                        post.getContent(),
-                        mentionInfos
+                        post.getId(),           // ✅ ID поста
+                        author.getId(),         // кто упомянул
+                        post.getContent(),      // содержимое поста
+                        mentionInfos            // список упоминаний
                 );
 
-                // ✅ ПУБЛИКУЕМ BATCH СОБЫТИЕ
+                // Публикуем batch событие
                 eventPublisher.publishEvent(batchEvent);
 
                 log.info("✅ Опубликовано batch событие упоминаний для поста {} с {} упоминаниями",
@@ -173,22 +173,6 @@ public class MentionService {
         log.info("✅ Успешно создано {} новых упоминаний для поста ID: {}", savedMentions.size(), post.getId());
     }
 
-    // ✅ ВСПОМОГАТЕЛЬНЫЙ МЕТОД для создания превью поста
-    private String getPostPreview(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            return "Новый пост";
-        }
-
-        // Убираем HTML теги если есть
-        String cleanContent = content.replaceAll("<[^>]*>", "");
-
-        // Обрезаем до 100 символов для batch события
-        if (cleanContent.length() > 100) {
-            return cleanContent.substring(0, 100) + "...";
-        }
-
-        return cleanContent;
-    }
 
     /**
      * ✅ ДОБАВИТЬ ЭТОТ МЕТОД в ваш MentionService
@@ -210,7 +194,7 @@ public class MentionService {
 
 
     /**
-     * ✅ АЛЬТЕРНАТИВНЫЙ МЕТОД: С кэшированием для производительности
+     * ✅ ИСПРАВЛЕННЫЙ МЕТОД: Конвертация упоминаний в ссылки с правильным экранированием
      */
     public String convertMentionsToLinksWithCache(String content, Long postId) {
         if (content == null || content.trim().isEmpty()) {
@@ -227,7 +211,8 @@ public class MentionService {
                         (existing, replacement) -> existing // В случае дубликатов берем первый
                 ));
 
-        Pattern mentionPattern = Pattern.compile("@(?:\"([^\"]+)\"|([\\S]+(?:\\s+[\\S]+)?))");
+        // ✅ УЛУЧШЕННЫЙ ПАТТЕРН: более точный поиск упоминаний
+        Pattern mentionPattern = Pattern.compile("@(?:\"([^\"]+)\"|([^\\s@]+(?:\\s+[^\\s@]+)?))(?=\\s|$|[.,!?;:\\n])");
         Matcher matcher = mentionPattern.matcher(content);
         StringBuffer result = new StringBuffer();
 
@@ -238,26 +223,44 @@ public class MentionService {
                 User mentionedUser = mentionCache.get(mentionText.trim().toLowerCase());
 
                 if (mentionedUser != null) {
+                    // ✅ ИСПРАВЛЕНИЕ: Правильное экранирование HTML атрибутов
+                    String escapedFirstName = escapeHtml(mentionedUser.getFirstName());
+                    String escapedLastName = escapeHtml(mentionedUser.getLastName());
+                    String escapedMentionText = escapeHtml(mentionText);
+
                     String link = String.format(
-                            "<a href=\"/profile/%d\" class=\"mention-link\" title=\"%s %s\">@%s</a>",
+                            "<a href=\"/profile/%d\" class=\"mention-link\" title=\"%s %s\" onclick=\"return handleMentionClick(event, %d)\">@%s</a>",
                             mentionedUser.getId(),
-                            mentionedUser.getFirstName(),
-                            mentionedUser.getLastName(),
-                            mentionText
+                            escapedFirstName,
+                            escapedLastName,
+                            mentionedUser.getId(),
+                            escapedMentionText
                     );
-                    matcher.appendReplacement(result, link);
+
+                    // ✅ ВАЖНО: Экранируем специальные символы для replaceAll
+                    matcher.appendReplacement(result, Matcher.quoteReplacement(link));
                 } else {
                     String styledMention = String.format(
                             "<span class=\"mention-inactive\">@%s</span>",
-                            mentionText
+                            escapeHtml(mentionText)
                     );
-                    matcher.appendReplacement(result, styledMention);
+                    matcher.appendReplacement(result, Matcher.quoteReplacement(styledMention));
                 }
             }
         }
         matcher.appendTail(result);
 
         return result.toString();
+    } /**
+     * ✅ ДОБАВЛЯЕМ: Метод для экранирования HTML
+     */
+    private String escapeHtml(String input) {
+        if (input == null) return "";
+        return input.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#x27;");
     }
 
 

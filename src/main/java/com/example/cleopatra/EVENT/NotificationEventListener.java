@@ -201,13 +201,14 @@ public class NotificationEventListener {
                 event.getMentionerUserId(), event.getMentions().size(), event.getPostId());
 
         try {
-            // ✅ УПРОЩЕННАЯ ОБРАБОТКА - только ID пользователей
+            // Обрабатываем каждое упоминание отдельно
             for (PostMentionsBatchEvent.MentionInfo mentionInfo : event.getMentions()) {
                 try {
-                    // Создаем уведомление с минимальными параметрами
-                    notificationService.createMentionNotification(
+                    // ✅ ПЕРЕДАЕМ POST ID в уведомление
+                    notificationService.createMentionNotificationWithPost(
                             mentionInfo.getMentionedUserId(), // кому (кого упомянули)
-                            event.getMentionerUserId()        // кто (кто упомянул)
+                            event.getMentionerUserId(),        // кто (кто упомянул)
+                            event.getPostId()                  // ✅ ID поста для перехода
                     );
 
                     log.info("✅ Mention notification created: {} mentioned {} in post {}",
@@ -216,7 +217,6 @@ public class NotificationEventListener {
                 } catch (Exception e) {
                     log.error("❌ Error creating mention notification for user {}: {}",
                             mentionInfo.getMentionedUserId(), e.getMessage());
-                    // Продолжаем обработку остальных упоминаний
                 }
             }
 
@@ -227,19 +227,6 @@ public class NotificationEventListener {
         }
     }
 
-    private String getPostPreview(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            return "Новый пост";
-        }
-
-        String cleanContent = content.replaceAll("<[^>]*>", "");
-
-        if (cleanContent.length() > 50) {
-            return cleanContent.substring(0, 50) + "...";
-        }
-
-        return cleanContent;
-    }
 
 
     @Transactional
