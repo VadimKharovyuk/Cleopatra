@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -176,5 +177,33 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
     Page<User> findByRole(Role role, Pageable pageable);
+
+
+
+
+    /**
+     * Находит пользователей по упоминаниям (имя, фамилия или полное имя)
+     */
+    @Query("""
+        SELECT DISTINCT u FROM User u 
+        WHERE LOWER(u.firstName) IN :mentions 
+           OR LOWER(u.lastName) IN :mentions 
+           OR LOWER(CONCAT(u.firstName, ' ', u.lastName)) IN :mentions
+           OR LOWER(CONCAT(u.lastName, ' ', u.firstName)) IN :mentions
+        """)
+    List<User> findUsersByMentions(@Param("mentions") Set<String> mentions);
+
+    /**
+     * Поиск пользователей для автодополнения упоминаний
+     */
+    @Query("""
+    SELECT u FROM User u 
+    WHERE LOWER(u.firstName) LIKE LOWER(CONCAT(:query, '%'))
+       OR LOWER(u.lastName) LIKE LOWER(CONCAT(:query, '%'))
+       OR LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :query, '%'))
+    ORDER BY u.firstName, u.lastName
+    LIMIT 10
+    """)
+    List<User> searchUsersForMentions(@Param("query") String query);
 }
 

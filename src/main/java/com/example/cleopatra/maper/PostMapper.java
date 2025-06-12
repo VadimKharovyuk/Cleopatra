@@ -1,5 +1,4 @@
 //package com.example.cleopatra.maper;
-//
 //import com.example.cleopatra.dto.Location.LocationDto;
 //import com.example.cleopatra.dto.Post.PostCardDto;
 //import com.example.cleopatra.dto.Post.PostCreateDto;
@@ -7,12 +6,15 @@
 //import com.example.cleopatra.dto.Post.PostResponseDto;
 //import com.example.cleopatra.model.Post;
 //import com.example.cleopatra.model.User;
+//import com.example.cleopatra.service.MentionService;
+//import lombok.RequiredArgsConstructor;
 //import org.springframework.stereotype.Component;
 //
 //import java.util.List;
-//
+//@RequiredArgsConstructor
 //@Component
 //public class PostMapper {
+//    private final MentionService mentionService;
 //
 //    private static final int CONTENT_PREVIEW_LENGTH = 200;
 //
@@ -31,13 +33,19 @@
 //    }
 //
 //    /**
-//     * ✅ УПРОЩЕННЫЙ - принимает готовые данные о лайках
+//     * ✅ ИСПРАВЛЕНО - убрана дублированная строка location
 //     */
 //    public PostResponseDto toResponseDto(Post post, Boolean isLikedByCurrentUser,
 //                                         List<PostResponseDto.LikeUserDto> recentLikes) {
+//
+//
+//        String contentWithLinks = mentionService.convertMentionsToLinksWithCache(
+//                post.getContent(),
+//                post.getId()
+//        );
 //        return PostResponseDto.builder()
 //                .id(post.getId())
-//                .content(post.getContent())
+//                .content(contentWithLinks)
 //                .imageUrl(post.getImageUrl())
 //                .author(toAuthorDto(post.getAuthor()))
 //                .createdAt(post.getCreatedAt())
@@ -45,16 +53,13 @@
 //                .commentsCount(post.getCommentsCount())
 //                .viewsCount(post.getViewsCount())
 //                .isLikedByCurrentUser(isLikedByCurrentUser)
-//                .location(post.getLocation() != null ? LocationDto.from(post.getLocation()) : null)
 //                .recentLikes(recentLikes)
-//                .location(LocationDto.from(post.getLocation()))
+//                .location(post.getLocation() != null ? LocationDto.from(post.getLocation()) : null) // ✅ ОСТАВЛЯЕМ ТОЛЬКО ОДНУ СТРОКУ
 //                .build();
-//
-//
 //    }
 //
 //    /**
-//     * ✅ УПРОЩЕННЫЙ - принимает готовые данные о лайках
+//     * ✅ ДОБАВЛЕНА ГЕОЛОКАЦИЯ В КАРТОЧКУ ПОСТА
 //     */
 //    public PostCardDto toCardDto(Post post, Boolean isLikedByCurrentUser,
 //                                 List<PostCardDto.LikeUserDto> recentLikes) {
@@ -77,6 +82,11 @@
 //                .isLongContent(isLongContent)
 //                .isLikedByCurrentUser(isLikedByCurrentUser)
 //                .recentLikes(recentLikes)
+//
+//                // ✅ ДОБАВЛЯЕМ ГЕОЛОКАЦИЮ
+//                .location(post.getLocation() != null ? LocationDto.from(post.getLocation()) : null)
+//                .hasLocation(post.getLocation() != null) // Можно убрать, так как есть метод hasLocation()
+//
 //                .build();
 //    }
 //
@@ -150,6 +160,7 @@
 //                .build();
 //    }
 //}
+
 package com.example.cleopatra.maper;
 
 import com.example.cleopatra.dto.Location.LocationDto;
@@ -159,13 +170,19 @@ import com.example.cleopatra.dto.Post.PostListDto;
 import com.example.cleopatra.dto.Post.PostResponseDto;
 import com.example.cleopatra.model.Post;
 import com.example.cleopatra.model.User;
+import com.example.cleopatra.service.MentionService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Component
+@Slf4j
 public class PostMapper {
 
+    private final MentionService mentionService;
     private static final int CONTENT_PREVIEW_LENGTH = 200;
 
     /**
@@ -183,13 +200,17 @@ public class PostMapper {
     }
 
     /**
-     * ✅ ИСПРАВЛЕНО - убрана дублированная строка location
+     * ✅ ОБНОВЛЕНО - добавлена обработка упоминаний
      */
     public PostResponseDto toResponseDto(Post post, Boolean isLikedByCurrentUser,
                                          List<PostResponseDto.LikeUserDto> recentLikes) {
+
+        // ✅ Обрабатываем упоминания в полном контенте
+        String contentWithLinks = processContentMentions(post.getContent(), post.getId());
+
         return PostResponseDto.builder()
                 .id(post.getId())
-                .content(post.getContent())
+                .content(contentWithLinks) // ✅ Контент с кликабельными ссылками
                 .imageUrl(post.getImageUrl())
                 .author(toAuthorDto(post.getAuthor()))
                 .createdAt(post.getCreatedAt())
@@ -198,24 +219,30 @@ public class PostMapper {
                 .viewsCount(post.getViewsCount())
                 .isLikedByCurrentUser(isLikedByCurrentUser)
                 .recentLikes(recentLikes)
-                .location(post.getLocation() != null ? LocationDto.from(post.getLocation()) : null) // ✅ ОСТАВЛЯЕМ ТОЛЬКО ОДНУ СТРОКУ
+                .location(post.getLocation() != null ? LocationDto.from(post.getLocation()) : null)
                 .build();
     }
 
     /**
-     * ✅ ДОБАВЛЕНА ГЕОЛОКАЦИЯ В КАРТОЧКУ ПОСТА
+     * ✅ ОБНОВЛЕНО - добавлена обработка упоминаний в превью
      */
     public PostCardDto toCardDto(Post post, Boolean isLikedByCurrentUser,
                                  List<PostCardDto.LikeUserDto> recentLikes) {
+
         String originalContent = post.getContent();
         boolean isLongContent = originalContent.length() > CONTENT_PREVIEW_LENGTH;
+
+        // ✅ Создаем превью контента
         String previewContent = isLongContent
                 ? originalContent.substring(0, CONTENT_PREVIEW_LENGTH) + "..."
                 : originalContent;
 
+        // ✅ Обрабатываем упоминания в превью контенте
+        String contentWithLinks = processContentMentions(previewContent, post.getId());
+
         return PostCardDto.builder()
                 .id(post.getId())
-                .content(previewContent)
+                .content(contentWithLinks) // ✅ Превью контент с кликабельными ссылками
                 .imageUrl(post.getImageUrl())
                 .author(toCardAuthorDto(post.getAuthor()))
                 .createdAt(post.getCreatedAt())
@@ -226,11 +253,38 @@ public class PostMapper {
                 .isLongContent(isLongContent)
                 .isLikedByCurrentUser(isLikedByCurrentUser)
                 .recentLikes(recentLikes)
-
-                // ✅ ДОБАВЛЯЕМ ГЕОЛОКАЦИЮ
                 .location(post.getLocation() != null ? LocationDto.from(post.getLocation()) : null)
-                .hasLocation(post.getLocation() != null) // Можно убрать, так как есть метод hasLocation()
+                .hasLocation(post.getLocation() != null)
+                .build();
+    }
 
+    /**
+     * ✅ НОВЫЙ МЕТОД - версия без обработки упоминаний для производительности
+     */
+    public PostCardDto toCardDtoSimple(Post post, Boolean isLikedByCurrentUser,
+                                       List<PostCardDto.LikeUserDto> recentLikes) {
+
+        String originalContent = post.getContent();
+        boolean isLongContent = originalContent.length() > CONTENT_PREVIEW_LENGTH;
+        String previewContent = isLongContent
+                ? originalContent.substring(0, CONTENT_PREVIEW_LENGTH) + "..."
+                : originalContent;
+
+        return PostCardDto.builder()
+                .id(post.getId())
+                .content(previewContent) // ✅ Без обработки упоминаний
+                .imageUrl(post.getImageUrl())
+                .author(toCardAuthorDto(post.getAuthor()))
+                .createdAt(post.getCreatedAt())
+                .likesCount(post.getLikesCount())
+                .commentsCount(post.getCommentsCount())
+                .viewsCount(post.getViewsCount())
+                .hasImage(post.getImageUrl() != null && !post.getImageUrl().isEmpty())
+                .isLongContent(isLongContent)
+                .isLikedByCurrentUser(isLikedByCurrentUser)
+                .recentLikes(recentLikes)
+                .location(post.getLocation() != null ? LocationDto.from(post.getLocation()) : null)
+                .hasLocation(post.getLocation() != null)
                 .build();
     }
 
@@ -254,7 +308,47 @@ public class PostMapper {
                 .build();
     }
 
-    // ✅ УТИЛИТНЫЕ МЕТОДЫ для конвертации User в DTO
+    // ===== ✅ НОВЫЕ ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ =====
+
+    /**
+     * ✅ Безопасная обработка упоминаний в контенте
+     */
+    private String processContentMentions(String content, Long postId) {
+        if (content == null || content.trim().isEmpty()) {
+            return content;
+        }
+
+        try {
+            return mentionService.convertMentionsToLinksWithCache(content, postId);
+        } catch (Exception e) {
+            log.warn("Ошибка обработки упоминаний для поста {}: {}", postId, e.getMessage());
+            // Возвращаем оригинальный контент если обработка упоминаний не удалась
+            return content;
+        }
+    }
+
+    /**
+     * ✅ Пакетная обработка упоминаний для списка постов
+     */
+    public List<PostCardDto> processCardMentionsInBatch(List<PostCardDto> postCards) {
+        return postCards.stream()
+                .peek(card -> {
+                    try {
+                        String contentWithLinks = mentionService.convertMentionsToLinksWithCache(
+                                card.getContent(),
+                                card.getId()
+                        );
+                        card.setContent(contentWithLinks);
+                    } catch (Exception e) {
+                        log.warn("Ошибка пакетной обработки упоминаний для поста {}: {}",
+                                card.getId(), e.getMessage());
+                        // Оставляем оригинальный контент
+                    }
+                })
+                .toList();
+    }
+
+    // ===== СУЩЕСТВУЮЩИЕ УТИЛИТНЫЕ МЕТОДЫ (без изменений) =====
 
     /**
      * Преобразует User в LikeUserDto для PostResponseDto

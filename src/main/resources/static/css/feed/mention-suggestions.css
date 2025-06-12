@@ -1,0 +1,361 @@
+/* ===== СТИЛИ ДЛЯ СИСТЕМЫ УПОМИНАНИЙ ===== */
+
+/* Контейнер для упоминаний */
+.mention-container {
+    position: relative;
+}
+
+/* Dropdown с предложениями */
+.mention-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    margin-top: 4px;
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+    .mention-suggestions {
+        background: #15202b;
+        border-color: #38444d;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Элемент предложения */
+.mention-suggestion {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #e1e8ed;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.mention-suggestion:hover,
+.mention-suggestion.selected {
+    background: #f7f9fa;
+    border-left: 3px solid #1da1f2;
+    padding-left: 13px;
+}
+
+.mention-suggestion:last-child {
+    border-bottom: none;
+}
+
+/* Темная тема для предложений */
+@media (prefers-color-scheme: dark) {
+    .mention-suggestion {
+        border-bottom-color: #38444d;
+    }
+
+    .mention-suggestion:hover,
+    .mention-suggestion.selected {
+        background: #1e2732;
+        border-left-color: #1da1f2;
+    }
+}
+
+/* Аватар пользователя */
+.mention-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1da1f2, #1991db);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+/* Информация о пользователе */
+.mention-user-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.mention-user-name {
+    font-weight: 600;
+    color: #14171a;
+    font-size: 15px;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mention-user-email {
+    font-size: 13px;
+    color: #657786;
+    margin: 2px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Темная тема для информации */
+@media (prefers-color-scheme: dark) {
+    .mention-user-name {
+        color: #ffffff;
+    }
+
+    .mention-user-email {
+        color: #8899a6;
+    }
+}
+
+/* Подсвечивание поискового запроса */
+.mention-user-name strong {
+    color: #1da1f2;
+    background: rgba(29, 161, 242, 0.1);
+    padding: 1px 2px;
+    border-radius: 2px;
+}
+
+/* Состояния загрузки и ошибок */
+.mention-loading,
+.mention-no-results {
+    padding: 16px;
+    text-align: center;
+    color: #657786;
+    font-size: 14px;
+    border-radius: 12px;
+}
+
+.mention-loading {
+    background: #f7f9fa;
+}
+
+.mention-no-results {
+    font-style: italic;
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+/* Темная тема для состояний */
+@media (prefers-color-scheme: dark) {
+    .mention-loading {
+        background: #1e2732;
+        color: #8899a6;
+    }
+
+    .mention-no-results {
+        background: #2d3748;
+        color: #cbd5e0;
+        border-color: #4a5568;
+    }
+}
+
+/* Индикатор упоминаний */
+.mention-indicator {
+    position: absolute;
+    bottom: 8px;
+    left: 12px;
+    background: #1da1f2;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 10;
+}
+
+.mention-indicator.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.mention-indicator i {
+    font-size: 10px;
+}
+
+/* Стили для упоминаний в тексте постов */
+.mention-link {
+    background: linear-gradient(135deg, rgba(29, 161, 242, 0.1), rgba(25, 145, 219, 0.1));
+    color: #1da1f2;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+    border: 1px solid rgba(29, 161, 242, 0.2);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.mention-link:hover {
+    background: linear-gradient(135deg, rgba(29, 161, 242, 0.2), rgba(25, 145, 219, 0.2));
+    color: #1da1f2;
+    border-color: rgba(29, 161, 242, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(29, 161, 242, 0.2);
+    text-decoration: none;
+}
+
+.mention-link:focus {
+    outline: 2px solid #1da1f2;
+    outline-offset: 2px;
+}
+
+/* Неактивные упоминания */
+.mention-inactive {
+    background: rgba(156, 163, 175, 0.1);
+    color: #9ca3af;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+    border: 1px solid rgba(156, 163, 175, 0.2);
+    font-style: italic;
+}
+
+/* Упоминания текущего пользователя */
+.mention-link.mention-current-user {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 197, 94, 0.1));
+    color: #059669;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.mention-link.mention-current-user:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(34, 197, 94, 0.2));
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .mention-suggestions {
+        max-height: 200px;
+        border-radius: 8px;
+    }
+
+    .mention-suggestion {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+
+    .mention-user-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .mention-user-name {
+        font-size: 14px;
+    }
+
+    .mention-user-email {
+        font-size: 12px;
+    }
+
+    .mention-indicator {
+        bottom: 6px;
+        left: 8px;
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+
+    .mention-link {
+        padding: 1px 4px;
+        font-size: 0.9em;
+    }
+}
+
+/* Анимации */
+@keyframes mentionSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mention-suggestions {
+    animation: mentionSlideIn 0.2s ease-out;
+}
+
+/* Скроллбар для списка предложений */
+.mention-suggestions::-webkit-scrollbar {
+    width: 6px;
+}
+
+.mention-suggestions::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 6px;
+}
+
+.mention-suggestions::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 6px;
+}
+
+.mention-suggestions::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Темная тема для скроллбара */
+@media (prefers-color-scheme: dark) {
+    .mention-suggestions::-webkit-scrollbar-track {
+        background: #2d3748;
+    }
+
+    .mention-suggestions::-webkit-scrollbar-thumb {
+        background: #4a5568;
+    }
+
+    .mention-suggestions::-webkit-scrollbar-thumb:hover {
+        background: #718096;
+    }
+}
+
+/* Улучшенная типографика */
+.mention-suggestions {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Состояние фокуса для accessibility */
+.mention-suggestion:focus {
+    outline: 2px solid #1da1f2;
+    outline-offset: -2px;
+}
+
+/* Высокий контраст для accessibility */
+@media (prefers-contrast: high) {
+    .mention-link {
+        border-width: 2px;
+        font-weight: 600;
+    }
+
+    .mention-suggestion.selected {
+        background: #000;
+        color: #fff;
+    }
+}

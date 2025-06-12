@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,12 +39,13 @@ public class PostServiceImpl implements PostService {
     private final PostLikeService postLikeService;
     private final CommentService commentService;
     private final LocationService locationService;
+    private final MentionService mentionService;
 
 
 
     @Override
+    @Transactional // ✅ Убедитесь, что метод транзакционный
     public PostResponseDto createPost(PostCreateDto postCreateDto) {
-
 
         User currentUser = getCurrentUser();
         Post post = postMapper.toEntity(postCreateDto, currentUser);
@@ -51,6 +53,7 @@ public class PostServiceImpl implements PostService {
         // ✅ ДОБАВЛЯЕМ логику для необязательной геолокации
         handleLocationForPost(post, postCreateDto);
 
+        // Обработка изображения
         if (postCreateDto.getImage() != null && !postCreateDto.getImage().isEmpty()) {
             try {
                 ImageConverterService.ProcessedImage processedImage =
@@ -69,6 +72,8 @@ public class PostServiceImpl implements PostService {
                 throw new RuntimeException("Не удалось загрузить изображение: " + e.getMessage());
             }
         }
+
+        // Логирование локации перед сохранением
         if (post.getLocation() != null) {
             log.info("Location ID: {}", post.getLocation().getId());
             log.info("Location Coordinates: ({}, {})",
@@ -76,17 +81,31 @@ public class PostServiceImpl implements PostService {
             log.info("Location PlaceName: {}", post.getLocation().getPlaceName());
         }
 
+        // ✅ ИСПРАВЛЕНИЕ: СНАЧАЛА сохраняем пост
         Post savedPost = postRepository.save(post);
         userRepository.save(currentUser);
+
         if (savedPost.getLocation() != null) {
-            log.info("Saved Location ID: {}", savedPost.getLocation().getId());
             log.info("Saved Location Coordinates: ({}, {})",
                     savedPost.getLocation().getLatitude(), savedPost.getLocation().getLongitude());
         }
+
+        // ✅ ИСПРАВЛЕНИЕ: ЗАТЕМ обрабатываем упоминания (пост уже имеет ID)
+        try {
+            mentionService.createPostMentions(savedPost); // ✅ Используем savedPost
+            log.info("Упоминания успешно обработаны для поста ID: {}", savedPost.getId());
+        } catch (Exception e) {
+            log.error("Ошибка при создании упоминаний для поста {}: {}", savedPost.getId(), e.getMessage());
+            // Не бросаем исключение, чтобы не откатить создание поста
+            // Можно добавить в очередь для повторной обработки
+        }
+
+        // Получаем информацию о лайках
         Boolean isLiked = postLikeService.isPostLikedByUser(savedPost, currentUser.getId());
         List<PostResponseDto.LikeUserDto> recentLikes =
                 postLikeService.getRecentLikes(savedPost, 5);
 
+        // Создаем DTO для ответа
         PostResponseDto responseDto = postMapper.toResponseDto(savedPost, isLiked, recentLikes);
 
         // ✅ ЛОГИРУЕМ ФИНАЛЬНЫЙ DTO
@@ -96,6 +115,7 @@ public class PostServiceImpl implements PostService {
             log.info("Response Location Coordinates: ({}, {})",
                     responseDto.getLocation().getLatitude(), responseDto.getLocation().getLongitude());
         }
+
         return responseDto;
     }
 
@@ -213,11 +233,11 @@ public class PostServiceImpl implements PostService {
             log.info("Найдено {} постов пользователя {} на странице {}",
                     postSlice.getNumberOfElements(), userId, page);
 
-            // Конвертируем в DTO
-            PostListDto result = convertPostSliceToListDto(postSlice, page);
+            // ✅ ОБНОВЛЕННАЯ ЧАСТЬ - конвертируем в DTO с обработкой упоминаний
+            PostListDto result = convertPostSliceToListDtoWithMentions(postSlice, page, userId);
 
             if (result == null) {
-                log.warn("convertPostSliceToListDto вернул null для пользователя {}", userId);
+                log.warn("convertPostSliceToListDtoWithMentions вернул null для пользователя {}", userId);
                 result = createEmptyPostListDto(page, size);
             }
 
@@ -242,6 +262,67 @@ public class PostServiceImpl implements PostService {
 
             // Для других ошибок возвращаем пустой результат
             return createEmptyPostListDto(page, size);
+        }
+    }
+
+    // ✅ НОВЫЙ МЕТОД - конвертация с обработкой упоминаний
+    private PostListDto convertPostSliceToListDtoWithMentions(Slice<Post> postSlice, int page, Long currentUserId) {
+        try {
+            List<PostCardDto> postCards = postSlice.getContent().stream()
+                    .map(post -> {
+                        try {
+                            // Получаем информацию о лайках
+                            Boolean isLiked = false;
+                            List<PostCardDto.LikeUserDto> recentLikes = List.of();
+
+                            // Если пользователь авторизован, получаем информацию о лайках
+                            if (currentUserId != null) {
+                                try {
+                                    isLiked = postLikeService.isPostLikedByUser(post, currentUserId);
+
+                                    // ✅ ИСПРАВЛЕНИЕ: Правильная конвертация типов
+                                    recentLikes = postLikeService.getRecentLikes(post, 3)
+                                            .stream()
+                                            .map(likeUserDto -> PostCardDto.LikeUserDto.builder()
+                                                    .id(likeUserDto.getId())
+                                                    .firstName(likeUserDto.getFirstName())
+                                                    .lastName(likeUserDto.getLastName())
+                                                    .imageUrl(likeUserDto.getImageUrl())
+                                                    .build())
+                                            .collect(Collectors.toList());
+                                } catch (Exception e) {
+                                    log.warn("Ошибка получения информации о лайках для поста {}: {}",
+                                            post.getId(), e.getMessage());
+                                }
+                            }
+
+                            // ✅ ИСПОЛЬЗУЕМ toCardDto с обработкой упоминаний
+                            return postMapper.toCardDto(post, isLiked, recentLikes);
+
+                        } catch (Exception e) {
+                            log.error("Ошибка конвертации поста {} в DTO: {}", post.getId(), e.getMessage());
+
+                            // Fallback - возвращаем простую версию без упоминаний
+                            return postMapper.toCardDtoSimple(post, false, List.of());
+                        }
+                    })
+                    .filter(Objects::nonNull) // Исключаем null значения
+                    .collect(Collectors.toList());
+
+            return PostListDto.builder()
+                    .posts(postCards)
+                    .currentPage(page)
+                    .hasNext(postSlice.hasNext())
+                    .hasPrevious(postSlice.hasPrevious())
+                    .nextPage(postSlice.hasNext() ? page + 1 : null)
+                    .previousPage(page > 0 ? page - 1 : null)
+                    .isEmpty(postCards.isEmpty())
+                    .numberOfElements(postCards.size())
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Ошибка конвертации постов в DTO: {}", e.getMessage(), e);
+            return null;
         }
     }
 

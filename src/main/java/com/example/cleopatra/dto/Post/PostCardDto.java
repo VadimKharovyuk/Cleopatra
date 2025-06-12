@@ -36,7 +36,6 @@ public class PostCardDto {
     private List<LikeUserDto> recentLikes; // Последние 2-3 пользователя для карточки
 
 
-
     private LocationDto location;
     private Boolean hasLocation;
 

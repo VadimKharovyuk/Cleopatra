@@ -1,463 +1,469 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Создать пост - Cleopatra</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать пост - Cleopatra</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
 
-  <!-- ПОДКЛЮЧЕНИЕ ФРАГМЕНТА СТИЛЕЙ -->
-  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+    <!-- ПОДКЛЮЧЕНИЕ ФРАГМЕНТА СТИЛЕЙ -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
 
-  <style>
-    body {
-      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
-      color: var(--text-primary);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      min-height: 100vh;
-    }
+    <style>
+        body {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+        }
 
-    /* Main Content Layout */
-    .main-content {
-      margin-left: 280px;
-      margin-right: 380px;
-      min-height: 100vh;
-      padding: 2rem 0;
-    }
+        /* Main Content Layout */
+        .main-content {
+            margin-left: 280px;
+            margin-right: 380px;
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
 
-    /* Right Sidebar */
-    .right-sidebar {
-      position: fixed;
-      top: 0;
-      right: 0;
-      height: 100vh;
-      width: 380px;
-      background: var(--bg-secondary);
-      border-left: 1px solid var(--border-primary);
-      padding: 2rem 1.5rem;
-      overflow-y: auto;
-      box-shadow: var(--shadow-sm);
-    }
+        /* Right Sidebar */
+        .right-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 380px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-primary);
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            box-shadow: var(--shadow-sm);
+        }
 
-    /* Create Post Container */
-    .create-post-container {
-      background: var(--bg-secondary);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
-      margin: 0 2rem;
-      border: 1px solid var(--border-primary);
-    }
+        /* Create Post Container */
+        .create-post-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            margin: 0 2rem;
+            border: 1px solid var(--border-primary);
+        }
 
-    /* Header */
-    .create-header {
-      padding: 2rem 2rem 1rem;
-      border-bottom: 1px solid var(--border-secondary);
-      background: var(--surface-elevated);
-    }
+        /* Header */
+        .create-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid var(--border-secondary);
+            background: var(--surface-elevated);
+        }
 
-    .breadcrumb-nav {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-      font-size: 0.875rem;
-    }
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
 
-    .breadcrumb-link {
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
+        .breadcrumb-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
 
-    .breadcrumb-link:hover {
-      color: var(--accent-primary);
-    }
+        .breadcrumb-link:hover {
+            color: var(--accent-primary);
+        }
 
-    .breadcrumb-separator {
-      color: var(--text-muted);
-    }
+        .breadcrumb-separator {
+            color: var(--text-muted);
+        }
 
-    .page-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0;
-      letter-spacing: -0.02em;
-    }
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
 
-    .page-subtitle {
-      color: var(--text-secondary);
-      font-size: 1rem;
-      margin: 0.5rem 0 0;
-    }
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin: 0.5rem 0 0;
+        }
 
-    /* Form Styles */
-    .create-form {
-      padding: 2rem;
-    }
+        /* Form Styles */
+        .create-form {
+            padding: 2rem;
+        }
 
-    .form-group {
-      margin-bottom: 2rem;
-    }
+        .form-group {
+            margin-bottom: 2rem;
+        }
 
-    .form-label {
-      display: block;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.75rem;
-      font-size: 0.9375rem;
-    }
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            font-size: 0.9375rem;
+        }
 
-    .form-textarea {
-      width: 100%;
-      min-height: 150px;
-      border: 2px solid var(--border-primary);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem;
-      font-family: inherit;
-      font-size: 1rem;
-      line-height: 1.6;
-      resize: vertical;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      transition: all 0.2s ease;
-    }
+        .form-textarea {
+            width: 100%;
+            min-height: 150px;
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
 
-    .form-textarea:focus {
-      outline: none;
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-      background: white;
-    }
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            background: white;
+        }
 
-    .form-textarea::placeholder {
-      color: var(--text-muted);
-    }
+        .form-textarea::placeholder {
+            color: var(--text-muted);
+        }
 
-    /* Character Counter */
-    .char-counter {
-      text-align: right;
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      margin-top: 0.5rem;
-      transition: color 0.2s;
-    }
+        /* Character Counter */
+        .char-counter {
+            text-align: right;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            transition: color 0.2s;
+        }
 
-    .char-counter.warning {
-      color: var(--accent-warning);
-    }
+        .char-counter.warning {
+            color: var(--accent-warning);
+        }
 
-    .char-counter.danger {
-      color: #dc2626;
-    }
+        .char-counter.danger {
+            color: #dc2626;
+        }
 
-    /* File Upload */
-    .file-upload-area {
-      border: 2px dashed var(--border-primary);
-      border-radius: var(--radius-lg);
-      padding: 2rem;
-      text-align: center;
-      background: var(--bg-accent);
-      transition: all 0.2s ease;
-      cursor: pointer;
-      position: relative;
-    }
+        /* File Upload */
+        .file-upload-area {
+            border: 2px dashed var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            background: var(--bg-accent);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
 
-    .file-upload-area:hover {
-      border-color: var(--accent-primary);
-      background: rgba(37, 99, 235, 0.05);
-    }
+        .file-upload-area:hover {
+            border-color: var(--accent-primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
 
-    .file-upload-area.dragover {
-      border-color: var(--accent-primary);
-      background: rgba(37, 99, 235, 0.1);
-      transform: scale(1.02);
-    }
+        .file-upload-area.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(37, 99, 235, 0.1);
+            transform: scale(1.02);
+        }
 
-    .file-input {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-    }
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
 
-    .upload-icon {
-      font-size: 2.5rem;
-      color: var(--accent-primary);
-      margin-bottom: 1rem;
-    }
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+        }
 
-    .upload-text {
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
-    }
+        .upload-text {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
 
-    .upload-hint {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
+        .upload-hint {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
 
-    /* Image Preview */
-    .image-preview {
-      margin-top: 1.5rem;
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      border: 1px solid var(--border-primary);
-      position: relative;
-    }
+        /* Image Preview */
+        .image-preview {
+            margin-top: 1.5rem;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-primary);
+            position: relative;
+        }
 
-    .preview-image {
-      width: 100%;
-      max-height: 400px;
-      object-fit: cover;
-      display: block;
-    }
+        .preview-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            display: block;
+        }
 
-    .remove-image {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+        .remove-image {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-    .remove-image:hover {
-      background: #dc2626;
-      transform: scale(1.1);
-    }
+        .remove-image:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
 
-    /* Action Buttons */
-    .form-actions {
-      display: flex;
-      gap: 1rem;
-      padding: 1.5rem 2rem;
-      border-top: 1px solid var(--border-secondary);
-      background: var(--bg-accent);
-    }
+        /* Action Buttons */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--border-secondary);
+            background: var(--bg-accent);
+        }
 
-    .btn-luxury {
-      padding: 0.875rem 2rem;
-      border-radius: var(--radius-md);
-      font-weight: 500;
-      font-size: 0.9375rem;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      position: relative;
-      overflow: hidden;
-    }
+        .btn-luxury {
+            padding: 0.875rem 2rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9375rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      color: white;
-      box-shadow: var(--shadow-md);
-    }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
 
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-      color: white;
-    }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
 
-    .btn-primary:disabled {
-      opacity: 0.6;
-      transform: none;
-      cursor: not-allowed;
-    }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            transform: none;
+            cursor: not-allowed;
+        }
 
-    .btn-secondary {
-      background: var(--surface-elevated);
-      color: var(--text-primary);
-      border: 1px solid var(--border-secondary);
-    }
+        .btn-secondary {
+            background: var(--surface-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border-secondary);
+        }
 
-    .btn-secondary:hover {
-      background: var(--bg-accent);
-      color: var(--text-primary);
-      transform: translateY(-1px);
-    }
+        .btn-secondary:hover {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
 
-    /* Error Messages */
-    .error-message {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(248, 113, 113, 0.1));
-      color: #dc2626;
-      border-left: 4px solid #dc2626;
-      padding: 1rem 1.5rem;
-      border-radius: var(--radius-md);
-      margin: 2rem;
-    }
+        /* Error Messages */
+        .error-message {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(248, 113, 113, 0.1));
+            color: #dc2626;
+            border-left: 4px solid #dc2626;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            margin: 2rem;
+        }
 
-    .field-error {
-      color: #dc2626;
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
+        .field-error {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    /* Loading State */
-    .loading-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      border-radius: var(--radius-xl);
-      z-index: 1000;
-    }
+        /* Loading State */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-xl);
+            z-index: 1000;
+        }
 
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid var(--border-primary);
-      border-top: 3px solid var(--accent-primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-primary);
+            border-top: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
 
-    /* Widget Styles for Sidebar */
-    .widget {
-      background: var(--surface-elevated);
-      border-radius: var(--radius-lg);
-      margin-bottom: 1.5rem;
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border-secondary);
-    }
+        /* Widget Styles for Sidebar */
+        .widget {
+            background: var(--surface-elevated);
+            border-radius: var(--radius-lg);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-secondary);
+        }
 
-    .widget-header {
-      padding: 1.5rem 1.5rem 1rem;
-      border-bottom: 1px solid var(--border-secondary);
-    }
+        .widget-header {
+            padding: 1.5rem 1.5rem 1rem;
+            border-bottom: 1px solid var(--border-secondary);
+        }
 
-    .widget-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0;
-    }
+        .widget-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
 
-    .widget-content {
-      padding: 1rem 1.5rem 1.5rem;
-    }
+        .widget-content {
+            padding: 1rem 1.5rem 1.5rem;
+        }
 
-    .tip-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--border-secondary);
-    }
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-secondary);
+        }
 
-    .tip-item:last-child {
-      border-bottom: none;
-    }
+        .tip-item:last-child {
+            border-bottom: none;
+        }
 
-    .tip-icon {
-      width: 24px;
-      height: 24px;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 0.75rem;
-      flex-shrink: 0;
-    }
+        .tip-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
 
-    .tip-content {
-      flex: 1;
-    }
+        .tip-content {
+            flex: 1;
+        }
 
-    .tip-title {
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0 0 0.25rem;
-      font-size: 0.875rem;
-    }
+        .tip-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.25rem;
+            font-size: 0.875rem;
+        }
 
-    .tip-text {
-      color: var(--text-secondary);
-      font-size: 0.8125rem;
-      margin: 0;
-      line-height: 1.4;
-    }
+        .tip-text {
+            color: var(--text-secondary);
+            font-size: 0.8125rem;
+            margin: 0;
+            line-height: 1.4;
+        }
 
-    /* Responsive Design */
-    @media (max-width: 1400px) {
-      .right-sidebar {
-        display: none;
-      }
-      .main-content {
-        margin-right: 0;
-      }
-    }
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .right-sidebar {
+                display: none;
+            }
 
-    @media (max-width: 1024px) {
-      .main-content {
-        margin-left: 80px;
-      }
-    }
+            .main-content {
+                margin-right: 0;
+            }
+        }
 
-    @media (max-width: 768px) {
-      .main-content {
-        margin-left: 0;
-        margin-top: 60px;
-        padding: 1rem 0;
-      }
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 80px;
+            }
+        }
 
-      .create-post-container {
-        margin: 0 1rem;
-      }
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                margin-top: 60px;
+                padding: 1rem 0;
+            }
 
-      .create-header, .create-form, .form-actions {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-      }
+            .create-post-container {
+                margin: 0 1rem;
+            }
 
-      .form-actions {
-        flex-direction: column;
-      }
+            .create-header, .create-form, .form-actions {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
 
-      .btn-luxury {
-        width: 100%;
-        justify-content: center;
-      }
-    }
-  </style>
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn-luxury {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -470,179 +476,179 @@
 <!-- Main Content -->
 <main class="main-content">
 
-  <!-- Error Messages -->
-  <div th:if="${errorMessage}" class="error-message">
-    <i class="fas fa-exclamation-circle me-2"></i>
-    <span th:text="${errorMessage}"></span>
-  </div>
-
-  <!-- Create Post Container -->
-  <div class="create-post-container">
-    <div class="loading-overlay" id="loadingOverlay">
-      <div class="loading-spinner"></div>
+    <!-- Error Messages -->
+    <div th:if="${errorMessage}" class="error-message">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
     </div>
 
-    <!-- Header -->
-    <div class="create-header">
-      <nav class="breadcrumb-nav">
-        <a href="/" class="breadcrumb-link">
-          <i class="fas fa-home"></i>
-          Главная
-        </a>
-        <span class="breadcrumb-separator">/</span>
-        <span>Создать пост</span>
-      </nav>
+    <!-- Create Post Container -->
+    <div class="create-post-container">
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+        </div>
 
-      <h1 class="page-title">Создать новый пост</h1>
-      <p class="page-subtitle">Поделитесь своими мыслями с миром</p>
+        <!-- Header -->
+        <div class="create-header">
+            <nav class="breadcrumb-nav">
+                <a href="/" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    Главная
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span>Создать пост</span>
+            </nav>
+
+            <h1 class="page-title">Создать новый пост</h1>
+            <p class="page-subtitle">Поделитесь своими мыслями с миром</p>
+        </div>
+
+        <!-- Form -->
+        <form th:action="@{/posts/create}"
+              th:object="${postCreateDto}"
+              method="post"
+              enctype="multipart/form-data"
+              class="create-form"
+              id="createPostForm">
+
+            <!-- Text Content -->
+            <div class="form-group">
+                <label for="content" class="form-label">
+                    <i class="fas fa-edit me-2"></i>
+                    Что у вас нового?
+                </label>
+                <textarea
+                        id="content"
+                        th:field="*{content}"
+                        class="form-textarea"
+                        placeholder="Поделитесь своими мыслями, идеями или просто расскажите о своем дне..."></textarea>
+
+                <div class="char-counter" id="charCounter">0/1000 символов</div>
+
+                <!-- Validation Errors -->
+                <div th:if="${#fields.hasErrors('content')}" class="field-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span th:each="error : ${#fields.errors('content')}" th:text="${error}"></span>
+                </div>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-image me-2"></i>
+                    Добавить изображение (необязательно)
+                </label>
+
+                <div class="file-upload-area" id="uploadArea">
+                    <input
+                            type="file"
+                            id="image"
+                            th:field="*{image}"
+                            class="file-input"
+                            accept="image/jpeg,image/jpg,image/png,image/heif,image/heic">
+
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">Перетащите изображение или нажмите для выбора</div>
+                    <div class="upload-hint">JPG, PNG, HEIF, HEIC до 10MB</div>
+                </div>
+
+                <!-- Image Preview -->
+                <div id="imagePreview" class="image-preview" style="display: none;">
+                    <img id="preview" src="" alt="Предварительный просмотр" class="preview-image">
+                    <button type="button" class="remove-image" onclick="removeImage()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Validation Errors -->
+                <div th:if="${#fields.hasErrors('image')}" class="field-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span th:each="error : ${#fields.errors('image')}" th:text="${error}"></span>
+                </div>
+            </div>
+        </form>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+            <button type="submit" form="createPostForm" class="btn-luxury btn-primary" id="submitBtn">
+                <i class="fas fa-paper-plane"></i>
+                <span>Опубликовать пост</span>
+            </button>
+
+            <button type="button" class="btn-luxury btn-secondary" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i>
+                <span>Отмена</span>
+            </button>
+        </div>
     </div>
-
-    <!-- Form -->
-    <form th:action="@{/posts/create}"
-          th:object="${postCreateDto}"
-          method="post"
-          enctype="multipart/form-data"
-          class="create-form"
-          id="createPostForm">
-
-      <!-- Text Content -->
-      <div class="form-group">
-        <label for="content" class="form-label">
-          <i class="fas fa-edit me-2"></i>
-          Что у вас нового?
-        </label>
-        <textarea
-                id="content"
-                th:field="*{content}"
-                class="form-textarea"
-                placeholder="Поделитесь своими мыслями, идеями или просто расскажите о своем дне..."></textarea>
-
-        <div class="char-counter" id="charCounter">0/1000 символов</div>
-
-        <!-- Validation Errors -->
-        <div th:if="${#fields.hasErrors('content')}" class="field-error">
-          <i class="fas fa-exclamation-triangle"></i>
-          <span th:each="error : ${#fields.errors('content')}" th:text="${error}"></span>
-        </div>
-      </div>
-
-      <!-- Image Upload -->
-      <div class="form-group">
-        <label class="form-label">
-          <i class="fas fa-image me-2"></i>
-          Добавить изображение (необязательно)
-        </label>
-
-        <div class="file-upload-area" id="uploadArea">
-          <input
-                  type="file"
-                  id="image"
-                  th:field="*{image}"
-                  class="file-input"
-                  accept="image/jpeg,image/jpg,image/png,image/heif,image/heic">
-
-          <div class="upload-icon">
-            <i class="fas fa-cloud-upload-alt"></i>
-          </div>
-          <div class="upload-text">Перетащите изображение или нажмите для выбора</div>
-          <div class="upload-hint">JPG, PNG, HEIF, HEIC до 10MB</div>
-        </div>
-
-        <!-- Image Preview -->
-        <div id="imagePreview" class="image-preview" style="display: none;">
-          <img id="preview" src="" alt="Предварительный просмотр" class="preview-image">
-          <button type="button" class="remove-image" onclick="removeImage()">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-
-        <!-- Validation Errors -->
-        <div th:if="${#fields.hasErrors('image')}" class="field-error">
-          <i class="fas fa-exclamation-triangle"></i>
-          <span th:each="error : ${#fields.errors('image')}" th:text="${error}"></span>
-        </div>
-      </div>
-    </form>
-
-    <!-- Action Buttons -->
-    <div class="form-actions">
-      <button type="submit" form="createPostForm" class="btn-luxury btn-primary" id="submitBtn">
-        <i class="fas fa-paper-plane"></i>
-        <span>Опубликовать пост</span>
-      </button>
-
-      <button type="button" class="btn-luxury btn-secondary" onclick="history.back()">
-        <i class="fas fa-arrow-left"></i>
-        <span>Отмена</span>
-      </button>
-    </div>
-  </div>
 </main>
 
 <!-- Right Sidebar -->
 <aside class="right-sidebar">
-  <!-- Tips Widget -->
-  <div class="widget">
-    <div class="widget-header">
-      <h3 class="widget-title">Советы для создания постов</h3>
+    <!-- Tips Widget -->
+    <div class="widget">
+        <div class="widget-header">
+            <h3 class="widget-title">Советы для создания постов</h3>
+        </div>
+        <div class="widget-content">
+            <div class="tip-item">
+                <div class="tip-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <div class="tip-content">
+                    <p class="tip-title">Будьте оригинальными</p>
+                    <p class="tip-text">Делитесь уникальными мыслями и идеями, которые интересны именно вам</p>
+                </div>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon">
+                    <i class="fas fa-image"></i>
+                </div>
+                <div class="tip-content">
+                    <p class="tip-title">Добавляйте изображения</p>
+                    <p class="tip-text">Визуальный контент привлекает больше внимания и делает пост интереснее</p>
+                </div>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon">
+                    <i class="fas fa-hashtag"></i>
+                </div>
+                <div class="tip-content">
+                    <p class="tip-title">Используйте хештеги</p>
+                    <p class="tip-text">Добавляйте релевантные хештеги, чтобы ваш пост было легче найти</p>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="widget-content">
-      <div class="tip-item">
-        <div class="tip-icon">
-          <i class="fas fa-lightbulb"></i>
-        </div>
-        <div class="tip-content">
-          <p class="tip-title">Будьте оригинальными</p>
-          <p class="tip-text">Делитесь уникальными мыслями и идеями, которые интересны именно вам</p>
-        </div>
-      </div>
-      <div class="tip-item">
-        <div class="tip-icon">
-          <i class="fas fa-image"></i>
-        </div>
-        <div class="tip-content">
-          <p class="tip-title">Добавляйте изображения</p>
-          <p class="tip-text">Визуальный контент привлекает больше внимания и делает пост интереснее</p>
-        </div>
-      </div>
-      <div class="tip-item">
-        <div class="tip-icon">
-          <i class="fas fa-hashtag"></i>
-        </div>
-        <div class="tip-content">
-          <p class="tip-title">Используйте хештеги</p>
-          <p class="tip-text">Добавляйте релевантные хештеги, чтобы ваш пост было легче найти</p>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Recent Activity -->
-  <div class="widget">
-    <div class="widget-header">
-      <h3 class="widget-title">Ваша активность</h3>
+    <!-- Recent Activity -->
+    <div class="widget">
+        <div class="widget-header">
+            <h3 class="widget-title">Ваша активность</h3>
+        </div>
+        <div class="widget-content">
+            <div class="tip-item">
+                <div class="tip-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="tip-content">
+                    <p class="tip-title">Постов создано</p>
+                    <p class="tip-text">12 за последнюю неделю</p>
+                </div>
+            </div>
+            <div class="tip-item">
+                <div class="tip-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div class="tip-content">
+                    <p class="tip-title">Лайков получено</p>
+                    <p class="tip-text">156 за последнюю неделю</p>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="widget-content">
-      <div class="tip-item">
-        <div class="tip-icon">
-          <i class="fas fa-edit"></i>
-        </div>
-        <div class="tip-content">
-          <p class="tip-title">Постов создано</p>
-          <p class="tip-text">12 за последнюю неделю</p>
-        </div>
-      </div>
-      <div class="tip-item">
-        <div class="tip-icon">
-          <i class="fas fa-heart"></i>
-        </div>
-        <div class="tip-content">
-          <p class="tip-title">Лайков получено</p>
-          <p class="tip-text">156 за последнюю неделю</p>
-        </div>
-      </div>
-    </div>
-  </div>
 </aside>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -651,113 +657,113 @@
 <th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
 
 <script>
-  // Character counter
-  const contentTextarea = document.getElementById('content');
-  const charCounter = document.getElementById('charCounter');
-  const maxLength = 1000;
+    // Character counter
+    const contentTextarea = document.getElementById('content');
+    const charCounter = document.getElementById('charCounter');
+    const maxLength = 1000;
 
-  contentTextarea.addEventListener('input', function() {
-    const currentLength = this.value.length;
-    charCounter.textContent = `${currentLength}/${maxLength} символов`;
+    contentTextarea.addEventListener('input', function () {
+        const currentLength = this.value.length;
+        charCounter.textContent = `${currentLength}/${maxLength} символов`;
 
-    // Update counter color based on usage
-    charCounter.className = 'char-counter';
-    if (currentLength > maxLength * 0.9) {
-      charCounter.classList.add('warning');
+        // Update counter color based on usage
+        charCounter.className = 'char-counter';
+        if (currentLength > maxLength * 0.9) {
+            charCounter.classList.add('warning');
+        }
+        if (currentLength > maxLength * 0.95) {
+            charCounter.classList.remove('warning');
+            charCounter.classList.add('danger');
+        }
+    });
+
+    // Image upload functionality
+    const imageInput = document.getElementById('image');
+    const uploadArea = document.getElementById('uploadArea');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImage = document.getElementById('preview');
+
+    // Handle file selection
+    imageInput.addEventListener('change', handleImageSelect);
+
+    // Handle drag and drop
+    uploadArea.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function (e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function (e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            imageInput.files = files;
+            handleImageSelect();
+        }
+    });
+
+    function handleImageSelect() {
+        const file = imageInput.files[0];
+        if (file) {
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heif', 'image/heic'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Неподдерживаемый формат файла. Используйте JPG, PNG, HEIF или HEIC.');
+                imageInput.value = '';
+                return;
+            }
+
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Файл слишком большой. Максимальный размер: 10MB.');
+                imageInput.value = '';
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+                imagePreview.style.display = 'block';
+                uploadArea.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
     }
-    if (currentLength > maxLength * 0.95) {
-      charCounter.classList.remove('warning');
-      charCounter.classList.add('danger');
-    }
-  });
 
-  // Image upload functionality
-  const imageInput = document.getElementById('image');
-  const uploadArea = document.getElementById('uploadArea');
-  const imagePreview = document.getElementById('imagePreview');
-  const previewImage = document.getElementById('preview');
-
-  // Handle file selection
-  imageInput.addEventListener('change', handleImageSelect);
-
-  // Handle drag and drop
-  uploadArea.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    this.classList.add('dragover');
-  });
-
-  uploadArea.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    this.classList.remove('dragover');
-  });
-
-  uploadArea.addEventListener('drop', function(e) {
-    e.preventDefault();
-    this.classList.remove('dragover');
-
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      imageInput.files = files;
-      handleImageSelect();
-    }
-  });
-
-  function handleImageSelect() {
-    const file = imageInput.files[0];
-    if (file) {
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heif', 'image/heic'];
-      if (!allowedTypes.includes(file.type)) {
-        alert('Неподдерживаемый формат файла. Используйте JPG, PNG, HEIF или HEIC.');
+    function removeImage() {
         imageInput.value = '';
-        return;
-      }
-
-      // Validate file size (10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        alert('Файл слишком большой. Максимальный размер: 10MB.');
-        imageInput.value = '';
-        return;
-      }
-
-      // Show preview
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        previewImage.src = e.target.result;
-        imagePreview.style.display = 'block';
-        uploadArea.style.display = 'none';
-      };
-      reader.readAsDataURL(file);
+        imagePreview.style.display = 'none';
+        uploadArea.style.display = 'block';
     }
-  }
 
-  function removeImage() {
-    imageInput.value = '';
-    imagePreview.style.display = 'none';
-    uploadArea.style.display = 'block';
-  }
+    // Form submission with loading state
+    const form = document.getElementById('createPostForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
 
-  // Form submission with loading state
-  const form = document.getElementById('createPostForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const loadingOverlay = document.getElementById('loadingOverlay');
+    form.addEventListener('submit', function () {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Публикуем...</span>';
+        loadingOverlay.style.display = 'flex';
+    });
 
-  form.addEventListener('submit', function() {
-    // Show loading state
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Публикуем...</span>';
-    loadingOverlay.style.display = 'flex';
-  });
+    // Auto-resize textarea
+    contentTextarea.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = Math.max(150, this.scrollHeight) + 'px';
+    });
 
-  // Auto-resize textarea
-  contentTextarea.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.max(150, this.scrollHeight) + 'px';
-  });
-
-  // Initialize character counter
-  charCounter.textContent = `0/${maxLength} символов`;
+    // Initialize character counter
+    charCounter.textContent = `0/${maxLength} символов`;
 </script>
-
+<script th:src="@{/js/post/mention-indicator.js}"></script>
 </body>
 </html>

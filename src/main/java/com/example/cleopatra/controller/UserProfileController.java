@@ -41,6 +41,7 @@ public class UserProfileController {
 
 
 
+
     @GetMapping("/{userId}")
     public String showProfile(@PathVariable Long userId,
                               @RequestParam(defaultValue = "0") int page,

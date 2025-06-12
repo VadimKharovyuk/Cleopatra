@@ -4,12 +4,14 @@ import com.example.cleopatra.dto.Post.PostListDto;
 import com.example.cleopatra.dto.Post.PostResponseDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.model.User;
+import com.example.cleopatra.service.MentionService;
 import com.example.cleopatra.service.PostService;
 import com.example.cleopatra.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Controller
 @RequestMapping("/posts")
@@ -28,6 +31,7 @@ public class PostController {
 
     private final PostService postService;
     private final UserService userService;
+
 
 
     @GetMapping("/create")
@@ -198,6 +202,7 @@ public class PostController {
                     .body(null);
         }
     }
+
 
     /**
      * API endpoint для AJAX загрузки постов пользователя

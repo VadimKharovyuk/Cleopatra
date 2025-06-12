@@ -39,6 +39,7 @@ public class DashboardController {
                 User currentUser = userService.getCurrentUserEntity();
 
 
+
                 PostListDto recentFeedPosts = postService.getFeedPosts(currentUser.getId(), 0, 10);
                 model.addAttribute("recentPosts", recentFeedPosts);
                 model.addAttribute("currentUser", currentUser);
