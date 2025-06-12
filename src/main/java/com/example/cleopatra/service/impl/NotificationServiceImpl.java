@@ -387,6 +387,7 @@ public class NotificationServiceImpl implements NotificationService {
                     .title("Подписка отменена")
                     .message(actorName + " отписался от вас")
                     .isRead(false)
+                    .isSent(false)
                     .createdAt(LocalDateTime.now())
                     .build();
 

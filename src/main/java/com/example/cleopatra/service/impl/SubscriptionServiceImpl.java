@@ -1,6 +1,7 @@
 package com.example.cleopatra.service.impl;
 
 import com.example.cleopatra.EVENT.SubscriptionCreatedEvent;
+import com.example.cleopatra.EVENT.UnsubscribeEvent;
 import com.example.cleopatra.dto.SubscriptionDto.UserSubscriptionCard;
 import com.example.cleopatra.dto.SubscriptionDto.UserSubscriptionDto;
 import com.example.cleopatra.dto.SubscriptionDto.UserSubscriptionListDto;
@@ -84,17 +85,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             return false;
         }
     }
-    // 🔥 Добавить метод если его нет
     private String getFullName(User user) {
         if (user.getFirstName() != null && user.getLastName() != null) {
             return user.getFirstName() + " " + user.getLastName();
         } else if (user.getFirstName() != null) {
             return user.getFirstName();
-        } else if (user.getFirstName() != null) {
+        } else if (user.getLastName() != null) {
             return user.getLastName();
         }
         return "Пользователь";
     }
+
 
     @Override
     @Transactional
@@ -106,8 +107,20 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 return false;
             }
 
+            // Получаем пользователя ДО удаления подписки (для получения имени)
+            User subscriber = userRepository.findById(subscriberId)
+                    .orElseThrow(() -> new RuntimeException("Subscriber not found: " + subscriberId));
+
             // Удаляем подписку
             subscriptionRepository.deleteBySubscriberIdAndSubscribedToId(subscriberId, subscribedToId);
+
+            // 🔥 ПУБЛИКУЕМ СОБЫТИЕ О ОТПИСКЕ
+            String subscriberName = getFullName(subscriber); // Передаем объект User
+            eventPublisher.publishEvent(new UnsubscribeEvent(
+                    subscriberId,      // кто отписался
+                    subscribedToId,    // от кого отписались
+                    subscriberName     // имя того, кто отписался
+            ));
 
             // Обновляем счетчики
             updateSubscriptionCounts(subscriberId, subscribedToId);
