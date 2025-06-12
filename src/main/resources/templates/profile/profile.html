@@ -733,11 +733,8 @@
             flex-shrink: 0;
         }
 
-        .btn-follow:hover {
-            background: var(--accent-secondary);
-            transform: translateY(-1px);
-        }
     </style>
+    <link th:href="@{/css/feed/mention-suggestions.css}" rel="stylesheet">
 
 
 </head>
@@ -1337,8 +1334,8 @@
                 </div>
 
             </div>
-            <link th:href="@{/css/feed/mention-suggestions.css}" rel="stylesheet">
-            <script th:src="@{/js/post/mention-indicator.js}"></script>
+
+
 
             <!-- Если постов нет -->
             <div th:unless="${posts != null and !posts.posts.empty}" class="empty-state" id="emptyState">
@@ -3041,25 +3038,158 @@
 
 <!-- В конце body, перед закрывающим тегом -->
 
+<!-- ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА СКРИПТОВ ПРОФИЛЯ -->
 
-<!-- Модуль подписок загружается последним -->
-<script th:src="@{/js/profile/subscriptionActions.js}"></script>
-
-<!-- Подключаем ваши собственные модули в правильном порядке -->
+<!-- 1. Базовые утилиты (без зависимостей) -->
 <script th:src="@{/js/profile/notifications.js}"></script>
 <script th:src="@{/js/profile/apiClient.js}"></script>
-<script th:src="@{/js/profile/userActions.js}"></script>
+
+<!-- 2. Вспомогательные модули -->
 <script th:src="@{/js/profile/profileUtils.js}"></script>
 
-
-
-<script th:src="@{/js/profile/postNotificationLike.js}"></script>
-
+<!-- 3. Статус пользователя (ТОЛЬКО ОДИН РАЗ!) -->
 <script th:src="@{/js/online-status.js}"></script>
 
+<!-- 4. Действия пользователя (зависят от apiClient и notifications) -->
+<script th:src="@{/js/profile/userActions.js}"></script>
+
+<!-- 5. Блокировка пользователя (зависит от userActions) -->
 <script th:src="@{/js/profile/lock-user.js}"></script>
 
-<script th:src="@{/js/online-status.js}"></script>
+<!-- 6. Уведомления о лайках (зависят от базовых модулей) -->
+<script th:src="@{/js/profile/postNotificationLike.js}"></script>
+
+<!-- 7. Подписки загружаются последними (зависят от всех предыдущих) -->
+<script th:src="@{/js/profile/subscriptionActions.js}"></script>
+
+<!-- 8. Координатор инициализации профиля -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('👤 Инициализация модулей профиля...');
+
+        // Проверяем загрузку всех модулей
+        const requiredModules = [
+            'NotificationManager',
+            'ApiClient',
+            'UserActions',
+            'ProfileUtils'
+        ];
+
+        const missingModules = requiredModules.filter(module =>
+            typeof window[module] === 'undefined'
+        );
+
+        if (missingModules.length > 0) {
+            console.warn('⚠️ Не загружены модули:', missingModules);
+        }
+
+        // Инициализируем модули в правильном порядке
+        setTimeout(() => {
+            try {
+                // 1. Базовые утилиты
+                if (typeof ProfileUtils !== 'undefined' && ProfileUtils.init) {
+                    ProfileUtils.init();
+                    console.log('✅ ProfileUtils инициализирован');
+                }
+
+                // 2. API клиент
+                if (typeof ApiClient !== 'undefined' && ApiClient.init) {
+                    ApiClient.init();
+                    console.log('✅ ApiClient инициализирован');
+                }
+
+                // 3. Статус онлайн
+                if (typeof OnlineStatus !== 'undefined' && OnlineStatus.init) {
+                    OnlineStatus.init();
+                    console.log('✅ OnlineStatus инициализирован');
+                }
+
+                // 4. Действия пользователя
+                if (typeof UserActions !== 'undefined' && UserActions.init) {
+                    UserActions.init();
+                    console.log('✅ UserActions инициализирован');
+                }
+
+                // 5. Блокировка пользователя
+                if (typeof LockUser !== 'undefined' && LockUser.init) {
+                    LockUser.init();
+                    console.log('✅ LockUser инициализирован');
+                }
+
+                // 6. Уведомления о лайках
+                if (typeof PostNotificationLike !== 'undefined' && PostNotificationLike.init) {
+                    PostNotificationLike.init();
+                    console.log('✅ PostNotificationLike инициализирован');
+                }
+
+                // 7. Подписки (последними)
+                if (typeof SubscriptionActions !== 'undefined' && SubscriptionActions.init) {
+                    SubscriptionActions.init();
+                    console.log('✅ SubscriptionActions инициализирован');
+                }
+
+                console.log('🎉 Все модули профиля инициализированы');
+
+            } catch (error) {
+                console.error('❌ Ошибка при инициализации модулей профиля:', error);
+            }
+        }, 100);
+    });
+
+    // Функция для проверки готовности модулей профиля
+    window.checkProfileModulesReady = function() {
+        const modules = [
+            'NotificationManager',
+            'ApiClient',
+            'UserActions',
+            'ProfileUtils',
+            'SubscriptionActions'
+        ];
+
+        const status = {};
+        modules.forEach(module => {
+            status[module] = typeof window[module] !== 'undefined';
+        });
+
+        console.table(status);
+        return status;
+    };
+
+    // Функция для переинициализации модулей профиля
+    window.reinitializeProfileModules = function() {
+        console.log('🔄 Переинициализация модулей профиля...');
+
+        // Перезапускаем инициализацию через 100мс
+        setTimeout(() => {
+            const event = new Event('DOMContentLoaded');
+            document.dispatchEvent(event);
+        }, 100);
+    };
+</script>
+
+<!-- 9. Диагностика (только для разработки) -->
+<script>
+    // Диагностика конфликтов (убрать в продакшене)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        setTimeout(() => {
+            console.group('🔍 ДИАГНОСТИКА ПРОФИЛЯ');
+            console.log('Загруженные модули профиля:');
+            window.checkProfileModulesReady();
+
+            // Проверяем дублирование глобальных функций
+            const globalFunctions = Object.keys(window).filter(key =>
+                typeof window[key] === 'function' &&
+                (key.includes('toggle') || key.includes('Action') || key.includes('User'))
+            );
+
+            if (globalFunctions.length > 0) {
+                console.log('Глобальные функции:', globalFunctions);
+            }
+
+            console.groupEnd();
+        }, 500);
+    }
+</script>
 
 </body>
 </html>
