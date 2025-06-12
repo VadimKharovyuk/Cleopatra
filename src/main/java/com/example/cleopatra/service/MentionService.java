@@ -1,4 +1,5 @@
 package com.example.cleopatra.service;
+import com.example.cleopatra.EVENT.PostMentionsBatchEvent;
 import com.example.cleopatra.model.Post;
 import com.example.cleopatra.model.PostMention;
 import com.example.cleopatra.model.User;
@@ -6,6 +7,7 @@ import com.example.cleopatra.repository.PostMentionRepository;
 import com.example.cleopatra.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +25,7 @@ public class MentionService {
 
     private final UserRepository userRepository;
     private final PostMentionRepository postMentionRepository;
-    // private final NotificationService notificationService; // раскомментируйте когда будет готов
+    private final ApplicationEventPublisher eventPublisher;
 
     // Паттерн для поиска упоминаний: @Имя Фамилия или @"Имя Фамилия"
     private static final Pattern MENTION_PATTERN = Pattern.compile(
@@ -72,7 +74,6 @@ public class MentionService {
 
     /**
      * Создает упоминания для поста
-     * ✅ ИСПРАВЛЕННАЯ ВЕРСИЯ
      */
     @Transactional
     public void createPostMentions(Post post) {
@@ -103,7 +104,7 @@ public class MentionService {
         // Исключаем автора поста из упоминаний
         mentionedUsers = mentionedUsers.stream()
                 .filter(user -> !user.getId().equals(author.getId()))
-                .collect(Collectors.toList());
+                .toList();
 
         if (mentionedUsers.isEmpty()) {
             log.info("Пользователи для упоминания не найдены или все упоминания указывают на автора поста");
@@ -126,7 +127,7 @@ public class MentionService {
             return;
         }
 
-        // Создаем упоминания батчем для лучшей производительности
+        // Создаем упоминания батчем
         List<PostMention> mentionsToSave = newMentionedUsers.stream()
                 .map(mentionedUser -> PostMention.builder()
                         .post(post)
@@ -138,21 +139,55 @@ public class MentionService {
         // Сохраняем все упоминания одним запросом
         List<PostMention> savedMentions = postMentionRepository.saveAll(mentionsToSave);
 
-        // Отправляем уведомления
-        for (PostMention mention : savedMentions) {
+        // ✅ СОЗДАЕМ И ПУБЛИКУЕМ BATCH СОБЫТИЕ
+        if (!savedMentions.isEmpty()) {
             try {
-                // notificationService.sendMentionNotification(mention.getMentionedUser(), post, author);
-                log.info("Создано упоминание: {} упомянут пользователем {} в посте {}",
-                        mention.getMentionedUser().getFirstName() + " " + mention.getMentionedUser().getLastName(),
-                        author.getFirstName() + " " + author.getLastName(),
-                        post.getId());
+                // Создаем список MentionInfo для события
+                List<PostMentionsBatchEvent.MentionInfo> mentionInfos = savedMentions.stream()
+                        .map(mention -> new PostMentionsBatchEvent.MentionInfo(
+                                mention.getMentionedUser().getId(),
+                                "@" + mention.getMentionedUser().getFirstName() + " " + mention.getMentionedUser().getLastName()
+                        ))
+                        .toList();
+
+                // Создаем batch событие
+                PostMentionsBatchEvent batchEvent = new PostMentionsBatchEvent(
+                        post.getId(),
+                        author.getId(),
+                        post.getContent(),
+                        mentionInfos
+                );
+
+                // ✅ ПУБЛИКУЕМ BATCH СОБЫТИЕ
+                eventPublisher.publishEvent(batchEvent);
+
+                log.info("✅ Опубликовано batch событие упоминаний для поста {} с {} упоминаниями",
+                        post.getId(), savedMentions.size());
+
             } catch (Exception e) {
-                log.error("Ошибка отправки уведомления пользователю {}: {}",
-                        mention.getMentionedUser().getId(), e.getMessage());
+                log.error("❌ Ошибка публикации batch события упоминаний для поста {}: {}",
+                        post.getId(), e.getMessage());
             }
         }
 
-        log.info("Успешно создано {} новых упоминаний для поста ID: {}", savedMentions.size(), post.getId());
+        log.info("✅ Успешно создано {} новых упоминаний для поста ID: {}", savedMentions.size(), post.getId());
+    }
+
+    // ✅ ВСПОМОГАТЕЛЬНЫЙ МЕТОД для создания превью поста
+    private String getPostPreview(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            return "Новый пост";
+        }
+
+        // Убираем HTML теги если есть
+        String cleanContent = content.replaceAll("<[^>]*>", "");
+
+        // Обрезаем до 100 символов для batch события
+        if (cleanContent.length() > 100) {
+            return cleanContent.substring(0, 100) + "...";
+        }
+
+        return cleanContent;
     }
 
     /**
@@ -172,12 +207,6 @@ public class MentionService {
         log.debug("Найдено {} пользователей для запроса: '{}'", users.size(), trimmedQuery);
         return users;
     }
-
-
-
-
-
-
 
 
     /**
@@ -246,12 +275,4 @@ public class MentionService {
         return postMentionRepository.findByPostId(postId);
     }
 
-
-
-    /**
-     * Проверяет, упомянут ли пользователь в посте
-     */
-    public boolean isUserMentioned(Long postId, Long userId) {
-        return postMentionRepository.existsByPostIdAndMentionedUserId(postId, userId);
-    }
 }

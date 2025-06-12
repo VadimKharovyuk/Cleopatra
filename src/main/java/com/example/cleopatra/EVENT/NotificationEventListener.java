@@ -194,7 +194,52 @@ public class NotificationEventListener {
     }
 
 
+    @EventListener
+    @Async
+    public void handlePostMentionsBatch(PostMentionsBatchEvent event) {
+        log.info("🎉 EVENT RECEIVED: PostMentionsBatchEvent - user {} mentioned {} users in post {}",
+                event.getMentionerUserId(), event.getMentions().size(), event.getPostId());
 
+        try {
+            // ✅ УПРОЩЕННАЯ ОБРАБОТКА - только ID пользователей
+            for (PostMentionsBatchEvent.MentionInfo mentionInfo : event.getMentions()) {
+                try {
+                    // Создаем уведомление с минимальными параметрами
+                    notificationService.createMentionNotification(
+                            mentionInfo.getMentionedUserId(), // кому (кого упомянули)
+                            event.getMentionerUserId()        // кто (кто упомянул)
+                    );
+
+                    log.info("✅ Mention notification created: {} mentioned {} in post {}",
+                            event.getMentionerUserId(), mentionInfo.getMentionedUserId(), event.getPostId());
+
+                } catch (Exception e) {
+                    log.error("❌ Error creating mention notification for user {}: {}",
+                            mentionInfo.getMentionedUserId(), e.getMessage());
+                    // Продолжаем обработку остальных упоминаний
+                }
+            }
+
+            log.info("✅ Batch mention notifications processing completed for post {}", event.getPostId());
+
+        } catch (Exception e) {
+            log.error("❌ Error processing batch mention event for post {}: {}", event.getPostId(), e.getMessage());
+        }
+    }
+
+    private String getPostPreview(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            return "Новый пост";
+        }
+
+        String cleanContent = content.replaceAll("<[^>]*>", "");
+
+        if (cleanContent.length() > 50) {
+            return cleanContent.substring(0, 50) + "...";
+        }
+
+        return cleanContent;
+    }
 
 
     @Transactional

@@ -229,6 +229,83 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    @Override
+    @Transactional
+    public void createMentionNotification(Long mentionedUserId, Long mentionerUserId) {
+        try {
+            log.info("Creating mention notification: mentioner {} → mentioned {}", mentionerUserId, mentionedUserId);
+
+            // Проверяем валидность параметров
+            if (mentionedUserId == null || mentionerUserId == null) {
+                log.warn("Invalid parameters for mention notification: mentionedUserId={}, mentionerUserId={}",
+                        mentionedUserId, mentionerUserId);
+                return;
+            }
+
+            // Проверяем, что пользователь не упоминает сам себя
+            if (mentionedUserId.equals(mentionerUserId)) {
+                log.debug("User {} tried to mention themselves, skipping notification", mentionerUserId);
+                return;
+            }
+
+            // Получаем пользователей из базы данных
+            User mentionedUser = userRepository.findById(mentionedUserId)
+                    .orElseThrow(() -> new RuntimeException("Упомянутый пользователь с ID " + mentionedUserId + " не найден"));
+
+            User mentionerUser = userRepository.findById(mentionerUserId)
+                    .orElseThrow(() -> new RuntimeException("Пользователь-автор с ID " + mentionerUserId + " не найден"));
+
+            // Проверяем, не заблокирован ли пользователь
+            // TODO: Добавить проверку блокировки если есть такая функциональность
+            // if (isUserBlocked(mentionedUserId, mentionerUserId)) {
+            //     log.debug("User {} is blocked by {}, skipping notification", mentionerUserId, mentionedUserId);
+            //     return;
+            // }
+
+            // Формируем заголовок уведомления
+            String title = String.format("%s %s упомянул вас в посте",
+                    mentionerUser.getFirstName(),
+                    mentionerUser.getLastName());
+
+            // Формируем содержание уведомления
+            String message = String.format("%s %s упомянул вас в своем посте",
+                    mentionerUser.getFirstName(),
+                    mentionerUser.getLastName());
+
+            // Создаем уведомление
+            Notification notification = Notification.builder()
+                    .recipient(mentionedUser)
+                    .actor(mentionerUser)
+                    .type(NotificationType.MENTION)
+                    .title(title)
+                    .message(message)
+                    .isRead(false)
+                    .isSent(false)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            // Сохраняем уведомление
+            Notification savedNotification = notificationRepository.save(notification);
+
+            log.info("✅ Mention notification created successfully: ID={}, recipient={}, actor={}",
+                    savedNotification.getId(), mentionedUserId, mentionerUserId);
+
+            // Публикуем событие для отправки уведомления
+            NotificationCreatedEvent event = new NotificationCreatedEvent(
+                    savedNotification.getId(),
+                    mentionedUserId
+            );
+            eventPublisher.publishEvent(event);
+
+            log.info("📤 NotificationCreatedEvent published for mention notification: {}", savedNotification.getId());
+
+        } catch (Exception e) {
+            log.error("❌ Error creating mention notification: mentioner {} → mentioned {}: {}",
+                    mentionerUserId, mentionedUserId, e.getMessage(), e);
+            throw new RuntimeException("Не удалось создать уведомление об упоминании: " + e.getMessage(), e);
+        }
+    }
+
     // ===================== ПОЛУЧЕНИЕ УВЕДОМЛЕНИЙ =====================
 
     @Override
