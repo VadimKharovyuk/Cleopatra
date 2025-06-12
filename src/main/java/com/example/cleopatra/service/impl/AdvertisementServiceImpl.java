@@ -2,6 +2,7 @@ package com.example.cleopatra.service.impl;
 
 import com.example.cleopatra.dto.AdvertisementDTO.*;
 import com.example.cleopatra.enums.AdStatus;
+import com.example.cleopatra.enums.Gender;
 import com.example.cleopatra.enums.Role;
 import com.example.cleopatra.ExistsException.ImageValidationException;
 import com.example.cleopatra.model.Advertisement;
@@ -18,8 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -157,16 +162,110 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     @Override
     @Transactional(readOnly = true)
     public Optional<AdvertisementResponseDTO> getRandomActiveAdvertisement(User user) {
-        Pageable pageable = PageRequest.of(0, 1);
+        log.debug("Получение случайной рекламы для пользователя: {}",
+                user != null ? user.getEmail() : "анонимный");
 
-        return advertisementRepository.findActiveAdsForUser(
-                        user.getGender() != null ? user.getGender().name() : null,
-                        calculateUserAge(user),
-                        user.getCity(),
-                        pageable
-                ).getContent().stream()
-                .findFirst()
-                .map(AdvertisementResponseDTO::fromEntity);
+        try {
+            // Сначала пробуем получить с учетом всех параметров пользователя
+            if (user != null) {
+                Optional<AdvertisementResponseDTO> targetedAd = getTargetedAdvertisement(user);
+                if (targetedAd.isPresent()) {
+                    return targetedAd;
+                }
+            }
+
+            // Если не получилось или пользователь = null, получаем любую активную
+            return getAnyActiveAdvertisement();
+
+        } catch (Exception e) {
+            log.error("Ошибка получения случайной рекламы: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private Optional<AdvertisementResponseDTO> getTargetedAdvertisement(User user) {
+        try {
+            Gender userGender = user.getGender();
+            String userCity = user.getCity();
+
+            Pageable pageable = PageRequest.of(0, 1);
+
+            return advertisementRepository.findActiveAdsForUser(
+                            userGender,
+                            userCity,
+                            pageable
+                    ).getContent().stream()
+                    .findFirst()
+                    .map(AdvertisementResponseDTO::fromEntity);
+
+        } catch (Exception e) {
+            log.warn("Ошибка получения таргетированной рекламы: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private Optional<AdvertisementResponseDTO> getAnyActiveAdvertisement() {
+        try {
+            // Получаем все активные объявления
+            List<Advertisement> activeAds = advertisementRepository.findByStatus(AdStatus.ACTIVE);
+
+            if (activeAds.isEmpty()) {
+                log.debug("Активные объявления не найдены");
+                return Optional.empty();
+            }
+
+            // Фильтруем по времени и дате (если нужно)
+            List<Advertisement> availableAds = activeAds.stream()
+                    .filter(this::isAdCurrentlyActive)
+                    .toList();
+
+            if (availableAds.isEmpty()) {
+                log.debug("Нет доступных для показа объявлений");
+                return Optional.empty();
+            }
+
+            // Выбираем случайное
+            Advertisement randomAd = availableAds.get(
+                    new java.util.Random().nextInt(availableAds.size())
+            );
+
+            log.debug("Выбрано объявление: {} (ID: {})", randomAd.getTitle(), randomAd.getId());
+
+            return Optional.of(AdvertisementResponseDTO.fromEntity(randomAd));
+
+        } catch (Exception e) {
+            log.error("Ошибка получения любой активной рекламы: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private boolean isAdCurrentlyActive(Advertisement ad) {
+        LocalTime currentTime = LocalTime.now();
+        LocalDate currentDate = LocalDate.now();
+
+        // Проверка даты окончания
+        if (ad.getEndDate() != null && ad.getEndDate().isBefore(currentDate)) {
+            return false;
+        }
+
+        // Проверка времени начала
+        if (ad.getStartTime() != null && ad.getStartTime().isAfter(currentTime)) {
+            return false;
+        }
+
+        // Проверка времени окончания
+        if (ad.getEndTime() != null && ad.getEndTime().isBefore(currentTime)) {
+            return false;
+        }
+
+        // Проверка бюджета
+        if (ad.getRemainingBudget() != null &&
+                ad.getCostPerView() != null &&
+                ad.getRemainingBudget().compareTo(ad.getCostPerView()) < 0) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override

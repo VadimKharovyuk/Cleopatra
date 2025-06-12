@@ -1,5 +1,6 @@
 package com.example.cleopatra.repository;
 
+import com.example.cleopatra.enums.Gender;
 import com.example.cleopatra.model.Advertisement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 public interface AdvertisementRepository extends JpaRepository<Advertisement, Long> {
 
@@ -30,22 +33,15 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
     @Query("SELECT DISTINCT a FROM Advertisement a JOIN a.reports r ORDER BY a.createdAt DESC")
     Page<Advertisement> findAdvertisementsWithReports(Pageable pageable);
 
-    // Активные рекламы для показа (с фильтрацией)
+
+
     @Query("SELECT a FROM Advertisement a WHERE a.status = 'ACTIVE' " +
-            "AND a.remainingBudget >= a.costPerView " +
-            "AND (a.startDate IS NULL OR a.startDate <= CURRENT_DATE) " +
+            "AND (a.targetGender IS NULL OR a.targetGender = :gender) " +
             "AND (a.endDate IS NULL OR a.endDate >= CURRENT_DATE) " +
-            "AND (a.startTime IS NULL OR a.startTime <= CURRENT_TIME) " +
-            "AND (a.endTime IS NULL OR a.endTime >= CURRENT_TIME) " +
-            "AND (:targetGender IS NULL OR a.targetGender IS NULL OR a.targetGender = :targetGender) " +
-            "AND (:userAge IS NULL OR a.minAge IS NULL OR a.minAge <= :userAge) " +
-            "AND (:userAge IS NULL OR a.maxAge IS NULL OR a.maxAge >= :userAge) " +
-            "AND (:userCity IS NULL OR a.targetCity IS NULL OR a.targetCity = :userCity) " +
-            "ORDER BY RANDOM()")
+            "AND (:city IS NULL OR a.targetCity IS NULL OR a.targetCity = :city)")
     Page<Advertisement> findActiveAdsForUser(
-            @Param("targetGender") String targetGender,
-            @Param("userAge") Integer userAge,
-            @Param("userCity") String userCity,
+            @Param("gender") Gender gender,
+            @Param("city") String city,
             Pageable pageable
     );
 
@@ -61,4 +57,7 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
 
     @Query("SELECT a.category, COUNT(a) FROM Advertisement a GROUP BY a.category")
     java.util.List<Object[]> getAdCountByCategory();
+
+
+    List<Advertisement> findByStatus(AdStatus status);
 }
