@@ -1,7 +1,7 @@
 
 .ad-widget {
     max-width: 300px;
-    margin: 20px 0;
+    margin: 20px 0 30px 0; /* увеличиваем нижний отступ */
     border: 1px solid #ddd;
     border-radius: 8px;
     overflow: hidden;
