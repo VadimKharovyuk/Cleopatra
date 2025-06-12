@@ -22,9 +22,7 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final UserService userService;
 
-    /**
-     * Главная страница уведомлений
-     */
+
     @GetMapping
     public String getNotificationsPage(
             @RequestParam(defaultValue = "0") int page,
@@ -164,6 +162,7 @@ public class NotificationController {
         }
         return "redirect:/notifications";
     }
+
 
 //    /**
 //     * Страница настроек уведомлений
