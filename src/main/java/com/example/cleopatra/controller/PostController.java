@@ -32,6 +32,17 @@ public class PostController {
     private final PostService postService;
     private final UserService userService;
 
+    @GetMapping("/{id}")
+    public String showPost(@PathVariable Long id, Model model) {
+        PostResponseDto post = postService.getPostById(id);
+
+        if (post == null) {
+            log.warn("Пост с ID {} не найден!", id);
+        }
+
+        model.addAttribute("post", post);
+        return "posts/view";
+    }
 
 
     @GetMapping("/create")
@@ -78,17 +89,6 @@ public class PostController {
         }
     }
 
-    @GetMapping("/{id}")
-    public String showPost(@PathVariable Long id, Model model) {
-        PostResponseDto post = postService.getPostById(id);
-
-        if (post == null) {
-            log.warn("Пост с ID {} не найден!", id);
-        }
-
-        model.addAttribute("post", post);
-        return "posts/view";
-    }
 
 
 

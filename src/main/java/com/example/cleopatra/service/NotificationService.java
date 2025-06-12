@@ -14,8 +14,6 @@ public interface NotificationService {
     void createCommentNotification(Long postOwnerId, Long commenterId, Long postId, String commentText);
     void createFollowNotification(Long followedUserId, Long followerId);
     void createSystemNotification(Long userId, String title, String message);
-    // ✅ ДОБАВИТЬ ЭТОТ МЕТОД с минимальными параметрами
-
     void createMentionNotification(Long mentionedUserId, Long mentionerUserId);
 
 
