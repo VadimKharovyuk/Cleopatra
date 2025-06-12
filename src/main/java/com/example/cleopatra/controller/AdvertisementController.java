@@ -4,14 +4,19 @@ import com.example.cleopatra.dto.AdvertisementDTO.*;
 import com.example.cleopatra.enums.AdCategory;
 import com.example.cleopatra.enums.AdStatus;
 import com.example.cleopatra.enums.Gender;
+import com.example.cleopatra.model.Advertisement;
 import com.example.cleopatra.model.User;
+import com.example.cleopatra.repository.AdvertisementRepository;
 import com.example.cleopatra.service.AdvertisementListService;
 import com.example.cleopatra.service.AdvertisementService;
 import com.example.cleopatra.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,6 +31,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -37,6 +45,7 @@ public class AdvertisementController {
     private final AdvertisementService advertisementService;
     private final AdvertisementListService advertisementListService;
     private final UserService userService;
+    private final AdvertisementRepository advertisementRepository;
 
     // === СТРАНИЦЫ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ ===
 
@@ -239,14 +248,37 @@ public class AdvertisementController {
 
 
     // === API ENDPOINTS ===
-
-    /**
-     * Получение случайной рекламы для показа
-     */
     @GetMapping("/api/random")
     @ResponseBody
-    public Optional<AdvertisementResponseDTO> getRandomAd(@AuthenticationPrincipal User user) {
-        return advertisementService.getRandomActiveAdvertisement(user);
+    public ResponseEntity<?> getRandomAd(HttpServletRequest request) {
+        try {
+            List<Advertisement> activeAds = advertisementRepository.findByStatus(AdStatus.ACTIVE);
+
+            if (activeAds.isEmpty()) {
+                return ResponseEntity.ok().build();
+            }
+
+            Advertisement ad = activeAds.get(0);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("id", ad.getId());
+            result.put("title", ad.getTitle() != null ? ad.getTitle() : "");
+            result.put("shortDescription", ad.getShortDescription() != null ? ad.getShortDescription() : "");
+            result.put("url", ad.getUrl() != null ? ad.getUrl() : "");
+            result.put("imageUrl", ad.getImageUrl() != null ? ad.getImageUrl() : "");
+            result.put("category", ad.getCategory() != null ? ad.getCategory().name() : "");
+            result.put("viewsCount", ad.getViewsCount() != null ? ad.getViewsCount() : 0);
+            result.put("clicksCount", ad.getClicksCount() != null ? ad.getClicksCount() : 0);
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Ошибка загрузки рекламы",
+                            "details", e.getMessage()
+                    ));
+        }
     }
 
     /**

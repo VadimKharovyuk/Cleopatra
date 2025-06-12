@@ -1,11 +1,16 @@
 package com.example.cleopatra.util;
 
 import com.example.cleopatra.dto.AdvertisementDTO.AdvertisementResponseDTO;
+import com.example.cleopatra.enums.AdStatus;
+import com.example.cleopatra.model.Advertisement;
 import com.example.cleopatra.model.User;
+import com.example.cleopatra.repository.AdvertisementRepository;
 import com.example.cleopatra.service.AdvertisementService;
 import com.example.cleopatra.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -14,7 +19,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,6 +33,7 @@ public class TestController {
 
     private final AdvertisementService advertisementService;
     private final UserService userService;
+    private final AdvertisementRepository advertisementRepository ;
 
     @GetMapping
     public String test(Authentication authentication, Model model) {
@@ -142,14 +150,93 @@ public class TestController {
         return result;
     }
 
-    @GetMapping("/check-db")
+    // Добавьте этот ВРЕМЕННЫЙ endpoint в AdvertisementController для отладки:
+
+    @GetMapping("/api/random-debug")
     @ResponseBody
-    public Map<String, Object> checkDatabase() {
-        Map<String, Object> result = new HashMap<>();
+    public ResponseEntity<?> getRandomAdDebug() {
+        try {
+            log.info("=== ОТЛАДОЧНЫЙ API ENDPOINT ===");
 
-      advertisementService.debugAdvertisements();
-        result.put("message", "Нужно добавить методы диагностики в сервис");
+            // Проверяем, работает ли Repository
+            log.info("Шаг 1: Проверяем Repository...");
+            long totalCount = advertisementRepository.count();
+            log.info("Всего объявлений в базе: {}", totalCount);
 
-        return result;
+            if (totalCount == 0) {
+                return ResponseEntity.ok(Map.of("error", "Нет объявлений в базе"));
+            }
+
+            // Пробуем получить активные объявления
+            log.info("Шаг 2: Получаем активные объявления...");
+            List<Advertisement> activeAds = advertisementRepository.findByStatus(AdStatus.ACTIVE);
+            log.info("Найдено активных: {}", activeAds.size());
+
+            if (activeAds.isEmpty()) {
+                // Пробуем получить любые объявления
+                List<Advertisement> allAds = advertisementRepository.findAll();
+                log.info("Всего объявлений (любых): {}", allAds.size());
+
+                return ResponseEntity.ok(Map.of(
+                        "error", "Нет активных объявлений",
+                        "total_ads", allAds.size(),
+                        "active_ads", 0
+                ));
+            }
+
+            // Выбираем первое активное объявление
+            log.info("Шаг 3: Преобразуем в DTO...");
+            Advertisement firstAd = activeAds.get(0);
+
+            try {
+                AdvertisementResponseDTO dto = AdvertisementResponseDTO.fromEntity(firstAd);
+                log.info("DTO создан успешно: {}", dto.getTitle());
+
+                return ResponseEntity.ok(dto);
+
+            } catch (Exception e) {
+                log.error("Ошибка создания DTO: {}", e.getMessage(), e);
+
+                // Возвращаем базовую информацию вручную
+                Map<String, Object> manualDto = new HashMap<>();
+                manualDto.put("id", firstAd.getId());
+                manualDto.put("title", firstAd.getTitle());
+                manualDto.put("shortDescription", firstAd.getShortDescription());
+                manualDto.put("url", firstAd.getUrl());
+                manualDto.put("imageUrl", firstAd.getImageUrl());
+                manualDto.put("category", firstAd.getCategory() != null ? firstAd.getCategory().name() : null);
+                manualDto.put("viewsCount", firstAd.getViewsCount() != null ? firstAd.getViewsCount() : 0);
+                manualDto.put("clicksCount", firstAd.getClicksCount() != null ? firstAd.getClicksCount() : 0);
+
+                return ResponseEntity.ok(manualDto);
+            }
+
+        } catch (Exception e) {
+            log.error("Критическая ошибка в отладочном API: {}", e.getMessage(), e);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Критическая ошибка",
+                            "message", e.getMessage(),
+                            "type", e.getClass().getSimpleName()
+                    ));
+        }
+    }
+
+    // Также добавьте простой endpoint для проверки работоспособности:
+    @GetMapping("/api/health")
+    @ResponseBody
+    public ResponseEntity<?> healthCheck() {
+        try {
+            long count = advertisementRepository.count();
+            return ResponseEntity.ok(Map.of(
+                    "status", "OK",
+                    "total_advertisements", count,
+                    "timestamp", LocalDateTime.now()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", "ERROR", "message", e.getMessage()));
+        }
     }
 }

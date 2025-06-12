@@ -10,6 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
           rel="stylesheet">
+    <link th:href="@{/css/advertisement-widget.css}" rel="stylesheet" type="text/css">
 
     <style>
         /* Основные стили страницы */
@@ -1254,6 +1255,14 @@
             </div>
         </div>
 
+
+        <div id="advertisement-widget" class="ad-widget">
+            <div id="ad-content" class="ad-content">
+                <p class="ad-loading">Загрузка рекламы...</p>
+            </div>
+        </div>
+
+
         <!-- Who to Follow -->
         <div class="widget">
             <div class="widget-header">
@@ -1311,5 +1320,6 @@
 <script th:src="@{/js/modules/navigation.js}"></script>
 <script th:src="@{/js/modules/post-composer.js}"></script>
 <script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/advertisement-widget.js}"></script>
 </body>
 </html>
