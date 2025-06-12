@@ -369,6 +369,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+
     @Override
     @Transactional
     public void createUnsubscribeNotification(Long recipientId, Long actorId, String actorName) {

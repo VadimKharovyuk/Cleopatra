@@ -150,6 +150,7 @@ public class NotificationController {
     }
 
 
+
     @PostMapping("/delete-all")
     public String deleteAllNotifications(Authentication authentication, RedirectAttributes redirectAttributes) {
         try {

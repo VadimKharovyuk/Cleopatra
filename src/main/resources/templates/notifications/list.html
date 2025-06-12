@@ -523,6 +523,15 @@
                     </button>
                 </form>
             </div>
+
+            <form th:action="@{/notifications/delete-all}" method="post" style="display: inline;"
+                  onsubmit="return confirm('Вы уверены, что хотите удалить все уведомления? Это действие нельзя отменить.')">
+                <button type="submit" class="btn-luxury btn-danger-luxury">
+                    <i class="fas fa-trash-alt"></i>
+                    Удалить все
+                </button>
+            </form>
+
         </div>
     </div>
     <!-- Notifications Container -->
