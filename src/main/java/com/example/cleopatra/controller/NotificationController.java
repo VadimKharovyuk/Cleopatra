@@ -151,6 +151,20 @@ public class NotificationController {
         return "redirect:/notifications";
     }
 
+
+    @PostMapping("/delete-all")
+    public String deleteAllNotifications(Authentication authentication, RedirectAttributes redirectAttributes) {
+        try {
+           String email = authentication.getName();
+           Long userId = userService.getUserIdByEmail(email);
+            notificationService.deleteAllNotifications(userId);
+            redirectAttributes.addFlashAttribute("success", "Все уведомления успешно удалены");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Ошибка при удалении уведомлений");
+        }
+        return "redirect:/notifications";
+    }
+
 //    /**
 //     * Страница настроек уведомлений
 //     */

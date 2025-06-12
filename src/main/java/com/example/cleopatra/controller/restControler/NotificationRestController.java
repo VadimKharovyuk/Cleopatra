@@ -1,5 +1,6 @@
 package com.example.cleopatra.controller.restControler;
 import com.example.cleopatra.dto.Notification.NotificationDto;
+import com.example.cleopatra.model.User;
 import com.example.cleopatra.service.NotificationService;
 import com.example.cleopatra.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
@@ -186,5 +188,18 @@ public class NotificationRestController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/delete-all")
+    public String deleteAllNotifications(Authentication authentication, RedirectAttributes redirectAttributes) {
+        try {
+            String email = authentication.getName();
+            Long userId = userService.getUserIdByEmail(email);
+            notificationService.deleteAllNotifications(userId);
+            redirectAttributes.addFlashAttribute("success", "Все уведомления успешно удалены");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Ошибка при удалении уведомлений");
+        }
+        return "redirect:/notifications";
     }
 }

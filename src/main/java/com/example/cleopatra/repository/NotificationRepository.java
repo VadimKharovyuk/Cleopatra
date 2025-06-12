@@ -148,4 +148,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findOldPendingNotifications(@Param("cutoffDate") LocalDateTime cutoffDate);
 
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Notification n WHERE n.recipient.id = :userId")
+    void deleteByRecipientId(@Param("userId") Long userId);
 }
