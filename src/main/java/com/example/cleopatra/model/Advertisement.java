@@ -32,6 +32,7 @@ public class Advertisement {
     private String imageUrl;
     private String imgId;
 
+
     @Builder.Default
     private BigDecimal totalBudget = BigDecimal.ZERO;
     @Builder.Default

@@ -3,17 +3,273 @@
 <head>
   <meta charset="UTF-8">
   <title>Создать рекламу</title>
+  <style>
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    header h1 {
+      margin: 0 0 15px 0;
+      color: #1f2937;
+    }
+
+    .balance-info {
+      background: #f0f8ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border: 1px solid #dbeafe;
+    }
+
+    .balance-label {
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .balance-amount {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2563eb;
+    }
+
+    .btn-balance {
+      background: #10b981;
+      color: white;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-balance:hover {
+      background: #059669;
+    }
+
+    .ad-form {
+      background: white;
+    }
+
+    fieldset {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+      background: #fafafa;
+    }
+
+    legend {
+      font-weight: bold;
+      color: #374151;
+      padding: 0 10px;
+      font-size: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    input[type="file"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input[type="file"] {
+      padding: 8px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    small {
+      display: block;
+      margin-top: 5px;
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    .budget-info {
+      background: #f9fafb;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .current-balance {
+      font-size: 16px;
+      color: #1f2937;
+    }
+
+    .budget-help {
+      color: #6b7280;
+      font-size: 14px;
+      display: block;
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    .pricing-info {
+      background: #ecfdf5;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      border: 1px solid #d1fae5;
+    }
+
+    .pricing-rates {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 10px;
+    }
+
+    .rate-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rate-value {
+      font-weight: bold;
+      color: #059669;
+    }
+
+    .budget-calculator {
+      background: #ecfdf5;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      border: 1px solid #d1fae5;
+    }
+
+    .budget-calculator h4 {
+      margin: 0 0 10px 0;
+      color: #1f2937;
+    }
+
+    .calculation {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #374151;
+    }
+
+    .error-message {
+      color: #dc2626;
+      font-size: 14px;
+      margin-top: 5px;
+      display: block;
+    }
+
+    .form-actions {
+      text-align: center;
+      padding: 30px 0;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 30px;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-right: 15px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-primary:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+      padding: 12px 24px;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #4b5563;
+    }
+
+    input:invalid {
+      border-color: #dc2626;
+    }
+
+    #totalBudget.error {
+      border-color: #dc2626;
+    }
+  </style>
 </head>
-<body>
+<body th:attr="data-user-balance=${userBalance}">
 <div class="container">
   <header>
     <h1>Создать рекламу</h1>
     <a href="/advertisements/my" class="btn-secondary">← Назад к списку</a>
+
+    <!-- Показываем текущий баланс пользователя -->
+    <div class="balance-info">
+      <span class="balance-label">Ваш баланс:</span>
+      <span class="balance-amount" th:text="${userBalance != null ? userBalance + ' руб.' : '0.00 руб.'}">0.00 руб.</span>
+      <a href="/balance/top-up" class="btn-balance">Пополнить баланс</a>
+    </div>
   </header>
 
-
-
   <form th:action="@{/advertisements/create}" th:object="${createDto}" method="post" enctype="multipart/form-data" class="ad-form">
+
+    <!-- Скрытое поле с балансом для JavaScript -->
+    <input type="hidden" id="hiddenUserBalance" th:value="${userBalance}">
 
     <!-- Основная информация -->
     <fieldset>
@@ -27,19 +283,19 @@
 
       <div class="form-group">
         <label for="shortDescription">Краткое описание*:</label>
-        <textarea id="shortDescription" th:field="*{shortDescription}" rows="2" maxlength="150" required></textarea>
+        <textarea id="shortDescription" th:field="*{shortDescription}" rows="2" maxlength="150" required placeholder="Краткое описание для показа в виджете рекламы"></textarea>
         <span th:if="${#fields.hasErrors('shortDescription')}" th:errors="*{shortDescription}" class="error-message"></span>
       </div>
 
       <div class="form-group">
         <label for="description">Полное описание*:</label>
-        <textarea id="description" th:field="*{description}" rows="4" maxlength="500" required></textarea>
+        <textarea id="description" th:field="*{description}" rows="4" maxlength="500" required placeholder="Подробное описание вашего предложения"></textarea>
         <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="error-message"></span>
       </div>
 
       <div class="form-group">
         <label for="url">Ссылка*:</label>
-        <input type="url" id="url" th:field="*{url}" required>
+        <input type="url" id="url" th:field="*{url}" required placeholder="https://example.com">
         <span th:if="${#fields.hasErrors('url')}" th:errors="*{url}" class="error-message"></span>
       </div>
 
@@ -59,26 +315,58 @@
       </div>
     </fieldset>
 
-    <!-- Бюджет -->
+    <!-- Бюджет из баланса пользователя -->
     <fieldset>
-      <legend>Бюджет и стоимость</legend>
+      <legend>Бюджет из вашего баланса</legend>
+
+      <div class="budget-info">
+        <div class="current-balance">
+          <strong>Текущий баланс: <span th:text="${userBalance != null ? userBalance + ' руб.' : '0.00 руб.'}">0.00 руб.</span></strong>
+        </div>
+      </div>
 
       <div class="form-group">
-        <label for="totalBudget">Общий бюджет (руб.)*:</label>
-        <input type="number" id="totalBudget" th:field="*{totalBudget}" min="1" max="100000" step="0.01" required>
+        <label for="totalBudget">Сколько потратить на эту рекламу (руб.)*:</label>
+        <input type="number"
+               id="totalBudget"
+               th:field="*{totalBudget}"
+               min="1"
+               th:max="${userBalance != null ? userBalance : 100000}"
+               step="0.01"
+               required>
+        <small class="budget-help">
+          Эта сумма будет зарезервирована из вашего баланса для показа рекламы.
+          Максимум: <span th:text="${userBalance != null ? userBalance + ' руб.' : '0.00 руб.'}">0.00 руб.</span>
+        </small>
         <span th:if="${#fields.hasErrors('totalBudget')}" th:errors="*{totalBudget}" class="error-message"></span>
+        <div id="insufficient-balance-error" class="error-message" style="display: none;">
+          Недостаточно средств на балансе!
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="costPerView">Стоимость за просмотр (руб.):</label>
-        <input type="number" id="costPerView" th:field="*{costPerView}" min="0.01" max="10" step="0.01" value="0.20">
-        <span th:if="${#fields.hasErrors('costPerView')}" th:errors="*{costPerView}" class="error-message"></span>
+      <!-- Информация о ценах (только для просмотра) -->
+      <div class="pricing-info">
+        <h4>Стоимость показов:</h4>
+        <div class="pricing-rates">
+          <div class="rate-item">
+            <span>Просмотр:</span>
+            <span class="rate-value">0.20 руб.</span>
+          </div>
+          <div class="rate-item">
+            <span>Клик:</span>
+            <span class="rate-value">0.50 руб.</span>
+          </div>
+        </div>
+        <small>Цены устанавливаются платформой и не подлежат изменению</small>
       </div>
 
-      <div class="form-group">
-        <label for="costPerClick">Стоимость за клик (руб.):</label>
-        <input type="number" id="costPerClick" th:field="*{costPerClick}" min="0.01" max="50" step="0.01" value="0.50">
-        <span th:if="${#fields.hasErrors('costPerClick')}" th:errors="*{costPerClick}" class="error-message"></span>
+      <!-- Калькулятор ориентировочных показов -->
+      <div class="budget-calculator">
+        <h4>Ориентировочные показы:</h4>
+        <div class="calculation">
+          <span>При стоимости 0.20 руб. за просмотр</span><br>
+          <span>Бюджет <span id="budget-display">0</span> руб. = примерно <strong id="estimated-views">0</strong> просмотров</span>
+        </div>
       </div>
     </fieldset>
 
@@ -97,11 +385,11 @@
       <div class="form-row">
         <div class="form-group">
           <label for="minAge">Возраст от:</label>
-          <input type="number" id="minAge" th:field="*{minAge}" min="13" max="100">
+          <input type="number" id="minAge" th:field="*{minAge}" min="13" max="100" placeholder="13">
         </div>
         <div class="form-group">
           <label for="maxAge">Возраст до:</label>
-          <input type="number" id="maxAge" th:field="*{maxAge}" min="13" max="100">
+          <input type="number" id="maxAge" th:field="*{maxAge}" min="13" max="100" placeholder="100">
         </div>
       </div>
 
@@ -119,10 +407,12 @@
         <div class="form-group">
           <label for="startTime">Время начала:</label>
           <input type="time" id="startTime" th:field="*{startTime}">
+          <small>Оставьте пустым для показа круглосуточно</small>
         </div>
         <div class="form-group">
           <label for="endTime">Время окончания:</label>
           <input type="time" id="endTime" th:field="*{endTime}">
+          <small>Оставьте пустым для показа круглосуточно</small>
         </div>
       </div>
 
@@ -142,14 +432,72 @@
 
     <!-- Кнопки -->
     <div class="form-actions">
-      <button type="submit" class="btn-primary">Создать рекламу</button>
+      <button type="submit" class="btn-primary" id="submit-btn">Создать рекламу</button>
       <a href="/advertisements/my" class="btn-secondary">Отмена</a>
     </div>
   </form>
 </div>
 
 <script>
-  // Автоматическое заполнение даты окончания
+  // Получаем баланс пользователя из скрытого поля
+  const userBalance = parseFloat(document.getElementById('hiddenUserBalance').value) || 0;
+  console.log('Баланс пользователя:', userBalance); // Для отладки
+
+  // Устанавливаем текущую дату как минимальную для даты начала
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Тип баланса:', typeof userBalance, 'Значение:', userBalance);
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').min = today;
+    document.getElementById('endDate').min = today;
+
+    // Устанавливаем завтрашний день как дату начала по умолчанию
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('startDate').value = tomorrow.toISOString().split('T')[0];
+
+    // Устанавливаем дату окончания через месяц
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    document.getElementById('endDate').value = nextMonth.toISOString().split('T')[0];
+  });
+
+  // Проверка баланса при изменении суммы
+  document.getElementById('totalBudget').addEventListener('input', function() {
+    const budgetValue = parseFloat(this.value) || 0;
+    const errorDiv = document.getElementById('insufficient-balance-error');
+    const submitBtn = document.getElementById('submit-btn');
+
+    console.log('Введенная сумма:', budgetValue, 'Баланс:', userBalance); // Для отладки
+
+    // Обновляем калькулятор
+    updateCalculator();
+
+    if (budgetValue > userBalance) {
+      console.log('Недостаточно средств'); // Для отладки
+      errorDiv.style.display = 'block';
+      submitBtn.disabled = true;
+      this.classList.add('error');
+    } else {
+      console.log('Средств достаточно'); // Для отладки
+      errorDiv.style.display = 'none';
+      submitBtn.disabled = false;
+      this.classList.remove('error');
+    }
+  });
+
+  // Обновление калькулятора показов
+  function updateCalculator() {
+    const budget = parseFloat(document.getElementById('totalBudget').value) || 0;
+    const costPerView = 0.20; // Фиксированная цена
+
+    const estimatedViews = budget > 0 ? Math.floor(budget / costPerView) : 0;
+
+    document.getElementById('budget-display').textContent = budget.toFixed(2);
+    document.getElementById('estimated-views').textContent = estimatedViews.toLocaleString();
+  }
+
+  // Автоматическое заполнение даты окончания при изменении даты начала
   document.getElementById('startDate').addEventListener('change', function() {
     const startDate = new Date(this.value);
     if (!isNaN(startDate)) {
@@ -167,6 +515,9 @@
       maxAge.value = this.value;
     }
   });
+
+  // Инициализация калькулятора
+  updateCalculator();
 </script>
 </body>
 </html>

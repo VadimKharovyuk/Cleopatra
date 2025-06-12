@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -450,6 +451,50 @@ public User getCurrentUserEntity(Authentication authentication) {
         log.info("Пароль успешно сброшен для пользователя с email: {}", email);
     }
 
+    @Override
+    public void addBalance(User user, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Сумма должна быть положительной");
+        }
+
+        user.setBalance(user.getBalance().add(amount));
+        userRepository.save(user);
+
+        log.info("Пополнен баланс пользователя {} на {}. Новый баланс: {}",
+                user.getEmail(), amount, user.getBalance());
+    }
+
+    @Override
+    public void subtractBalance(User user, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Сумма должна быть положительной");
+        }
+
+        if (user.getBalance().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Недостаточно средств на балансе");
+        }
+
+        user.setBalance(user.getBalance().subtract(amount));
+        userRepository.save(user);
+
+        log.info("Списано с баланса пользователя {} сумма {}. Остаток: {}",
+                user.getEmail(), amount, user.getBalance());
+    }
+
+    @Override
+    public BigDecimal getBalance(User user) {
+        return user.getBalance();
+    }
+
+    @Override
+    public boolean hasEnoughBalance(User user, BigDecimal amount) {
+        return user.getBalance().compareTo(amount) >= 0;
+    }
+
+    @Override
+    public User save(User user) {
+        return userRepository.save(user);
+    }
 
 
     /**

@@ -9,6 +9,7 @@ import com.example.cleopatra.model.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface UserService {
@@ -92,5 +93,9 @@ public interface UserService {
     void resetPasswordByEmail(String email, String newPassword);
 
 
-
+    void addBalance(User user, BigDecimal amount);
+    void subtractBalance(User user, BigDecimal amount);
+    BigDecimal getBalance(User user);
+    boolean hasEnoughBalance(User user, BigDecimal amount);
+    User save(User user);
 }

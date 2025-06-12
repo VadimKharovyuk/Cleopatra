@@ -5,6 +5,7 @@ import com.example.cleopatra.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -68,7 +69,9 @@ public class User {
     @Column(name = "is_private_profile")
     private Boolean isPrivateProfile = false;
 
-
+    @Column(nullable = false, precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal balance = BigDecimal.ZERO;
 
     // Добавить в User entity:
     @Column(name = "is_online")

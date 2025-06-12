@@ -1,6 +1,7 @@
 package com.example.cleopatra.controller;
 
 import com.example.cleopatra.dto.AdvertisementDTO.*;
+import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.enums.AdCategory;
 import com.example.cleopatra.enums.AdStatus;
 import com.example.cleopatra.enums.Gender;
@@ -31,6 +32,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +49,16 @@ public class AdvertisementController {
     private final UserService userService;
     private final AdvertisementRepository advertisementRepository;
 
-    // === СТРАНИЦЫ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ ===
+
+    @GetMapping("/info")
+    public String info(Model model,Authentication authentication) {
+        String email = authentication.getName();
+        Long userId = userService.getUserIdByEmail(email);
+        UserResponse currentUser = userService.getUserById(userId);
+
+        model.addAttribute("currentUserId", currentUser);
+        return "advertisements/info";
+    }
 
     /**
      * Список реклам пользователя
@@ -67,15 +78,29 @@ public class AdvertisementController {
         model.addAttribute("currentPage", "my-ads");
         return "advertisements/my-list";
     }
-
     /**
      * Форма создания рекламы
      */
     @GetMapping("/create")
-    public String createForm(Model model) {
+    public String createForm(Authentication authentication, Model model) {
+        // Получаем текущего пользователя
+        User user = userService.getCurrentUserEntity(authentication);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         model.addAttribute("createDto", new CreateAdvertisementDTO());
         model.addAttribute("categories", AdCategory.values());
         model.addAttribute("genders", Gender.values());
+
+        // Передаем баланс как строку и как BigDecimal
+        BigDecimal userBalance = user.getBalance();
+        model.addAttribute("userBalance", userBalance);
+        model.addAttribute("userBalanceString", userBalance.toString());
+
+        // Для отладки
+        log.info("Баланс пользователя {}: {}", user.getEmail(), userBalance);
+
         return "advertisements/create";
     }
 
@@ -83,27 +108,49 @@ public class AdvertisementController {
     public String createAdvertisement(@Valid @ModelAttribute("createDto") CreateAdvertisementDTO dto,
                                       BindingResult result,
                                       @RequestParam(value = "image", required = false) MultipartFile image,
-                                      Authentication authentication, // Добавляем параметр
+                                      Authentication authentication,
                                       Model model,
                                       RedirectAttributes redirectAttributes) {
 
-        // Получаем пользователя через ваш метод с параметром
-        User user = userService.getCurrentUserEntity(authentication) ;
+        // Получаем пользователя
+        User user = userService.getCurrentUserEntity(authentication);
         if (user == null) {
-            log.error("Пользователь не найден через getCurrentUserEntity(authentication)");
+            log.error("Пользователь не найден");
             redirectAttributes.addFlashAttribute("errorMessage", "Необходимо войти в систему");
             return "redirect:/login";
         }
 
         log.debug("Создание рекламы для пользователя: {}", user.getEmail());
 
+        // НОВАЯ ПРОВЕРКА: Достаточно ли средств на балансе
+        if (dto.getTotalBudget() != null && user.getBalance().compareTo(dto.getTotalBudget()) < 0) {
+            result.rejectValue("totalBudget", "insufficient.balance",
+                    "Недостаточно средств на балансе. Ваш баланс: " + user.getBalance() + " руб.");
+        }
+
         if (result.hasErrors()) {
             model.addAttribute("categories", AdCategory.values());
             model.addAttribute("genders", Gender.values());
+            model.addAttribute("userBalance", user.getBalance()); // Добавляем баланс обратно
             return "advertisements/create";
         }
 
         try {
+            // НОВАЯ ЛОГИКА: Резервируем средства при создании рекламы
+            if (dto.getTotalBudget() != null && dto.getTotalBudget().compareTo(BigDecimal.ZERO) > 0) {
+                // Проверяем еще раз перед списанием
+                if (user.getBalance().compareTo(dto.getTotalBudget()) < 0) {
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Недостаточно средств на балансе для создания рекламы");
+                    return "redirect:/advertisements/create";
+                }
+
+                // Резервируем средства (списываем с баланса пользователя)
+                userService.subtractBalance(user, dto.getTotalBudget());
+                log.info("Зарезервировано {} руб. для рекламы пользователя {}",
+                        dto.getTotalBudget(), user.getEmail());
+            }
+
             AdvertisementDetailDTO createdAd;
             if (image != null && !image.isEmpty()) {
                 createdAd = advertisementService.createAdvertisement(dto, image, user);
@@ -112,19 +159,35 @@ public class AdvertisementController {
             }
 
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Реклама успешно создана! Ожидает модерации.");
+                    "Реклама успешно создана! Ожидает модерации. Зарезервировано " +
+                            dto.getTotalBudget() + " руб. из вашего баланса.");
             return "redirect:/advertisements/details/" + createdAd.getId();
 
+        } catch (IllegalArgumentException e) {
+            log.error("Ошибка баланса при создании рекламы: {}", e.getMessage());
+            result.reject("balance.error", e.getMessage());
         } catch (IOException e) {
             log.error("Ошибка загрузки изображения: {}", e.getMessage());
             result.reject("image.upload.error", "Ошибка загрузки изображения: " + e.getMessage());
         } catch (Exception e) {
             log.error("Ошибка создания рекламы: {}", e.getMessage());
             result.reject("advertisement.create.error", "Ошибка создания рекламы: " + e.getMessage());
+
+            // ВАЖНО: Если произошла ошибка после списания, возвращаем средства
+            if (dto.getTotalBudget() != null && dto.getTotalBudget().compareTo(BigDecimal.ZERO) > 0) {
+                try {
+                    userService.addBalance(user, dto.getTotalBudget());
+                    log.info("Возвращены средства {} руб. пользователю {} из-за ошибки создания рекламы",
+                            dto.getTotalBudget(), user.getEmail());
+                } catch (Exception balanceError) {
+                    log.error("Критическая ошибка возврата средств: {}", balanceError.getMessage());
+                }
+            }
         }
 
         model.addAttribute("categories", AdCategory.values());
         model.addAttribute("genders", Gender.values());
+        model.addAttribute("userBalance", user.getBalance()); // Обновленный баланс
         return "advertisements/create";
     }
 
