@@ -543,7 +543,7 @@
                             <span th:unless="${notification.actorImageUrl}"
                                   class="default-avatar"
                                   th:text="${#strings.substring(notification.actorName ?: 'У', 0, 1)}">У</span>
-                        </a>  </div>
+                        </a></div>
 
                     <!-- Content -->
                     <div class="notification-body">
@@ -576,12 +576,17 @@
                                 <span th:case="'FOLLOW'">
                                         <i class="fas fa-user-plus"></i> Подписка
                                     </span>
+                                <span th:case="'UNFOLLOW'">
+                                        <i class="fas fa-user-minus"></i> Отписка
+                                </span>
                                 <span th:case="*">
                                         <i class="fas fa-bell"></i> Уведомление
                                     </span>
+
                             </div>
                         </div>
                     </div>
+
 
                     <!-- Actions -->
                     <div class="notification-actions">

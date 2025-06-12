@@ -14,7 +14,8 @@ public interface NotificationService {
     void createCommentNotification(Long postOwnerId, Long commenterId, Long postId, String commentText);
     void createFollowNotification(Long followedUserId, Long followerId);
     void createSystemNotification(Long userId, String title, String message);
-    void createMentionNotification(Long mentionedUserId, Long mentionerUserId);
+    void createUnsubscribe(Long followedUserId, Long followerId);
+
 
 
     // Получение уведомлений
@@ -31,9 +32,7 @@ public interface NotificationService {
     void sendPendingNotifications();
     void cleanupOldNotifications();
 
-
-    void createMentionNotificationWithPost(Long mentionedUserId, Long mentionerUserId, Long postId);
-
-
     void deleteAllNotifications(Long userId);
+
+    void createUnsubscribeNotification(Long subscribedToId, Long subscriberId, String subscriberName);
 }

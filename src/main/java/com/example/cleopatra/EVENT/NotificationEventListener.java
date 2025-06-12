@@ -30,6 +30,7 @@ public class NotificationEventListener {
     private final NotificationService notificationService;
 
 
+
     @EventListener
     @Async
     @Transactional(readOnly = true)
@@ -120,6 +121,29 @@ public class NotificationEventListener {
 
     @EventListener
     @Async
+    public void handleUnsubscribe(UnsubscribeEvent event) {
+        log.info("🔔 EVENT RECEIVED: UnsubscribeEvent - {} unsubscribed from {}",
+                event.getSubscriberId(), event.getSubscribedToId());
+
+        try {
+            // Создаем уведомление об отписке
+            notificationService.createUnsubscribeNotification(
+                    event.getSubscribedToId(),  // кому уведомление (от кого отписались)
+                    event.getSubscriberId(),    // кто отписался
+                    event.getSubscriberName()   // имя того, кто отписался
+            );
+
+            log.info("✅ Unsubscribe notification created successfully: {} unsubscribed from {}",
+                    event.getSubscriberId(), event.getSubscribedToId());
+
+        } catch (Exception e) {
+            log.error("❌ Error creating unsubscribe notification: {} unsubscribed from {}",
+                    event.getSubscriberId(), event.getSubscribedToId(), e);
+        }
+    }
+
+    @EventListener
+    @Async
     public void handlePostLiked(PostLikedEvent event) {
         log.info("🎉 EVENT RECEIVED: PostLikedEvent for post: {} by user: {}",
                 event.getPostId(), event.getLikerUserId());
@@ -192,42 +216,6 @@ public class NotificationEventListener {
             }
         });
     }
-
-
-    @EventListener
-    @Async
-    public void handlePostMentionsBatch(PostMentionsBatchEvent event) {
-        log.info("🎉 EVENT RECEIVED: PostMentionsBatchEvent - user {} mentioned {} users in post {}",
-                event.getMentionerUserId(), event.getMentions().size(), event.getPostId());
-
-        try {
-            // Обрабатываем каждое упоминание отдельно
-            for (PostMentionsBatchEvent.MentionInfo mentionInfo : event.getMentions()) {
-                try {
-                    // ✅ ПЕРЕДАЕМ POST ID в уведомление
-                    notificationService.createMentionNotificationWithPost(
-                            mentionInfo.getMentionedUserId(), // кому (кого упомянули)
-                            event.getMentionerUserId(),        // кто (кто упомянул)
-                            event.getPostId()                  // ✅ ID поста для перехода
-                    );
-
-                    log.info("✅ Mention notification created: {} mentioned {} in post {}",
-                            event.getMentionerUserId(), mentionInfo.getMentionedUserId(), event.getPostId());
-
-                } catch (Exception e) {
-                    log.error("❌ Error creating mention notification for user {}: {}",
-                            mentionInfo.getMentionedUserId(), e.getMessage());
-                }
-            }
-
-            log.info("✅ Batch mention notifications processing completed for post {}", event.getPostId());
-
-        } catch (Exception e) {
-            log.error("❌ Error processing batch mention event for post {}: {}", event.getPostId(), e.getMessage());
-        }
-    }
-
-
 
     @Transactional
     public void updateNotificationAsSent(Long notificationId) {

@@ -67,7 +67,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             subscriptionRepository.save(subscription);
 
             // 🔥 ПУБЛИКУЕМ СОБЫТИЕ О ПОДПИСКЕ
-            String subscriberName = getFullName(subscriber); // если у вас есть этот метод
+            String subscriberName = getFullName(subscriber);
             eventPublisher.publishEvent(new SubscriptionCreatedEvent(
                     subscriberId,
                     subscribedToId,

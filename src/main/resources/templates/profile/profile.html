@@ -738,6 +738,7 @@
 
 
 </head>
+
 <body th:data-current-user-id="${currentUserId}"
       th:data-profile-user-id="${user.id}"
       th:data-is-subscribed="${isSubscribed ?: false}">
@@ -819,16 +820,19 @@
                     <!-- ПРОСТАЯ кнопка подписки -->
                     <button type="button"
                             id="follow-btn"
-                            th:class="${isSubscribed} ? 'btn-luxury btn-secondary-luxury' : 'btn-luxury btn-primary-luxury'"
+                            class="follow-btn"
+                            data-action="follow"
+                            th:data-user-id="${user.id}"
+                            th:class="${isSubscribed} ? 'btn-luxury btn-secondary-luxury following' : 'btn-luxury btn-primary-luxury'"
                             onclick="simpleToggleFollow()">
                         <i th:class="${isSubscribed} ? 'fas fa-user-check' : 'fas fa-user-plus'" id="follow-icon"></i>
                         <span id="follow-text" th:text="${isSubscribed} ? 'Подписан' : 'Подписаться'">Подписаться</span>
                     </button>
 
-                    <button type="button" onclick="shareProfile()" class="btn-luxury btn-secondary-luxury">
-                        <i class="fas fa-share"></i>
-                        <span>Поделиться</span>
-                    </button>
+<!--                    <button type="button" onclick="shareProfile()" class="btn-luxury btn-secondary-luxury">-->
+<!--                        <i class="fas fa-share"></i>-->
+<!--                        <span>Поделиться</span>-->
+<!--                    </button>-->
 
 
                     <!-- Показывается только для чужих профилей -->
@@ -945,8 +949,12 @@
                         }
 
                         @keyframes spin {
-                            from { transform: rotate(0deg); }
-                            to { transform: rotate(360deg); }
+                            from {
+                                transform: rotate(0deg);
+                            }
+                            to {
+                                transform: rotate(360deg);
+                            }
                         }
 
                         /* Адаптивность */
@@ -1148,8 +1156,6 @@
         </div>
 
 
-
-
         <!-- Content Area - заменить существующий блок -->
         <div class="content-area" id="profileContentArea">
 
@@ -1254,7 +1260,6 @@
                         </div>
 
 
-
                         <!-- Информация о лайках (новый блок) -->
                         <div class="post-likes-info"
                              th:if="${post.recentLikes != null and !post.recentLikes.empty and post.likesCount > 0}">
@@ -1336,7 +1341,6 @@
             </div>
 
 
-
             <!-- Если постов нет -->
             <div th:unless="${posts != null and !posts.posts.empty}" class="empty-state" id="emptyState">
                 <div class="empty-icon">
@@ -1396,8 +1400,12 @@
             }
 
             @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
             }
 
             .profile-loading-spinner span {
@@ -1996,6 +2004,7 @@
 
             // Обработчик скролла для профиля
             let profileScrollTimeout;
+
             function handleProfileScroll() {
                 if (profileScrollTimeout) {
                     clearTimeout(profileScrollTimeout);
@@ -2049,7 +2058,7 @@
             // ============================================
 
             // Инициализация при загрузке страницы
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 // Проверяем, что мы на странице профиля
                 if (window.location.pathname.includes('/profile/')) {
                     initProfileInfiniteScroll();
@@ -2059,7 +2068,7 @@
 
             // Инициализация если DOM уже загружен
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', function() {
+                document.addEventListener('DOMContentLoaded', function () {
                     if (window.location.pathname.includes('/profile/')) {
                         initProfileInfiniteScroll();
                     }
@@ -2079,7 +2088,6 @@
 
             console.log('📝 Скрипт бесконечной загрузки профиля загружен');
         </script>
-
 
 
         <!-- Модальное окно подтверждения удаления -->
@@ -3064,7 +3072,7 @@
 
 <!-- 8. Координатор инициализации профиля -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         console.log('👤 Инициализация модулей профиля...');
 
         // Проверяем загрузку всех модулей
@@ -3137,7 +3145,7 @@
     });
 
     // Функция для проверки готовности модулей профиля
-    window.checkProfileModulesReady = function() {
+    window.checkProfileModulesReady = function () {
         const modules = [
             'NotificationManager',
             'ApiClient',
@@ -3156,7 +3164,7 @@
     };
 
     // Функция для переинициализации модулей профиля
-    window.reinitializeProfileModules = function() {
+    window.reinitializeProfileModules = function () {
         console.log('🔄 Переинициализация модулей профиля...');
 
         // Перезапускаем инициализацию через 100мс
@@ -3167,29 +3175,6 @@
     };
 </script>
 
-<!-- 9. Диагностика (только для разработки) -->
-<script>
-    // Диагностика конфликтов (убрать в продакшене)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        setTimeout(() => {
-            console.group('🔍 ДИАГНОСТИКА ПРОФИЛЯ');
-            console.log('Загруженные модули профиля:');
-            window.checkProfileModulesReady();
-
-            // Проверяем дублирование глобальных функций
-            const globalFunctions = Object.keys(window).filter(key =>
-                typeof window[key] === 'function' &&
-                (key.includes('toggle') || key.includes('Action') || key.includes('User'))
-            );
-
-            if (globalFunctions.length > 0) {
-                console.log('Глобальные функции:', globalFunctions);
-            }
-
-            console.groupEnd();
-        }, 500);
-    }
-</script>
 
 </body>
 </html>
