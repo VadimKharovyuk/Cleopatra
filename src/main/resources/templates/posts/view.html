@@ -6,7 +6,8 @@
     <title>Просмотр поста - Cleopatra</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
 
     <!-- ПОДКЛЮЧЕНИЕ ФРАГМЕНТА СТИЛЕЙ -->
     <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
@@ -344,8 +345,12 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .comment-btn:hover {
@@ -596,6 +601,7 @@
             .right-sidebar {
                 display: none;
             }
+
             .main-content {
                 margin-right: 0;
             }
@@ -729,7 +735,8 @@
         </div>
 
         <!-- Информация о лайках -->
-        <div class="post-likes-info" th:if="${post.recentLikes != null and !post.recentLikes.empty and post.likesCount > 0}">
+        <div class="post-likes-info"
+             th:if="${post.recentLikes != null and !post.recentLikes.empty and post.likesCount > 0}">
             <div class="likes-avatars">
                 <!-- Показываем аватары последних пользователей, которые лайкнули -->
                 <div class="like-avatar" th:each="likeUser, iterStat : ${post.recentLikes}"
@@ -800,33 +807,20 @@
                     <span>Поделиться</span>
                 </button>
 
-                <div th:if="${currentUserId != null and currentUserId != post.author.id}">
-                    <button type="button"
-                            class="btn btn-outline-secondary btn-sm report-btn"
-                            th:onclick="'reportPost(' + ${post.id} + ')'"
-                            title="Пожаловаться на пост"
-                            th:id="'reportBtn_' + ${post.id}">
-                        <i class="fas fa-flag"></i>
-                        <span class="d-none d-sm-inline ms-1">Пожаловаться</span>
-                    </button>
-                </div>
             </div>
 
-            <div class="post-stats">
-                <div class="stat-item">
-                    <i class="far fa-eye"></i>
-                    <span th:text="${post.viewsCount}">0</span>
-                </div>
-                <div class="stat-item">
-                    <i class="far fa-heart"></i>
-                    <span class="likes-count" th:text="${post.likesCount}">0</span>
-                </div>
-                <div class="stat-item">
-                    <i class="far fa-comment"></i>
-                    <span th:text="${post.commentsCount}">0</span>
-                </div>
-            </div>
+
+            <button type="button"
+                    class="action-btn report-btn"
+                    th:if="${currentUserId != null and currentUserId != post.author.id}"
+                    th:onclick="'reportPost(' + ${post.id} + ')'"
+                    title="Пожаловаться на пост"
+                    th:id="'reportBtn_' + ${post.id}">
+                <i class="fas fa-flag"></i>
+                <span>Пожаловаться</span>
+            </button>
         </div>
+    </div>
 
 
     </div>
@@ -929,7 +923,8 @@
             <h3 class="widget-title">Быстрые действия</h3>
         </div>
         <div class="widget-content">
-            <a href="/posts/create" class="follow-btn" style="width: 100%; margin-bottom: 1rem; justify-content: center;">
+            <a href="/posts/create" class="follow-btn"
+               style="width: 100%; margin-bottom: 1rem; justify-content: center;">
                 <i class="fas fa-plus"></i>
                 Создать пост
             </a>
@@ -1163,7 +1158,7 @@
             btn.style.color = '#3b82f6';
 
             // Scroll to comments
-            commentsSection.scrollIntoView({ behavior: 'smooth' });
+            commentsSection.scrollIntoView({behavior: 'smooth'});
         } else {
             commentsSection.style.display = 'none';
             btn.style.background = '';
@@ -1172,16 +1167,18 @@
     }
 
     // Обработчики событий
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Закрытие уведомления по клику
-        document.getElementById('notification').addEventListener('click', function() {
+        document.getElementById('notification').addEventListener('click', function () {
             hideNotification();
         });
 
         // Привязка события к кнопке лайка
         const likeBtn = document.querySelector('.like-btn');
         if (likeBtn && !likeBtn.onclick) {
-            likeBtn.onclick = function() { toggleLike(this); };
+            likeBtn.onclick = function () {
+                toggleLike(this);
+            };
         }
     });
 </script>
