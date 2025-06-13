@@ -799,6 +799,17 @@
                     <i class="fas fa-share"></i>
                     <span>Поделиться</span>
                 </button>
+
+                <div th:if="${currentUserId != null and currentUserId != post.author.id}">
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm report-btn"
+                            th:onclick="'reportPost(' + ${post.id} + ')'"
+                            title="Пожаловаться на пост"
+                            th:id="'reportBtn_' + ${post.id}">
+                        <i class="fas fa-flag"></i>
+                        <span class="d-none d-sm-inline ms-1">Пожаловаться</span>
+                    </button>
+                </div>
             </div>
 
             <div class="post-stats">
@@ -816,6 +827,8 @@
                 </div>
             </div>
         </div>
+
+
     </div>
 
     <!-- Comments Section -->
@@ -1173,6 +1186,7 @@
     });
 </script>
 <script th:src="@{/js/online-status.js}"></script>
+<script th:src="@{/js/post/reportPost.js}"></script>
 
 </body>
 </html>

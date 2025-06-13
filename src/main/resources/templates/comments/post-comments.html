@@ -326,8 +326,6 @@
 
 
 
-
-        <!-- AI Помощник для комментариев -->
         <!-- AI Помощник для комментариев -->
         <div class="ai-assistant-section" th:if="${currentUser}">
             <div class="card border-primary">
@@ -650,9 +648,12 @@
                 <button class="btn btn-outline-primary btn-sm" onclick="sharePost()">
                     <i class="fas fa-share"></i> Поделиться
                 </button>
-                <button class="btn btn-outline-secondary btn-sm" onclick="reportPost()">
+                <!-- Обновленная кнопка с передачей ID -->
+                <button class="btn btn-outline-secondary btn-sm"
+                        th:onclick="'reportPost(' + ${post.id} + ')'">
                     <i class="fas fa-flag"></i> Пожаловаться
                 </button>
+
                 <a th:href="@{'/posts/' + ${postId}}" class="btn btn-outline-info btn-sm">
                     <i class="fas fa-arrow-left"></i> К посту
                 </a>
@@ -1070,10 +1071,33 @@
         }
     }
 
-    function reportPost() {
+    function reportPost(postId) {
         if (confirm('Вы уверены, что хотите пожаловаться на этот пост?')) {
-            // Здесь можно добавить отправку жалобы на сервер
-            showSuccess('Жалоба отправлена на рассмотрение');
+
+            const reportData = {
+                postId: postId,
+                reason: "OTHER",
+                description: ""
+            };
+
+            fetch('/api/reports', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(reportData)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        showSuccess('Жалоба отправлена на рассмотрение');
+                    } else {
+                        alert('Ошибка: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Ошибка при отправке жалобы');
+                });
         }
     }
 

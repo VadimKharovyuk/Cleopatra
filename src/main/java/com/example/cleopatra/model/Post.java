@@ -54,6 +54,7 @@ public class Post {
     @Builder.Default
     private Long viewsCount = 0L;
 
+
     // Лайки - Many-to-Many связь с User
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -79,6 +80,15 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<PostMention> mentions = new HashSet<>();
 
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<PostReport> reports = new HashSet<>();
+
+    // Счетчик жалоб для производительности
+    @Column(name = "reports_count")
+    @Builder.Default
+    private Long reportsCount = 0L;
 
 
     // Системные поля

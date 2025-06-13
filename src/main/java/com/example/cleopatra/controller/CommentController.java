@@ -69,6 +69,7 @@ public class CommentController {
             // Получаем общее количество комментариев
             long totalComments = commentService.getCommentsCount(postId);
 
+
             // Добавляем данные в модель
             model.addAttribute("post", post);
             model.addAttribute("currentUser", currentUser);

@@ -5,6 +5,7 @@ import com.example.cleopatra.dto.Post.PostResponseDto;
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.service.MentionService;
+import com.example.cleopatra.service.PostReportService;
 import com.example.cleopatra.service.PostService;
 import com.example.cleopatra.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -31,17 +33,51 @@ public class PostController {
 
     private final PostService postService;
     private final UserService userService;
+    private final PostReportService reportService ;
 
     @GetMapping("/{id}")
-    public String showPost(@PathVariable Long id, Model model) {
-        PostResponseDto post = postService.getPostById(id);
+    public String showPost(@PathVariable Long id,
+                           Authentication authentication,
+                           Model model) {
 
-        if (post == null) {
-            log.warn("Пост с ID {} не найден!", id);
+        String username = authentication.getName();
+        Long currentUserId = userService.getUserIdByEmail(username);
+
+        try {
+            PostResponseDto post = postService.getPostById(id);
+
+            if (post == null) {
+                log.warn("Пост с ID {} не найден!", id);
+                return "error/404";
+            }
+
+            // Основные атрибуты
+            model.addAttribute("post", post);
+            model.addAttribute("currentUserId", currentUserId);
+
+            // Атрибуты для системы жалоб
+            boolean alreadyReported = reportService.hasUserReportedPost(id, currentUserId);
+            model.addAttribute("alreadyReported", alreadyReported);
+
+            // Проверяем, является ли пользователь автором поста
+            boolean isOwner = post.getAuthor() != null &&
+                    currentUserId.equals(post.getAuthor().getId());
+            model.addAttribute("isPostOwner", isOwner);
+
+            // Добавляем причины жалоб для JavaScript
+            model.addAttribute("reportReasons",
+                    java.util.Arrays.asList(com.example.cleopatra.enums.ReportReason.values()));
+
+            model.addAttribute("isAuthenticated", true);
+
+            log.debug("Показ поста {} пользователю {} ({})", id, currentUserId, username);
+            return "posts/view";
+
+        } catch (Exception e) {
+            log.error("Ошибка при загрузке поста {}: {}", id, e.getMessage(), e);
+            model.addAttribute("error", "Ошибка при загрузке поста");
+            return "error/500";
         }
-
-        model.addAttribute("post", post);
-        return "posts/view";
     }
 
 
