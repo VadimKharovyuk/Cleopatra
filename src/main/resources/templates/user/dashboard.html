@@ -1169,7 +1169,6 @@
         <!-- Feed -->
         <div class="feed" id="feed">
             <!-- Если есть посты -->
-            <!-- Обновленный шаблон с интеграцией рекламы -->
             <div th:if="${recentPosts != null and !recentPosts.posts.empty}" class="posts-container">
 
                 <!-- Переменная для отслеживания позиции -->
@@ -1241,8 +1240,8 @@
                         </div>
                     </div>
 
-                    <!-- Вставляем рекламу каждые 3 поста -->
-                    <div th:if="${(iterStat.index + 1) % 3 == 0 and !iterStat.last}"
+                    <!-- ИСПРАВЛЕНО: Используем переменную adInterval вместо жестко заданного числа -->
+                    <div th:if="${(iterStat.index + 1) % adInterval == 0 and !iterStat.last}"
                          class="ad-widget post-item ad-post-item"
                          th:attr="data-ad-position=${iterStat.index + 1}">
                         <div class="ad-content">

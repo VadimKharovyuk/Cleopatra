@@ -105,11 +105,7 @@ public class Advertisement {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-
-
-
-
+//
 //    @Scheduled(fixedRate = 300000) // каждые 5 минут
 //    public void checkBudgetStatus() {
 //        List<Advertisement> activeAds = advertisementRepository.findByStatus(AdStatus.ACTIVE);
@@ -120,5 +116,5 @@ public class Advertisement {
 //                    ad.setStatus(AdStatus.FINISHED);
 //                    advertisementRepository.save(ad);
 //                });
-//    }
+////    }
 }
