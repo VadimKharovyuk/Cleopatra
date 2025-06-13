@@ -1,8 +1,7 @@
 package com.example.cleopatra.service;
 
-import com.example.cleopatra.dto.WallPost.WallPostCardResponse;
-import com.example.cleopatra.dto.WallPost.WallPostCreateRequest;
-import com.example.cleopatra.dto.WallPost.WallPostPageResponse;
+import com.example.cleopatra.dto.WallPost.*;
+import com.example.cleopatra.enums.WallAccessLevel;
 
 import java.io.IOException;
 

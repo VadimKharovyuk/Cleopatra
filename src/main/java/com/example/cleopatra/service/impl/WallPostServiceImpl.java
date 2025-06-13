@@ -1,8 +1,7 @@
 package com.example.cleopatra.service.impl;
 
-import com.example.cleopatra.dto.WallPost.WallPostCardResponse;
-import com.example.cleopatra.dto.WallPost.WallPostCreateRequest;
-import com.example.cleopatra.dto.WallPost.WallPostPageResponse;
+import com.example.cleopatra.dto.WallPost.*;
+import com.example.cleopatra.enums.WallAccessLevel;
 import com.example.cleopatra.maper.WallPostMapper;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.model.WallPost;
@@ -204,5 +203,4 @@ public class WallPostServiceImpl implements WallPostService {
         return wallPost.getAuthor().getId().equals(currentUserId) ||
                 wallPost.getWallOwner().getId().equals(currentUserId);
     }
-
 }

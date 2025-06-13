@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'Настройки стены - ' + ${user.firstName} + ' ' + ${user.lastName}">Настройки стены</title>
+
+  <!-- Подключаем Font Awesome для иконок -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Подключаем Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Подключаем существующие стили sidebar -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Main Content Layout */
+    .main-content {
+      margin-left: 280px;
+      margin-right: 0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* Content Container */
+    .content-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-secondary);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .user-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border-primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .header-text h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem 0;
+      color: var(--text-primary);
+    }
+
+    .header-text p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-secondary);
+      transform: translateY(-1px);
+      text-decoration: none;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: var(--surface-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-secondary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-accent);
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    /* Settings Container */
+    .settings-container {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-secondary);
+      overflow: hidden;
+    }
+
+    .settings-header {
+      padding: 2rem 2rem 1rem;
+      border-bottom: 1px solid var(--border-secondary);
+      background: var(--surface-elevated);
+    }
+
+    .settings-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .settings-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin: 0.5rem 0 0 0;
+    }
+
+    /* Settings Content */
+    .settings-content {
+      padding: 2rem;
+    }
+
+    .setting-section {
+      margin-bottom: 2rem;
+    }
+
+    .setting-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 1rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-description {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    /* Access Level Options */
+    .access-options {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .access-option {
+      background: var(--bg-accent);
+      border: 2px solid var(--border-secondary);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .access-option:hover {
+      background: var(--surface-elevated);
+      border-color: var(--accent-primary);
+      transform: translateY(-1px);
+    }
+
+    .access-option.selected {
+      background: var(--surface-elevated);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .access-option.selected::before {
+      content: '';
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 20px;
+      height: 20px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .access-option.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 20px;
+      height: 20px;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .option-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .option-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      color: white;
+    }
+
+    .option-icon.public {
+      background: linear-gradient(135deg, var(--accent-success), #059669);
+    }
+
+    .option-icon.friends {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    .option-icon.private {
+      background: linear-gradient(135deg, var(--accent-warning), #d97706);
+    }
+
+    .option-icon.disabled {
+      background: linear-gradient(135deg, var(--text-muted), #6b7280);
+    }
+
+    .option-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .option-description {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    /* Current Status */
+    .current-status {
+      background: rgba(37, 99, 235, 0.1);
+      border: 1px solid rgba(37, 99, 235, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-icon {
+      color: var(--accent-primary);
+      font-size: 1.25rem;
+    }
+
+    .status-title {
+      font-weight: 600;
+      color: var(--accent-primary);
+      margin: 0;
+    }
+
+    .status-description {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-secondary);
+      flex-wrap: wrap;
+    }
+
+    /* Loading State */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow-lg);
+      z-index: 10000;
+      animation: slideInRight 0.3s ease;
+      max-width: 320px;
+    }
+
+    .notification.success {
+      border-left: 4px solid var(--accent-success);
+    }
+
+    .notification.error {
+      border-left: 4px solid var(--accent-warning);
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 80px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+        padding-top: 60px;
+      }
+
+      .page-header,
+      .settings-container {
+        border-radius: var(--radius-lg);
+      }
+
+      .page-header,
+      .settings-content {
+        padding: 1.5rem;
+      }
+
+      .header-content {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-actions {
+        justify-content: flex-start;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Подключаем sidebar -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+<th:block th:replace="~{fragments/sidebar :: sidebar('settings')}"></th:block>
+
+<!-- Основной контент -->
+<div class="main-content">
+  <div class="content-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-info">
+          <img th:src="${user.imageUrl ?: '/default-avatar.png'}"
+               th:alt="${user.firstName + ' ' + user.lastName}"
+               class="user-avatar">
+          <div class="header-text">
+            <h1>
+              <span th:text="${user.firstName + ' ' + user.lastName}">Имя пользователя</span>
+            </h1>
+            <p>Настройки стены</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <a th:href="@{'/wall/' + ${user.id}}" class="btn btn-secondary">
+            <i class="fas fa-eye"></i>
+            Перейти к стене
+          </a>
+          <a th:href="@{'/profile/' + ${user.id}}" class="btn btn-secondary">
+            <i class="fas fa-user"></i>
+            Профиль
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Container -->
+    <div class="settings-container">
+      <div class="settings-header">
+        <h2 class="settings-title">
+          <i class="fas fa-cog"></i>
+          Настройки стены
+        </h2>
+        <p class="settings-subtitle">
+          Управляйте тем, кто может писать на вашей стене
+        </p>
+      </div>
+
+      <div class="settings-content">
+        <!-- Current Status -->
+        <div class="current-status">
+          <div class="status-header">
+            <i class="fas fa-info-circle status-icon"></i>
+            <h3 class="status-title">Текущие настройки</h3>
+          </div>
+          <p class="status-description" th:text="${settings.displayName}">
+            Все могут писать на стене
+          </p>
+        </div>
+
+        <!-- Access Level Settings -->
+        <div class="setting-section">
+          <h3 class="section-title">
+            <i class="fas fa-shield-alt"></i>
+            Уровень доступа к стене
+          </h3>
+          <p class="section-description">
+            Выберите, кто может оставлять записи на вашей стене
+          </p>
+
+          <div class="access-options">
+            <div th:each="level : ${allAccessLevels}"
+                 class="access-option"
+                 th:classappend="${level == settings.wallAccessLevel} ? 'selected' : ''"
+                 th:data-level="${level.name()}"
+                 onclick="selectAccessLevel(this)">
+
+              <div class="option-header">
+                <div class="option-icon"
+                     th:classappend="${level.name().toLowerCase()}">
+                  <i th:class="${level.name() == 'PUBLIC' ? 'fas fa-globe' :
+                                                     level.name() == 'FRIENDS' ? 'fas fa-users' :
+                                                     level.name() == 'PRIVATE' ? 'fas fa-lock' :
+                                                     'fas fa-ban'}"></i>
+                </div>
+                <h4 class="option-title" th:text="${level.displayName}">
+                  Все могут писать на стене
+                </h4>
+              </div>
+              <p class="option-description"
+                 th:text="${level.name() == 'PUBLIC' ? 'Любой пользователь может оставить запись на вашей стене' :
+                                            level.name() == 'FRIENDS' ? 'Только ваши подписчики могут писать на стене' :
+                                            level.name() == 'PRIVATE' ? 'Только вы можете писать на собственной стене' :
+                                            'Стена полностью отключена для всех записей'}">
+                Описание уровня доступа
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+            <i class="fas fa-times"></i>
+            Отмена
+          </button>
+          <button type="button" class="btn btn-primary" id="saveBtn" onclick="saveSettings()">
+            <i class="fas fa-save"></i>
+            Сохранить изменения
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Подключаем скрипты sidebar -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<script th:inline="javascript">
+  // Переменные из Thymeleaf
+  const userId = /*[[${user.id}]]*/ 0;
+  const currentAccessLevel = /*[[${settings.wallAccessLevel.name()}]]*/ 'PUBLIC';
+
+  let selectedAccessLevel = currentAccessLevel;
+
+  // Выбор уровня доступа
+  function selectAccessLevel(element) {
+    // Убираем выделение со всех опций
+    document.querySelectorAll('.access-option').forEach(option => {
+      option.classList.remove('selected');
+    });
+
+    // Выделяем выбранную опцию
+    element.classList.add('selected');
+    selectedAccessLevel = element.dataset.level;
+
+    // Проверяем, изменились ли настройки
+    updateSaveButton();
+  }
+
+  // Обновление состояния кнопки сохранения
+  function updateSaveButton() {
+    const saveBtn = document.getElementById('saveBtn');
+    const hasChanges = selectedAccessLevel !== currentAccessLevel;
+
+    if (hasChanges) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="fas fa-save"></i> Сохранить изменения';
+    } else {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fas fa-check"></i> Изменений нет';
+    }
+  }
+
+  // Сохранение настроек
+  async function saveSettings() {
+    if (selectedAccessLevel === currentAccessLevel) {
+      return;
+    }
+
+    const saveBtn = document.getElementById('saveBtn');
+    const originalContent = saveBtn.innerHTML;
+
+    // Показываем состояние загрузки
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner"></span> Сохранение...';
+
+    try {
+      const response = await fetch(`/wall/settings/api/${userId}/access-level?accessLevel=${selectedAccessLevel}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка сохранения настроек');
+      }
+
+      const data = await response.json();
+
+      // Обновляем текущий статус
+      document.querySelector('.status-description').textContent = data.displayName;
+
+      showNotification('Настройки успешно сохранены!', 'success');
+
+      // Обновляем переменные
+      window.currentAccessLevel = selectedAccessLevel;
+      updateSaveButton();
+
+    } catch (error) {
+      console.error('Ошибка сохранения:', error);
+      showNotification('Ошибка при сохранении настроек', 'error');
+
+      // Восстанавливаем кнопку
+      saveBtn.innerHTML = originalContent;
+      saveBtn.disabled = false;
+    }
+  }
+
+  // Показать уведомление
+  function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.transform = 'translateX(100%)';
+      notification.style.opacity = '0';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // Инициализация
+  document.addEventListener('DOMContentLoaded', function() {
+    updateSaveButton();
+  });
+</script>
+</body>
+</html>

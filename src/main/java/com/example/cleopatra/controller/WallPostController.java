@@ -28,13 +28,9 @@ public class WallPostController {
     private final UserService userService;
     private final SubscriptionService subscriptionService;
 
-    // Добавь тестовый метод в контроллер для отладки:
-    @GetMapping("/debug/subscription/{userId1}/{userId2}")
-    @ResponseBody
-    public ResponseEntity<String> debugSubscription(@PathVariable Long userId1, @PathVariable Long userId2) {
-        boolean isSubscribed = subscriptionService.isSubscribed(userId1, userId2);
-        return ResponseEntity.ok("User " + userId1 + " subscribed to " + userId2 + ": " + isSubscribed);
-    }
+
+//    @PostMapping("/wall/api/posts/{postId}/like")
+//    @GetMapping("/wall/api/posts/{postId}/comments")
 
 
     /**
