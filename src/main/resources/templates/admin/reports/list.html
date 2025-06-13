@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Управление жалобами - Админ панель</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .admin-header {
+      background: linear-gradient(135deg, #6f42c1, #d63384);
+      color: white;
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+    }
+
+    .stats-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-left: 4px solid;
+    }
+
+    .stat-card.pending { border-left-color: #ffc107; }
+    .stat-card.total { border-left-color: #0dcaf0; }
+    .stat-card.today { border-left-color: #198754; }
+
+    .filters {
+      background: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .reports-table {
+      background: white;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .priority-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .priority-5 { background-color: #dc3545; }
+    .priority-4 { background-color: #fd7e14; }
+    .priority-3 { background-color: #ffc107; }
+    .priority-2 { background-color: #6c757d; }
+    .priority-1 { background-color: #adb5bd; }
+
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .post-preview {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .pagination-wrapper {
+      background: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .table-responsive {
+        font-size: 0.875rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Заголовок -->
+<div class="admin-header">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1 class="mb-1">
+          <i class="fas fa-shield-alt"></i>
+          Управление жалобами
+        </h1>
+        <p class="mb-0 opacity-75">Модерация контента и рассмотрение жалоб пользователей</p>
+      </div>
+      <div class="text-end">
+        <div class="fs-5 fw-bold" th:text="${totalElements}">0</div>
+        <div class="small">Всего жалоб</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Карточки статистики -->
+  <div class="stats-cards">
+    <div class="stat-card pending">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h3 class="fs-2 fw-bold mb-0 text-warning" th:text="${pendingCount}">0</h3>
+          <p class="mb-0 text-muted">Ожидают рассмотрения</p>
+        </div>
+        <i class="fas fa-clock fa-2x text-warning"></i>
+      </div>
+    </div>
+
+    <div class="stat-card total">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h3 class="fs-2 fw-bold mb-0 text-info" th:text="${totalCount}">0</h3>
+          <p class="mb-0 text-muted">Всего жалоб</p>
+        </div>
+        <i class="fas fa-flag fa-2x text-info"></i>
+      </div>
+    </div>
+
+    <div class="stat-card today">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h3 class="fs-2 fw-bold mb-0 text-success">0</h3>
+          <p class="mb-0 text-muted">За сегодня</p>
+        </div>
+        <i class="fas fa-calendar-day fa-2x text-success"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Фильтры -->
+  <div class="filters">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <div class="d-flex gap-2">
+          <a th:href="@{/admin/reports(filter='all', page=0, size=${pageSize})}"
+             class="btn btn-outline-primary"
+             th:classappend="${currentFilter == 'all'} ? 'active' : ''">
+            <i class="fas fa-list"></i> Все жалобы
+          </a>
+          <a th:href="@{/admin/reports(filter='pending', page=0, size=${pageSize})}"
+             class="btn btn-outline-warning"
+             th:classappend="${currentFilter == 'pending'} ? 'active' : ''">
+            <i class="fas fa-clock"></i> Ожидают рассмотрения
+          </a>
+        </div>
+      </div>
+      <div class="col-md-6 text-end">
+        <div class="d-flex justify-content-end gap-2">
+          <button class="btn btn-outline-secondary" onclick="refreshPage()">
+            <i class="fas fa-sync-alt"></i> Обновить
+          </button>
+          <button class="btn btn-outline-info" onclick="exportReports()">
+            <i class="fas fa-download"></i> Экспорт
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Таблица жалоб -->
+  <div class="reports-table">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Пост</th>
+          <th>Автор поста</th>
+          <th>Жалобщик</th>
+          <th>Причина</th>
+          <th>Приоритет</th>
+          <th>Статус</th>
+          <th>Дата</th>
+          <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${reports.empty}">
+          <td colspan="9" class="text-center py-4 text-muted">
+            <i class="fas fa-inbox fa-3x mb-3"></i>
+            <div>Жалоб не найдено</div>
+          </td>
+        </tr>
+
+        <tr th:each="report : ${reports.content}">
+          <td class="fw-bold" th:text="${report.id}">#123</td>
+
+          <td>
+            <div class="post-preview" th:text="${report.postContent}" title="Полный текст поста">
+              Содержимое поста...
+            </div>
+            <small class="text-muted">ID: <span th:text="${report.postId}">456</span></small>
+          </td>
+
+          <td th:text="${report.postAuthorName}">Автор</td>
+          <td th:text="${report.reporterName}">Жалобщик</td>
+
+          <td>
+            <span class="badge bg-secondary" th:text="${report.reason.description}">Причина</span>
+            <div th:if="${report.description != null and !report.description.empty}">
+              <small class="text-muted" th:text="${report.description}">Описание</small>
+            </div>
+          </td>
+
+          <td>
+                                <span class="badge priority-badge"
+                                      th:classappend="'priority-' + ${report.priority}"
+                                      th:text="'Приоритет ' + ${report.priority}">
+                                    Приоритет 3
+                                </span>
+          </td>
+
+          <td>
+                                <span class="badge status-badge"
+                                      th:classappend="${report.status.name() == 'PENDING'} ? 'bg-warning' : (${report.status.name() == 'RESOLVED'} ? 'bg-success' : 'bg-secondary')"
+                                      th:text="${report.status.displayName}">
+                                    Ожидает
+                                </span>
+          </td>
+
+          <td>
+            <div th:text="${#temporals.format(report.createdAt, 'dd.MM.yyyy')}">01.01.2024</div>
+            <small class="text-muted" th:text="${#temporals.format(report.createdAt, 'HH:mm')}">12:30</small>
+          </td>
+
+          <td>
+            <div class="action-buttons">
+              <button class="btn btn-sm btn-outline-primary"
+                      th:onclick="'viewReport(' + ${report.id} + ')'"
+                      title="Просмотреть">
+                <i class="fas fa-eye"></i>
+              </button>
+
+              <button class="btn btn-sm btn-outline-success"
+                      th:onclick="'resolveReport(' + ${report.id} + ')'"
+                      th:if="${report.status.name() == 'PENDING'}"
+                      title="Решить">
+                <i class="fas fa-check"></i>
+              </button>
+
+              <a class="btn btn-sm btn-outline-info"
+                 th:href="@{/posts/{id}(id=${report.postId})}"
+                 target="_blank"
+                 title="Открыть пост">
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Пагинация -->
+  <div class="pagination-wrapper" th:if="${totalPages > 1}">
+    <nav aria-label="Навигация по страницам">
+      <ul class="pagination justify-content-center mb-0">
+        <!-- Предыдущая страница -->
+        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+          <a class="page-link"
+             th:href="@{/admin/reports(filter=${currentFilter}, page=${currentPage - 1}, size=${pageSize})}">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+        </li>
+
+        <!-- Номера страниц -->
+        <li class="page-item"
+            th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+            th:if="${pageNum >= currentPage - 2 && pageNum <= currentPage + 2}"
+            th:classappend="${pageNum == currentPage} ? 'active'">
+          <a class="page-link"
+             th:href="@{/admin/reports(filter=${currentFilter}, page=${pageNum}, size=${pageSize})}"
+             th:text="${pageNum + 1}">1</a>
+        </li>
+
+        <!-- Следующая страница -->
+        <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+          <a class="page-link"
+             th:href="@{/admin/reports(filter=${currentFilter}, page=${currentPage + 1}, size=${pageSize})}">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="text-center mt-2 text-muted">
+      Показано <span th:text="${reports.numberOfElements}">20</span> из
+      <span th:text="${totalElements}">100</span> жалоб
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно для решения жалобы -->
+<div class="modal fade" id="resolveModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-gavel"></i>
+          Рассмотрение жалобы
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="resolveForm">
+          <div class="mb-3">
+            <label for="adminComment" class="form-label">Комментарий администратора</label>
+            <textarea class="form-control" id="adminComment" rows="3"
+                      placeholder="Укажите причину принятого решения..."></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="actionTaken" class="form-label">Предпринятые действия</label>
+            <select class="form-select" id="actionTaken">
+              <option value="">Выберите действие</option>
+              <option value="no_action">Никаких действий не требуется</option>
+              <option value="post_hidden">Пост скрыт</option>
+              <option value="post_deleted">Пост удален</option>
+              <option value="user_warned">Пользователь предупрежден</option>
+              <option value="user_blocked">Пользователь заблокирован</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-success" onclick="submitResolve()">
+          <i class="fas fa-check"></i> Решить жалобу
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+  let currentReportId = null;
+
+  function viewReport(reportId) {
+    // TODO: Показать детальную информацию о жалобе
+    alert('Просмотр жалобы #' + reportId);
+  }
+
+  function resolveReport(reportId) {
+    currentReportId = reportId;
+    const modal = new bootstrap.Modal(document.getElementById('resolveModal'));
+    modal.show();
+  }
+
+  function submitResolve() {
+    const adminComment = document.getElementById('adminComment').value;
+    const actionTaken = document.getElementById('actionTaken').value;
+
+    if (!adminComment.trim()) {
+      alert('Пожалуйста, укажите комментарий');
+      return;
+    }
+
+    if (!actionTaken) {
+      alert('Пожалуйста, выберите предпринятое действие');
+      return;
+    }
+
+    fetch(`/admin/reports/${currentReportId}/resolve`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `adminComment=${encodeURIComponent(adminComment)}&actionTaken=${encodeURIComponent(actionTaken)}`
+    })
+            .then(response => response.json())
+            .then(result => {
+              if (result.success) {
+                alert('Жалоба успешно рассмотрена');
+                location.reload();
+              } else {
+                alert('Ошибка: ' + result.message);
+              }
+            })
+            .catch(error => {
+              console.error('Ошибка:', error);
+              alert('Произошла ошибка при рассмотрении жалобы');
+            });
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('resolveModal'));
+    modal.hide();
+  }
+
+  function refreshPage() {
+    location.reload();
+  }
+
+  function exportReports() {
+    alert('Функция экспорта будет добавлена позже');
+  }
+
+  // Автообновление каждые 30 секунд
+  setInterval(function() {
+    location.reload();
+  }, 30000);
+</script>
+</body>
+</html>
