@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
           rel="stylesheet">
     <link th:href="@{/css/advertisement-widget.css}" rel="stylesheet" type="text/css">
-    <link th:href="@{/css/feed/mention-suggestions.css}" rel="stylesheet">
+
 
     <style>
         /* Основные стили страницы */
@@ -840,24 +840,15 @@
                     <form id="createPostForm" enctype="multipart/form-data">
 
                         <!-- ✅ ОБНОВЛЕННЫЙ БЛОК TEXTAREA С СИСТЕМОЙ УПОМИНАНИЙ -->
-                        <div class="mention-container">
+
                     <textarea
                             class="post-textarea mention-enabled"
-                            placeholder="Что происходит? Используйте @ для упоминания пользователей..."
+                            placeholder="Что происходит?.."
                             maxlength="1000"
                             id="postContent"
                             name="content"
                             required></textarea>
 
-                            <!-- ✅ Dropdown для suggestions упоминаний -->
-                            <div class="mention-suggestions" id="mentionSuggestions"></div>
-
-                            <!-- ✅ Индикатор упоминаний -->
-                            <div class="mention-indicator" id="mentionIndicator">
-                                <i class="fas fa-at"></i>
-                                Введите @ для упоминания
-                            </div>
-                        </div>
 
                         <!-- Скрытые поля для геолокации -->
                         <input type="hidden" id="locationId" name="locationId">
@@ -921,16 +912,13 @@
                                         onclick="selectImage()">
                                     <i class="fas fa-image"></i>
                                 </button>
+
                                 <button type="button" class="tool-btn" title="Добавить местоположение"
                                         onclick="toggleLocationSection()">
                                     <i class="fas fa-map-marker-alt"></i>
                                 </button>
 
-                                <!-- ✅ НОВАЯ КНОПКА ДЛЯ УПОМИНАНИЙ -->
-                                <button type="button" class="tool-btn mention-tool-btn" title="Упомянуть пользователя"
-                                        onclick="showMentionHint()">
-                                    <i class="fas fa-at"></i>
-                                </button>
+
 
                                 <button type="button" class="tool-btn" title="Добавить эмодзи">
                                     <i class="fas fa-smile"></i>
@@ -1187,7 +1175,8 @@
                                  th:src="${post.author.imageUrl}"
                                  th:alt="${post.author.firstName + ' ' + post.author.lastName}">
                             <div th:unless="${post.author.imageUrl}" class="default-avatar">
-                                <span th:text="${#strings.substring(post.author.firstName, 0, 1) + #strings.substring(post.author.lastName, 0, 1)}">AB</span>
+        <span th:text="${(post.author.firstName != null ? #strings.substring(post.author.firstName, 0, 1) : '') +
+                       (post.author.lastName != null ? #strings.substring(post.author.lastName, 0, 1) : '')}">AB</span>
                             </div>
                         </a>
 

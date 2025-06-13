@@ -67,7 +67,7 @@ public class NotificationController {
             Long userId = userService.getUserIdByEmail(email);
 
             Pageable pageable = PageRequest.of(page, size);
-            // Используем новый метод с пагинацией
+
             Page<NotificationDto> unreadNotifications = notificationService
                     .getUnreadNotificationsWithPagination(userId, pageable);
             long unreadCount = notificationService.getUnreadCount(userId);
