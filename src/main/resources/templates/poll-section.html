@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- Секция для создания опроса (скрытая по умолчанию) -->
+<div id="poll-section" class="poll-section" style="display: none;">
+  <div class="poll-creator">
+    <h4><i class="fas fa-poll"></i> Создать опрос</h4>
+
+    <div class="form-group">
+      <label>Вопрос для голосования:</label>
+      <input type="text" id="poll-question"
+             placeholder="Введите вопрос..." maxlength="500">
+    </div>
+
+    <div class="poll-options">
+      <label>Варианты ответов:</label>
+      <div class="option-input">
+        <input type="text" placeholder="Вариант 1" maxlength="200">
+        <button type="button" onclick="removePollOption(this)">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="option-input">
+        <input type="text" placeholder="Вариант 2" maxlength="200">
+        <button type="button" onclick="removePollOption(this)">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="poll-controls">
+      <button type="button" onclick="addPollOption()" class="btn-add-option">
+        <i class="fas fa-plus"></i> Добавить вариант
+      </button>
+
+      <div class="poll-settings">
+        <label>
+          <input type="checkbox" id="multiple-choice">
+          Множественный выбор
+        </label>
+
+        <div class="expiry-setting">
+          <label>Завершить голосование:</label>
+          <select id="poll-expiry">
+            <option value="">Никогда</option>
+            <option value="1">За 1 час</option>
+            <option value="24">За 1 день</option>
+            <option value="168">За 7 дней</option>
+            <option value="720">За 30 дней</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="poll-actions">
+      <button type="button" onclick="removePoll()" class="btn-remove">
+        <i class="fas fa-trash"></i> Удалить опрос
+      </button>
+    </div>
+  </div>
+
+  <div th:if="${post.poll}" class="post-poll">
+    <h4 class="poll-question" th:text="${post.poll.question}">Вопрос опроса</h4>
+
+    <div class="poll-options">
+      <div th:each="option : ${post.poll.options}" class="poll-option">
+        <button type="button"
+                class="poll-option-btn"
+                th:classappend="${option.userVoted} ? 'voted' : ''"
+                onclick="voteOnPoll(${post.poll.id}, ${option.id})">
+
+          <span class="option-text" th:text="${option.optionText}">Вариант</span>
+
+          <div class="vote-bar">
+            <div class="vote-progress"
+                 th:style="'width: ' + ${option.percentage} + '%'"></div>
+          </div>
+
+          <span class="vote-count" th:text="${option.votesCount} + ' голосов'">0 голосов</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="poll-footer">
+        <span class="total-votes" th:text="${post.poll.totalVotes} + ' человек проголосовало'">
+            0 человек проголосовало
+        </span>
+
+      <span th:if="${post.poll.expiresAt}" class="poll-expiry">
+            Завершится: <span th:text="${#temporals.format(post.poll.expiresAt, 'dd.MM.yyyy HH:mm')}"></span>
+        </span>
+    </div>
+  </div></div>
+<script>
+  function togglePollSection() {
+    const pollSection = document.getElementById('poll-section');
+    pollSection.style.display = pollSection.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function addPollOption() {
+    const optionsContainer = document.querySelector('.poll-options');
+    const optionCount = optionsContainer.children.length;
+
+    if (optionCount < 10) { // Максимум 10 вариантов
+      const newOption = document.createElement('div');
+      newOption.className = 'option-input';
+      newOption.innerHTML = `
+            <input type="text" placeholder="Вариант ${optionCount}" maxlength="200">
+            <button type="button" onclick="removePollOption(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+      optionsContainer.appendChild(newOption);
+    }
+  }
+
+  function removePollOption(button) {
+    const optionsContainer = document.querySelector('.poll-options');
+    if (optionsContainer.children.length > 2) { // Минимум 2 варианта
+      button.parentElement.remove();
+    }
+  }
+
+  function removePoll() {
+    document.getElementById('poll-section').style.display = 'none';
+    // Очистить все поля
+    document.getElementById('poll-question').value = '';
+    document.querySelectorAll('.option-input input').forEach(input => input.value = '');
+  }
+</script>
+</body>
+</html>
