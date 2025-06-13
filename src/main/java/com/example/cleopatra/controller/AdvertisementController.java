@@ -349,28 +349,39 @@ public class AdvertisementController {
      */
     @PostMapping("/api/{id}/view")
     @ResponseBody
-    public String registerView(@PathVariable Long id, @AuthenticationPrincipal User user) {
+    public ResponseEntity<String> registerView(@PathVariable Long id,
+                                               Authentication authentication,
+                                               HttpServletRequest request) {
         try {
-            advertisementService.registerView(id, user);
-            return "OK";
+            User user = userService.getCurrentUserEntity(authentication);
+            log.info("Регистрация просмотра рекламы {} пользователем {}",
+                    id, user != null ? user.getEmail() : "анонимный");
+
+            // Передаем request в сервис
+            advertisementService.registerView(id, user, request);
+            return ResponseEntity.ok("OK");
         } catch (Exception e) {
-            log.error("Ошибка регистрации просмотра: {}", e.getMessage());
-            return "ERROR";
+            log.error("Ошибка регистрации просмотра: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body("ERROR");
         }
     }
 
-    /**
-     * Регистрация клика по рекламе
-     */
     @PostMapping("/api/{id}/click")
     @ResponseBody
-    public String registerClick(@PathVariable Long id, @AuthenticationPrincipal User user) {
+    public ResponseEntity<String> registerClick(@PathVariable Long id,
+                                                Authentication authentication,
+                                                HttpServletRequest request) {
         try {
-            advertisementService.registerClick(id, user);
-            return "OK";
+            User user = userService.getCurrentUserEntity(authentication);
+            log.info("Регистрация клика по рекламе {} пользователем {}",
+                    id, user != null ? user.getEmail() : "анонимный");
+
+            // Передаем request в сервис
+            advertisementService.registerClick(id, user, request);
+            return ResponseEntity.ok("OK");
         } catch (Exception e) {
-            log.error("Ошибка регистрации клика: {}", e.getMessage());
-            return "ERROR";
+            log.error("Ошибка регистрации клика: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body("ERROR");
         }
     }
 }

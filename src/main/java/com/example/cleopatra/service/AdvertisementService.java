@@ -5,11 +5,14 @@ import com.example.cleopatra.dto.AdvertisementDTO.AdvertisementResponseDTO;
 import com.example.cleopatra.dto.AdvertisementDTO.UpdateAdvertisementDTO;
 import com.example.cleopatra.model.Advertisement;
 import com.example.cleopatra.model.User;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
+
 
 public interface AdvertisementService {
 
@@ -56,12 +59,12 @@ public interface AdvertisementService {
     /**
      * Регистрирует просмотр рекламы
      */
-    void registerView(Long advertisementId, User viewer);
+    void registerView(Long advertisementId, User viewer, HttpServletRequest request);
 
     /**
      * Регистрирует клик по рекламе
      */
-    void registerClick(Long advertisementId, User clicker);
+    void registerClick(Long advertisementId, User clicker, HttpServletRequest request);
 
     /**
      * Проверяет, принадлежит ли реклама пользователю
@@ -94,4 +97,6 @@ public interface AdvertisementService {
 
 
     Map<String, Object> debugAdvertisements();
+
+    AdvertisementDetailDTO addBudgetToAdvertisement(Long advertisementId, BigDecimal additionalBudget, User user);
 }

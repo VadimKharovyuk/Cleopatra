@@ -109,6 +109,7 @@ public class Advertisement {
 
 
 
+
 //    @Scheduled(fixedRate = 300000) // каждые 5 минут
 //    public void checkBudgetStatus() {
 //        List<Advertisement> activeAds = advertisementRepository.findByStatus(AdStatus.ACTIVE);

@@ -9,11 +9,14 @@ import com.example.cleopatra.model.Advertisement;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.repository.AdvertisementRepository;
 import com.example.cleopatra.service.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,8 +41,24 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     private final UserService userService;
 
     @Override
+    @Transactional
     public AdvertisementDetailDTO createAdvertisement(CreateAdvertisementDTO dto, MultipartFile image, User createdBy) throws IOException {
         log.info("Создание рекламы с изображением для пользователя: {}", createdBy.getEmail());
+
+        // Проверяем и резервируем средства с баланса
+        BigDecimal totalBudget = dto.getTotalBudget();
+        BigDecimal userBalance = createdBy.getBalance();
+
+        if (userBalance == null) {
+            userBalance = BigDecimal.ZERO;
+            createdBy.setBalance(userBalance);
+        }
+
+        if (userBalance.compareTo(totalBudget) < 0) {
+            throw new RuntimeException(String.format(
+                    "Недостаточно средств на балансе. Доступно: %s, требуется: %s",
+                    userBalance, totalBudget));
+        }
 
         // Валидация и обработка изображения
         ImageConverterService.ProcessedImage processedImage = imageValidator.validateAndProcess(image);
@@ -52,9 +71,16 @@ public class AdvertisementServiceImpl implements AdvertisementService {
         advertisement.setImageUrl(storageResult.getUrl());
         advertisement.setImgId(storageResult.getImageId());
 
+        // Резервируем средства с баланса пользователя
+        BigDecimal newBalance = userBalance.subtract(totalBudget);
+        createdBy.setBalance(newBalance);
+        userService.save(createdBy);
+
         Advertisement savedAd = advertisementRepository.save(advertisement);
 
-        log.info("Реклама успешно создана с ID: {}", savedAd.getId());
+        log.info("Реклама успешно создана с ID: {}. Зарезервировано {} с баланса. Остаток баланса: {}",
+                savedAd.getId(), totalBudget, newBalance);
+
         return AdvertisementDetailDTO.fromEntity(savedAd);
     }
 
@@ -198,7 +224,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
                         log.info("  Объявление ID {}: подходит = {}", ad.getId(), suitable);
                         return suitable;
                     })
-                    .collect(Collectors.toList());
+                    .toList();
 
             log.info("После фильтрации по пользователю: {}", suitableAds.size());
 
@@ -373,18 +399,25 @@ public class AdvertisementServiceImpl implements AdvertisementService {
             return false;
         }
 
-        // НОВАЯ ЛОГИКА: Проверка баланса владельца рекламы
+        // Проверка баланса владельца рекламы
         User adOwner = ad.getCreatedBy();
-        if (adOwner != null && adOwner.getBalance() != null) {
+        if (adOwner != null) {
+            BigDecimal ownerBalance = adOwner.getBalance();
             BigDecimal requiredAmount = ad.getCostPerView() != null ? ad.getCostPerView() : BigDecimal.ZERO;
-            if (adOwner.getBalance().compareTo(requiredAmount) < 0) {
+
+            // Защита от null баланса
+            if (ownerBalance == null) {
+                ownerBalance = BigDecimal.ZERO;
+            }
+
+            if (ownerBalance.compareTo(requiredAmount) < 0) {
                 log.debug("Реклама ID {} неактивна: недостаточно средств у владельца. Баланс: {}, требуется: {}",
-                        ad.getId(), adOwner.getBalance(), requiredAmount);
+                        ad.getId(), ownerBalance, requiredAmount);
                 return false;
             }
         }
 
-        // Оставляем старую проверку для совместимости
+        // Дополнительная проверка remainingBudget для совместимости
         if (ad.getRemainingBudget() != null &&
                 ad.getCostPerView() != null &&
                 ad.getRemainingBudget().compareTo(ad.getCostPerView()) < 0) {
@@ -394,262 +427,8 @@ public class AdvertisementServiceImpl implements AdvertisementService {
         return true;
     }
 
-//    private boolean isAdCurrentlyActive(Advertisement ad) {
-//        LocalTime currentTime = LocalTime.now();
-//        LocalDate currentDate = LocalDate.now();
-//
-//        // Проверка даты окончания
-//        if (ad.getEndDate() != null && ad.getEndDate().isBefore(currentDate)) {
-//            return false;
-//        }
-//
-//        // Проверка времени начала
-//        if (ad.getStartTime() != null && ad.getStartTime().isAfter(currentTime)) {
-//            return false;
-//        }
-//
-//        // Проверка времени окончания
-//        if (ad.getEndTime() != null && ad.getEndTime().isBefore(currentTime)) {
-//            return false;
-//        }
-//
-//        // Проверка бюджета
-//        if (ad.getRemainingBudget() != null &&
-//                ad.getCostPerView() != null &&
-//                ad.getRemainingBudget().compareTo(ad.getCostPerView()) < 0) {
-//            return false;
-//        }
-//
-//        return true;
-//    }
 
 
-    @Override
-    public void registerView(Long advertisementId, User viewer) {
-        if (viewer == null) {
-            log.debug("Пропускаем регистрацию просмотра для анонимного пользователя");
-            return;
-        }
-
-        try {
-            Advertisement advertisement = advertisementRepository.findById(advertisementId)
-                    .orElseThrow(() -> new RuntimeException("Реклама не найдена"));
-
-            // Получаем владельца рекламы
-            User adOwner = advertisement.getCreatedBy();
-            BigDecimal costPerView = advertisement.getCostPerView();
-
-            // НОВАЯ ЛОГИКА: Проверяем баланс владельца рекламы
-            if (adOwner.getBalance().compareTo(costPerView) < 0) {
-                log.warn("Недостаточно средств на балансе у владельца рекламы ID {}. Баланс: {}, требуется: {}",
-                        advertisementId, adOwner.getBalance(), costPerView);
-
-                // Приостанавливаем рекламу
-                advertisement.setStatus(AdStatus.PAUSED);
-                advertisementRepository.save(advertisement);
-                return;
-            }
-
-            // Списываем средства с баланса владельца
-            BigDecimal newBalance = adOwner.getBalance().subtract(costPerView);
-            adOwner.setBalance(newBalance);
-            userService.save(adOwner); // Сохраняем пользователя
-
-            // Увеличиваем счетчик просмотров
-            long currentViews = advertisement.getViewsCount() != null ? advertisement.getViewsCount() : 0;
-            advertisement.setViewsCount(currentViews + 1);
-            advertisement.setLastViewedAt(LocalDateTime.now());
-
-            // Обновляем remaining_budget для совместимости
-            advertisement.setRemainingBudget(newBalance);
-
-            advertisementRepository.save(advertisement);
-
-            log.info("Списано {} с баланса пользователя {}. Новый баланс: {}",
-                    costPerView, adOwner.getEmail(), newBalance);
-
-            // Записываем в детальную статистику
-            try {
-                adStatisticsService.recordView(advertisementId, viewer, null);
-            } catch (Exception e) {
-                log.warn("Ошибка записи детальной статистики просмотра: {}", e.getMessage());
-            }
-
-        } catch (Exception e) {
-            log.error("Ошибка регистрации просмотра: {}", e.getMessage());
-        }
-    }
-
-//    @Override
-//    public void registerView(Long advertisementId, User viewer) {
-//        log.debug("Регистрация просмотра рекламы {} пользователем {}",
-//                advertisementId, viewer != null ? viewer.getEmail() : "анонимный");
-//
-//        // Проверяем что пользователь не null
-//        if (viewer == null) {
-//            log.debug("Пропускаем регистрацию просмотра для анонимного пользователя");
-//            return;
-//        }
-//
-//        try {
-//            Advertisement advertisement = advertisementRepository.findById(advertisementId)
-//                    .orElseThrow(() -> new RuntimeException("Реклама не найдена"));
-//
-//            // Проверяем бюджет
-//            if (advertisement.getRemainingBudget() != null &&
-//                    advertisement.getCostPerView() != null &&
-//                    advertisement.getRemainingBudget().compareTo(advertisement.getCostPerView()) < 0) {
-//                advertisement.setStatus(AdStatus.FINISHED);
-//                advertisementRepository.save(advertisement);
-//                return;
-//            }
-//
-//            // Списываем средства и увеличиваем счетчик
-//            if (advertisement.getRemainingBudget() != null && advertisement.getCostPerView() != null) {
-//                BigDecimal newBudget = advertisement.getRemainingBudget().subtract(advertisement.getCostPerView());
-//                advertisement.setRemainingBudget(newBudget);
-//
-//                // Проверяем не закончился ли бюджет
-//                if (newBudget.compareTo(advertisement.getCostPerView()) < 0) {
-//                    advertisement.setStatus(AdStatus.FINISHED);
-//                }
-//            }
-//
-//            // Увеличиваем счетчик просмотров
-//            long currentViews = advertisement.getViewsCount() != null ? advertisement.getViewsCount() : 0;
-//            advertisement.setViewsCount(currentViews + 1);
-//            advertisement.setLastViewedAt(LocalDateTime.now());
-//
-//            advertisementRepository.save(advertisement);
-//
-//            // Записываем в детальную статистику (если сервис доступен)
-//            try {
-//                adStatisticsService.recordView(advertisementId, viewer, null);
-//            } catch (Exception e) {
-//                log.warn("Ошибка записи детальной статистики просмотра: {}", e.getMessage());
-//            }
-//
-//        } catch (Exception e) {
-//            log.error("Ошибка регистрации просмотра: {}", e.getMessage());
-//        }
-//    }
-
-
-
-
-
-
-    @Override
-    public void registerClick(Long advertisementId, User clicker) {
-        if (clicker == null) {
-            log.debug("Пропускаем регистрацию клика для анонимного пользователя");
-            return;
-        }
-
-        try {
-            Advertisement advertisement = advertisementRepository.findById(advertisementId)
-                    .orElseThrow(() -> new RuntimeException("Реклама не найдена"));
-
-            // Получаем владельца рекламы
-            User adOwner = advertisement.getCreatedBy();
-            BigDecimal costPerClick = advertisement.getCostPerClick();
-
-            // НОВАЯ ЛОГИКА: Проверяем баланс владельца рекламы
-            if (adOwner.getBalance().compareTo(costPerClick) < 0) {
-                log.warn("Недостаточно средств для клика по рекламе ID {}. Баланс: {}, требуется: {}",
-                        advertisementId, adOwner.getBalance(), costPerClick);
-                return;
-            }
-
-            // Списываем средства с баланса владельца
-            BigDecimal newBalance = adOwner.getBalance().subtract(costPerClick);
-            adOwner.setBalance(newBalance);
-            userService.save(adOwner);
-
-            // Увеличиваем счетчик кликов
-            long currentClicks = advertisement.getClicksCount() != null ? advertisement.getClicksCount() : 0;
-            advertisement.setClicksCount(currentClicks + 1);
-            advertisement.setLastClickedAt(LocalDateTime.now());
-
-            // Обновляем remaining_budget для совместимости
-            advertisement.setRemainingBudget(newBalance);
-
-            // Проверяем, нужно ли приостановить рекламу
-            if (newBalance.compareTo(advertisement.getCostPerView()) < 0) {
-                advertisement.setStatus(AdStatus.PAUSED);
-                log.info("Реклама ID {} приостановлена из-за недостатка средств", advertisementId);
-            }
-
-            advertisementRepository.save(advertisement);
-
-            log.info("Списано {} за клик с баланса пользователя {}. Новый баланс: {}",
-                    costPerClick, adOwner.getEmail(), newBalance);
-
-            // Записываем в детальную статистику
-            try {
-                adStatisticsService.recordClick(advertisementId, clicker, null);
-            } catch (Exception e) {
-                log.warn("Ошибка записи детальной статистики клика: {}", e.getMessage());
-            }
-
-        } catch (Exception e) {
-            log.error("Ошибка регистрации клика: {}", e.getMessage());
-        }
-    }
-
-//
-//    @Override
-//    public void registerClick(Long advertisementId, User clicker) {
-//        log.debug("Регистрация клика по рекламе {} пользователем {}",
-//                advertisementId, clicker != null ? clicker.getEmail() : "анонимный");
-//
-//        // Проверяем что пользователь не null
-//        if (clicker == null) {
-//            log.debug("Пропускаем регистрацию клика для анонимного пользователя");
-//            return;
-//        }
-//
-//        try {
-//            Advertisement advertisement = advertisementRepository.findById(advertisementId)
-//                    .orElseThrow(() -> new RuntimeException("Реклама не найдена"));
-//
-//            // Проверяем бюджет для клика
-//            if (advertisement.getRemainingBudget() != null &&
-//                    advertisement.getCostPerClick() != null &&
-//                    advertisement.getRemainingBudget().compareTo(advertisement.getCostPerClick()) < 0) {
-//                return;
-//            }
-//
-//            // Списываем средства и увеличиваем счетчик
-//            if (advertisement.getRemainingBudget() != null && advertisement.getCostPerClick() != null) {
-//                BigDecimal newBudget = advertisement.getRemainingBudget().subtract(advertisement.getCostPerClick());
-//                advertisement.setRemainingBudget(newBudget);
-//
-//                // Проверяем не закончился ли бюджет
-//                if (newBudget.compareTo(advertisement.getCostPerView() != null ? advertisement.getCostPerView() : BigDecimal.ZERO) < 0) {
-//                    advertisement.setStatus(AdStatus.FINISHED);
-//                }
-//            }
-//
-//            // Увеличиваем счетчик кликов
-//            long currentClicks = advertisement.getClicksCount() != null ? advertisement.getClicksCount() : 0;
-//            advertisement.setClicksCount(currentClicks + 1);
-//            advertisement.setLastClickedAt(LocalDateTime.now());
-//
-//            advertisementRepository.save(advertisement);
-//
-//            // Записываем в детальную статистику
-//            try {
-//                adStatisticsService.recordClick(advertisementId, clicker, null);
-//            } catch (Exception e) {
-//                log.warn("Ошибка записи детальной статистики клика: {}", e.getMessage());
-//            }
-//
-//        } catch (Exception e) {
-//            log.error("Ошибка регистрации клика: {}", e.getMessage());
-//        }
-//    }
-//
     @Override
     @Transactional(readOnly = true)
     public boolean isOwner(Long advertisementId, User user) {
@@ -657,6 +436,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
                 .map(ad -> ad.getCreatedBy().getId().equals(user.getId()))
                 .orElse(false);
     }
+
 
     @Override
     public void approveAdvertisement(Long advertisementId, User admin) {
@@ -769,6 +549,219 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
 
     @Override
+    @Transactional
+    public void registerView(Long advertisementId, User viewer, HttpServletRequest request) {
+        if (viewer == null) {
+            log.debug("Пропускаем регистрацию просмотра для анонимного пользователя");
+            return;
+        }
+
+        try {
+            Advertisement advertisement = advertisementRepository.findById(advertisementId)
+                    .orElseThrow(() -> new RuntimeException("Реклама не найдена"));
+
+            BigDecimal costPerView = advertisement.getCostPerView();
+            if (costPerView == null) {
+                costPerView = new BigDecimal("0.20");
+            }
+
+            // Проверяем remainingBudget рекламы (зарезервированные средства)
+            BigDecimal remainingBudget = advertisement.getRemainingBudget();
+            if (remainingBudget == null) {
+                remainingBudget = BigDecimal.ZERO;
+            }
+
+            if (remainingBudget.compareTo(costPerView) < 0) {
+                log.warn("Недостаточно зарезервированного бюджета для просмотра рекламы ID {}. Остаток: {}, требуется: {}",
+                        advertisementId, remainingBudget, costPerView);
+
+                // Приостанавливаем рекламу из-за исчерпания бюджета
+                advertisement.setStatus(AdStatus.FINISHED);
+                advertisementRepository.save(advertisement);
+                return;
+            }
+
+            // Списываем средства с remainingBudget (зарезервированных средств)
+            BigDecimal newRemainingBudget = remainingBudget.subtract(costPerView);
+            advertisement.setRemainingBudget(newRemainingBudget);
+
+            // Увеличиваем счетчик просмотров
+            long currentViews = advertisement.getViewsCount() != null ? advertisement.getViewsCount() : 0;
+            advertisement.setViewsCount(currentViews + 1);
+            advertisement.setLastViewedAt(LocalDateTime.now());
+
+            // Проверяем, нужно ли завершить рекламу
+            if (newRemainingBudget.compareTo(costPerView) < 0) {
+                advertisement.setStatus(AdStatus.FINISHED);
+                log.info("Реклама ID {} завершена из-за исчерпания бюджета", advertisementId);
+            }
+
+            advertisementRepository.save(advertisement);
+
+            log.info("Списано {} с бюджета рекламы ID {}. Остаток бюджета: {}",
+                    costPerView, advertisementId, newRemainingBudget);
+
+            // Записываем статистику с HttpServletRequest
+            recordViewStatistics(advertisementId, viewer, request);
+
+        } catch (Exception e) {
+            log.error("Ошибка регистрации просмотра: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void registerClick(Long advertisementId, User clicker, HttpServletRequest request) {
+        if (clicker == null) {
+            log.debug("Пропускаем регистрацию клика для анонимного пользователя");
+            return;
+        }
+
+        try {
+            Advertisement advertisement = advertisementRepository.findById(advertisementId)
+                    .orElseThrow(() -> new RuntimeException("Реклама не найдена"));
+
+            BigDecimal costPerClick = advertisement.getCostPerClick();
+            if (costPerClick == null) {
+                costPerClick = new BigDecimal("0.50");
+            }
+
+            // Проверяем remainingBudget рекламы
+            BigDecimal remainingBudget = advertisement.getRemainingBudget();
+            if (remainingBudget == null) {
+                remainingBudget = BigDecimal.ZERO;
+            }
+
+            if (remainingBudget.compareTo(costPerClick) < 0) {
+                log.warn("Недостаточно зарезервированного бюджета для клика по рекламе ID {}. Остаток: {}, требуется: {}",
+                        advertisementId, remainingBudget, costPerClick);
+                return;
+            }
+
+            // Списываем средства с remainingBudget
+            BigDecimal newRemainingBudget = remainingBudget.subtract(costPerClick);
+            advertisement.setRemainingBudget(newRemainingBudget);
+
+            // Увеличиваем счетчик кликов
+            long currentClicks = advertisement.getClicksCount() != null ? advertisement.getClicksCount() : 0;
+            advertisement.setClicksCount(currentClicks + 1);
+            advertisement.setLastClickedAt(LocalDateTime.now());
+
+            // Проверяем, нужно ли завершить рекламу
+            BigDecimal minCostForActivity = advertisement.getCostPerView();
+            if (minCostForActivity == null) {
+                minCostForActivity = new BigDecimal("0.20");
+            }
+
+            if (newRemainingBudget.compareTo(minCostForActivity) < 0) {
+                advertisement.setStatus(AdStatus.FINISHED);
+                log.info("Реклама ID {} завершена из-за исчерпания бюджета", advertisementId);
+            }
+
+            advertisementRepository.save(advertisement);
+
+            log.info("Списано {} за клик с бюджета рекламы ID {}. Остаток бюджета: {}",
+                    costPerClick, advertisementId, newRemainingBudget);
+
+            // Записываем статистику с HttpServletRequest
+            recordClickStatistics(advertisementId, clicker, request);
+
+        } catch (Exception e) {
+            log.error("Ошибка регистрации клика: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+// =================
+// ОБНОВЛЕННЫЕ ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+// =================
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected void recordViewStatistics(Long advertisementId, User viewer, HttpServletRequest request) {
+        try {
+            adStatisticsService.recordView(advertisementId, viewer, request);
+        } catch (Exception e) {
+            log.warn("Не удалось записать статистику просмотра: {}", e.getMessage());
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected void recordClickStatistics(Long advertisementId, User clicker, HttpServletRequest request) {
+        try {
+            adStatisticsService.recordClick(advertisementId, clicker, request);
+        } catch (Exception e) {
+            log.warn("Не удалось записать статистику клика: {}", e.getMessage());
+        }
+    }
+
+    // Можете также оставить простые методы для обратной совместимости
+    @Deprecated
+    @Async
+    protected void recordSimpleViewStatistics(Long advertisementId, User viewer) {
+        recordViewStatistics(advertisementId, viewer, null);
+    }
+
+    @Deprecated
+    @Async
+    protected void recordSimpleClickStatistics(Long advertisementId, User clicker) {
+        recordClickStatistics(advertisementId, clicker, null);
+    }
+
+    @Override
+    @Transactional
+    public AdvertisementDetailDTO addBudgetToAdvertisement(Long advertisementId, BigDecimal additionalBudget, User user) {
+        log.info("Пополнение бюджета рекламы {} на сумму {} пользователем {}",
+                advertisementId, additionalBudget, user.getEmail());
+
+        Advertisement advertisement = advertisementRepository.findById(advertisementId)
+                .orElseThrow(() -> new RuntimeException("Реклама не найдена"));
+
+        if (!canModify(advertisement, user)) {
+            throw new RuntimeException("Нет прав для пополнения бюджета этой рекламы");
+        }
+
+        // Проверяем баланс пользователя
+        BigDecimal userBalance = user.getBalance();
+        if (userBalance == null) {
+            userBalance = BigDecimal.ZERO;
+        }
+
+        if (userBalance.compareTo(additionalBudget) < 0) {
+            throw new RuntimeException(String.format(
+                    "Недостаточно средств на балансе. Доступно: %s, требуется: %s",
+                    userBalance, additionalBudget));
+        }
+
+        // Списываем с баланса и добавляем к бюджету рекламы
+        BigDecimal newBalance = userBalance.subtract(additionalBudget);
+        user.setBalance(newBalance);
+        userService.save(user);
+
+        // Увеличиваем бюджеты рекламы
+        BigDecimal newTotalBudget = advertisement.getTotalBudget().add(additionalBudget);
+        BigDecimal newRemainingBudget = advertisement.getRemainingBudget().add(additionalBudget);
+
+        advertisement.setTotalBudget(newTotalBudget);
+        advertisement.setRemainingBudget(newRemainingBudget);
+        advertisement.setUpdatedAt(LocalDateTime.now());
+
+        // Если реклама была завершена из-за недостатка средств, активируем её
+        if (advertisement.getStatus() == AdStatus.FINISHED) {
+            advertisement.setStatus(AdStatus.ACTIVE);
+            log.info("Реклама ID {} повторно активирована после пополнения бюджета", advertisementId);
+        }
+
+        Advertisement savedAd = advertisementRepository.save(advertisement);
+
+        log.info("Бюджет рекламы {} пополнен на {}. Новый общий бюджет: {}, остаток: {}",
+                advertisementId, additionalBudget, newTotalBudget, newRemainingBudget);
+
+        return AdvertisementDetailDTO.fromEntity(savedAd);
+    }
+
+
+    @Override
     public Map<String, Object> debugAdvertisements() {
         Map<String, Object> result = new HashMap<>();
 
@@ -845,7 +838,6 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
         return result;
     }
-
 
     // Приватные методы-помощники
 
