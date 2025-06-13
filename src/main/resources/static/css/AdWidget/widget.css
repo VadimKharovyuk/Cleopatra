@@ -1,97 +1,311 @@
 
-.ad-widget {
-    max-width: 300px;
-    margin: 20px 0 30px 0; /* увеличиваем нижний отступ */
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+/*.ad-widget {*/
+/*    max-width: 300px;*/
+/*    margin: 20px 0 30px 0; !* увеличиваем нижний отступ *!*/
+/*    border: 1px solid #ddd;*/
+/*    border-radius: 8px;*/
+/*    overflow: hidden;*/
+/*    font-family: Arial, sans-serif;*/
+/*    box-shadow: 0 2px 4px rgba(0,0,0,0.1);*/
+/*}*/
+
+/*.ad-content {*/
+/*    position: relative;*/
+/*}*/
+
+/*.ad-loading {*/
+/*    text-align: center;*/
+/*    padding: 20px;*/
+/*    color: #666;*/
+/*    margin: 0;*/
+/*}*/
+
+/*.ad-container {*/
+/*    background: #fff;*/
+/*}*/
+
+/*.ad-label {*/
+/*    background: #f5f5f5;*/
+/*    padding: 4px 8px;*/
+/*    font-size: 11px;*/
+/*    color: #666;*/
+/*    text-transform: uppercase;*/
+/*    border-bottom: 1px solid #eee;*/
+/*}*/
+
+/*.ad-body {*/
+/*    padding: 15px;*/
+/*}*/
+
+/*.ad-image {*/
+/*    width: 100%;*/
+/*    height: auto;*/
+/*    max-height: 150px;*/
+/*    object-fit: cover;*/
+/*    border-radius: 4px;*/
+/*    margin-bottom: 10px;*/
+/*}*/
+
+/*.ad-title {*/
+/*    font-size: 16px;*/
+/*    font-weight: bold;*/
+/*    margin: 0 0 8px 0;*/
+/*    color: #333;*/
+/*}*/
+
+/*.ad-description {*/
+/*    font-size: 14px;*/
+/*    color: #666;*/
+/*    margin: 0 0 10px 0;*/
+/*    line-height: 1.4;*/
+/*}*/
+
+/*.ad-footer {*/
+/*    padding: 10px 15px;*/
+/*    background: #f9f9f9;*/
+/*    display: flex;*/
+/*    justify-content: space-between;*/
+/*    align-items: center;*/
+/*    border-top: 1px solid #eee;*/
+/*}*/
+
+/*.ad-link {*/
+/*    background: #007bff;*/
+/*    color: white;*/
+/*    padding: 6px 12px;*/
+/*    text-decoration: none;*/
+/*    border-radius: 4px;*/
+/*    font-size: 14px;*/
+/*    transition: background-color 0.2s;*/
+/*}*/
+
+/*.ad-link:hover {*/
+/*    background: #0056b3;*/
+/*}*/
+
+/*.ad-category {*/
+/*    font-size: 12px;*/
+/*    color: #888;*/
+/*}*/
+
+/*!* Адаптивность *!*/
+/*@media (max-width: 768px) {*/
+/*    .ad-widget {*/
+/*        max-width: 100%;*/
+/*        margin: 10px 0;*/
+/*    }*/
+/*}*/
+
+/* Стили для рекламы в ленте постов */
+
+.ad-post-item {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-left: 4px solid #007bff;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
-.ad-content {
-    position: relative;
+.ad-post-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+    border-left-color: #0056b3;
+}
+
+.ad-post-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #007bff, #6610f2, #007bff);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.ad-post-item .ad-content {
+    padding: 1rem;
+}
+
+.ad-post-item .ad-container {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.ad-post-item .ad-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.ad-post-item .ad-label i {
+    color: #007bff;
+    font-size: 1rem;
+}
+
+.ad-post-item .ad-body {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.ad-post-item .ad-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    border: 2px solid #e9ecef;
+}
+
+.ad-post-item .ad-text {
+    flex: 1;
+}
+
+.ad-post-item .ad-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #343a40;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+}
+
+.ad-post-item .ad-description {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ad-post-item .ad-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.ad-post-item .ad-link {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+}
+
+.ad-post-item .ad-link:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.ad-post-item .ad-category {
+    font-size: 0.75rem;
+    color: #007bff;
+    background: rgba(0,123,255,0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
 }
 
 .ad-loading {
     text-align: center;
-    padding: 20px;
-    color: #666;
-    margin: 0;
+    color: #6c757d;
+    font-style: italic;
+    padding: 2rem;
+    background: linear-gradient(45deg, #f8f9fa, #e9ecef, #f8f9fa);
+    background-size: 200% 200%;
+    animation: gradient-loading 2s ease infinite;
 }
 
-.ad-container {
-    background: #fff;
+@keyframes gradient-loading {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
-.ad-label {
-    background: #f5f5f5;
-    padding: 4px 8px;
-    font-size: 11px;
-    color: #666;
-    text-transform: uppercase;
-    border-bottom: 1px solid #eee;
-}
-
-.ad-body {
-    padding: 15px;
-}
-
-.ad-image {
-    width: 100%;
-    height: auto;
-    max-height: 150px;
-    object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 10px;
-}
-
-.ad-title {
-    font-size: 16px;
-    font-weight: bold;
-    margin: 0 0 8px 0;
-    color: #333;
-}
-
-.ad-description {
-    font-size: 14px;
-    color: #666;
-    margin: 0 0 10px 0;
-    line-height: 1.4;
-}
-
-.ad-footer {
-    padding: 10px 15px;
-    background: #f9f9f9;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid #eee;
-}
-
-.ad-link {
-    background: #007bff;
-    color: white;
-    padding: 6px 12px;
-    text-decoration: none;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: background-color 0.2s;
-}
-
-.ad-link:hover {
-    background: #0056b3;
-}
-
-.ad-category {
-    font-size: 12px;
-    color: #888;
-}
-
-/* Адаптивность */
+/* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
-    .ad-widget {
-        max-width: 100%;
-        margin: 10px 0;
+    .ad-post-item .ad-body {
+        flex-direction: column;
+        gap: 0.75rem;
     }
+
+    .ad-post-item .ad-image {
+        width: 100%;
+        height: 120px;
+        align-self: center;
+    }
+
+    .ad-post-item .ad-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+
+    .ad-post-item .ad-link {
+        text-align: center;
+        border-radius: 8px;
+    }
+}
+
+/* Плавное появление рекламы */
+.ad-post-item {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Особые стили для разных категорий рекламы */
+.ad-post-item[data-category="TECHNOLOGY"] .ad-label i {
+    color: #6f42c1;
+}
+
+.ad-post-item[data-category="FASHION"] .ad-label i {
+    color: #e83e8c;
+}
+
+.ad-post-item[data-category="FOOD"] .ad-label i {
+    color: #fd7e14;
+}
+
+.ad-post-item[data-category="TRAVEL"] .ad-label i {
+    color: #20c997;
 }

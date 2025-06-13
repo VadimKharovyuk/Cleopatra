@@ -264,9 +264,7 @@ public class AdvertisementController {
                                       RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             Optional<AdvertisementDetailDTO> adOptional = advertisementService.getAdvertisementDetails(id, user);
-            if (adOptional.isPresent()) {
-                model.addAttribute("advertisement", adOptional.get());
-            }
+            adOptional.ifPresent(advertisementDetailDTO -> model.addAttribute("advertisement", advertisementDetailDTO));
             return "advertisements/edit";
         }
 
@@ -280,9 +278,7 @@ public class AdvertisementController {
             result.reject("advertisement.update.error", "Ошибка обновления: " + e.getMessage());
 
             Optional<AdvertisementDetailDTO> adOptional = advertisementService.getAdvertisementDetails(id, user);
-            if (adOptional.isPresent()) {
-                model.addAttribute("advertisement", adOptional.get());
-            }
+            adOptional.ifPresent(advertisementDetailDTO -> model.addAttribute("advertisement", advertisementDetailDTO));
             return "advertisements/edit";
         }
     }

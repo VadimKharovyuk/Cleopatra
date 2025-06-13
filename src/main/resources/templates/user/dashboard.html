@@ -1169,73 +1169,87 @@
         <!-- Feed -->
         <div class="feed" id="feed">
             <!-- Если есть посты -->
-
+            <!-- Обновленный шаблон с интеграцией рекламы -->
             <div th:if="${recentPosts != null and !recentPosts.posts.empty}" class="posts-container">
-                <div class="post-item" th:each="post : ${recentPosts.posts}"
-                     onclick="navigateToPost(event, this)"
-                     th:data-post-id="${post.id}">
 
-                    <div class="post-header">
-                        <a th:href="@{/profile/{userId}(userId=${post.author.id})}" class="post-avatar">
-                            <img th:if="${post.author.imageUrl}"
-                                 th:src="${post.author.imageUrl}"
-                                 th:alt="${post.author.firstName + ' ' + post.author.lastName}">
-                            <div th:unless="${post.author.imageUrl}" class="default-avatar">
-        <span th:text="${(post.author.firstName != null ? #strings.substring(post.author.firstName, 0, 1) : '') +
-                       (post.author.lastName != null ? #strings.substring(post.author.lastName, 0, 1) : '')}">AB</span>
-                            </div>
-                        </a>
+                <!-- Переменная для отслеживания позиции -->
+                <div th:with="adInterval=5" style="display: none;"></div>
 
-                        <div class="post-meta">
-                            <a th:href="@{/profile/{userId}(userId=${post.author.id})}" class="post-author">
-                                <span th:text="${post.author.firstName + ' ' + post.author.lastName}">Имя Автора</span>
+                <div th:each="post, iterStat : ${recentPosts.posts}">
+
+                    <!-- Обычный пост -->
+                    <div class="post-item"
+                         onclick="navigateToPost(event, this)"
+                         th:data-post-id="${post.id}">
+
+                        <div class="post-header">
+                            <a th:href="@{/profile/{userId}(userId=${post.author.id})}" class="post-avatar">
+                                <img th:if="${post.author.imageUrl}"
+                                     th:src="${post.author.imageUrl}"
+                                     th:alt="${post.author.firstName + ' ' + post.author.lastName}">
+                                <div th:unless="${post.author.imageUrl}" class="default-avatar">
+                        <span th:text="${(post.author.firstName != null ? #strings.substring(post.author.firstName, 0, 1) : '') +
+                                       (post.author.lastName != null ? #strings.substring(post.author.lastName, 0, 1) : '')}">AB</span>
+                                </div>
                             </a>
-                            <span class="post-handle"
-                                  th:text="'@' + ${post.author.firstName?.toLowerCase()}">@автор</span>
-                            <span class="post-time"
-                                  th:text="'· ' + ${#temporals.format(post.createdAt, 'HH:mm', new java.util.Locale('ru'))}">· 2ч</span>
+
+                            <div class="post-meta">
+                                <a th:href="@{/profile/{userId}(userId=${post.author.id})}" class="post-author">
+                                    <span th:text="${post.author.firstName + ' ' + post.author.lastName}">Имя Автора</span>
+                                </a>
+                                <span class="post-handle"
+                                      th:text="'@' + ${post.author.firstName?.toLowerCase()}">@автор</span>
+                                <span class="post-time"
+                                      th:text="'· ' + ${#temporals.format(post.createdAt, 'HH:mm', new java.util.Locale('ru'))}">· 2ч</span>
+                            </div>
+                        </div>
+
+                        <div class="post-content">
+                            <p th:utext="${post.content}" class="post-text">
+                                Содержимое поста...
+                            </p>
+                        </div>
+
+                        <img th:if="${post.hasImage}"
+                             th:src="${post.imageUrl}"
+                             alt="Изображение поста"
+                             class="post-image">
+
+                        <div th:if="${post.hasLocation()}" class="post-location-compact">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span th:text="${post.location.displayName}"></span>
+                        </div>
+
+                        <div class="post-actions">
+                            <button class="action-btn comment-btn" onclick="openComments(event, this)"
+                                    th:data-post-id="${post.id}">
+                                <i class="fas fa-comment"></i>
+                                <span th:text="${post.commentsCount}">0</span>
+                            </button>
+
+                            <button class="action-btn like-btn" onclick="toggleLike(event, this)"
+                                    th:data-post-id="${post.id}"
+                                    th:classappend="${post.isLikedByCurrentUser} ? 'liked' : ''">
+                                <i class="fas fa-heart"></i>
+                                <span th:text="${post.likesCount}">0</span>
+                            </button>
+
+                            <button class="action-btn share-btn" onclick="sharePost(event, this)"
+                                    th:data-post-id="${post.id}">
+                                <i class="fas fa-share"></i>
+                            </button>
                         </div>
                     </div>
 
-
-                    <!-- ✅ ОБНОВЛЕННЫЙ БЛОК КОНТЕНТА С ПОДДЕРЖКОЙ УПОМИНАНИЙ -->
-                    <div class="post-content">
-                        <!-- Используем th:utext для HTML контента с ссылками упоминаний -->
-                        <p th:utext="${post.content}" class="post-text">
-                            Содержимое поста...
-                        </p>
+                    <!-- Вставляем рекламу каждые 3 поста -->
+                    <div th:if="${(iterStat.index + 1) % 3 == 0 and !iterStat.last}"
+                         class="ad-widget post-item ad-post-item"
+                         th:attr="data-ad-position=${iterStat.index + 1}">
+                        <div class="ad-content">
+                            <p class="ad-loading">Загрузка рекламы...</p>
+                        </div>
                     </div>
 
-                    <img th:if="${post.hasImage}"
-                         th:src="${post.imageUrl}"
-                         alt="Изображение поста"
-                         class="post-image">
-
-                    <!-- Компактная версия для мобильных -->
-                    <div th:if="${post.hasLocation()}" class="post-location-compact">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span th:text="${post.location.displayName}"></span>
-                    </div>
-
-                    <div class="post-actions">
-                        <button class="action-btn comment-btn" onclick="openComments(event, this)"
-                                th:data-post-id="${post.id}">
-                            <i class="fas fa-comment"></i>
-                            <span th:text="${post.commentsCount}">0</span>
-                        </button>
-
-                        <button class="action-btn like-btn" onclick="toggleLike(event, this)"
-                                th:data-post-id="${post.id}"
-                                th:classappend="${post.isLikedByCurrentUser} ? 'liked' : ''">
-                            <i class="fas fa-heart"></i>
-                            <span th:text="${post.likesCount}">0</span>
-                        </button>
-
-                        <button class="action-btn share-btn" onclick="sharePost(event, this)"
-                                th:data-post-id="${post.id}">
-                            <i class="fas fa-share"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
 
@@ -1301,11 +1315,12 @@
             </div>
         </div>
 
-        <div id="advertisement-widget" class="ad-widget">
-            <div id="ad-content" class="ad-content">
-                <p class="ad-loading">Загрузка рекламы...</p>
-            </div>
-        </div>
+
+<!--        <div id="advertisement-widget" class="ad-widget">-->
+<!--            <div id="ad-content" class="ad-content">-->
+<!--                <p class="ad-loading">Загрузка рекламы...</p>-->
+<!--            </div>-->
+<!--        </div>-->
 
 
         <!-- Who to Follow -->
