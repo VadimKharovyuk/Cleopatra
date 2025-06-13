@@ -648,7 +648,6 @@
     </style>
 
     <link th:href="@{/css/feed/mention-suggestions.css}" rel="stylesheet">
-    <script th:src="@{/js/post/mention-indicator.js}"></script>
 </head>
 <body th:data-current-user-id="${currentUserId}"
       th:data-profile-user-id="${post?.author?.id}"
@@ -680,7 +679,7 @@
                     Главная
                 </a>
                 <span class="breadcrumb-separator">/</span>
-                <a href="/posts/create" class="breadcrumb-link">Посты</a>
+                <a href="/posts/create" class="breadcrumb-link">Создать пост</a>
                 <span class="breadcrumb-separator">/</span>
                 <span>Просмотр поста</span>
             </nav>
@@ -692,7 +691,7 @@
                 <img th:if="${post.author.imageUrl}"
                      th:src="${post.author.imageUrl}"
                      th:alt="${post.author.firstName}">
-                <div th:unless="${post.author.imageUrl}" class="default-avatar">
+                <div th:text="${post.author.imageUrl}" class="default-avatar">
                     <span th:text="${#strings.substring(post.author.firstName, 0, 1)}">A</span>
                     <span th:if="${post.author.lastName != null and !#strings.isEmpty(post.author.lastName)}"
                           th:text="${#strings.substring(post.author.lastName, 0, 1)}"></span>

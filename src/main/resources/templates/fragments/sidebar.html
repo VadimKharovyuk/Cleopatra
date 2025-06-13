@@ -555,12 +555,6 @@
             </a>
 
 
-<!--            <a href="/messages"-->
-<!--               class="nav-item"-->
-<!--               th:classappend="${activeSection == 'messages'} ? 'active' : ''">-->
-<!--                <i class="fas fa-envelope nav-icon"></i>-->
-<!--                <span class="nav-text">Сообщения</span>-->
-<!--            </a>-->
             <a href="/game"
                class="nav-item"
                th:classappend="${activeSection == 'game'} ? 'active' : ''">
@@ -838,9 +832,11 @@
 
     <!-- Scripts -->
     <th:block th:replace="~{:: sidebar-scripts}"></th:block>
-</th:block>
-<script th:src="@{/js/online-status.js}"></script>
 
-<script th:src="@{/js/notifications.js}"></script>
+    <script th:src="@{/js/online-status.js}"></script>
+
+    <script th:src="@{/js/notifications.js}"></script>
+</th:block>
+
 </body>
 </html>

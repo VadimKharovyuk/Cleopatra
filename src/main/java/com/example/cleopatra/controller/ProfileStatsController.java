@@ -1,6 +1,7 @@
 package com.example.cleopatra.controller;
-
+import com.example.cleopatra.dto.user.ProfileStatisticsDTO;
 import com.example.cleopatra.dto.user.UserResponse;
+import com.example.cleopatra.service.ProfileStatisticsService;
 import com.example.cleopatra.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,17 +12,14 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Controller
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/showProfileStats")
 public class ProfileStatsController {
+
     private final UserService userService;
-
-
+    private final ProfileStatisticsService profileStatisticsService;
 
     @GetMapping("/{userId}/stats")
     public String showProfileStats(@PathVariable Long userId,
@@ -42,34 +40,26 @@ public class ProfileStatsController {
                 return "error/404";
             }
 
+            // Получаем реальную статистику
+            ProfileStatisticsDTO stats = profileStatisticsService.getUserProfileStats(userId);
+
             model.addAttribute("user", user);
-
-            // TODO: Добавить когда будет готов StatisticsService
-            // ProfileStatistics stats = statisticsService.getUserStats(userId);
-            // model.addAttribute("stats", stats);
-
-            // Временные данные для демонстрации (потом удалить)
-            addMockStatsData(model);
+            model.addAttribute("stats", stats);
+            model.addAttribute("currentUserId", currentUserId);
 
             return "profile/stats";
 
         } catch (Exception e) {
-            log.error("Ошибка при загрузке статистики профиля {}: {}", userId, e.getMessage());
+            log.error("Ошибка при загрузке статистики профиля {}: {}", userId, e.getMessage(), e);
             return "error/500";
         }
     }
 
-    private void addMockStatsData(Model model) {
-        Map<String, Object> mockStats = new HashMap<>();
-        mockStats.put("profileViews", 1247);
-        mockStats.put("totalLikes", 3456);
-        mockStats.put("avgEngagement", "7.2%");
-        mockStats.put("postsCount", 89);
-        mockStats.put("followersCount", 2534);
-        mockStats.put("newFollowersWeek", 47);
-        mockStats.put("unfollowersWeek", 12);
-        mockStats.put("netGrowth", 35);
-
-        model.addAttribute("stats", mockStats);
+    @GetMapping("/{userId}/stats/export")
+    public String exportStats(@PathVariable Long userId,
+                              @ModelAttribute("currentUserId") Long currentUserId) {
+        // TODO: реализовать экспорт статистики в CSV/JSON
+        log.info("Экспорт статистики для пользователя {}", userId);
+        return "redirect:/profile/" + userId + "/stats?exported=true";
     }
 }

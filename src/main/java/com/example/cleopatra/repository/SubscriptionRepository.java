@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -114,13 +115,19 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     long countBySubscribedToId(Long subscribedToId);
 
 
-
-
-
     /**
      * Найти всех на кого подписан пользователь
      */
     @Query("SELECT s.subscribedTo.id FROM Subscription s WHERE s.subscriber.id = :userId")
     List<Long> findSubscribedToIdsBySubscriberId(@Param("userId") Long userId);
 
+
+
+    Long countBySubscribedTo_Id(Long userId);
+
+
+    Long countBySubscriber_Id(Long userId);
+
+
+    Long countBySubscribedTo_IdAndCreatedAtAfter(Long userId, LocalDateTime weekAgo);
 }

@@ -86,4 +86,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             "AND c.isDeleted = false " +
             "ORDER BY c.createdAt DESC")
     Slice<Comment> findByPostIdWithAuthor(@Param("postId") Long postId, Pageable pageable);
+
+
+    Long countByPostId(Long datum);
+    Long countByPost_AuthorId(Long authorId);
+
+
 }

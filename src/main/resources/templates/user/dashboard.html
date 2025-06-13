@@ -1169,6 +1169,7 @@
         <!-- Feed -->
         <div class="feed" id="feed">
             <!-- Если есть посты -->
+            <!-- Обновленный шаблон с интеграцией рекламы -->
             <div th:if="${recentPosts != null and !recentPosts.posts.empty}" class="posts-container">
 
                 <!-- Переменная для отслеживания позиции -->
@@ -1207,6 +1208,11 @@
                             <p th:utext="${post.content}" class="post-text">
                                 Содержимое поста...
                             </p>
+
+                            <div th:if="${post.hasLocation()}" class="post-location-compact">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span th:text="${post.location.displayName}"></span>
+                            </div>
                         </div>
 
                         <img th:if="${post.hasImage}"
@@ -1214,10 +1220,7 @@
                              alt="Изображение поста"
                              class="post-image">
 
-                        <div th:if="${post.hasLocation()}" class="post-location-compact">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span th:text="${post.location.displayName}"></span>
-                        </div>
+
 
                         <div class="post-actions">
                             <button class="action-btn comment-btn" onclick="openComments(event, this)"
@@ -1240,8 +1243,8 @@
                         </div>
                     </div>
 
-                    <!-- ИСПРАВЛЕНО: Используем переменную adInterval вместо жестко заданного числа -->
-                    <div th:if="${(iterStat.index + 1) % adInterval == 0 and !iterStat.last}"
+                    <!-- Вставляем рекламу каждые 3 поста -->
+                    <div th:if="${(iterStat.index + 1) % 5 == 0 and !iterStat.last}"
                          class="ad-widget post-item ad-post-item"
                          th:attr="data-ad-position=${iterStat.index + 1}">
                         <div class="ad-content">

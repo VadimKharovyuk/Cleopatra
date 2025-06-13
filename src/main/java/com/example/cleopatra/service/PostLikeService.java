@@ -29,6 +29,7 @@ public class PostLikeService {
     private final PostMapper postMapper;
     private final ApplicationEventPublisher eventPublisher;
 
+
     /**
      * Лайкнуть/убрать лайк с поста
      */

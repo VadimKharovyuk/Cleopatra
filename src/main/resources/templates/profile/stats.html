@@ -1,3 +1,859 @@
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Статистика профиля - Cleopatra</title>-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">-->
+<!--  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">-->
+<!--  <style>-->
+<!--    :root {-->
+<!--      &#45;&#45;bg-primary: #0f0f0f;-->
+<!--      &#45;&#45;bg-secondary: #1a1a1a;-->
+<!--      &#45;&#45;bg-accent: #2a2a2a;-->
+<!--      &#45;&#45;text-primary: #ffffff;-->
+<!--      &#45;&#45;text-secondary: #b3b3b3;-->
+<!--      &#45;&#45;text-muted: #666666;-->
+<!--      &#45;&#45;accent-primary: #d4af37;-->
+<!--      &#45;&#45;accent-secondary: #b8941f;-->
+<!--      &#45;&#45;accent-success: #10b981;-->
+<!--      &#45;&#45;accent-warning: #f59e0b;-->
+<!--      &#45;&#45;accent-danger: #ef4444;-->
+<!--      &#45;&#45;accent-info: #3b82f6;-->
+<!--      &#45;&#45;border-color: #333333;-->
+<!--      &#45;&#45;shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);-->
+<!--      &#45;&#45;shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);-->
+<!--      &#45;&#45;shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);-->
+<!--      &#45;&#45;shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);-->
+<!--      &#45;&#45;radius-sm: 0.375rem;-->
+<!--      &#45;&#45;radius-md: 0.5rem;-->
+<!--      &#45;&#45;radius-lg: 0.75rem;-->
+<!--      &#45;&#45;radius-xl: 1rem;-->
+<!--    }-->
+
+<!--    * {-->
+<!--      margin: 0;-->
+<!--      padding: 0;-->
+<!--      box-sizing: border-box;-->
+<!--    }-->
+
+<!--    body {-->
+<!--      font-family: 'Inter', sans-serif;-->
+<!--      background: var(&#45;&#45;bg-primary);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      line-height: 1.6;-->
+<!--      min-height: 100vh;-->
+<!--    }-->
+
+<!--    .container {-->
+<!--      max-width: 1200px;-->
+<!--      margin: 0 auto;-->
+<!--      padding: 2rem 1rem;-->
+<!--    }-->
+
+<!--    .page-header {-->
+<!--      text-align: center;-->
+<!--      margin-bottom: 3rem;-->
+<!--      padding: 2rem 0;-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;bg-secondary), var(&#45;&#45;bg-accent));-->
+<!--      border-radius: var(&#45;&#45;radius-xl);-->
+<!--      border: 1px solid var(&#45;&#45;border-color);-->
+<!--    }-->
+
+<!--    .page-title {-->
+<!--      font-family: 'Playfair Display', serif;-->
+<!--      font-size: 2.5rem;-->
+<!--      font-weight: 700;-->
+<!--      color: var(&#45;&#45;accent-primary);-->
+<!--      margin-bottom: 0.5rem;-->
+<!--    }-->
+
+<!--    .page-subtitle {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 1.1rem;-->
+<!--    }-->
+
+<!--    .stats-grid {-->
+<!--      display: grid;-->
+<!--      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));-->
+<!--      gap: 2rem;-->
+<!--      margin-bottom: 3rem;-->
+<!--    }-->
+
+<!--    .stats-card {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border: 1px solid var(&#45;&#45;border-color);-->
+<!--      border-radius: var(&#45;&#45;radius-xl);-->
+<!--      padding: 2rem;-->
+<!--      transition: all 0.3s ease;-->
+<!--      position: relative;-->
+<!--      overflow: hidden;-->
+<!--    }-->
+
+<!--    .stats-card:hover {-->
+<!--      transform: translateY(-5px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-xl);-->
+<!--      border-color: var(&#45;&#45;accent-primary);-->
+<!--    }-->
+
+<!--    .stats-card::before {-->
+<!--      content: '';-->
+<!--      position: absolute;-->
+<!--      top: 0;-->
+<!--      left: 0;-->
+<!--      right: 0;-->
+<!--      height: 4px;-->
+<!--      background: linear-gradient(90deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--    }-->
+
+<!--    .card-header {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      margin-bottom: 1.5rem;-->
+<!--    }-->
+
+<!--    .card-icon {-->
+<!--      font-size: 2rem;-->
+<!--      margin-right: 1rem;-->
+<!--      padding: 0.75rem;-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--      border-radius: var(&#45;&#45;radius-lg);-->
+<!--    }-->
+
+<!--    .card-title {-->
+<!--      font-family: 'Playfair Display', serif;-->
+<!--      font-size: 1.5rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--    }-->
+
+<!--    .metric-row {-->
+<!--      display: flex;-->
+<!--      justify-content: space-between;-->
+<!--      align-items: center;-->
+<!--      padding: 1rem 0;-->
+<!--      border-bottom: 1px solid var(&#45;&#45;border-color);-->
+<!--    }-->
+
+<!--    .metric-row:last-child {-->
+<!--      border-bottom: none;-->
+<!--    }-->
+
+<!--    .metric-label {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-weight: 500;-->
+<!--    }-->
+
+<!--    .metric-value {-->
+<!--      font-weight: 700;-->
+<!--      font-size: 1.2rem;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--    }-->
+
+<!--    .metric-trend {-->
+<!--      font-size: 0.9rem;-->
+<!--      margin-left: 0.5rem;-->
+<!--    }-->
+
+<!--    .trend-up { color: var(&#45;&#45;accent-success); }-->
+<!--    .trend-down { color: var(&#45;&#45;accent-danger); }-->
+<!--    .trend-stable { color: var(&#45;&#45;text-muted); }-->
+
+<!--    .progress-bar {-->
+<!--      width: 100%;-->
+<!--      height: 8px;-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      border-radius: var(&#45;&#45;radius-sm);-->
+<!--      overflow: hidden;-->
+<!--      margin-top: 0.5rem;-->
+<!--    }-->
+
+<!--    .progress-fill {-->
+<!--      height: 100%;-->
+<!--      background: linear-gradient(90deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      transition: width 0.3s ease;-->
+<!--    }-->
+
+<!--    .chart-container {-->
+<!--      height: 200px;-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      margin-top: 1rem;-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--      font-style: italic;-->
+<!--    }-->
+
+<!--    .badge {-->
+<!--      display: inline-block;-->
+<!--      padding: 0.25rem 0.75rem;-->
+<!--      border-radius: var(&#45;&#45;radius-sm);-->
+<!--      font-size: 0.8rem;-->
+<!--      font-weight: 600;-->
+<!--      text-transform: uppercase;-->
+<!--      letter-spacing: 0.5px;-->
+<!--    }-->
+
+<!--    .badge-success { background: var(&#45;&#45;accent-success); color: white; }-->
+<!--    .badge-warning { background: var(&#45;&#45;accent-warning); color: white; }-->
+<!--    .badge-info { background: var(&#45;&#45;accent-info); color: white; }-->
+<!--    .badge-danger { background: var(&#45;&#45;accent-danger); color: white; }-->
+
+<!--    .action-buttons {-->
+<!--      display: flex;-->
+<!--      gap: 1rem;-->
+<!--      justify-content: center;-->
+<!--      margin-top: 3rem;-->
+<!--      flex-wrap: wrap;-->
+<!--    }-->
+
+<!--    .btn {-->
+<!--      padding: 0.75rem 1.5rem;-->
+<!--      border: none;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      font-weight: 600;-->
+<!--      text-decoration: none;-->
+<!--      transition: all 0.3s ease;-->
+<!--      cursor: pointer;-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.5rem;-->
+<!--    }-->
+
+<!--    .btn-primary {-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    .btn-secondary {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      border: 1px solid var(&#45;&#45;border-color);-->
+<!--    }-->
+
+<!--    .btn:hover {-->
+<!--      transform: translateY(-2px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--    }-->
+
+<!--    .weekly-activity {-->
+<!--      display: grid;-->
+<!--      grid-template-columns: repeat(7, 1fr);-->
+<!--      gap: 0.5rem;-->
+<!--      margin-top: 1rem;-->
+<!--    }-->
+
+<!--    .day-activity {-->
+<!--      text-align: center;-->
+<!--      padding: 1rem 0.5rem;-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      border: 2px solid transparent;-->
+<!--      transition: all 0.3s ease;-->
+<!--    }-->
+
+<!--    .day-activity.active {-->
+<!--      border-color: var(&#45;&#45;accent-primary);-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    .day-name {-->
+<!--      font-size: 0.8rem;-->
+<!--      font-weight: 600;-->
+<!--      margin-bottom: 0.5rem;-->
+<!--    }-->
+
+<!--    .day-value {-->
+<!--      font-size: 1.2rem;-->
+<!--      font-weight: 700;-->
+<!--    }-->
+
+<!--    .top-posts {-->
+<!--      display: flex;-->
+<!--      flex-direction: column;-->
+<!--      gap: 1rem;-->
+<!--      margin-top: 1rem;-->
+<!--    }-->
+
+<!--    .post-item {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      padding: 1rem;-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      transition: all 0.3s ease;-->
+<!--    }-->
+
+<!--    .post-item:hover {-->
+<!--      background: var(&#45;&#45;border-color);-->
+<!--    }-->
+
+<!--    .post-rank {-->
+<!--      font-size: 1.5rem;-->
+<!--      font-weight: 700;-->
+<!--      color: var(&#45;&#45;accent-primary);-->
+<!--      margin-right: 1rem;-->
+<!--      min-width: 40px;-->
+<!--    }-->
+
+<!--    .post-content {-->
+<!--      flex: 1;-->
+<!--    }-->
+
+<!--    .post-text {-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: 0.5rem;-->
+<!--    }-->
+
+<!--    .post-stats {-->
+<!--      display: flex;-->
+<!--      gap: 1rem;-->
+<!--      font-size: 0.9rem;-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--    }-->
+
+<!--    .geography-tags {-->
+<!--      display: flex;-->
+<!--      flex-wrap: wrap;-->
+<!--      gap: 0.5rem;-->
+<!--      margin-top: 1rem;-->
+<!--    }-->
+
+<!--    .geo-tag {-->
+<!--      padding: 0.5rem 1rem;-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      border-radius: var(&#45;&#45;radius-sm);-->
+<!--      font-size: 0.9rem;-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      border: 1px solid var(&#45;&#45;border-color);-->
+<!--    }-->
+
+<!--    .optimal-time {-->
+<!--      text-align: center;-->
+<!--      padding: 2rem;-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-info), #1e40af);-->
+<!--      border-radius: var(&#45;&#45;radius-lg);-->
+<!--      color: white;-->
+<!--      margin-top: 1rem;-->
+<!--    }-->
+
+<!--    .time-value {-->
+<!--      font-size: 2rem;-->
+<!--      font-weight: 700;-->
+<!--      margin-bottom: 0.5rem;-->
+<!--    }-->
+
+<!--    .time-description {-->
+<!--      opacity: 0.9;-->
+<!--    }-->
+
+<!--    @media (max-width: 768px) {-->
+<!--      .container {-->
+<!--        padding: 1rem 0.5rem;-->
+<!--      }-->
+
+<!--      .page-title {-->
+<!--        font-size: 2rem;-->
+<!--      }-->
+
+<!--      .stats-grid {-->
+<!--        grid-template-columns: 1fr;-->
+<!--        gap: 1.5rem;-->
+<!--      }-->
+
+<!--      .weekly-activity {-->
+<!--        grid-template-columns: repeat(4, 1fr);-->
+<!--      }-->
+
+<!--      .action-buttons {-->
+<!--        flex-direction: column;-->
+<!--        align-items: center;-->
+<!--      }-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--  &lt;!&ndash; Заголовок страницы &ndash;&gt;-->
+<!--  <div class="page-header">-->
+<!--    <h1 class="page-title">-->
+<!--      <i class="fas fa-chart-line"></i>-->
+<!--      Статистика профиля-->
+<!--    </h1>-->
+<!--    <p class="page-subtitle" th:text="'Подробная аналитика профиля ' + ${user.firstName} + ' ' + ${user.lastName}">-->
+<!--      Подробная аналитика вашего профиля и контента-->
+<!--    </p>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Сетка статистических карточек &ndash;&gt;-->
+<!--  <div class="stats-grid">-->
+
+<!--    &lt;!&ndash; 1. Основные метрики &ndash;&gt;-->
+<!--    <div class="stats-card">-->
+<!--      <div class="card-header">-->
+<!--        <i class="card-icon fas fa-eye"></i>-->
+<!--        <h3 class="card-title">Основные метрики</h3>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">Просмотры профиля</span>-->
+<!--        <div>-->
+<!--          <span class="metric-value" th:text="${stats.formattedProfileViews}">1,247</span>-->
+<!--          <span class="metric-trend trend-up">-->
+<!--            <i class="fas fa-arrow-up"></i> +12%-->
+<!--          </span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">Всего лайков</span>-->
+<!--        <div>-->
+<!--          <span class="metric-value" th:text="${stats.formattedTotalLikes}">3,456</span>-->
+<!--          <span class="metric-trend trend-up">-->
+<!--            <i class="fas fa-arrow-up"></i> +8%-->
+<!--          </span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">Вовлеченность</span>-->
+<!--        <div>-->
+<!--          <span class="metric-value" th:text="${stats.avgEngagement}">7.2%</span>-->
+<!--          <span class="metric-trend trend-stable">-->
+<!--            <i class="fas fa-minus"></i> стабильно-->
+<!--          </span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">Постов опубликовано</span>-->
+<!--        <div>-->
+<!--          <span class="metric-value" th:text="${stats.postsCount}">89</span>-->
+<!--          <span class="metric-trend trend-up">-->
+<!--            <i class="fas fa-arrow-up"></i> активность-->
+<!--          </span>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 2. Рост подписчиков &ndash;&gt;-->
+<!--    <div class="stats-card">-->
+<!--      <div class="card-header">-->
+<!--        <i class="card-icon fas fa-users"></i>-->
+<!--        <h3 class="card-title">Подписчики</h3>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">Всего подписчиков</span>-->
+<!--        <div>-->
+<!--          <span class="metric-value" th:text="${stats.formattedFollowersCount}">2,534</span>-->
+<!--          <span class="badge badge-success">Растет</span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">Новых за неделю</span>-->
+<!--        <span class="metric-value" th:text="${stats.newFollowersWeekFormatted}">+47</span>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">Отписок за неделю</span>-->
+<!--        <span class="metric-value" th:text="${stats.unfollowersWeekFormatted}">-12</span>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">Чистый прирост</span>-->
+<!--        <span class="metric-value" th:text="${stats.netGrowthFormatted}" th:classappend="${stats.netGrowthTrendClass}">+35</span>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Прогресс до цели &ndash;&gt;-->
+<!--      <div style="margin-top: 1rem;">-->
+<!--        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">-->
+<!--          <span class="metric-label">Прогресс к цели</span>-->
+<!--          <span style="color: var(&#45;&#45;accent-primary);" th:text="${stats.goalProgressFormatted}">84.5%</span>-->
+<!--        </div>-->
+<!--        <div class="progress-bar">-->
+<!--          <div class="progress-fill" th:style="'width: ' + ${stats.goalProgress} + '%;'"></div>-->
+<!--        </div>-->
+<!--        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(&#45;&#45;text-secondary);" th:text="${stats.nextGoal}">-->
+<!--          🎯 3000 подписчиков (осталось 466)-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 3. Активность по дням недели &ndash;&gt;-->
+<!--    <div class="stats-card">-->
+<!--      <div class="card-header">-->
+<!--        <i class="card-icon fas fa-calendar-week"></i>-->
+<!--        <h3 class="card-title">Активность по дням</h3>-->
+<!--      </div>-->
+
+<!--      <div class="weekly-activity">-->
+<!--        <div th:each="day : ${stats.weeklyActivity}"-->
+<!--             class="day-activity"-->
+<!--             th:classappend="${day.key == stats.bestDay} ? 'active' : ''">-->
+<!--          <div class="day-name" th:text="${day.key}">ПН</div>-->
+<!--          <div class="day-value" th:text="${day.value}">245</div>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div style="text-align: center; margin-top: 1rem; color: var(&#45;&#45;text-secondary);">-->
+<!--        <i class="fas fa-crown" style="color: var(&#45;&#45;accent-primary);"></i>-->
+<!--        Лучший день: <strong style="color: var(&#45;&#45;accent-primary);" th:text="${stats.bestDay}">Воскресенье</strong>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 4. Топ популярных постов &ndash;&gt;-->
+<!--    <div class="stats-card">-->
+<!--      <div class="card-header">-->
+<!--        <i class="card-icon fas fa-fire"></i>-->
+<!--        <h3 class="card-title">Топ-3 поста</h3>-->
+<!--      </div>-->
+
+<!--      <div class="top-posts" th:if="${stats.topPosts != null and !stats.topPosts.empty}">-->
+<!--        <div class="post-item" th:each="post, iterStat : ${stats.topPosts}">-->
+<!--          <div class="post-rank" th:switch="${iterStat.index}">-->
+<!--            <span th:case="0">🥇</span>-->
+<!--            <span th:case="1">🥈</span>-->
+<!--            <span th:case="2">🥉</span>-->
+<!--            <span th:case="*" th:text="${iterStat.index + 1}">4</span>-->
+<!--          </div>-->
+<!--          <div class="post-content">-->
+<!--            <div class="post-text" th:text="${post.content}">Содержимое поста...</div>-->
+<!--            <div class="post-stats">-->
+<!--              <span><i class="fas fa-heart"></i> <span th:text="${post.likesCount}">234</span></span>-->
+<!--              <span><i class="fas fa-comment"></i> <span th:text="${post.commentsCount}">45</span></span>-->
+<!--              <span><i class="fas fa-eye"></i> <span th:text="${post.viewsCount}">1.2k</span></span>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div th:if="${stats.topPosts == null or stats.topPosts.empty}"-->
+<!--           style="text-align: center; color: var(&#45;&#45;text-muted); padding: 2rem;">-->
+<!--        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem;"></i>-->
+<!--        <p>Пока нет популярных постов</p>-->
+<!--        <p style="font-size: 0.9rem;">Создайте больше контента для анализа</p>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 5. География аудитории &ndash;&gt;-->
+<!--    <div class="stats-card" th:if="${stats.geography != null}">-->
+<!--      <div class="card-header">-->
+<!--        <i class="card-icon fas fa-globe"></i>-->
+<!--        <h3 class="card-title">География</h3>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">Основная аудитория</span>-->
+<!--        <span class="metric-value" th:text="${stats.geography.mainCountry + ' (' + stats.geography.mainPercentage + '%)'}">"🇹🇷 Турция (45%)"</span>-->
+<!--      </div>-->
+
+<!--      <div class="geography-tags">-->
+<!--        <div class="geo-tag" th:each="city : ${stats.geography.cities}"-->
+<!--             th:text="${city.name + ' (' + city.percentage + '%)'}">"🇹🇷 Анталия (23%)"</div>-->
+<!--      </div>-->
+
+<!--      <div class="chart-container">-->
+<!--        <span>📊 Интерактивная карта (будет добавлена)</span>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 6. Оптимальное время &ndash;&gt;-->
+<!--    <div class="stats-card">-->
+<!--      <div class="card-header">-->
+<!--        <i class="card-icon fas fa-clock"></i>-->
+<!--        <h3 class="card-title">Лучшее время</h3>-->
+<!--      </div>-->
+
+<!--      <div class="optimal-time">-->
+<!--        <div class="time-value" th:text="${stats.optimalPostTime}">18:00 - 20:00</div>-->
+<!--        <div class="time-description">-->
+<!--          Максимальная активность аудитории<br>-->
+<!--          <strong th:text="${stats.bestDay + ', вечер'}">Воскресенье, вечер</strong>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row" style="margin-top: 1rem;">-->
+<!--        <span class="metric-label">Среднее время онлайн</span>-->
+<!--        <span class="metric-value" th:text="${stats.avgOnlineTime}">2.3 часа</span>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">Пик активности</span>-->
+<!--        <span class="metric-value" th:text="${stats.peakActivity}">19:30</span>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 7. Аналитика контента &ndash;&gt;-->
+<!--    <div class="stats-card" th:if="${stats.contentTypes != null}">-->
+<!--      <div class="card-header">-->
+<!--        <i class="card-icon fas fa-chart-pie"></i>-->
+<!--        <h3 class="card-title">Типы контента</h3>-->
+<!--      </div>-->
+
+<!--&lt;!&ndash;      <div class="metric-row">&ndash;&gt;-->
+<!--&lt;!&ndash;        <span class="metric-label">📸 Фото</span>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div>&ndash;&gt;-->
+<!--&lt;!&ndash;          <span class="metric-value" th:text="${stats.contentTypes.photo + '%'}">67%</span>&ndash;&gt;-->
+<!--&lt;!&ndash;          <span class="badge" th:classappend="${stats.contentTypes.photo > 50} ? 'badge-success' : 'badge-info'">&ndash;&gt;-->
+<!--&lt;!&ndash;            <span th:if="${stats.contentTypes.photo > 50}">Популярно</span>&ndash;&gt;-->
+<!--&lt;!&ndash;            <span th:unless="${stats.contentTypes.photo > 50}">Развивать</span>&ndash;&gt;-->
+<!--&lt;!&ndash;          </span>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">📝 Текст</span>-->
+<!--        <span class="metric-value" th:text="${stats.contentTypes.text + '%'}">23%</span>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">🎥 Видео</span>-->
+<!--        <div>-->
+<!--          <span class="metric-value" th:text="${stats.contentTypes.video + '%'}">10%</span>-->
+<!--          <span class="badge badge-warning">Развивать</span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div style="margin-top: 1rem; padding: 1rem; background: var(&#45;&#45;bg-accent); border-radius: var(&#45;&#45;radius-md);"-->
+<!--           th:if="${stats.contentTypes.recommendation != null}">-->
+<!--        <div style="font-weight: 600; color: var(&#45;&#45;accent-primary); margin-bottom: 0.5rem;">-->
+<!--          💡 Рекомендация-->
+<!--        </div>-->
+<!--        <div style="color: var(&#45;&#45;text-secondary); font-size: 0.9rem;" th:text="${stats.contentTypes.recommendation}">-->
+<!--          Рекомендация по контенту-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 8. Достижения и цели &ndash;&gt;-->
+<!--    <div class="stats-card">-->
+<!--      <div class="card-header">-->
+<!--        <i class="card-icon fas fa-trophy"></i>-->
+<!--        <h3 class="card-title">Достижения</h3>-->
+<!--      </div>-->
+
+<!--      <div class="metric-row">-->
+<!--        <span class="metric-label">🏆 Всего достижений</span>-->
+<!--        <span class="metric-value" th:text="${stats.totalAchievements}">12/20</span>-->
+<!--      </div>-->
+
+<!--      <div style="margin: 1rem 0;" th:if="${stats.achievements != null and !stats.achievements.empty}">-->
+<!--        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">-->
+<!--          <span class="badge badge-success" th:each="achievement : ${stats.achievements}" th:text="${achievement}">📈 1К подписчиков</span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div style="margin: 1rem 0;" th:if="${stats.achievements == null or stats.achievements.empty}">-->
+<!--        <div style="text-align: center; color: var(&#45;&#45;text-muted); padding: 1rem;">-->
+<!--          <i class="fas fa-star" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>-->
+<!--          <p>Пока нет достижений</p>-->
+<!--          <p style="font-size: 0.9rem;">Продолжайте создавать контент!</p>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div style="margin-top: 1rem;" th:if="${stats.nextGoal != null}">-->
+<!--        <div style="color: var(&#45;&#45;text-secondary); margin-bottom: 0.5rem;">Следующая цель:</div>-->
+<!--        <div style="font-weight: 600; color: var(&#45;&#45;accent-primary);" th:text="${stats.nextGoal}">-->
+<!--          🎯 3000 подписчиков (осталось 466)-->
+<!--        </div>-->
+<!--        <div class="progress-bar" style="margin-top: 0.5rem;">-->
+<!--          <div class="progress-fill" th:style="'width: ' + ${stats.goalProgress} + '%;'"></div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Кнопки действий &ndash;&gt;-->
+<!--  <div class="action-buttons">-->
+<!--    <a th:href="@{/profile/{userId}/stats/export(userId=${currentUserId})}" class="btn btn-primary">-->
+<!--      <i class="fas fa-download"></i>-->
+<!--      Экспорт данных-->
+<!--    </a>-->
+<!--    <a href="/posts/create" class="btn btn-secondary">-->
+<!--      <i class="fas fa-plus"></i>-->
+<!--      Создать пост-->
+<!--    </a>-->
+<!--    <button onclick="scheduleOptimalPost()" class="btn btn-secondary">-->
+<!--      <i class="fas fa-calendar-plus"></i>-->
+<!--      Запланировать пост-->
+<!--    </button>-->
+<!--    <a th:href="@{/profile/{userId}(userId=${currentUserId})}" class="btn btn-secondary">-->
+<!--      <i class="fas fa-user"></i>-->
+<!--      Вернуться к профилю-->
+<!--    </a>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--<script th:inline="javascript">-->
+<!--  // Передаем данные статистики в JavaScript для дополнительной обработки-->
+<!--  const STATS_DATA = {-->
+<!--    profileViews: /*[[${stats.profileViews}]]*/ 0,-->
+<!--    totalLikes: /*[[${stats.totalLikes}]]*/ 0,-->
+<!--    followersCount: /*[[${stats.followersCount}]]*/ 0,-->
+<!--    postsCount: /*[[${stats.postsCount}]]*/ 0,-->
+<!--    bestDay: /*[[${stats.bestDay}]]*/ 'ВС',-->
+<!--    weeklyActivity: /*[[${stats.weeklyActivity}]]*/ {}-->
+<!--  };-->
+
+<!--  // Простая функция для демонстрации-->
+<!--  function scheduleOptimalPost() {-->
+<!--    const optimalTime = /*[[${stats.optimalPostTime}]]*/ '18:00 - 20:00';-->
+<!--    const bestDay = /*[[${stats.bestDay}]]*/ 'Воскресенье';-->
+
+<!--    alert(`Рекомендуемое время для поста:\n${bestDay}, ${optimalTime}\n\nФункция планирования будет добавлена в будущем!`);-->
+<!--  }-->
+
+<!--  // Анимация при загрузке-->
+<!--  document.addEventListener('DOMContentLoaded', function() {-->
+<!--    const cards = document.querySelectorAll('.stats-card');-->
+<!--    cards.forEach((card, index) => {-->
+<!--      card.style.opacity = '0';-->
+<!--      card.style.transform = 'translateY(20px)';-->
+<!--      setTimeout(() => {-->
+<!--        card.style.transition = 'all 0.5s ease';-->
+<!--        card.style.opacity = '1';-->
+<!--        card.style.transform = 'translateY(0)';-->
+<!--      }, index * 100);-->
+<!--    });-->
+
+<!--    // Анимация для числовых значений-->
+<!--    animateCounters();-->
+<!--  });-->
+
+<!--  function animateCounters() {-->
+<!--    const counters = document.querySelectorAll('.metric-value');-->
+<!--    counters.forEach(counter => {-->
+<!--      const text = counter.textContent;-->
+<!--      const number = parseFloat(text.replace(/[^\d.]/g, ''));-->
+
+<!--      if (!isNaN(number) && number > 0) {-->
+<!--        animateNumber(counter, 0, number, text);-->
+<!--      }-->
+<!--    });-->
+<!--  }-->
+
+<!--  function animateNumber(element, start, end, originalText) {-->
+<!--    const duration = 1000;-->
+<!--    const startTime = performance.now();-->
+
+<!--    function update(currentTime) {-->
+<!--      const elapsed = currentTime - startTime;-->
+<!--      const progress = Math.min(elapsed / duration, 1);-->
+
+<!--      const current = Math.floor(start + (end - start) * progress);-->
+
+<!--      // Сохраняем форматирование (K, M, %, и т.д.)-->
+<!--      if (originalText.includes('K')) {-->
+<!--        element.textContent = (current / 1000).toFixed(1) + 'K';-->
+<!--      } else if (originalText.includes('M')) {-->
+<!--        element.textContent = (current / 1000000).toFixed(1) + 'M';-->
+<!--      } else if (originalText.includes('%')) {-->
+<!--        element.textContent = current + '%';-->
+<!--      } else if (originalText.includes('+')) {-->
+<!--        element.textContent = '+' + current;-->
+<!--      } else if (originalText.includes('-')) {-->
+<!--        element.textContent = '-' + current;-->
+<!--      } else {-->
+<!--        element.textContent = current.toLocaleString();-->
+<!--      }-->
+
+<!--      if (progress < 1) {-->
+<!--        requestAnimationFrame(update);-->
+<!--      } else {-->
+<!--        element.textContent = originalText; // Восстанавливаем оригинальный текст-->
+<!--      }-->
+<!--    }-->
+
+<!--    requestAnimationFrame(update);-->
+<!--  }-->
+
+<!--  // Показать уведомление об экспорте, если есть параметр-->
+<!--  const urlParams = new URLSearchParams(window.location.search);-->
+<!--  if (urlParams.get('exported') === 'true') {-->
+<!--    showNotification('Экспорт статистики запущен! Файл будет доступен для скачивания в ближайшее время.', 'success');-->
+<!--  }-->
+
+<!--  function showNotification(message, type = 'info') {-->
+<!--    const notification = document.createElement('div');-->
+<!--    notification.style.cssText = `-->
+<!--      position: fixed;-->
+<!--      top: 20px;-->
+<!--      right: 20px;-->
+<!--      background: ${type === 'success' ? 'var(&#45;&#45;accent-success)' : 'var(&#45;&#45;accent-info)'};-->
+<!--      color: white;-->
+<!--      padding: 1rem 1.5rem;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--      z-index: 1000;-->
+<!--      animation: slideInRight 0.3s ease;-->
+<!--    `;-->
+
+<!--    notification.innerHTML = `-->
+<!--      <div style="display: flex; align-items: center; gap: 0.5rem;">-->
+<!--        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>-->
+<!--        <span>${message}</span>-->
+<!--        <button onclick="this.parentElement.parentElement.remove()"-->
+<!--                style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: 0.5rem;">-->
+<!--          ×-->
+<!--        </button>-->
+<!--      </div>-->
+<!--    `;-->
+
+<!--    document.body.appendChild(notification);-->
+
+<!--    // Автоматически убираем через 5 секунд-->
+<!--    setTimeout(() => {-->
+<!--      if (notification.parentElement) {-->
+<!--        notification.remove();-->
+<!--      }-->
+<!--    }, 5000);-->
+<!--  }-->
+
+<!--  // Добавляем CSS для анимации уведомлений-->
+<!--  const style = document.createElement('style');-->
+<!--  style.textContent = `-->
+<!--    @keyframes slideInRight {-->
+<!--      from {-->
+<!--        transform: translateX(100%);-->
+<!--        opacity: 0;-->
+<!--      }-->
+<!--      to {-->
+<!--        transform: translateX(0);-->
+<!--        opacity: 1;-->
+<!--      }-->
+<!--    }-->
+
+<!--    .stats-card {-->
+<!--      animation: fadeInUp 0.6s ease forwards;-->
+<!--    }-->
+
+<!--    @keyframes fadeInUp {-->
+<!--      from {-->
+<!--        opacity: 0;-->
+<!--        transform: translateY(30px);-->
+<!--      }-->
+<!--      to {-->
+<!--        opacity: 1;-->
+<!--        transform: translateY(0);-->
+<!--      }-->
+<!--    }-->
+<!--  `;-->
+<!--  document.head.appendChild(style);-->
+<!--</script>-->
+
+<!--&lt;!&ndash; Подключаем скрипт онлайн статуса &ndash;&gt;-->
+<!--<script th:src="@{/js/online-status.js}"></script>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -351,6 +1207,73 @@
       opacity: 0.9;
     }
 
+    /* Новые стили для статистики посетителей */
+    .visitor-stats {
+      background: var(--bg-accent);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .visitor-stats-title {
+      font-weight: 600;
+      color: var(--accent-primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .visitor-metric {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .visitor-metric:last-child {
+      border-bottom: none;
+    }
+
+    .visitor-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .visitor-value {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .content-recommendation {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      margin-top: 1rem;
+    }
+
+    .recommendation-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .loading-skeleton {
+      background: linear-gradient(90deg, var(--bg-accent), var(--border-color), var(--bg-accent));
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: var(--radius-sm);
+      height: 1.5rem;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
     @media (max-width: 768px) {
       .container {
         padding: 1rem 0.5rem;
@@ -373,6 +1296,22 @@
         flex-direction: column;
         align-items: center;
       }
+
+      .metric-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .post-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .post-rank {
+        margin-right: 0;
+      }
     }
   </style>
 </head>
@@ -384,7 +1323,7 @@
       <i class="fas fa-chart-line"></i>
       Статистика профиля
     </h1>
-    <p class="page-subtitle">
+    <p class="page-subtitle" th:text="'Подробная аналитика профиля ' + ${user.firstName} + ' ' + ${user.lastName}">
       Подробная аналитика вашего профиля и контента
     </p>
   </div>
@@ -402,40 +1341,40 @@
       <div class="metric-row">
         <span class="metric-label">Просмотры профиля</span>
         <div>
-          <span class="metric-value" th:text="${stats.profileViews ?: 1247}">1,247</span>
+          <span class="metric-value" th:text="${stats.profileViews}">1,247</span>
           <span class="metric-trend trend-up">
-                            <i class="fas fa-arrow-up"></i> +12%
-                        </span>
+            <i class="fas fa-arrow-up"></i> +12%
+          </span>
         </div>
       </div>
 
       <div class="metric-row">
         <span class="metric-label">Всего лайков</span>
         <div>
-          <span class="metric-value" th:text="${stats.totalLikes ?: 3456}">3,456</span>
+          <span class="metric-value" th:text="${stats.totalLikes}">3,456</span>
           <span class="metric-trend trend-up">
-                            <i class="fas fa-arrow-up"></i> +8%
-                        </span>
+            <i class="fas fa-arrow-up"></i> +8%
+          </span>
         </div>
       </div>
 
       <div class="metric-row">
         <span class="metric-label">Вовлеченность</span>
         <div>
-          <span class="metric-value" th:text="${stats.avgEngagement ?: '7.2%'}">7.2%</span>
+          <span class="metric-value" th:text="${stats.avgEngagement}">7.2%</span>
           <span class="metric-trend trend-stable">
-                            <i class="fas fa-minus"></i> стабильно
-                        </span>
+            <i class="fas fa-minus"></i> стабильно
+          </span>
         </div>
       </div>
 
       <div class="metric-row">
         <span class="metric-label">Постов опубликовано</span>
         <div>
-          <span class="metric-value" th:text="${stats.postsCount ?: 89}">89</span>
+          <span class="metric-value" th:text="${stats.postsCount}">89</span>
           <span class="metric-trend trend-up">
-                            <i class="fas fa-arrow-up"></i> +3 за неделю
-                        </span>
+            <i class="fas fa-arrow-up"></i> активность
+          </span>
         </div>
       </div>
     </div>
@@ -450,39 +1389,88 @@
       <div class="metric-row">
         <span class="metric-label">Всего подписчиков</span>
         <div>
-          <span class="metric-value" th:text="${stats.followersCount ?: 2534}">2,534</span>
-          <span class="badge badge-success">Цель: 3000</span>
+          <span class="metric-value" th:text="${stats.followersCount}">2,534</span>
+          <span class="badge badge-success">Растет</span>
         </div>
       </div>
 
       <div class="metric-row">
         <span class="metric-label">Новых за неделю</span>
-        <span class="metric-value" th:text="${stats.newFollowersWeek ?: '+47'}">+47</span>
+        <span class="metric-value" th:text="'+' + ${stats.newFollowersWeek}">+47</span>
       </div>
 
       <div class="metric-row">
         <span class="metric-label">Отписок за неделю</span>
-        <span class="metric-value" th:text="${stats.unfollowersWeek ?: '-12'}">-12</span>
+        <span class="metric-value" th:text="'-' + ${stats.unfollowersWeek}">-12</span>
       </div>
 
       <div class="metric-row">
         <span class="metric-label">Чистый прирост</span>
-        <span class="metric-value" style="color: var(--accent-success);" th:text="${stats.netGrowth ?: '+35'}">+35</span>
+        <span class="metric-value" th:text="${stats.netGrowth > 0 ? '+' + stats.netGrowth : stats.netGrowth}"
+              th:classappend="${stats.netGrowth > 0 ? 'trend-up' : stats.netGrowth < 0 ? 'trend-down' : 'trend-stable'}">+35</span>
       </div>
 
       <!-- Прогресс до цели -->
       <div style="margin-top: 1rem;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-          <span class="metric-label">Прогресс до 3000</span>
-          <span style="color: var(--accent-primary);">84.5%</span>
+          <span class="metric-label">Прогресс к цели</span>
+          <span style="color: var(--accent-primary);" th:text="${stats.goalProgress} + '%'">84.5%</span>
         </div>
         <div class="progress-bar">
-          <div class="progress-fill" style="width: 84.5%;"></div>
+          <div class="progress-fill" th:style="'width: ' + ${stats.goalProgress} + '%;'"></div>
+        </div>
+        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);" th:text="${stats.nextGoal}">
+          🎯 3000 подписчиков (осталось 466)
         </div>
       </div>
     </div>
 
-    <!-- 3. Активность по дням недели -->
+    <!-- 3. Статистика посетителей -->
+    <div class="stats-card" th:if="${stats.visitorStats != null}">
+      <div class="card-header">
+        <i class="card-icon fas fa-users-viewfinder"></i>
+        <h3 class="card-title">Посетители</h3>
+      </div>
+
+      <div class="visitor-stats">
+        <div class="visitor-metric">
+          <span class="visitor-label">Всего визитов</span>
+          <span class="visitor-value" th:text="${stats.visitorStats.totalVisits}">1,247</span>
+        </div>
+
+        <div class="visitor-metric">
+          <span class="visitor-label">Уникальные посетители</span>
+          <span class="visitor-value" th:text="${stats.visitorStats.uniqueVisitors}">892</span>
+        </div>
+
+        <div class="visitor-metric">
+          <span class="visitor-label">Визитов за неделю</span>
+          <span class="visitor-value" th:text="${stats.visitorStats.visitsThisWeek}">156</span>
+        </div>
+
+        <div class="visitor-metric">
+          <span class="visitor-label">Визитов сегодня</span>
+          <span class="visitor-value" th:text="${stats.visitorStats.visitsToday}">23</span>
+        </div>
+
+        <div class="visitor-metric">
+          <span class="visitor-label">Коэффициент возврата</span>
+          <span class="visitor-value" th:text="${stats.visitorStats.returnRate}">28.5%</span>
+        </div>
+
+        <div class="visitor-metric">
+          <span class="visitor-label">Визитов на посетителя</span>
+          <span class="visitor-value" th:text="${stats.visitorStats.avgVisitsPerVisitor}">1.4</span>
+        </div>
+
+        <div class="visitor-metric">
+          <span class="visitor-label">Уникальные IP</span>
+          <span class="visitor-value" th:text="${stats.visitorStats.uniqueIpAddresses}">743</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Активность по дням недели -->
     <div class="stats-card">
       <div class="card-header">
         <i class="card-icon fas fa-calendar-week"></i>
@@ -490,90 +1478,56 @@
       </div>
 
       <div class="weekly-activity">
-        <div class="day-activity">
-          <div class="day-name">ПН</div>
-          <div class="day-value">245</div>
-        </div>
-        <div class="day-activity">
-          <div class="day-name">ВТ</div>
-          <div class="day-value">189</div>
-        </div>
-        <div class="day-activity">
-          <div class="day-name">СР</div>
-          <div class="day-value">267</div>
-        </div>
-        <div class="day-activity">
-          <div class="day-name">ЧТ</div>
-          <div class="day-value">298</div>
-        </div>
-        <div class="day-activity">
-          <div class="day-name">ПТ</div>
-          <div class="day-value">334</div>
-        </div>
-        <div class="day-activity">
-          <div class="day-name">СБ</div>
-          <div class="day-value">412</div>
-        </div>
-        <div class="day-activity active">
-          <div class="day-name">ВС</div>
-          <div class="day-value">487</div>
+        <div th:each="day : ${stats.weeklyActivity}"
+             class="day-activity"
+             th:classappend="${day.key == stats.bestDay} ? 'active' : ''">
+          <div class="day-name" th:text="${day.key}">ПН</div>
+          <div class="day-value" th:text="${day.value}">245</div>
         </div>
       </div>
 
       <div style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
         <i class="fas fa-crown" style="color: var(--accent-primary);"></i>
-        Лучший день: <strong style="color: var(--accent-primary);">Воскресенье</strong>
+        Лучший день: <strong style="color: var(--accent-primary);" th:text="${stats.bestDay}">Воскресенье</strong>
       </div>
     </div>
 
-    <!-- 4. Топ популярных постов -->
+    <!-- 5. Топ популярных постов -->
     <div class="stats-card">
       <div class="card-header">
         <i class="card-icon fas fa-fire"></i>
         <h3 class="card-title">Топ-3 поста</h3>
       </div>
 
-      <div class="top-posts">
-        <div class="post-item">
-          <div class="post-rank">🥇</div>
-          <div class="post-content">
-            <div class="post-text">Закат над морем в Анталии...</div>
-            <div class="post-stats">
-              <span><i class="fas fa-heart"></i> 234</span>
-              <span><i class="fas fa-comment"></i> 45</span>
-              <span><i class="fas fa-eye"></i> 1.2k</span>
-            </div>
+      <div class="top-posts" th:if="${stats.topPosts != null and !stats.topPosts.empty}">
+        <div class="post-item" th:each="post, iterStat : ${stats.topPosts}">
+          <div class="post-rank" th:switch="${iterStat.index}">
+            <span th:case="0">🥇</span>
+            <span th:case="1">🥈</span>
+            <span th:case="2">🥉</span>
+            <span th:case="*" th:text="${iterStat.index + 1}">4</span>
           </div>
-        </div>
-
-        <div class="post-item">
-          <div class="post-rank">🥈</div>
           <div class="post-content">
-            <div class="post-text">Мои мысли о путешествиях...</div>
+            <div class="post-text" th:text="${post.content}">Содержимое поста...</div>
             <div class="post-stats">
-              <span><i class="fas fa-heart"></i> 189</span>
-              <span><i class="fas fa-comment"></i> 32</span>
-              <span><i class="fas fa-eye"></i> 987</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="post-item">
-          <div class="post-rank">🥉</div>
-          <div class="post-content">
-            <div class="post-text">Рецепт турецкого кофе...</div>
-            <div class="post-stats">
-              <span><i class="fas fa-heart"></i> 156</span>
-              <span><i class="fas fa-comment"></i> 28</span>
-              <span><i class="fas fa-eye"></i> 743</span>
+              <span><i class="fas fa-heart"></i> <span th:text="${post.likesCount}">234</span></span>
+              <span><i class="fas fa-comment"></i> <span th:text="${post.commentsCount}">45</span></span>
+              <span><i class="fas fa-eye"></i> <span th:text="${post.viewsCount}">1.2k</span></span>
             </div>
           </div>
         </div>
       </div>
+
+      <div th:if="${stats.topPosts == null or stats.topPosts.empty}"
+           style="text-align: center; color: var(--text-muted); padding: 2rem;">
+        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+        <p>Пока нет популярных постов</p>
+        <p style="font-size: 0.9rem;">Создайте больше контента для анализа</p>
+      </div>
     </div>
 
-    <!-- 5. География аудитории -->
-    <div class="stats-card">
+    <!-- 6. География аудитории -->
+    <div class="stats-card" th:if="${stats.geography != null}">
       <div class="card-header">
         <i class="card-icon fas fa-globe"></i>
         <h3 class="card-title">География</h3>
@@ -581,16 +1535,12 @@
 
       <div class="metric-row">
         <span class="metric-label">Основная аудитория</span>
-        <span class="metric-value">🇹🇷 Турция (45%)</span>
+        <span class="metric-value" th:text="${stats.geography.mainCountry + ' (' + stats.geography.mainPercentage + '%)'}">"🇹🇷 Турция (45%)"</span>
       </div>
 
       <div class="geography-tags">
-        <div class="geo-tag">🇹🇷 Анталия (23%)</div>
-        <div class="geo-tag">🇹🇷 Стамбул (15%)</div>
-        <div class="geo-tag">🇷🇺 Москва (12%)</div>
-        <div class="geo-tag">🇩🇪 Берлин (8%)</div>
-        <div class="geo-tag">🇺🇸 Нью-Йорк (6%)</div>
-        <div class="geo-tag">🌍 Другие (36%)</div>
+        <div class="geo-tag" th:each="city : ${stats.geography.cities}"
+             th:text="${city.name + ' (' + city.percentage + '%)'}">"🇹🇷 Анталия (23%)"</div>
       </div>
 
       <div class="chart-container">
@@ -598,7 +1548,7 @@
       </div>
     </div>
 
-    <!-- 6. Оптимальное время -->
+    <!-- 7. Оптимальное время -->
     <div class="stats-card">
       <div class="card-header">
         <i class="card-icon fas fa-clock"></i>
@@ -606,26 +1556,26 @@
       </div>
 
       <div class="optimal-time">
-        <div class="time-value">18:00 - 20:00</div>
+        <div class="time-value" th:text="${stats.optimalPostTime}">18:00 - 20:00</div>
         <div class="time-description">
           Максимальная активность аудитории<br>
-          <strong>Воскресенье, вечер</strong>
+          <strong th:text="${stats.bestDay + ', вечер'}">Воскресенье, вечер</strong>
         </div>
       </div>
 
       <div class="metric-row" style="margin-top: 1rem;">
         <span class="metric-label">Среднее время онлайн</span>
-        <span class="metric-value">2.3 часа</span>
+        <span class="metric-value" th:text="${stats.avgOnlineTime}">2.3 часа</span>
       </div>
 
       <div class="metric-row">
         <span class="metric-label">Пик активности</span>
-        <span class="metric-value">19:30</span>
+        <span class="metric-value" th:text="${stats.peakActivity}">19:30</span>
       </div>
     </div>
 
-    <!-- 7. Аналитика контента -->
-    <div class="stats-card">
+    <!-- 8. Аналитика контента -->
+    <div class="stats-card" th:if="${stats.contentTypes != null}">
       <div class="card-header">
         <i class="card-icon fas fa-chart-pie"></i>
         <h3 class="card-title">Типы контента</h3>
@@ -634,36 +1584,40 @@
       <div class="metric-row">
         <span class="metric-label">📸 Фото</span>
         <div>
-          <span class="metric-value">67%</span>
-          <span class="badge badge-success">Лучший</span>
+          <span class="metric-value" th:text="${stats.contentTypes.photo + '%'}">67%</span>
+          <span class="badge" th:classappend="${stats.contentTypes.photo > 50} ? 'badge-success' : 'badge-info'">
+            <span th:if="${stats.contentTypes.photo > 50}">Популярно</span>
+            <span th:unless="${stats.contentTypes.photo > 50}">Развивать</span>
+          </span>
         </div>
       </div>
 
       <div class="metric-row">
         <span class="metric-label">📝 Текст</span>
-        <span class="metric-value">23%</span>
+        <span class="metric-value" th:text="${stats.contentTypes.text + '%'}">23%</span>
       </div>
 
       <div class="metric-row">
         <span class="metric-label">🎥 Видео</span>
         <div>
-          <span class="metric-value">10%</span>
+          <span class="metric-value" th:text="${stats.contentTypes.video + '%'}">10%</span>
           <span class="badge badge-warning">Развивать</span>
         </div>
       </div>
 
-      <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-accent); border-radius: var(--radius-md);">
-        <div style="font-weight: 600; color: var(--accent-primary); margin-bottom: 0.5rem;">
-          💡 Рекомендация
+      <!-- Рекомендация по контенту -->
+      <div class="content-recommendation" th:if="${stats.contentTypes.recommendation != null}">
+        <div class="recommendation-title">
+          <i class="fas fa-lightbulb"></i>
+          Рекомендация
         </div>
-        <div style="color: var(--text-secondary); font-size: 0.9rem;">
-          Посты с фотографиями получают на 40% больше лайков.
-          Попробуйте добавить больше видео контента.
+        <div style="font-size: 0.9rem; opacity: 0.9;" th:text="${stats.contentTypes.recommendation}">
+          Рекомендация по контенту
         </div>
       </div>
     </div>
 
-    <!-- 8. Достижения и цели -->
+    <!-- 9. Достижения и цели -->
     <div class="stats-card">
       <div class="card-header">
         <i class="card-icon fas fa-trophy"></i>
@@ -672,25 +1626,30 @@
 
       <div class="metric-row">
         <span class="metric-label">🏆 Всего достижений</span>
-        <span class="metric-value">12/20</span>
+        <span class="metric-value" th:text="${stats.totalAchievements}">12/25</span>
       </div>
 
-      <div style="margin: 1rem 0;">
+      <div style="margin: 1rem 0;" th:if="${stats.achievements != null and !stats.achievements.empty}">
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <span class="badge badge-success">📈 1К подписчиков</span>
-          <span class="badge badge-success">❤️ 1К лайков</span>
-          <span class="badge badge-success">🔥 Вирусный пост</span>
-          <span class="badge badge-info">⭐ Активный автор</span>
+          <span class="badge badge-success" th:each="achievement : ${stats.achievements}" th:text="${achievement}">📈 1К подписчиков</span>
         </div>
       </div>
 
-      <div style="margin-top: 1rem;">
+      <div style="margin: 1rem 0;" th:if="${stats.achievements == null or stats.achievements.empty}">
+        <div style="text-align: center; color: var(--text-muted); padding: 1rem;">
+          <i class="fas fa-star" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+          <p>Пока нет достижений</p>
+          <p style="font-size: 0.9rem;">Продолжайте создавать контент!</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 1rem;" th:if="${stats.nextGoal != null}">
         <div style="color: var(--text-secondary); margin-bottom: 0.5rem;">Следующая цель:</div>
-        <div style="font-weight: 600; color: var(--accent-primary);">
+        <div style="font-weight: 600; color: var(--accent-primary);" th:text="${stats.nextGoal}">
           🎯 3000 подписчиков (осталось 466)
         </div>
         <div class="progress-bar" style="margin-top: 0.5rem;">
-          <div class="progress-fill" style="width: 84.5%;"></div>
+          <div class="progress-fill" th:style="'width: ' + ${stats.goalProgress} + '%;'"></div>
         </div>
       </div>
     </div>
@@ -699,7 +1658,7 @@
 
   <!-- Кнопки действий -->
   <div class="action-buttons">
-    <a href="/profile/export-stats" class="btn btn-primary">
+    <a th:href="@{/showProfileStats/{userId}/stats/export(userId=${currentUserId})}" class="btn btn-primary">
       <i class="fas fa-download"></i>
       Экспорт данных
     </a>
@@ -718,10 +1677,24 @@
   </div>
 </div>
 
-<script>
+<script th:inline="javascript">
+  // Передаем данные статистики в JavaScript для дополнительной обработки
+  const STATS_DATA = {
+    profileViews: /*[[${stats.profileViews}]]*/ 0,
+    totalLikes: /*[[${stats.totalLikes}]]*/ 0,
+    followersCount: /*[[${stats.followersCount}]]*/ 0,
+    postsCount: /*[[${stats.postsCount}]]*/ 0,
+    bestDay: /*[[${stats.bestDay}]]*/ 'ВС',
+    weeklyActivity: /*[[${stats.weeklyActivity}]]*/ {},
+    visitorStats: /*[[${stats.visitorStats}]]*/ {}
+  };
+
   // Простая функция для демонстрации
   function scheduleOptimalPost() {
-    alert('Функция планирования постов будет добавлена в будущем!');
+    const optimalTime = /*[[${stats.optimalPostTime}]]*/ '18:00 - 20:00';
+    const bestDay = /*[[${stats.bestDay}]]*/ 'Воскресенье';
+
+    alert(`Рекомендуемое время для поста:\n${bestDay}, ${optimalTime}\n\nФункция планирования будет добавлена в будущем!`);
   }
 
   // Анимация при загрузке
@@ -736,8 +1709,253 @@
         card.style.transform = 'translateY(0)';
       }, index * 100);
     });
+
+    // Анимация для числовых значений
+    animateCounters();
   });
+
+  function animateCounters() {
+    const counters = document.querySelectorAll('.metric-value, .visitor-value');
+    counters.forEach(counter => {
+      const text = counter.textContent;
+      const number = parseFloat(text.replace(/[^\d.]/g, ''));
+
+      if (!isNaN(number) && number > 0) {
+        animateNumber(counter, 0, number, text);
+      }
+    });
+  }
+
+  function animateNumber(element, start, end, originalText) {
+    const duration = 1000;
+    const startTime = performance.now();
+
+    function update(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      const current = Math.floor(start + (end - start) * progress);
+
+      // Сохраняем форматирование (K, M, %, и т.д.)
+      if (originalText.includes('K')) {
+        element.textContent = (current / 1000).toFixed(1) + 'K';
+      } else if (originalText.includes('M')) {
+        element.textContent = (current / 1000000).toFixed(1) + 'M';
+      } else if (originalText.includes('%')) {
+        element.textContent = current + '%';
+      } else if (originalText.includes('+')) {
+        element.textContent = '+' + current;
+      } else if (originalText.includes('-')) {
+        element.textContent = '-' + current;
+      } else {
+        element.textContent = current.toLocaleString();
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        element.textContent = originalText; // Восстанавливаем оригинальный текст
+      }
+    }
+
+    requestAnimationFrame(update);
+  }
+
+  // Показать уведомление об экспорте, если есть параметр
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('exported') === 'true') {
+    showNotification('Экспорт статистики запущен! Файл будет доступен для скачивания в ближайшее время.', 'success');
+  }
+
+  function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === 'success' ? 'var(--accent-success)' : 'var(--accent-info)'};
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      animation: slideInRight 0.3s ease;
+    `;
+
+    notification.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.parentElement.remove()"
+                style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: 0.5rem;">
+          ×
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Автоматически убираем через 5 секунд
+    setTimeout(() => {
+      if (notification.parentElement) {
+        notification.remove();
+      }
+    }, 5000);
+  }
+
+  // Функция для обновления статистики в реальном времени
+  function refreshStats() {
+    // Здесь можно добавить AJAX запрос для обновления статистики
+    console.log('Обновление статистики...');
+
+    // Пример: добавляем эффект загрузки
+    const cards = document.querySelectorAll('.stats-card');
+    cards.forEach(card => {
+      card.style.opacity = '0.7';
+      card.style.filter = 'grayscale(20%)';
+    });
+
+    // Имитируем загрузку
+    setTimeout(() => {
+      cards.forEach(card => {
+        card.style.opacity = '1';
+        card.style.filter = 'none';
+      });
+      showNotification('Статистика обновлена!', 'success');
+    }, 1000);
+  }
+
+  // Функция для сравнения с предыдущим периодом
+  function compareWithPrevious() {
+    // Здесь будет логика сравнения статистики
+    showNotification('Функция сравнения будет добавлена в следующем обновлении', 'info');
+  }
+
+  // Добавляем CSS для анимации уведомлений
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .stats-card {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Hover эффекты для интерактивности */
+    .visitor-metric:hover {
+      background: var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem;
+      margin: 0 -0.5rem;
+    }
+
+    .post-item:hover .post-rank {
+      transform: scale(1.2);
+      transition: transform 0.3s ease;
+    }
+
+    .day-activity:hover {
+      transform: scale(1.05);
+      cursor: pointer;
+    }
+
+    /* Адаптивные улучшения */
+    @media (max-width: 480px) {
+      .page-title {
+        font-size: 1.8rem;
+      }
+
+      .card-icon {
+        font-size: 1.5rem;
+        padding: 0.5rem;
+      }
+
+      .card-title {
+        font-size: 1.2rem;
+      }
+
+      .metric-value {
+        font-size: 1rem;
+      }
+
+      .weekly-activity {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.25rem;
+      }
+
+      .day-activity {
+        padding: 0.5rem 0.25rem;
+      }
+
+      .day-name {
+        font-size: 0.7rem;
+      }
+
+      .day-value {
+        font-size: 1rem;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Автоматическое обновление времени
+  function updateCurrentTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('ru-RU', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    // Обновляем время в заголовке, если нужно
+    document.title = `Статистика профиля - ${timeString} - Cleopatra`;
+  }
+
+  // Обновляем время каждую минуту
+  setInterval(updateCurrentTime, 60000);
+  updateCurrentTime(); // Вызываем сразу
+
+  // Отслеживание активности пользователя
+  let isUserActive = true;
+  let inactivityTimer;
+
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    isUserActive = true;
+
+    inactivityTimer = setTimeout(() => {
+      isUserActive = false;
+      console.log('Пользователь неактивен');
+    }, 300000); // 5 минут
+  }
+
+  // События для отслеживания активности
+  ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, true);
+  });
+
+  resetInactivityTimer();
 </script>
-<script th:src="@{/js/online-status.js}"></script>
+
+<!-- Подключаем скрипт онлайн статуса, если он существует -->
+<script th:src="@{/js/online-status.js}" onerror="console.log('online-status.js не найден')"></script>
 </body>
 </html>

@@ -153,6 +153,7 @@ public class UserServiceImpl implements UserService {
         return subscriptionRepository.countBySubscriberId(userId);
     }
 
+
     private Long getPostsCount(Long userId) {
         Long count = postRepository.countByAuthorId(userId);
         return count;
