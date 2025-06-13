@@ -629,11 +629,32 @@
       font-size: 0.875rem;
       color: var(--text-secondary);
       cursor: pointer;
-      transition: color 0.2s ease;
+      transition: all 0.2s ease;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
     }
 
     .stat-item:hover {
       color: var(--accent-primary);
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    .stat-item.like-btn {
+      position: relative;
+    }
+
+    .stat-item.like-btn:hover .like-icon {
+      transform: scale(1.2);
+    }
+
+    .stat-item.like-btn.liked .like-icon {
+      color: #e53e3e;
+      transform: scale(1.1);
+    }
+
+    .stat-item.comment-btn:hover {
+      color: var(--accent-secondary);
+      background: rgba(124, 58, 237, 0.05);
     }
 
     .stat-icon {
@@ -858,9 +879,6 @@
     <div th:if="${canWriteOnWall}" class="create-post">
       <form id="createPostForm" enctype="multipart/form-data">
         <div class="create-post-header">
-          <img th:src="${currentUser?.imageUrl ?: '/default-avatar.png'}"
-               alt="Ваш аватар"
-               class="user-avatar-small">
           <textarea id="postText"
                     name="text"
                     class="post-input"
@@ -1058,11 +1076,11 @@
                 </div>
 
                 <div class="post-stats">
-                    <div class="stat-item">
-                        <span class="stat-icon">❤️</span>
-                        <span>${post.likesCount}</span>
+                    <div class="stat-item like-btn" onclick="toggleLike(${post.id})" data-post-id="${post.id}">
+                        <span class="stat-icon like-icon">❤️</span>
+                        <span class="like-count">${post.likesCount}</span>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item comment-btn" onclick="showComments(${post.id})">
                         <span class="stat-icon">💬</span>
                         <span>${post.commentsCount}</span>
                     </div>
@@ -1258,9 +1276,59 @@
     return div.innerHTML;
   }
 
-  // Заглушка для функции редактирования
-  function editPost(postId) {
-    showNotification('Функция редактирования будет добавлена позже', 'info');
+  // Лайк поста (заглушка)
+  async function toggleLike(postId) {
+    const likeBtn = document.querySelector(`[data-post-id="${postId}"] .like-btn`);
+    const likeCount = document.querySelector(`[data-post-id="${postId}"] .like-count`);
+    const isLiked = likeBtn.classList.contains('liked');
+
+    try {
+      // TODO: Заменить на реальный API когда будет готова сущность Like
+      const response = await fetch(`/wall/api/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ liked: !isLiked })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Обновляем UI
+        likeBtn.classList.toggle('liked');
+        likeCount.textContent = data.likesCount;
+
+        // Анимация
+        likeBtn.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+          likeBtn.style.transform = 'scale(1)';
+        }, 200);
+      } else {
+        throw new Error('Ошибка при лайке');
+      }
+    } catch (error) {
+      console.error('Ошибка лайка:', error);
+
+      // Временная заглушка - просто меняем счетчик
+      const currentCount = parseInt(likeCount.textContent);
+      const newCount = isLiked ? currentCount - 1 : currentCount + 1;
+
+      likeBtn.classList.toggle('liked');
+      likeCount.textContent = newCount;
+
+      showNotification(isLiked ? 'Лайк убран' : 'Лайк поставлен', 'info');
+    }
+  }
+
+  // Показать комментарии (заглушка)
+  function showComments(postId) {
+    // TODO: Реализовать когда будет готова сущность Comment
+    showNotification('Комментарии будут доступны позже', 'info');
+
+    // Пример будущего функционала:
+    // window.location.href = `/wall/posts/${postId}/comments`;
+    // или открыть модальное окно с комментариями
   }
 </script>
 </body>
