@@ -16,7 +16,7 @@ public class CleopatraApplication {
 
 
 
-//пост упомянуть по имени при создание посты
+
 
 //public enum ProfilePrivacyLevel {
 //    PUBLIC,           // Все могут видеть
@@ -26,20 +26,33 @@ public class CleopatraApplication {
 //
 //
 
-//// Подключение к WebSocket
-//const socket = new WebSocket('/ws/notifications');
-//        socket.onmessage = (event) => {
-//    const notification = JSON.parse(event.data);
-//            showNotificationPopup(notification);
-//        };
 
 
-//        @Override
-//        public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-//            registry.addHandler(chatWebSocketHandler, "/chat")
-//                    .setAllowedOrigins("*") // В продакшене указать конкретные домены
-//                    .withSockJS(); // Fallback для старых браузеров
+
+//// В User добавить:
+//        @Enumerated(EnumType.STRING)
+//        @Column(name = "wall_access_level")
+//        @Builder.Default
+//        private WallAccessLevel wallAccessLevel = WallAccessLevel.PUBLIC;
+//
+//        enum WallAccessLevel {
+//            PUBLIC,      // Все могут писать на стене
+//            FRIENDS,     // Только подписчики могут писать
+//            PRIVATE,     // Никто не может писать (только владелец)
+//            DISABLED     // Стена отключена
 //        }
+
+
+
+//
+//        // Закреплен ли пост
+//        @Column(name = "is_pinned")
+//        @Builder.Default
+//        private Boolean isPinned = false;
+//
+//        // Дата закрепления
+//        @Column(name = "pinned_at")
+//        private LocalDateTime pinnedAt;
 
     }
 

@@ -2,6 +2,7 @@ package com.example.cleopatra.model;
 
 import com.example.cleopatra.enums.Gender;
 import com.example.cleopatra.enums.Role;
+import com.example.cleopatra.enums.WallAccessLevel;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -203,6 +204,13 @@ public class User {
     @OneToMany(mappedBy = "viewer", fetch = FetchType.LAZY)
     @Builder.Default
     private Set<StoryView> viewedStories = new HashSet<>();
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "wall_access_level")
+    @Builder.Default
+    private WallAccessLevel wallAccessLevel = WallAccessLevel.PUBLIC;
+
 
 
     // Системные поля

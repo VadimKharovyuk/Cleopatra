@@ -1144,13 +1144,18 @@
                 <div class="nav-tabs-luxury d-flex">
                     <button class="nav-tab-luxury active">Посты</button>
 
-
                     <a th:href="@{'/stories/user/' + ${userId}}" class="nav-tab-luxury-link">
                         <button class="nav-tab-luxury">
                             Медиа
                         </button>
                     </a>
-                    <button class="nav-tab-luxury">Нравится</button>
+
+                    <!-- Добавляем ссылку на стену -->
+                    <a th:href="@{'/wall/' + ${userId}}" class="nav-tab-luxury-link">
+                        <button class="nav-tab-luxury">
+                            Стена
+                        </button>
+                    </a>
                 </div>
             </div>
         </div>

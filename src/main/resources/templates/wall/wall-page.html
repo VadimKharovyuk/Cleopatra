@@ -1,0 +1,1261 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title th:text="'Стена пользователя ' + ${wallOwner.firstName} + ' ' + ${wallOwner.lastName}">Стена пользователя</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--&lt;!&ndash; Заголовок стены &ndash;&gt;-->
+<!--<div class="wall-header">-->
+<!--  <div class="wall-owner-info">-->
+<!--    <img th:src="${wallOwner.imageUrl}" th:alt="${wallOwner.firstName}" width="50" height="50">-->
+<!--    <h1 th:text="${wallOwner.firstName} + ' ' + ${wallOwner.lastName}">Имя пользователя</h1>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Форма создания поста (если есть права) &ndash;&gt;-->
+<!--<div th:if="${canWriteOnWall}" class="create-post-form">-->
+<!--  <h3>Написать на стене</h3>-->
+<!--  <form id="createPostForm" enctype="multipart/form-data">-->
+<!--    <div>-->
+<!--      <label for="postText">Текст поста:</label>-->
+<!--      <textarea id="postText" name="text" placeholder="Что у вас нового?" rows="3" style="width: 100%; max-width: 500px;"></textarea>-->
+<!--    </div>-->
+
+<!--    <div>-->
+<!--      <label for="postImage">Изображение (опционально):</label>-->
+<!--      <input type="file" id="postImage" name="image" accept="image/*">-->
+<!--    </div>-->
+
+<!--    <button type="submit">Опубликовать</button>-->
+<!--  </form>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Контейнер для постов &ndash;&gt;-->
+<!--<div id="postsContainer" class="posts-container">-->
+<!--  &lt;!&ndash; Посты будут загружаться сюда через JavaScript &ndash;&gt;-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Индикатор загрузки &ndash;&gt;-->
+<!--<div id="loadingIndicator" style="text-align: center; padding: 20px; display: none;">-->
+<!--  <p>Загрузка постов...</p>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Сообщение об окончании постов &ndash;&gt;-->
+<!--<div id="endMessage" style="text-align: center; padding: 20px; display: none;">-->
+<!--  <p>Больше постов нет</p>-->
+<!--</div>-->
+
+<!--<script th:inline="javascript">-->
+<!--  // Переменные из Thymeleaf-->
+<!--  const wallOwnerId = /*[[${wallOwnerId}]]*/ 0;-->
+<!--  const currentUserId = /*[[${currentUserId}]]*/ null;-->
+<!--  const canWriteOnWall = /*[[${canWriteOnWall}]]*/ false;-->
+
+<!--  // Состояние пагинации-->
+<!--  let currentPage = 0;-->
+<!--  let isLoading = false;-->
+<!--  let hasMorePosts = true;-->
+<!--  const pageSize = 10;-->
+
+<!--  // DOM элементы-->
+<!--  const postsContainer = document.getElementById('postsContainer');-->
+<!--  const loadingIndicator = document.getElementById('loadingIndicator');-->
+<!--  const endMessage = document.getElementById('endMessage');-->
+<!--  const createPostForm = document.getElementById('createPostForm');-->
+
+<!--  // Инициализация-->
+<!--  document.addEventListener('DOMContentLoaded', function() {-->
+<!--    loadWallPosts(); // Загружаем первую страницу-->
+<!--    setupInfiniteScroll(); // Настраиваем бесконечный скролл-->
+<!--    setupCreatePostForm(); // Настраиваем форму создания поста-->
+<!--  });-->
+
+<!--  // Загрузка постов стены-->
+<!--  async function loadWallPosts() {-->
+<!--    if (isLoading || !hasMorePosts) return;-->
+
+<!--    isLoading = true;-->
+<!--    showLoading();-->
+
+<!--    try {-->
+<!--      const response = await fetch(`/wall/api/${wallOwnerId}/posts?page=${currentPage}&size=${pageSize}`);-->
+
+<!--      if (!response.ok) {-->
+<!--        throw new Error('Ошибка загрузки постов');-->
+<!--      }-->
+
+<!--      const data = await response.json();-->
+
+<!--      // Добавляем посты в контейнер-->
+<!--      data.wallPosts.forEach(post => {-->
+<!--        postsContainer.appendChild(createPostElement(post));-->
+<!--      });-->
+
+<!--      // Обновляем состояние пагинации-->
+<!--      hasMorePosts = data.hasNext;-->
+<!--      currentPage++;-->
+
+<!--      // Показываем сообщение об окончании, если постов больше нет-->
+<!--      if (!hasMorePosts && data.isEmpty && currentPage === 1) {-->
+<!--        showMessage('На стене пока нет постов');-->
+<!--      } else if (!hasMorePosts) {-->
+<!--        endMessage.style.display = 'block';-->
+<!--      }-->
+
+<!--    } catch (error) {-->
+<!--      console.error('Ошибка загрузки постов:', error);-->
+<!--      showMessage('Ошибка загрузки постов');-->
+<!--    } finally {-->
+<!--      isLoading = false;-->
+<!--      hideLoading();-->
+<!--    }-->
+<!--  }-->
+
+<!--  // Создание HTML элемента поста-->
+<!--  function createPostElement(post) {-->
+<!--    const postDiv = document.createElement('div');-->
+<!--    postDiv.className = 'post-card';-->
+<!--    postDiv.style.cssText = 'border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 8px;';-->
+
+<!--    const authorInfo = post.author;-->
+<!--    const wallOwnerInfo = post.wallOwner;-->
+
+<!--    const isOwnPost = authorInfo.id !== wallOwnerInfo.id;-->
+<!--    const authorText = isOwnPost ? `${authorInfo.firstName} ${authorInfo.lastName} → ${wallOwnerInfo.firstName} ${wallOwnerInfo.lastName}`-->
+<!--            : `${authorInfo.firstName} ${authorInfo.lastName}`;-->
+
+<!--    postDiv.innerHTML = `-->
+<!--                <div class="post-header" style="display: flex; align-items: center; margin-bottom: 10px;">-->
+<!--                    <img src="${authorInfo.imageUrl || '/default-avatar.png'}"-->
+<!--                         alt="${authorInfo.firstName}"-->
+<!--                         style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">-->
+<!--                    <div>-->
+<!--                        <div style="font-weight: bold;">${authorText}</div>-->
+<!--                        <div style="color: #666; font-size: 12px;">${formatDate(post.createdAt)}</div>-->
+<!--                    </div>-->
+<!--                    <div style="margin-left: auto;">-->
+<!--                        ${post.canDelete ? `<button onclick="deletePost(${post.id})" style="color: red; background: none; border: none; cursor: pointer;">Удалить</button>` : ''}-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                ${post.text ? `<div class="post-text" style="margin-bottom: 10px;">${post.text}</div>` : ''}-->
+
+<!--                ${post.picUrl ? `<div class="post-image" style="margin-bottom: 10px;">-->
+<!--                    <img src="${post.picUrl}" alt="Изображение поста" style="max-width: 100%; height: auto; border-radius: 4px;">-->
+<!--                </div>` : ''}-->
+
+<!--                <div class="post-actions" style="display: flex; align-items: center; color: #666; font-size: 14px;">-->
+<!--                    <span style="margin-right: 15px;">❤️ ${post.likesCount}</span>-->
+<!--                    <span>💬 ${post.commentsCount}</span>-->
+<!--                </div>-->
+<!--            `;-->
+
+<!--    return postDiv;-->
+<!--  }-->
+
+<!--  // Настройка бесконечного скролла-->
+<!--  function setupInfiniteScroll() {-->
+<!--    window.addEventListener('scroll', function() {-->
+<!--      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {-->
+<!--        loadWallPosts();-->
+<!--      }-->
+<!--    });-->
+<!--  }-->
+
+<!--  // Настройка формы создания поста-->
+<!--  function setupCreatePostForm() {-->
+<!--    if (!createPostForm) return;-->
+
+<!--    createPostForm.addEventListener('submit', async function(e) {-->
+<!--      e.preventDefault();-->
+
+<!--      const formData = new FormData(this);-->
+
+<!--      try {-->
+<!--        const response = await fetch(`/wall/api/${wallOwnerId}/posts`, {-->
+<!--          method: 'POST',-->
+<!--          body: formData-->
+<!--        });-->
+
+<!--        if (!response.ok) {-->
+<!--          throw new Error('Ошибка создания поста');-->
+<!--        }-->
+
+<!--        const newPost = await response.json();-->
+
+<!--        // Добавляем новый пост в начало списка-->
+<!--        postsContainer.insertBefore(createPostElement(newPost), postsContainer.firstChild);-->
+
+<!--        // Очищаем форму-->
+<!--        this.reset();-->
+
+<!--        showMessage('Пост успешно опубликован!');-->
+
+<!--      } catch (error) {-->
+<!--        console.error('Ошибка создания поста:', error);-->
+<!--        showMessage('Ошибка при создании поста');-->
+<!--      }-->
+<!--    });-->
+<!--  }-->
+
+<!--  // Удаление поста-->
+<!--  async function deletePost(postId) {-->
+<!--    if (!confirm('Удалить этот пост?')) return;-->
+
+<!--    try {-->
+<!--      const response = await fetch(`/wall/api/posts/${postId}`, {-->
+<!--        method: 'DELETE'-->
+<!--      });-->
+
+<!--      if (!response.ok) {-->
+<!--        throw new Error('Ошибка удаления поста');-->
+<!--      }-->
+
+<!--      // Удаляем пост из DOM-->
+<!--      const postElements = document.querySelectorAll('.post-card');-->
+<!--      postElements.forEach(element => {-->
+<!--        if (element.innerHTML.includes(`deletePost(${postId})`)) {-->
+<!--          element.remove();-->
+<!--        }-->
+<!--      });-->
+
+<!--      showMessage('Пост удален');-->
+
+<!--    } catch (error) {-->
+<!--      console.error('Ошибка удаления поста:', error);-->
+<!--      showMessage('Ошибка при удалении поста');-->
+<!--    }-->
+<!--  }-->
+
+<!--  // Утилиты-->
+<!--  function showLoading() {-->
+<!--    loadingIndicator.style.display = 'block';-->
+<!--  }-->
+
+<!--  function hideLoading() {-->
+<!--    loadingIndicator.style.display = 'none';-->
+<!--  }-->
+
+<!--  function showMessage(message) {-->
+<!--    // Простое уведомление (можно заменить на более красивое)-->
+<!--    const messageDiv = document.createElement('div');-->
+<!--    messageDiv.textContent = message;-->
+<!--    messageDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #4CAF50; color: white; padding: 10px; border-radius: 4px; z-index: 1000;';-->
+<!--    document.body.appendChild(messageDiv);-->
+
+<!--    setTimeout(() => {-->
+<!--      document.body.removeChild(messageDiv);-->
+<!--    }, 3000);-->
+<!--  }-->
+
+<!--  function formatDate(dateString) {-->
+<!--    const date = new Date(dateString);-->
+<!--    const now = new Date();-->
+<!--    const diffMs = now - date;-->
+<!--    const diffMins = Math.floor(diffMs / 60000);-->
+<!--    const diffHours = Math.floor(diffMs / 3600000);-->
+<!--    const diffDays = Math.floor(diffMs / 86400000);-->
+
+<!--    if (diffMins < 1) return 'только что';-->
+<!--    if (diffMins < 60) return `${diffMins} мин назад`;-->
+<!--    if (diffHours < 24) return `${diffHours} ч назад`;-->
+<!--    if (diffDays < 7) return `${diffDays} дн назад`;-->
+
+<!--    return date.toLocaleDateString('ru-RU');-->
+<!--  }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'Стена пользователя ' + ${wallOwner.firstName} + ' ' + ${wallOwner.lastName}">Стена пользователя</title>
+
+  <!-- Подключаем существующие стили sidebar -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+  <style>
+    /* =================== МИНИМАЛИСТИЧНЫЙ ДИЗАЙН =================== */
+
+    body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Main Content Layout */
+    .main-content {
+      margin-left: 280px;
+      margin-right: 0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* Main Content Area */
+    .content-area {
+      max-width: 800px; /* Увеличиваем ширину */
+      margin: 0 auto;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-secondary);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .content-header {
+      padding: 2rem 2rem 1rem;
+      border-bottom: 1px solid var(--border-secondary);
+      background: var(--surface-elevated);
+    }
+
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--text-primary);
+    }
+
+    /* Wall Owner Info */
+    .wall-owner-section {
+      padding: 2rem;
+      border-bottom: 1px solid var(--border-secondary);
+      background: var(--bg-secondary);
+    }
+
+    .wall-owner-info {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .wall-owner-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border-primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .wall-owner-details h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .wall-owner-details p {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin: 0.5rem 0 0 0;
+    }
+
+    /* Wall Stats */
+    .wall-stats {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-secondary);
+    }
+
+    .wall-stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .wall-stat-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      line-height: 1;
+    }
+
+    .wall-stat-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Create Post Section */
+    .create-post {
+      padding: 2rem;
+      border-bottom: 8px solid var(--border-secondary);
+      background: var(--bg-secondary);
+    }
+
+    .create-post-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .user-avatar-small {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .post-input {
+      flex: 1;
+      background: var(--bg-accent);
+      border: 1px solid var(--border-primary);
+      border-radius: 24px;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      resize: none;
+      min-height: 56px;
+      font-family: inherit;
+      line-height: 1.5;
+    }
+
+    .post-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      background: var(--bg-secondary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .post-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .post-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .media-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .media-btn {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 50%;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .media-btn:hover {
+      background: var(--bg-accent);
+      color: var(--accent-primary);
+    }
+
+    .post-btn {
+      background: var(--accent-primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 0.5rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .post-btn:hover {
+      background: var(--accent-secondary);
+      transform: translateY(-1px);
+    }
+
+    .post-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Posts Feed */
+    .posts-feed {
+      background: var(--bg-secondary);
+    }
+
+    .post-item {
+      padding: 2rem;
+      border-bottom: 1px solid var(--border-secondary);
+      transition: background-color 0.2s ease;
+    }
+
+    .post-item:hover {
+      background: var(--bg-accent);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .post-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 1rem;
+    }
+
+    .post-author-info {
+      flex: 1;
+    }
+
+    .post-author-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .post-meta {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin: 0.25rem 0 0 0;
+    }
+
+    .post-menu {
+      position: relative;
+    }
+
+    .post-menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .post-menu-btn:hover {
+      background: var(--bg-accent);
+      color: var(--text-secondary);
+    }
+
+    /* Delete Button Styles */
+    .delete-btn {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .delete-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: #dc2626;
+      transform: translateY(-1px);
+    }
+
+    .delete-btn i {
+      font-size: 0.7rem;
+    }
+
+    .post-content {
+      margin-bottom: 1rem;
+    }
+
+    .post-text {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .post-image {
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .post-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .post-stats {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border-secondary);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .stat-item:hover {
+      color: var(--accent-primary);
+    }
+
+    .stat-icon {
+      font-size: 1rem;
+    }
+
+    /* Loading States */
+    .loading-indicator {
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-primary);
+      border-radius: 50%;
+      border-top-color: var(--accent-primary);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Empty State */
+    .empty-state {
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-state-text {
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    /* File Input */
+    .file-input {
+      display: none;
+    }
+
+    .file-preview {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--bg-accent);
+      border-radius: 12px;
+      border: 1px solid var(--border-primary);
+    }
+
+    .file-preview img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    .file-remove {
+      background: var(--accent-warning);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+
+    /* Notification Toast */
+    .notification-toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow-lg);
+      z-index: 10000;
+      animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 320px;
+    }
+
+    .notification-toast.success {
+      border-left: 4px solid var(--accent-success);
+    }
+
+    .notification-toast.error {
+      border-left: 4px solid var(--accent-warning);
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 80px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding-top: 60px;
+        padding: 1rem;
+      }
+
+      .content-area {
+        border-radius: var(--radius-lg);
+        margin: 1rem 0;
+      }
+
+      .create-post,
+      .post-item {
+        padding: 1.5rem;
+      }
+
+      .wall-owner-section {
+        padding: 1.5rem;
+      }
+
+      .wall-owner-details h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Post Menu Dropdown */
+    .post-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: 8px;
+      box-shadow: var(--shadow-md);
+      min-width: 120px;
+      z-index: 1000;
+      display: none;
+    }
+
+    .post-dropdown.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+      background: var(--bg-accent);
+      color: var(--text-primary);
+    }
+
+    .dropdown-item.danger {
+      color: var(--accent-warning);
+    }
+
+    .dropdown-item.danger:hover {
+      background: rgba(217, 119, 6, 0.1);
+    }
+  </style>
+</head>
+<body>
+<!-- Подключаем sidebar -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+<th:block th:replace="~{fragments/sidebar :: sidebar('wall')}"></th:block>
+
+<!-- Основной контент -->
+<div class="main-content">
+  <div class="content-area">
+    <!-- Header -->
+    <div class="content-header">
+      <h1 class="header-title">Стена</h1>
+    </div>
+
+    <!-- Wall Owner Info -->
+    <div class="wall-owner-section">
+      <div class="wall-owner-info">
+        <img th:src="${wallOwner.imageUrl ?: '/default-avatar.png'}"
+             th:alt="${wallOwner.firstName}"
+             class="wall-owner-avatar">
+        <div class="wall-owner-details">
+          <h1 th:text="${wallOwner.firstName} + ' ' + ${wallOwner.lastName}">
+            Имя пользователя
+          </h1>
+          <p>Стена пользователя</p>
+        </div>
+      </div>
+
+      <!-- Счетчик записей на стене -->
+      <div class="wall-stats">
+        <div class="wall-stat-item">
+          <span class="wall-stat-number" id="wallPostsCount">0</span>
+          <span class="wall-stat-label">записей на стене</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Post Section -->
+    <div th:if="${canWriteOnWall}" class="create-post">
+      <form id="createPostForm" enctype="multipart/form-data">
+        <div class="create-post-header">
+          <img th:src="${currentUser?.imageUrl ?: '/default-avatar.png'}"
+               alt="Ваш аватар"
+               class="user-avatar-small">
+          <textarea id="postText"
+                    name="text"
+                    class="post-input"
+                    placeholder="Что у вас нового?"
+                    rows="1"></textarea>
+        </div>
+
+        <div id="filePreview" class="file-preview" style="display: none;">
+          <img id="previewImage" src="" alt="Предпросмотр">
+          <button type="button" class="file-remove" onclick="removeFile()">Удалить</button>
+        </div>
+
+        <div class="post-actions">
+          <div class="media-buttons">
+            <button type="button" class="media-btn" onclick="document.getElementById('postImage').click()">
+              <i class="fas fa-image"></i>
+            </button>
+          </div>
+          <button type="submit" class="post-btn" id="submitBtn">
+            Опубликовать
+          </button>
+        </div>
+
+        <input type="file"
+               id="postImage"
+               name="image"
+               class="file-input"
+               accept="image/*"
+               onchange="previewFile(this)">
+      </form>
+    </div>
+
+    <!-- Posts Feed -->
+    <div class="posts-feed">
+      <div id="postsContainer">
+        <!-- Посты будут загружаться сюда через JavaScript -->
+      </div>
+
+      <!-- Loading Indicator -->
+      <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+        <span class="loading-spinner"></span>
+        Загрузка постов...
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">📝</div>
+        <p class="empty-state-text">На стене пока нет записей</p>
+      </div>
+
+      <!-- End Message -->
+      <div id="endMessage" class="loading-indicator" style="display: none;">
+        Все посты загружены
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Подключаем скрипты sidebar -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<script th:inline="javascript">
+  // Переменные из Thymeleaf
+  const wallOwnerId = /*[[${wallOwnerId}]]*/ 0;
+  const currentUserId = /*[[${currentUserId}]]*/ null;
+  const canWriteOnWall = /*[[${canWriteOnWall}]]*/ false;
+
+  // Состояние пагинации
+  let currentPage = 0;
+  let isLoading = false;
+  let hasMorePosts = true;
+  const pageSize = 10;
+  let totalPostsCount = 0; // Счетчик постов
+
+  // DOM элементы
+  const postsContainer = document.getElementById('postsContainer');
+  const loadingIndicator = document.getElementById('loadingIndicator');
+  const endMessage = document.getElementById('endMessage');
+  const emptyState = document.getElementById('emptyState');
+  const createPostForm = document.getElementById('createPostForm');
+  const wallPostsCountElement = document.getElementById('wallPostsCount');
+
+  // Инициализация
+  document.addEventListener('DOMContentLoaded', function() {
+    loadWallPosts();
+    setupInfiniteScroll();
+    setupCreatePostForm();
+    setupTextareaResize();
+  });
+
+  // Автоматическое изменение размера textarea
+  function setupTextareaResize() {
+    const textarea = document.getElementById('postText');
+    if (textarea) {
+      textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      });
+    }
+  }
+
+  // Загрузка постов стены
+  async function loadWallPosts() {
+    if (isLoading || !hasMorePosts) return;
+
+    isLoading = true;
+    showLoading();
+
+    try {
+      const response = await fetch(`/wall/api/${wallOwnerId}/posts?page=${currentPage}&size=${pageSize}`);
+
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки постов');
+      }
+
+      const data = await response.json();
+
+      // Добавляем посты в контейнер
+      data.wallPosts.forEach(post => {
+        postsContainer.appendChild(createPostElement(post));
+      });
+
+      // Обновляем общий счетчик постов
+      if (currentPage === 1) {
+        // При первой загрузке устанавливаем счетчик
+        totalPostsCount = data.wallPosts.length;
+      } else {
+        // При последующих загрузках добавляем к счетчику
+        totalPostsCount += data.wallPosts.length;
+      }
+      updatePostsCount();
+
+      // Обновляем состояние пагинации
+      hasMorePosts = data.hasNext;
+      currentPage++;
+
+      // Показываем empty state если нет постов
+      if (data.isEmpty && currentPage === 1) {
+        emptyState.style.display = 'block';
+      } else if (!hasMorePosts && currentPage > 1) {
+        endMessage.style.display = 'block';
+      }
+
+    } catch (error) {
+      console.error('Ошибка загрузки постов:', error);
+      showNotification('Ошибка загрузки постов', 'error');
+    } finally {
+      isLoading = false;
+      hideLoading();
+    }
+  }
+
+  // Создание HTML элемента поста
+  function createPostElement(post) {
+    const postDiv = document.createElement('div');
+    postDiv.className = 'post-item';
+    postDiv.setAttribute('data-post-id', post.id);
+
+    const authorInfo = post.author;
+    const wallOwnerInfo = post.wallOwner;
+
+    const isOwnPost = authorInfo.id !== wallOwnerInfo.id;
+    const authorText = isOwnPost
+            ? `${authorInfo.firstName} ${authorInfo.lastName} → ${wallOwnerInfo.firstName} ${wallOwnerInfo.lastName}`
+            : `${authorInfo.firstName} ${authorInfo.lastName}`;
+
+    postDiv.innerHTML = `
+                <div class="post-header">
+                    <img src="${authorInfo.imageUrl || '/default-avatar.png'}"
+                         alt="${authorInfo.firstName}"
+                         class="post-avatar">
+                    <div class="post-author-info">
+                        <h4 class="post-author-name">${escapeHtml(authorText)}</h4>
+                        <p class="post-meta">${formatDate(post.createdAt)}</p>
+                    </div>
+                    <div class="post-actions-header">
+                        ${(post.canEdit || post.canDelete) ? `
+                            ${post.canDelete ? `
+                                <button onclick="deletePost(${post.id})" class="delete-btn" title="Удалить пост">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Удалить</span>
+                                </button>
+                            ` : ''}
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div class="post-content">
+                    ${post.text ? `<div class="post-text">${escapeHtml(post.text)}</div>` : ''}
+                    ${post.picUrl ? `
+                        <div class="post-image">
+                            <img src="${post.picUrl}" alt="Изображение поста">
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="post-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">❤️</span>
+                        <span>${post.likesCount}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">💬</span>
+                        <span>${post.commentsCount}</span>
+                    </div>
+                </div>
+            `;
+
+    return postDiv;
+  }
+
+  // Настройка бесконечного скролла
+  function setupInfiniteScroll() {
+    window.addEventListener('scroll', function() {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {
+        loadWallPosts();
+      }
+    });
+  }
+
+  // Настройка формы создания поста
+  function setupCreatePostForm() {
+    if (!createPostForm) return;
+
+    createPostForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.textContent;
+
+      // Показываем состояние загрузки
+      submitBtn.textContent = 'Публикация...';
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch(`/wall/api/${wallOwnerId}/posts`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Ошибка создания поста');
+        }
+
+        const newPost = await response.json();
+
+        // Скрываем empty state если он показан
+        emptyState.style.display = 'none';
+
+        // Добавляем новый пост в начало списка
+        postsContainer.insertBefore(createPostElement(newPost), postsContainer.firstChild);
+
+        // Увеличиваем счетчик постов
+        totalPostsCount++;
+        updatePostsCount();
+
+        // Очищаем форму
+        this.reset();
+        document.getElementById('postText').style.height = 'auto';
+        document.getElementById('filePreview').style.display = 'none';
+
+        showNotification('Пост успешно опубликован!', 'success');
+
+      } catch (error) {
+        console.error('Ошибка создания поста:', error);
+        showNotification('Ошибка при создании поста', 'error');
+      } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  // Предпросмотр файла
+  function previewFile(input) {
+    const file = input.files[0];
+    const preview = document.getElementById('filePreview');
+    const previewImage = document.getElementById('previewImage');
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Удаление файла
+  function removeFile() {
+    document.getElementById('postImage').value = '';
+    document.getElementById('filePreview').style.display = 'none';
+  }
+
+  // Переключение меню поста
+  function togglePostMenu(postId, button) {
+    // Удалена функция, так как теперь используем прямые кнопки удаления
+  }
+
+  // Удаление поста с подтверждением
+  async function deletePost(postId) {
+    // Показываем более информативное подтверждение
+    const confirmMessage = currentUserId == wallOwnerId
+            ? 'Удалить эту запись со своей стены?'
+            : 'Удалить свой пост с этой стены?';
+
+    if (!confirm(confirmMessage)) return;
+
+    try {
+      const response = await fetch(`/wall/api/posts/${postId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка удаления поста');
+      }
+
+      // Удаляем пост из DOM
+      const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+      if (postElement) {
+        postElement.remove();
+
+        // Уменьшаем счетчик постов
+        totalPostsCount--;
+        updatePostsCount();
+      }
+
+      showNotification('Пост удален', 'success');
+
+      // Проверяем, нужно ли показать empty state
+      if (postsContainer.children.length === 0) {
+        emptyState.style.display = 'block';
+      }
+
+    } catch (error) {
+      console.error('Ошибка удаления поста:', error);
+      showNotification('Ошибка при удалении поста', 'error');
+    }
+  }
+
+  // Утилиты
+  function showLoading() {
+    loadingIndicator.style.display = 'block';
+  }
+
+  function hideLoading() {
+    loadingIndicator.style.display = 'none';
+  }
+
+  // Обновление счетчика постов
+  function updatePostsCount() {
+    if (wallPostsCountElement) {
+      wallPostsCountElement.textContent = totalPostsCount;
+    }
+  }
+
+  function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification-toast ${type}`;
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.transform = 'translateX(100%)';
+      notification.style.opacity = '0';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'только что';
+    if (diffMins < 60) return `${diffMins} мин назад`;
+    if (diffHours < 24) return `${diffHours} ч назад`;
+    if (diffDays < 7) return `${diffDays} дн назад`;
+
+    return date.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'short'
+    });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Заглушка для функции редактирования
+  function editPost(postId) {
+    showNotification('Функция редактирования будет добавлена позже', 'info');
+  }
+</script>
+</body>
+</html>
