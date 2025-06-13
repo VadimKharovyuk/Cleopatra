@@ -284,6 +284,25 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+    @Override
+    public Page<NotificationDto> getUnreadNotificationsWithPagination(Long userId, Pageable pageable) {
+        try {
+            log.debug("Getting unread notifications for user: {} with pagination", userId);
+
+            Page<Notification> notifications = notificationRepository
+                    .findByRecipientIdAndIsReadFalseOrderByCreatedAtDesc(userId, pageable);
+
+            log.debug("Found {} unread notifications for user: {}",
+                    notifications.getTotalElements(), userId);
+
+            return notifications.map(notificationMapper::toDto);
+
+        } catch (Exception e) {
+            log.error("Error getting unread notifications with pagination for user: {}", userId, e);
+            throw new RuntimeException("Failed to get unread notifications", e);
+        }
+    }
+
     // ===================== УПРАВЛЕНИЕ УВЕДОМЛЕНИЯМИ =====================
 
     @Override

@@ -22,6 +22,8 @@ public interface NotificationService {
     Page<NotificationDto> getUserNotifications(Long userId, Pageable pageable);
     List<NotificationDto> getUnreadNotifications(Long userId);
     long getUnreadCount(Long userId);
+    Page<NotificationDto> getUnreadNotificationsWithPagination(Long userId, Pageable pageable);
+
 
     // Управление уведомлениями
     void markAsRead(Long notificationId, Long userId);

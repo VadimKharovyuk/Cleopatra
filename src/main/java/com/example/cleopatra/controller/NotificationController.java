@@ -29,7 +29,7 @@ public class NotificationController {
             @RequestParam(defaultValue = "20") int size,
             Authentication authentication,
             Model model) {
-
+        log.info("🔍 getNotificationsPage called");
         try {
             String email = authentication.getName();
             Long userId = userService.getUserIdByEmail(email);
@@ -56,20 +56,29 @@ public class NotificationController {
         }
     }
 
-    /**
-     * Страница непрочитанных уведомлений
-     */
     @GetMapping("/unread")
-    public String getUnreadNotificationsPage(Authentication authentication, Model model) {
+    public String getUnreadNotificationsPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            Authentication authentication,
+            Model model) {
         try {
             String email = authentication.getName();
             Long userId = userService.getUserIdByEmail(email);
 
-            var unreadNotifications = notificationService.getUnreadNotifications(userId);
+            Pageable pageable = PageRequest.of(page, size);
+            // Используем новый метод с пагинацией
+            Page<NotificationDto> unreadNotifications = notificationService
+                    .getUnreadNotificationsWithPagination(userId, pageable);
             long unreadCount = notificationService.getUnreadCount(userId);
 
             model.addAttribute("notifications", unreadNotifications);
             model.addAttribute("unreadCount", unreadCount);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", unreadNotifications.getTotalPages());
+            model.addAttribute("hasNext", unreadNotifications.hasNext());
+            model.addAttribute("hasPrevious", unreadNotifications.hasPrevious());
+            model.addAttribute("currentUserId", userId);
             model.addAttribute("isUnreadOnly", true);
 
             return "notifications/list";

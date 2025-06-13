@@ -116,7 +116,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     }
 
 
-
     /**
      * Batch-обновление статуса уведомлений как отправленных
      */
@@ -161,4 +160,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             @Param("actorId") Long actorId,
             @Param("type") NotificationType type
     );
+
+    @Query("SELECT n FROM Notification n WHERE n.recipient.id = :userId AND n.isRead = false ORDER BY n.createdAt DESC")
+    Page<Notification> findByRecipientIdAndIsReadFalseOrderByCreatedAtDesc(@Param("userId") Long userId, Pageable pageable);
 }
+
