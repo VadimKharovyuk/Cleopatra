@@ -131,4 +131,7 @@ public interface StoryService {
 
 
     int deleteExpiredStoriesBatch(int batchSize);
+
+
+    long getTotalStoriesCount();
 }

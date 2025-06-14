@@ -18,6 +18,9 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -404,6 +407,30 @@ public class PostServiceImpl implements PostService {
                 .build();
     }
 
+    @Override
+    public long getTotalPostsCount() {
+        return postRepository.count();
+    }
+
+    @Override
+    public long getPostsCountByDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        return postRepository.countByCreatedAtBetween(startOfDay, endOfDay);
+    }
+
+    @Override
+    public long getPostsCountFromDate(LocalDate fromDate) {
+        LocalDateTime startDate = fromDate.atStartOfDay();
+        return postRepository.countByCreatedAtGreaterThanEqual(startDate);
+    }
+
+    @Override
+    public long getPostsCountBetweenDates(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(LocalTime.MAX);
+        return postRepository.countByCreatedAtBetween(start, end);
+    }
 
 
     /**

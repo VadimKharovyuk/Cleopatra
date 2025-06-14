@@ -197,7 +197,10 @@ public class WallPostServiceImpl implements WallPostService {
         };
     }
 
-
+    @Override
+    public long getTotalWallPostsCount() {
+        return wallPostRepository.count();
+    }
 
 
     // Вспомогательные методы

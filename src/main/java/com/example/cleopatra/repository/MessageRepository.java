@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -17,15 +18,6 @@ import java.util.List;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
-
-//    // Получить сообщения между двумя пользователями
-//    @Query("SELECT m FROM Message m WHERE " +
-//            "((m.sender.id = :userId1 AND m.recipient.id = :userId2 AND m.deletedBySender = false) OR " +
-//            "(m.sender.id = :userId2 AND m.recipient.id = :userId1 AND m.deletedByRecipient = false)) " +
-//            "ORDER BY m.createdAt DESC")
-//    Page<Message> findConversation(@Param("userId1") Long userId1,
-//                                   @Param("userId2") Long userId2,
-//                                   Pageable pageable);
 
     // Получить непрочитанные сообщения от конкретного отправителя
     @Query("SELECT m FROM Message m WHERE m.recipient.id = :recipientId " +
@@ -114,8 +106,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findRecentUnreadMessages(@Param("userId") Long userId, Pageable pageable);
 
 
-
-
     @Query("SELECT m FROM Message m WHERE " +
             "((m.sender.id = :userId AND m.recipient.id = :otherUserId AND m.deletedBySender = false) OR " +
             "(m.sender.id = :otherUserId AND m.recipient.id = :userId AND m.deletedByRecipient = false)) " +
@@ -136,7 +126,8 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     // Добавьте этот метод в ваш MessageRepository
     @Query("""
-    SELECT m FROM Message m 
+
+            SELECT m FROM Message m 
     LEFT JOIN FETCH m.sender s 
     LEFT JOIN FETCH s.onlineStatus 
     LEFT JOIN FETCH m.recipient r 
@@ -150,4 +141,26 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
                                             Pageable pageable);
 
 
-}
+    // Методы для аналитики с правильным полем createdAt
+    long countByCreatedAtGreaterThanEqual(LocalDateTime date);
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    // Безопасные методы с @Query (работают во всех БД)
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.createdAt >= :fromDate")
+    long countMessagesByDateFrom(@Param("fromDate") LocalDateTime fromDate);
+
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.createdAt BETWEEN :start AND :end")
+    long countMessagesByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    // Исправленный запрос для подсчета сообщений за сегодня (работает во всех БД)
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.createdAt >= :startOfDay AND m.createdAt <= :endOfDay")
+    long countTodayMessages(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);
+
+    // Дополнительные полезные методы для аналитики
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.createdAt >= :date AND m.sender.id = :senderId")
+    long countMessagesBySenderFromDate(@Param("senderId") Long senderId, @Param("date") LocalDateTime date);
+
+    @Query("SELECT COUNT(DISTINCT m.sender.id) FROM Message m WHERE m.createdAt >= :date")
+    long countActiveMessageSendersFromDate(@Param("date") LocalDateTime date);
+
+    }

@@ -195,6 +195,11 @@ public class UserBlockServiceImpl implements UserBlockService {
         return userBlockRepository.existsByBlockerIdAndBlockedId(blockerId, blockedId);
     }
 
+    @Override
+    public long getTotalBlockedUsersCount() {
+        return userBlockRepository.count();
+    }
+
 
     @Transactional(readOnly = true)
     @Override

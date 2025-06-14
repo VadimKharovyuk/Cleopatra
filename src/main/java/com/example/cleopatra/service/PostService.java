@@ -3,6 +3,8 @@ package com.example.cleopatra.service;
 import com.example.cleopatra.dto.Post.*;
 import com.example.cleopatra.model.Post;
 
+import java.time.LocalDate;
+
 public interface PostService {
 
 
@@ -31,4 +33,16 @@ public interface PostService {
     // ✅ НОВЫЕ МЕТОДЫ для лайков
     PostLikeResponseDto toggleLike(Long postId);
     PostLikeInfoDto getLikeInfo(Long postId);
+
+
+    long getTotalPostsCount();
+
+
+    long getPostsCountByDate(LocalDate today);
+
+
+  long getPostsCountFromDate(LocalDate weekStart);
+
+
+  long getPostsCountBetweenDates(LocalDate lastWeekStart, LocalDate lastWeekEnd);
 }

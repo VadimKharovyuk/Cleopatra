@@ -89,4 +89,7 @@ public interface CommentService {
      * @return количество комментариев
      */
     long getCommentsCount(Long postId);
+
+
+    long getTotalCommentsCount();
 }

@@ -172,7 +172,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Поиск по имени или фамилии (частичное совпадение)
     List<User> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
             String firstName, String lastName);
-    
+
     Page<User> findByEmailContainingIgnoreCaseOrFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
             String email, String firstName, String lastName, Pageable pageable);
 
@@ -210,5 +210,25 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.id IN :userIds AND u.birthDate IS NOT NULL ORDER BY u.birthDate")
     Page<User> findUsersWithBirthdaysByIds(@Param("userIds") List<Long> userIds, Pageable pageable);
-    }
+
+
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+    long countByCreatedAtGreaterThanEqual(LocalDateTime date);
+
+    // Методы для активности пользователей (используем lastActivity и lastSeen)
+    long countByLastActivityBetween(LocalDateTime start, LocalDateTime end);
+    long countByLastActivityGreaterThanEqual(LocalDateTime date);
+
+    // Онлайн пользователи
+    long countByIsOnlineTrue();
+
+    // Активные пользователи за период (комбинация lastActivity и lastSeen)
+    @Query("SELECT COUNT(u) FROM User u WHERE u.lastActivity >= :fromDate OR u.lastSeen >= :fromDate")
+    long countActiveUsersFromDate(@Param("fromDate") LocalDateTime fromDate);
+
+    @Query("SELECT COUNT(u) FROM User u WHERE (u.lastActivity BETWEEN :start AND :end) OR (u.lastSeen BETWEEN :start AND :end)")
+    long countActiveUsersBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+}
 

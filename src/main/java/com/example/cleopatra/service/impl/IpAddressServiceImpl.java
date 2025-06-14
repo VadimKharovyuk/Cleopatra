@@ -76,7 +76,6 @@ public class IpAddressServiceImpl implements IpAddressService {
 
     @Override
     public void recordUserVisit(Long visitedUserId, Long currentUserId, HttpServletRequest request) {
-        log.info("🔍 START recordUserVisit: visitedUserId={}, currentUserId={}", visitedUserId, currentUserId);
 
         if (visitedUserId == null || currentUserId == null || request == null) {
             log.warn("❌ Invalid parameters for recording visit");
@@ -93,14 +92,8 @@ public class IpAddressServiceImpl implements IpAddressService {
             String ipAddress = getClientIpAddress(request);
             String userAgent = getUserAgent(request);
 
-            log.info("📝 Recording visit: {} -> {} from IP: {}", currentUserId, visitedUserId, ipAddress);
             visitService.recordVisit(visitedUserId, currentUserId, ipAddress, userAgent);
-
-            log.info("🔔 Creating notification: visitor={}, visited={}", currentUserId, visitedUserId);
             notificationService.createProfileVisitNotification(visitedUserId, currentUserId);
-
-            log.info("✅ Visit and notification processed successfully");
-
         } catch (Exception e) {
             log.error("❌ Error in recordUserVisit", e);
         }

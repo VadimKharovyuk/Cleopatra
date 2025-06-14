@@ -400,4 +400,9 @@ public class CommentServiceImpl implements CommentService {
 
         return commentRepository.countByPostIdAndIsDeletedFalse(postId);
     }
+
+    @Override
+    public long getTotalCommentsCount() {
+        return commentRepository.count();
+    }
 }

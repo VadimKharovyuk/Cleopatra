@@ -17,4 +17,7 @@ public interface WallPostService {
     void delete(Long postId, Long currentUserId);
     // Проверка доступа к стене
     boolean canAccessWall(Long wallOwnerId, Long visitorId);
+
+
+    long getTotalWallPostsCount();
 }

@@ -19,7 +19,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -490,5 +492,40 @@ public class MessageService {
      */
     public void afterMessagesRead(Long userId) {
         notifyUnreadCountUpdate(userId);
+    }
+
+
+
+
+    public long getTotalMessagesCount() {
+        return messageRepository.count();
+    }
+
+
+    public long getMessagesCountFromDate(LocalDate fromDate) {
+        LocalDateTime startDate = fromDate.atStartOfDay();
+        return messageRepository.countByCreatedAtGreaterThanEqual(startDate);
+    }
+
+
+    public long getMessagesCountByDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        return messageRepository.countByCreatedAtBetween(startOfDay, endOfDay);
+    }
+
+
+    public long getMessagesCountBetweenDates(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(LocalTime.MAX);
+        return messageRepository.countByCreatedAtBetween(start, end);
+    }
+
+    // Дополнительный метод для подсчета сообщений за сегодня
+    public long getTodayMessagesCount() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+        return messageRepository.countTodayMessages(startOfDay, endOfDay);
     }
 }

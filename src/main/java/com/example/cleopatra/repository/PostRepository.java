@@ -75,4 +75,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("SELECT SUM(p.likesCount) FROM Post p WHERE p.author.id = :userId")
     Long getTotalLikesByAuthor(@Param("userId") Long userId);
+
+
+    long countByCreatedAtBetween(LocalDateTime startOfDay, LocalDateTime endOfDay);
+
+    long countByCreatedAtGreaterThanEqual(LocalDateTime startDate);
 }

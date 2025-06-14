@@ -410,4 +410,9 @@ public class StoryServiceImpl implements StoryService {
         log.debug("Batch completed: deleted {} out of {} stories", deletedCount, expiredStoryIds.size());
         return deletedCount;
     }
+
+    @Override
+    public long getTotalStoriesCount() {
+        return storyRepository.count();
+    }
 }

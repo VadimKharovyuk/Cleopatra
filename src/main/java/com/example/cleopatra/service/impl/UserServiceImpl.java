@@ -28,7 +28,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -518,6 +520,56 @@ public User getCurrentUserEntity(Authentication authentication) {
         // }
 
         return true;
+    }
+
+    @Override
+    public long getTotalUsersCount() {
+        return userRepository.count();
+    }
+
+    @Override
+    public long getUsersCountByDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        return userRepository.countByCreatedAtBetween(startOfDay, endOfDay);
+    }
+
+    @Override
+    public long getUsersCountFromDate(LocalDate fromDate) {
+        LocalDateTime startDate = fromDate.atStartOfDay();
+        return userRepository.countByCreatedAtGreaterThanEqual(startDate);
+    }
+
+    @Override
+    public long getActiveUsersCountByDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        return userRepository.countActiveUsersBetween(startOfDay, endOfDay);
+    }
+
+    @Override
+    public long getUsersCountBetweenDates(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(LocalTime.MAX);
+        return userRepository.countByCreatedAtBetween(start, end);
+    }
+
+    @Override
+    public long getUsersCountByMonth(int year, int monthValue) {
+        LocalDateTime startOfMonth = LocalDateTime.of(year, monthValue, 1, 0, 0);
+        LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusSeconds(1);
+        return userRepository.countByCreatedAtBetween(startOfMonth, endOfMonth);
+    }
+
+    @Override
+    public long getOnlineUsersCount() {
+        return userRepository.countByIsOnlineTrue();
+    }
+
+    @Override
+    public long getActiveUsersCountFromDate(LocalDate fromDate) {
+        LocalDateTime startDate = fromDate.atStartOfDay();
+        return userRepository.countActiveUsersFromDate(startDate);
     }
 
 

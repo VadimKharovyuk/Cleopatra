@@ -193,7 +193,7 @@ public class UserActivityScheduler {
                 return allSent;
 
                 // Вариант 2: Одним сообщением (если ваш WebSocket поддерживает)
-                // return notificationWebSocketHandler.sendNotificationBatchToUser(recipientId, notifications);
+//                 return notificationWebSocketHandler.sendNotificationBatchToUser(recipientId, notifications);
 
             } catch (Exception e) {
                 log.error("❌ Error sending notification batch to user {}", recipientId, e);

@@ -45,4 +45,7 @@ public interface UserBlockService {
 
 
     boolean isBlocked(Long id, Long userId);
+
+
+    long getTotalBlockedUsersCount();
 }
