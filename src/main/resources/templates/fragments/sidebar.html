@@ -491,6 +491,16 @@
 
         <div class="nav-section">
             <div class="nav-section-title">Главное</div>
+
+
+            <a href="/admin"
+               class="nav-item"
+               th:classappend="${activeSection == 'admin'} ? 'active' : ''"
+               th:if="${isAdmin}">
+                <i class="fas fa-user-shield nav-icon"></i>
+                <span class="nav-text">Админка</span>
+            </a>
+
             <a href="/dashboard"
                class="nav-item"
                th:classappend="${activeSection == 'home'} ? 'active' : ''">
