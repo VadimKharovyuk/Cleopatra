@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Добро пожаловать! Получите бонус</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Arial', sans-serif;
+    }
+
+    .welcome-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .welcome-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .welcome-header {
+      background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+      color: white;
+      padding: 40px 20px;
+    }
+
+    .welcome-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    .welcome-body {
+      padding: 40px 30px;
+    }
+
+    .bonus-amount {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #FF6B6B;
+      margin: 20px 0;
+    }
+
+    .balance-info {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .claim-btn {
+      background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+      border: none;
+      border-radius: 50px;
+      padding: 15px 40px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .claim-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    .claim-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .already-claimed {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      color: #155724;
+    }
+
+    .loading {
+      display: none;
+    }
+
+    .coins-animation {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+<div class="welcome-container">
+  <div class="welcome-card">
+    <div class="welcome-header">
+      <div class="welcome-icon">
+        <i class="fas fa-gift"></i>
+      </div>
+      <h1>Добро пожаловать!</h1>
+      <p>Мы рады видеть вас в нашем сервисе</p>
+    </div>
+
+    <div class="welcome-body">
+      <h2>Приветственный бонус</h2>
+      <p>Получите <strong>100 монет</strong> абсолютно бесплатно!</p>
+
+      <div class="bonus-amount">
+        <i class="fas fa-coins coins-animation"></i>
+        <span th:text="${bonusInfo.amount}">100</span>
+      </div>
+
+      <div class="balance-info">
+        <h5>Ваш текущий баланс:</h5>
+        <span class="h4" id="currentBalance" th:text="${currentBalance ?: '0.00'}">0.00</span> монет
+      </div>
+
+      <!-- Если бонус еще не получен -->
+      <div th:if="${bonusInfo.canClaim}" id="claimSection">
+        <p class="text-muted">Это единоразовая акция для новых пользователей</p>
+
+        <button id="claimButton" class="claim-btn">
+          <span class="btn-text">Получить бонус</span>
+          <span class="loading">
+                            <i class="fas fa-spinner fa-spin"></i> Обработка...
+                        </span>
+        </button>
+      </div>
+
+      <!-- Если бонус уже получен -->
+      <div th:if="${bonusInfo.alreadyClaimed}" class="already-claimed">
+        <i class="fas fa-check-circle"></i>
+        <strong>Бонус уже получен!</strong>
+        <p class="mb-0">Вы уже воспользовались приветственным бонусом</p>
+      </div>
+
+      <div class="mt-4">
+        <a href="/dashboard" class="btn btn-outline-primary">
+          <i class="fas fa-home"></i> Перейти к сервису
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const claimButton = document.getElementById('claimButton');
+    const currentBalanceEl = document.getElementById('currentBalance');
+
+    if (claimButton) {
+      claimButton.addEventListener('click', claimBonus);
+    }
+
+    async function claimBonus() {
+      const btnText = claimButton.querySelector('.btn-text');
+      const loading = claimButton.querySelector('.loading');
+
+      // Показываем загрузку
+      btnText.style.display = 'none';
+      loading.style.display = 'inline';
+      claimButton.disabled = true;
+
+      try {
+        const response = await fetch('/bonus/welcome/claim', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Успешно получен бонус
+          showSuccessMessage(data.message, data.newBalance);
+          updateBalance(data.newBalance);
+          hideClaimSection();
+        } else {
+          // Ошибка или уже получен
+          showErrorMessage(data.message);
+        }
+
+      } catch (error) {
+        console.error('Ошибка:', error);
+        showErrorMessage('Произошла ошибка при получении бонуса');
+      } finally {
+        // Скрываем загрузку
+        btnText.style.display = 'inline';
+        loading.style.display = 'none';
+        claimButton.disabled = false;
+      }
+    }
+
+    function showSuccessMessage(message, newBalance) {
+      const successHtml = `
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle"></i> ${message}
+                        <br><small>Новый баланс: ${newBalance} монет</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+
+      const claimSection = document.getElementById('claimSection');
+      claimSection.innerHTML = successHtml;
+
+      // Добавляем конфетти эффект
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 3000);
+    }
+
+    function showErrorMessage(message) {
+      const errorHtml = `
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i> ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+
+      const claimSection = document.getElementById('claimSection');
+      claimSection.insertAdjacentHTML('beforeend', errorHtml);
+    }
+
+    function updateBalance(newBalance) {
+      if (currentBalanceEl) {
+        currentBalanceEl.textContent = newBalance;
+
+        // Анимация обновления баланса
+        currentBalanceEl.style.color = '#28a745';
+        currentBalanceEl.style.fontWeight = 'bold';
+        setTimeout(() => {
+          currentBalanceEl.style.color = '';
+          currentBalanceEl.style.fontWeight = '';
+        }, 2000);
+      }
+    }
+
+    function hideClaimSection() {
+      setTimeout(() => {
+        const claimSection = document.getElementById('claimSection');
+        if (claimSection) {
+          claimSection.style.display = 'none';
+        }
+      }, 2000);
+    }
+  });
+</script>
+</body>
+</html>

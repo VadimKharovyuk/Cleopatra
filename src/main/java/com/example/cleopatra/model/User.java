@@ -145,6 +145,10 @@ public class User {
     private Long totalVisits = 0L;
 
 
+    // В модель User добавьте поле:
+    @Column(name = "welcome_bonus_claimed", nullable = false)
+    private Boolean welcomeBonusClaimed = false;
+
     // Посты пользователя
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderBy("createdAt DESC")
@@ -229,7 +233,6 @@ public class User {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
 
 
 
