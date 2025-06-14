@@ -12,6 +12,7 @@ public interface WallPostService {
     WallPostPageResponse getWallPosts(Long wallOwnerId, Long currentUserId, int page, int size);
     WallPostCardResponse getById(Long id, Long currentUserId);
 
+
     // Удаление поста
     void delete(Long postId, Long currentUserId);
     // Проверка доступа к стене

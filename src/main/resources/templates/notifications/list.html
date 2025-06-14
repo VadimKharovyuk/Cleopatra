@@ -574,25 +574,27 @@
                             </div>
 
                             <div class="notification-type" th:switch="${notification.type.name()}">
-                                    <span th:case="'PROFILE_VISIT'">
-                                        <i class="fas fa-eye"></i> Просмотр
-                                    </span>
+    <span th:case="'PROFILE_VISIT'">
+        <i class="fas fa-eye"></i> Просмотр
+    </span>
                                 <span th:case="'POST_LIKE'">
-                                        <i class="fas fa-heart"></i> Лайк
-                                    </span>
+        ❤️ Лайк
+    </span>
                                 <span th:case="'POST_COMMENT'">
-                                        <i class="fas fa-comment"></i> Комментарий
-                                    </span>
+        💬 Комментарий
+    </span>
                                 <span th:case="'FOLLOW'">
-                                        <i class="fas fa-user-plus"></i> Подписка
-                                    </span>
-                                <span th:case="'UNFOLLOW'">
-                                        <i class="fas fa-user-minus"></i> Отписка
-                                </span>
+        <i class="fas fa-user-plus"></i> Подписка
+    </span>
+                                <span th:case="'UNSUBSCRIBE'">
+        <i class="fas fa-user-minus"></i> Отписка
+    </span>
+                                <span th:case="'WALL_POST'">
+        📌 Запись на стене
+    </span>
                                 <span th:case="*">
-                                        <i class="fas fa-bell"></i> Уведомление
-                                    </span>
-
+        <i class="fas fa-bell"></i> Уведомление
+    </span>
                             </div>
                         </div>
                     </div>

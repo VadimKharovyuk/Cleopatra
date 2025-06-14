@@ -1,5 +1,6 @@
 package com.example.cleopatra.service.impl;
 
+import com.example.cleopatra.EVENT.WallPostCreatedEvent;
 import com.example.cleopatra.dto.WallPost.*;
 import com.example.cleopatra.enums.WallAccessLevel;
 import com.example.cleopatra.maper.WallPostMapper;
@@ -13,6 +14,7 @@ import com.example.cleopatra.service.SubscriptionService;
 import com.example.cleopatra.service.WallPostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -37,6 +39,7 @@ public class WallPostServiceImpl implements WallPostService {
     private final ImageValidator imageValidator;
     private final StorageService storageService;
     private final WallPostMapper wallPostMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public WallPostCardResponse create(WallPostCreateRequest request, Long currentUserId) throws IOException {
@@ -75,6 +78,23 @@ public class WallPostServiceImpl implements WallPostService {
                     .build();
 
             WallPost savedPost = wallPostRepository.save(wallPost);
+            eventPublisher.publishEvent(
+                    WallPostCreatedEvent.builder()
+                            .postId(savedPost.getId())
+                            .authorId(currentUserId)
+                            .authorName(author.getFirstName() + " " + author.getLastName())
+                            .wallOwnerId(request.getWallOwnerId())
+                            .postText(request.getText())
+                            .postPicUrl(savedPost.getPicUrl())
+                            .build()
+            );
+
+            log.info("📝 Published WallPostCreatedEvent for post: {} on user {}'s wall",
+                    savedPost.getId(), request.getWallOwnerId());
+
+
+
+
             log.info("Создан пост на стене: ID={}, автор={}, владелец стены={}",
                     savedPost.getId(), author.getId(), wallOwner.getId());
 

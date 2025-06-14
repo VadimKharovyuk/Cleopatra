@@ -22,9 +22,7 @@ public class BonusController {
     private final BonusService bonusService;
     private final UserService userService;
 
-    /**
-     * Страница приветственного бонуса
-     */
+
     @GetMapping("/welcome")
     public String welcomeBonusPage(Authentication authentication, Model model) {
         Long userId = getCurrentUserId(authentication);
@@ -43,7 +41,7 @@ public class BonusController {
         // Если бонус уже получен, перенаправляем на главную
         if (bonusInfo.isAlreadyClaimed()) {
             model.addAttribute("message", "Вы уже получили приветственный бонус!");
-            return "redirect:/dashboard"; // или на другую страницу
+            return "redirect:/dashboard";
         }
 
         return "bonus/welcome";

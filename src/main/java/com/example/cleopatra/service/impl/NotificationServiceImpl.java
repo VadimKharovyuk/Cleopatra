@@ -235,6 +235,53 @@ public class NotificationServiceImpl implements NotificationService {
 
     }
 
+    @Override
+    public void createWallPostNotification(Long wallOwnerId, Long authorId, Long postId,
+                                           String postText, String postPicUrl) {
+        log.debug("Creating wall post notification: author={}, wallOwner={}, post={}",
+                authorId, wallOwnerId, postId);
+
+        try {
+            User wallOwner = userRepository.findById(wallOwnerId)
+                    .orElseThrow(() -> new RuntimeException("Wall owner not found: " + wallOwnerId));
+            User author = userRepository.findById(authorId)
+                    .orElseThrow(() -> new RuntimeException("Post author not found: " + authorId));
+
+            String authorName = getFullName(author);
+            String title = "Новая запись на стене";
+
+            // Обрезаем текст поста для уведомления (максимум 50 символов)
+            String truncatedText = postText != null && postText.length() > 50
+                    ? postText.substring(0, 50) + "..."
+                    : postText;
+
+            String message = String.format("%s оставил(а) запись на вашей стене%s",
+                    authorName,
+                    truncatedText != null && !truncatedText.isEmpty()
+                            ? ": \"" + truncatedText + "\""
+                            : "");
+
+            String data = String.format(
+                    "{\"postId\":%d,\"authorId\":%d,\"authorImageUrl\":\"%s\",\"postUrl\":\"/wall/%d\",\"hasImage\":%s}",
+                    postId,
+                    authorId,
+                    author.getImageUrl() != null ? author.getImageUrl() : "",
+                    wallOwnerId,  // просто на стену владельца
+                    postPicUrl != null && !postPicUrl.isEmpty()
+            );
+
+            createNotification(
+                    wallOwner, author, NotificationType.WALL_POST,
+                    title, message, data, postId, "WALL_POST"
+            );
+
+            log.info("✅ Created wall post notification: {} posted on {}'s wall", authorId, wallOwnerId);
+
+        } catch (Exception e) {
+            log.error("❌ Error creating wall post notification", e);
+        }
+    }
+
 
     // ===================== ПОЛУЧЕНИЕ УВЕДОМЛЕНИЙ =====================
 

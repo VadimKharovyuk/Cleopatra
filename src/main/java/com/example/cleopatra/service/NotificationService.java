@@ -16,6 +16,8 @@ public interface NotificationService {
     void createSystemNotification(Long userId, String title, String message);
     void createUnsubscribe(Long followedUserId, Long followerId);
 
+    void createWallPostNotification(Long wallOwnerId, Long authorId, Long postId, String postText, String postPicUrl);
+
 
 
     // Получение уведомлений
@@ -37,4 +39,5 @@ public interface NotificationService {
     void deleteAllNotifications(Long userId);
 
     void createUnsubscribeNotification(Long subscribedToId, Long subscriberId, String subscriberName);
+
 }

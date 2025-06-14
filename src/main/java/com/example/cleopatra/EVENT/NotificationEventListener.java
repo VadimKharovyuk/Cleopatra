@@ -189,6 +189,39 @@ public class NotificationEventListener {
     }
 
 
+    // Добавьте этот метод в ваш NotificationEventListener
+
+    @EventListener
+    @Async
+    public void handleWallPostCreated(WallPostCreatedEvent event) {
+        log.info("🎉 EVENT RECEIVED: WallPostCreatedEvent for post: {} by user: {} on wall: {}",
+                event.getPostId(), event.getAuthorId(), event.getWallOwnerId());
+
+        try {
+            // Проверяем, что автор поста не является владельцем стены
+            // (не отправляем уведомление самому себе)
+            if (!event.getAuthorId().equals(event.getWallOwnerId())) {
+
+                notificationService.createWallPostNotification(
+                        event.getWallOwnerId(),  // кому уведомление (владелец стены)
+                        event.getAuthorId(),     // кто создал пост (автор)
+                        event.getPostId(),       // ID поста
+                        event.getPostText(),     // текст поста
+                        event.getPostPicUrl()    // картинка поста (если есть)
+                );
+
+                log.info("✅ Wall post notification created successfully: {} posted on {}'s wall",
+                        event.getAuthorId(), event.getWallOwnerId());
+            } else {
+                log.debug("👤 User posted on their own wall, no notification needed");
+            }
+
+        } catch (Exception e) {
+            log.error("❌ Error creating wall post notification for post: {}", event.getPostId(), e);
+        }
+    }
+
+
 
     /**
      * Планирует повторную отправку уведомления
@@ -217,6 +250,8 @@ public class NotificationEventListener {
             }
         });
     }
+
+
 
     @Transactional
     public void updateNotificationAsSent(Long notificationId) {
