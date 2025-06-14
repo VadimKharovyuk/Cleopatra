@@ -182,11 +182,73 @@
       padding: 30px;
     }
 
+    /* Статистические карточки */
+    .stats-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      border-left: 4px solid;
+    }
+
+    .stat-card.users { border-left-color: #667eea; }
+    .stat-card.posts { border-left-color: #f093fb; }
+    .stat-card.messages { border-left-color: #4facfe; }
+    .stat-card.online { border-left-color: #43e97b; }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .stat-title {
+      font-size: 14px;
+      color: #666;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .stat-icon {
+      font-size: 20px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .stat-trend {
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    .trend-up {
+      background-color: #e8f5e8;
+      color: #4caf50;
+    }
+
+    .trend-down {
+      background-color: #ffeaea;
+      color: #f44336;
+    }
+
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 25px;
-      margin-bottom: 30px;
     }
 
     .dashboard-card {
@@ -249,16 +311,6 @@
       font-weight: 500;
     }
 
-    .trend-up {
-      background-color: #e8f5e8;
-      color: #4caf50;
-    }
-
-    .trend-down {
-      background-color: #ffeaea;
-      color: #f44336;
-    }
-
     /* Цвета карточек */
     .card-users .card-icon { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     .card-content .card-icon { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
@@ -307,6 +359,10 @@
     }
 
     @media (max-width: 768px) {
+      .stats-overview {
+        grid-template-columns: 1fr;
+      }
+
       .dashboard-grid {
         grid-template-columns: 1fr;
       }
@@ -332,16 +388,21 @@
       }
     }
 
-    .dashboard-card {
+    .stat-card, .dashboard-card {
       animation: slideInRight 0.6s ease forwards;
     }
 
-    .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
-    .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
-    .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
-    .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
-    .dashboard-card:nth-child(5) { animation-delay: 0.5s; }
-    .dashboard-card:nth-child(6) { animation-delay: 0.6s; }
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .dashboard-card:nth-child(1) { animation-delay: 0.5s; }
+    .dashboard-card:nth-child(2) { animation-delay: 0.6s; }
+    .dashboard-card:nth-child(3) { animation-delay: 0.7s; }
+    .dashboard-card:nth-child(4) { animation-delay: 0.8s; }
+    .dashboard-card:nth-child(5) { animation-delay: 0.9s; }
+    .dashboard-card:nth-child(6) { animation-delay: 1.0s; }
   </style>
 </head>
 <body>
@@ -359,7 +420,7 @@
     <nav class="sidebar-menu">
       <div class="menu-section">
         <div class="menu-section-title">Основное</div>
-        <a href="/admin/dashboard" class="menu-item active">
+        <a href="/admin" class="menu-item active">
           <i>📊</i> Dashboard
         </a>
         <a href="/admin/analytics" class="menu-item">
@@ -439,6 +500,58 @@
 
     <!-- Контент -->
     <div class="admin-content">
+      <!-- Статистический обзор -->
+      <div class="stats-overview">
+        <div class="stat-card users">
+          <div class="stat-header">
+            <div class="stat-title">Всего пользователей</div>
+            <div class="stat-icon">👥</div>
+          </div>
+          <div class="stat-value" th:text="${analytics.totalUsers}">0</div>
+          <div class="stat-trend" th:classappend="${analytics.userGrowthPercentage >= 0 ? 'trend-up' : 'trend-down'}">
+            <span th:text="${analytics.userGrowthPercentage >= 0 ? '↗' : '↘'}">↗</span>
+            <span th:text="${#numbers.formatDecimal(analytics.userGrowthPercentage, 1, 1)} + '%'">0%</span>
+            за неделю
+          </div>
+        </div>
+
+        <div class="stat-card posts">
+          <div class="stat-header">
+            <div class="stat-title">Всего постов</div>
+            <div class="stat-icon">📝</div>
+          </div>
+          <div class="stat-value" th:text="${analytics.totalPosts}">0</div>
+          <div class="stat-trend" th:classappend="${analytics.postGrowthPercentage >= 0 ? 'trend-up' : 'trend-down'}">
+            <span th:text="${analytics.postGrowthPercentage >= 0 ? '↗' : '↘'}">↗</span>
+            <span th:text="${#numbers.formatDecimal(analytics.postGrowthPercentage, 1, 1)} + '%'">0%</span>
+            за неделю
+          </div>
+        </div>
+
+        <div class="stat-card messages">
+          <div class="stat-header">
+            <div class="stat-title">Всего сообщений</div>
+            <div class="stat-icon">💬</div>
+          </div>
+          <div class="stat-value" th:text="${analytics.totalMessages}">0</div>
+          <div class="stat-trend trend-up">
+            +<span th:text="${analytics.messagesThisWeek}">0</span> за неделю
+          </div>
+        </div>
+
+        <div class="stat-card online">
+          <div class="stat-header">
+            <div class="stat-title">Онлайн сейчас</div>
+            <div class="stat-icon">🟢</div>
+          </div>
+          <div class="stat-value" th:text="${analytics.onlineUsersNow}">0</div>
+          <div class="stat-trend trend-up">
+            <span th:text="${analytics.activeUsersToday}">0</span> активных сегодня
+          </div>
+        </div>
+      </div>
+
+      <!-- Основные функции -->
       <div class="dashboard-grid">
         <!-- Карточка управления пользователями -->
         <div class="dashboard-card card-users" onclick="navigateToUsers()">
@@ -446,8 +559,8 @@
           <div class="card-title">Управление пользователями</div>
           <div class="card-description">Поиск, блокировка и управление пользователями платформы</div>
           <div class="card-stats">
-            <div class="card-number">1,247</div>
-            <div class="card-trend trend-up">+12%</div>
+            <div class="card-number" th:text="${analytics.totalUsers}">0</div>
+            <div class="card-trend trend-up" th:text="'+' + ${analytics.newUsersToday} + ' сегодня'">+0 сегодня</div>
           </div>
         </div>
 
@@ -457,8 +570,8 @@
           <div class="card-title">Управление контентом</div>
           <div class="card-description">Модерация постов, комментариев и жалоб пользователей</div>
           <div class="card-stats">
-            <div class="card-number">3,892</div>
-            <div class="card-trend trend-up">+8%</div>
+            <div class="card-number" th:text="${analytics.totalPosts + analytics.totalComments}">0</div>
+            <div class="card-trend trend-up" th:text="'+' + ${analytics.postsToday} + ' постов сегодня'">+0 постов сегодня</div>
           </div>
         </div>
 
@@ -468,19 +581,19 @@
           <div class="card-title">Безопасность</div>
           <div class="card-description">Мониторинг безопасности, логи и блокировки</div>
           <div class="card-stats">
-            <div class="card-number">24</div>
-            <div class="card-trend trend-down">-3%</div>
+            <div class="card-number" th:text="${analytics.totalBlockedUsers}">0</div>
+            <div class="card-trend trend-down">заблокированных</div>
           </div>
         </div>
 
         <!-- Карточка аналитики -->
         <div class="dashboard-card card-analytics" onclick="navigateToAnalytics()">
           <div class="card-icon">📊</div>
-          <div class="card-title">Аналитика</div>
+          <div class="card-title">Детальная аналитика</div>
           <div class="card-description">Статистика, отчеты и метрики платформы</div>
           <div class="card-stats">
-            <div class="card-number">98.5%</div>
-            <div class="card-trend trend-up">+2.1%</div>
+            <div class="card-number">📈</div>
+            <div class="card-trend trend-up">Подробнее</div>
           </div>
         </div>
 
@@ -491,7 +604,7 @@
           <div class="card-description">Конфигурация сервера, базы данных и приложения</div>
           <div class="card-stats">
             <div class="card-number">16</div>
-            <div class="card-trend trend-up">+1</div>
+            <div class="card-trend trend-up">настроек</div>
           </div>
         </div>
 
@@ -502,7 +615,7 @@
           <div class="card-description">Тикеты поддержки и обращения пользователей</div>
           <div class="card-stats">
             <div class="card-number">42</div>
-            <div class="card-trend trend-down">-5</div>
+            <div class="card-trend trend-down">открытых тикетов</div>
           </div>
         </div>
       </div>
@@ -621,7 +734,7 @@
   }, observerOptions);
 
   // Наблюдение за карточками
-  document.querySelectorAll('.dashboard-card').forEach(card => {
+  document.querySelectorAll('.stat-card, .dashboard-card').forEach(card => {
     observer.observe(card);
   });
 </script>
