@@ -49,6 +49,8 @@ public class BonusController {
         return "bonus/welcome";
     }
 
+
+
     /**
      * API для получения информации о бонусе
      */
