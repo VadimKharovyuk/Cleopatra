@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserById(Long userId) {
-        // ✅ ЗАМЕНИТЬ НА ОПТИМИЗИРОВАННЫЙ МЕТОД
+
         User user = userRepository.findByIdWithOnlineStatus(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
@@ -497,6 +497,29 @@ public User getCurrentUserEntity(Authentication authentication) {
         return userRepository.save(user);
     }
 
+    @Override
+    public boolean canViewBirthday(Long userId, Long viewerId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+
+        // Сам пользователь видит всё
+        if (user.getId().equals(viewerId)) {
+            return true;
+        }
+
+        // Если не разрешил показывать дату рождения
+        if (user.getShowBirthday() == null || !user.getShowBirthday()) {
+            return false;
+        }
+
+        // Дополнительная логика: подписки, приватный профиль и т.д.
+        // if (user.getIsPrivateProfile() && !subscriptionService.isSubscribed(viewerId, userId)) {
+        //     return false;
+        // }
+
+        return true;
+    }
+
 
     /**
      * Получить пользователей онлайн
@@ -587,10 +610,6 @@ public User getCurrentUserEntity(Authentication authentication) {
         }
         return "?";
     }
-
-
-
-
 }
 
 

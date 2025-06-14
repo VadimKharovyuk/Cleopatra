@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 @Builder
 @Data
@@ -49,6 +50,9 @@ public class UserResponse {
     private Boolean isPrivateProfile ;
 
     private Boolean isBlocked;
+
+    private LocalDate birthDate;
+    private Boolean showBirthday;
 
 
 }

@@ -253,6 +253,10 @@ public class UserProfileController {
             dto.setLastName(user.getLastName());
             dto.setCity(user.getCity());
 
+            dto.setBirthDate(user.getBirthDate());
+            dto.setShowBirthday(user.getShowBirthday());
+
+
             model.addAttribute("user", user);
             model.addAttribute("updateProfileDto", dto);
 
@@ -431,19 +435,7 @@ public class UserProfileController {
         }
     }
 
-    // ========================================
-    // ДОПОЛНИТЕЛЬНЫЕ УТИЛИТАРНЫЕ МЕТОДЫ
-    // ========================================
 
-
-    /**
-     * Добавление настроек валидации в модель
-     */
-    private void addValidationAttributesToModel(Model model) {
-        model.addAttribute("maxFileSize", imageValidator.getMaxFileSizeMB());
-        model.addAttribute("allowedFormats", imageValidator.getAllowedExtensions());
-        model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());
-    }
 
 
 }

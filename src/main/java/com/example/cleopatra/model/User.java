@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -110,6 +111,13 @@ public class User {
     private Long blockedByAdminId;
 
 
+    @Column(name = "show_birthday", nullable = false)
+    private Boolean showBirthday = true;
+
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
+
+
     @OneToMany(mappedBy = "blockedUser", fetch = FetchType.LAZY)
     @OrderBy("blockedAt DESC")
     @Builder.Default
@@ -143,6 +151,8 @@ public class User {
     @Column(name = "total_visits")
     @Builder.Default
     private Long totalVisits = 0L;
+
+
 
 
     // В модель User добавьте поле:

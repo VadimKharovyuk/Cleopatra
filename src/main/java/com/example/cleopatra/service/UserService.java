@@ -98,4 +98,6 @@ public interface UserService {
     BigDecimal getBalance(User user);
     boolean hasEnoughBalance(User user, BigDecimal amount);
     User save(User user);
+
+    boolean canViewBirthday(Long userId, Long viewerId);
 }

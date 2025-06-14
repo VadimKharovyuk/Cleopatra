@@ -529,6 +529,41 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="birthDate" class="form-label">Дата рождения</label>
+                            <input type="date"
+                                   id="birthDate"
+                                   name="birthDate"
+                                   th:value="${updateProfileDto.birthDate}"
+                                   class="form-control-luxury">
+                            <div th:if="${#fields.hasErrors('birthDate')}" class="error-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span th:errors="*{birthDate}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="form-check-luxury">
+                                <input type="checkbox"
+                                       id="showBirthday"
+                                       name="showBirthday"
+                                       th:checked="${updateProfileDto.showBirthday}"
+                                       class="form-check-input">
+                                <label for="showBirthday" class="form-check-label">
+                                    <i class="fas fa-birthday-cake"></i>
+                                    Показывать дату рождения другим пользователям
+                                </label>
+                            </div>
+                            <small class="form-text">
+                                Если отключено, другие пользователи не смогут видеть вашу дату рождения и возраст
+                            </small>
+                        </div>
+                    </div>
                 </div>
 
             </div>

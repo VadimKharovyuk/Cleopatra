@@ -54,6 +54,9 @@ public class UserMapper {
 
         response.setIsPrivateProfile(user.getIsPrivateProfile());
 
+        response.setBirthDate(user.getBirthDate());
+        response.setShowBirthday(user.getShowBirthday());
+
 
         return response;
     }
@@ -73,6 +76,15 @@ public class UserMapper {
         } else if (dto.getCity() != null && dto.getCity().trim().isEmpty()) {
             // Если передали пустую строку, устанавливаем null
             user.setCity(null);
+        }
+
+        // Добавляем новые поля
+        if (dto.getBirthDate() != null) {
+            user.setBirthDate(dto.getBirthDate());
+        }
+
+        if (dto.getShowBirthday() != null) {
+            user.setShowBirthday(dto.getShowBirthday());
         }
     }
 
