@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${news.title} + ' - Админ панель'">Просмотр новости</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #fafbfc;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 20px 0;
+            margin-bottom: 32px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .breadcrumb a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-back:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-edit {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .btn-edit:hover {
+            background: #fde68a;
+        }
+
+        .btn-publish {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .btn-publish:hover {
+            background: #bbf7d0;
+        }
+
+        .btn-unpublish {
+            background: #fed7aa;
+            color: #c2410c;
+        }
+
+        .btn-unpublish:hover {
+            background: #fdba74;
+        }
+
+        .btn-delete {
+            background: #fecaca;
+            color: #dc2626;
+        }
+
+        .btn-delete:hover {
+            background: #f87171;
+        }
+
+        /* Content Card */
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        /* News Header */
+        .news-header {
+            padding: 32px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .news-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .meta-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .news-id {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .news-type {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .news-status {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-published {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .news-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .news-short-description {
+            font-size: 18px;
+            color: #6b7280;
+            font-style: italic;
+            background: #f8fafc;
+            padding: 16px 20px;
+            border-left: 4px solid #3b82f6;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 20px;
+        }
+
+        .news-dates {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .date-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-label {
+            font-weight: 500;
+        }
+
+        /* News Image */
+        .news-image {
+            padding: 0 32px 20px;
+        }
+
+        .news-image img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* News Content */
+        .news-content {
+            padding: 32px;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .content-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 20px;
+        }
+
+        .content-text {
+            color: #374151;
+            white-space: pre-line;
+        }
+
+        /* Author Info */
+        .author-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .author-header {
+            padding: 24px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .author-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 16px;
+        }
+
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .author-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #6b7280;
+        }
+
+        .author-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .author-details h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .author-details p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Statistics */
+        .stats-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .stats-header {
+            padding: 24px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .stats-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1px;
+            background: #f3f4f6;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* Technical Info */
+        .tech-info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .tech-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 16px;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            font-size: 14px;
+        }
+
+        .tech-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tech-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .tech-value {
+            color: #374151;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .news-title {
+                font-size: 24px;
+            }
+
+            .news-short-description {
+                font-size: 16px;
+            }
+
+            .action-bar {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+
+            .news-header, .news-content, .news-image {
+                padding: 20px;
+            }
+
+            .author-header {
+                padding: 20px;
+            }
+
+            .stats-header {
+                padding: 20px;
+            }
+
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="container">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="/admin">Админ панель</a> /
+                <a href="/admin/news">Новости</a> /
+                <span>Просмотр</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <a href="/admin/news" class="btn btn-back">
+            ← Назад к списку
+        </a>
+
+        <a th:href="'/admin/news/' + ${news.id} + '/edit'" class="btn btn-edit">
+            ✏️ Редактировать
+        </a>
+
+        <form th:if="${!news.isPublished}"
+              th:action="'/admin/news/' + ${news.id} + '/publish'"
+              method="post" style="display: inline;">
+            <button type="submit" class="btn btn-publish"
+                    onclick="return confirm('Опубликовать новость?')">
+                📢 Опубликовать
+            </button>
+        </form>
+
+        <form th:if="${news.isPublished}"
+              th:action="'/admin/news/' + ${news.id} + '/unpublish'"
+              method="post" style="display: inline;">
+            <button type="submit" class="btn btn-unpublish"
+                    onclick="return confirm('Снять с публикации?')">
+                📝 Снять с публикации
+            </button>
+        </form>
+
+        <form th:action="'/admin/news/' + ${news.id} + '/delete'"
+              method="post" style="display: inline;">
+            <button type="submit" class="btn btn-delete"
+                    onclick="return confirm('Удалить новость? Это действие нельзя отменить!')">
+                🗑️ Удалить
+            </button>
+        </form>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-card">
+        <div class="news-header">
+            <div class="news-meta">
+                <div class="meta-left">
+                    <span class="news-id" th:text="'ID: ' + ${news.id}"></span>
+                    <span class="news-type" th:text="${news.newsTypeDisplayName}"></span>
+                </div>
+                <div>
+                        <span th:if="${news.isPublished}" class="news-status status-published">
+                            ✅ Опубликована
+                        </span>
+                    <span th:unless="${news.isPublished}" class="news-status status-draft">
+                            📝 Черновик
+                        </span>
+                </div>
+            </div>
+
+            <h1 class="news-title" th:text="${news.title}"></h1>
+
+            <div th:if="${news.shortDescription}" class="news-short-description">
+                <p th:text="${news.shortDescription}"></p>
+            </div>
+
+            <div class="news-dates">
+                <div class="date-item">
+                    <span>📅</span>
+                    <span class="date-label">Создана:</span>
+                    <span th:text="${#temporals.format(news.createdAt, 'dd.MM.yyyy HH:mm')}"></span>
+                </div>
+                <div th:if="${news.publishedAt}" class="date-item">
+                    <span>📢</span>
+                    <span class="date-label">Опубликована:</span>
+                    <span th:text="${#temporals.format(news.publishedAt, 'dd.MM.yyyy HH:mm')}"></span>
+                </div>
+                <div th:if="${news.updatedAt != news.createdAt}" class="date-item">
+                    <span>✏️</span>
+                    <span class="date-label">Обновлена:</span>
+                    <span th:text="${#temporals.format(news.updatedAt, 'dd.MM.yyyy HH:mm')}"></span>
+                </div>
+                <div class="date-item">
+                    <span>👁️</span>
+                    <span class="date-label">Просмотров:</span>
+                    <span th:text="${news.viewsCount}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image -->
+        <div th:if="${news.photoUrl}" class="news-image">
+            <img th:src="${news.photoUrl}"
+                 th:alt="${news.title}">
+        </div>
+
+        <!-- Content -->
+        <div class="news-content">
+            <h2 class="content-title">Содержание новости</h2>
+            <div class="content-text" th:text="${news.description}"></div>
+        </div>
+    </div>
+
+    <!-- Author Info -->
+    <div class="author-card">
+        <div class="author-header">
+            <h3>Автор новости</h3>
+            <div class="author-info">
+                <div class="author-avatar">
+                    <img th:if="${news.author.imageUrl}"
+                         th:src="${news.author.imageUrl}"
+                         th:alt="${news.author.firstName + ' ' + news.author.lastName}">
+                    <span th:unless="${news.author.imageUrl}">👤</span>
+                </div>
+                <div class="author-details">
+                    <h4 th:text="${news.author.firstName + ' ' + news.author.lastName}"></h4>
+                    <p>Администратор проекта</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-card">
+        <div class="stats-header">
+            <h3>Статистика</h3>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" th:text="${news.viewsCount}"></div>
+                <div class="stat-label">Просмотров</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" th:text="${news.isPublished ? 'ДА' : 'НЕТ'}"></div>
+                <div class="stat-label">Опубликована</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" th:text="${news.photoUrl != null ? 'ДА' : 'НЕТ'}"></div>
+                <div class="stat-label">Есть изображение</div>
+            </div>
+        </div>
+
+        <!-- Technical Info -->
+        <div class="tech-info">
+            <h4>Техническая информация</h4>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <span class="tech-label">ID новости:</span>
+                    <span class="tech-value" th:text="${news.id}"></span>
+                </div>
+                <div class="tech-item" th:if="${news.photoId}">
+                    <span class="tech-label">ID изображения:</span>
+                    <span class="tech-value" th:text="${news.photoId}"></span>
+                </div>
+                <div class="tech-item">
+                    <span class="tech-label">Тип новости:</span>
+                    <span class="tech-value" th:text="${news.newsType}"></span>
+                </div>
+                <div class="tech-item">
+                    <span class="tech-label">ID автора:</span>
+                    <span class="tech-value" th:text="${news.author.id}"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

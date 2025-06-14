@@ -175,6 +175,13 @@ public class User {
 
 
 
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("createdAt DESC")
+    @Builder.Default
+    private List<ProjectNews> createdNews = new ArrayList<>();
+
+
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserOnlineStatus onlineStatus;
 

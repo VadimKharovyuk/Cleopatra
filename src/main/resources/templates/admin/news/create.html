@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Создание новости - Админ панель</title>
+</head>
+<body>
+<div>
+  <header>
+    <h1>Создание новости</h1>
+    <nav>
+      <a href="/admin">Админ панель</a> |
+      <a href="/admin/news">← Назад к списку новостей</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Сообщения об ошибке -->
+    <div th:if="${errorMessage}" style="color: red; background: #f8d7da; padding: 10px; margin: 10px 0; border: 1px solid #f5c6cb; border-radius: 4px;">
+      <span th:text="${errorMessage}"></span>
+    </div>
+
+    <form th:action="@{/admin/news/create}"
+          th:object="${newsRequest}"
+          method="post"
+          enctype="multipart/form-data"
+          style="max-width: 800px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+
+      <div style="margin-bottom: 20px;">
+        <label for="title" style="display: block; margin-bottom: 5px; font-weight: bold;">
+          Заголовок новости *
+        </label>
+        <input type="text"
+               id="title"
+               th:field="*{title}"
+               placeholder="Введите заголовок новости"
+               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+        <div th:if="${#fields.hasErrors('title')}"
+             style="color: red; font-size: 0.9em; margin-top: 5px;">
+          <span th:errors="*{title}"></span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="shortDescription" style="display: block; margin-bottom: 5px; font-weight: bold;">
+          Краткое описание
+        </label>
+        <textarea id="shortDescription"
+                  th:field="*{shortDescription}"
+                  rows="2"
+                  placeholder="Краткое описание для предварительного просмотра"
+                  style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
+        <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
+          Максимум 255 символов. Отображается в списке новостей.
+        </div>
+        <div th:if="${#fields.hasErrors('shortDescription')}"
+             style="color: red; font-size: 0.9em; margin-top: 5px;">
+          <span th:errors="*{shortDescription}"></span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="description" style="display: block; margin-bottom: 5px; font-weight: bold;">
+          Полное описание *
+        </label>
+        <textarea id="description"
+                  th:field="*{description}"
+                  rows="10"
+                  placeholder="Введите полное описание новости"
+                  style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; resize: vertical;"></textarea>
+        <div th:if="${#fields.hasErrors('description')}"
+             style="color: red; font-size: 0.9em; margin-top: 5px;">
+          <span th:errors="*{description}"></span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="newsType" style="display: block; margin-bottom: 5px; font-weight: bold;">
+          Тип новости *
+        </label>
+        <select id="newsType"
+                th:field="*{newsType}"
+                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+          <option value="">Выберите тип новости</option>
+          <option th:each="type : ${newsTypes}"
+                  th:value="${type}"
+                  th:text="${type.displayName}">
+          </option>
+        </select>
+        <div th:if="${#fields.hasErrors('newsType')}"
+             style="color: red; font-size: 0.9em; margin-top: 5px;">
+          <span th:errors="*{newsType}"></span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="photo" style="display: block; margin-bottom: 5px; font-weight: bold;">
+          Изображение
+        </label>
+        <input type="file"
+               id="photo"
+               th:field="*{photo}"
+               accept="image/*"
+               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+        <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
+          Поддерживаемые форматы: JPG, PNG, HEIF, HEIC. Максимальный размер: 10 MB.
+        </div>
+        <div th:if="${#fields.hasErrors('photo')}"
+             style="color: red; font-size: 0.9em; margin-top: 5px;">
+          <span th:errors="*{photo}"></span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label style="display: flex; align-items: center; font-weight: bold;">
+          <input type="checkbox"
+                 th:field="*{publishImmediately}"
+                 style="margin-right: 10px; transform: scale(1.2);">
+          Опубликовать немедленно
+        </label>
+        <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
+          Если не отмечено, новость будет сохранена как черновик
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 15px; margin-top: 30px;">
+        <button type="submit"
+                style="background: #28a745; color: white; padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+          💾 Создать новость
+        </button>
+
+        <a href="/admin/news"
+           style="background: #6c757d; color: white; padding: 12px 25px; text-decoration: none; border-radius: 4px; display: inline-block;">
+          ❌ Отмена
+        </a>
+      </div>
+    </form>
+  </main>
+</div>
+</body>
+</html>

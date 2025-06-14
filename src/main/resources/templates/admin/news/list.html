@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление новостями</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #fafbfc;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 20px 0;
+            margin-bottom: 32px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .breadcrumb {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .breadcrumb a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Filters */
+        .filters {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .filters h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #111827;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 16px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-select {
+            padding: 10px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            min-width: 180px;
+            transition: border-color 0.2s;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-filter {
+            background: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-filter:hover {
+            background: #4b5563;
+        }
+
+        .btn-reset {
+            color: #6b7280;
+            text-decoration: none;
+            padding: 10px 16px;
+            font-weight: 500;
+        }
+
+        .btn-reset:hover {
+            color: #374151;
+            text-decoration: underline;
+        }
+
+        /* Content */
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 24px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .content-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: #6b7280;
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-state h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .empty-state p {
+            margin-bottom: 24px;
+        }
+
+        /* News Grid */
+        .news-grid {
+            display: grid;
+            gap: 20px;
+            padding: 24px;
+        }
+
+        .news-card {
+            border: 1px solid #f3f4f6;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+            background: #fafbfc;
+        }
+
+        .news-card:hover {
+            border-color: #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .news-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .news-id {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .news-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-published {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .news-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .news-description {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .news-type {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .news-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+
+        .news-author {
+            font-weight: 500;
+        }
+
+        .news-views {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .news-date {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        /* Actions */
+        .news-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-view {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .btn-view:hover {
+            background: #dbeafe;
+        }
+
+        .btn-edit {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .btn-edit:hover {
+            background: #fde68a;
+        }
+
+        .btn-publish {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .btn-publish:hover {
+            background: #bbf7d0;
+        }
+
+        .btn-unpublish {
+            background: #fed7aa;
+            color: #c2410c;
+        }
+
+        .btn-unpublish:hover {
+            background: #fdba74;
+        }
+
+        .btn-delete {
+            background: #fecaca;
+            color: #dc2626;
+        }
+
+        .btn-delete:hover {
+            background: #f87171;
+        }
+
+        /* Pagination */
+        .pagination {
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .pagination-btn {
+            background: #f9fafb;
+            color: #374151;
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .pagination-info {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: start;
+                gap: 8px;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-select {
+                min-width: auto;
+            }
+
+            .news-actions {
+                justify-content: center;
+            }
+
+            .pagination {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="container">
+        <div class="header-content">
+            <h1>Управление новостями</h1>
+            <div class="breadcrumb">
+                <a href="/admin">Админ панель</a> /
+                <span>Новости</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <span th:text="${successMessage}"></span>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div th:if="${param.error}" class="alert alert-error">
+        <span th:text="${param.error}"></span>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <div>
+            <a href="/admin/news/create" class="btn-primary">
+                <span>➕</span>
+                Создать новость
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <h3>Фильтры</h3>
+        <form method="get" action="/admin/news" class="filter-form">
+            <div class="form-group">
+                <label>Тип новости</label>
+                <select name="newsType" class="form-select">
+                    <option value="">Все типы</option>
+                    <option th:each="type : ${newsTypes}"
+                            th:value="${type}"
+                            th:text="${type.displayName}"
+                            th:selected="${type == selectedType}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Статус</label>
+                <select name="isPublished" class="form-select">
+                    <option value="">Все</option>
+                    <option value="true" th:selected="${selectedPublished == true}">Опубликованные</option>
+                    <option value="false" th:selected="${selectedPublished == false}">Черновики</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn-filter">Применить</button>
+            </div>
+
+            <div class="form-group">
+                <a href="/admin/news" class="btn-reset">Сбросить</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Content -->
+    <div class="content-card">
+        <div class="content-header">
+            <h3>Список новостей</h3>
+        </div>
+
+        <div th:if="${newsPage.isEmpty}" class="empty-state">
+            <div class="icon">📰</div>
+            <h4>Новостей пока нет</h4>
+            <p>Создайте первую новость для начала работы</p>
+            <a href="/admin/news/create" class="btn-primary">Создать новость</a>
+        </div>
+
+        <div th:unless="${newsPage.isEmpty}">
+            <div class="news-grid">
+                <div th:each="news : ${newsPage.content}" class="news-card">
+                    <div class="news-header">
+                        <span class="news-id" th:text="'#' + ${news.id}"></span>
+                        <span th:if="${news.isPublished}" class="news-status status-published">
+                                ✅ Опубликована
+                            </span>
+                        <span th:unless="${news.isPublished}" class="news-status status-draft">
+                                📝 Черновик
+                            </span>
+                    </div>
+
+                    <h4 class="news-title" th:text="${news.title}"></h4>
+
+                    <p class="news-description" th:text="${news.shortDescription}"></p>
+
+                    <span class="news-type" th:text="${news.newsTypeDisplayName}"></span>
+
+                    <div class="news-meta">
+                        <div class="news-author">
+                            <span th:text="${news.author.firstName + ' ' + news.author.lastName}"></span>
+                        </div>
+                        <div class="news-views">
+                            <span>👁️</span>
+                            <span th:text="${news.viewsCount}"></span>
+                        </div>
+                        <div class="news-date">
+                            <div th:text="'Создана: ' + ${#temporals.format(news.createdAt, 'dd.MM.yyyy HH:mm')}"></div>
+                            <div th:if="${news.publishedAt}" th:text="'Опубл: ' + ${#temporals.format(news.publishedAt, 'dd.MM.yyyy HH:mm')}"></div>
+                        </div>
+                    </div>
+
+                    <div class="news-actions">
+                        <a th:href="'/admin/news/' + ${news.id}" class="btn-sm btn-view">
+                            👁️ Просмотр
+                        </a>
+
+                        <a th:href="'/admin/news/' + ${news.id} + '/edit'" class="btn-sm btn-edit">
+                            ✏️ Редактировать
+                        </a>
+
+                        <form th:if="${!news.isPublished}"
+                              th:action="'/admin/news/' + ${news.id} + '/publish'"
+                              method="post" style="display: inline;">
+                            <button type="submit" class="btn-sm btn-publish"
+                                    onclick="return confirm('Опубликовать новость?')">
+                                📢 Опубликовать
+                            </button>
+                        </form>
+
+                        <form th:if="${news.isPublished}"
+                              th:action="'/admin/news/' + ${news.id} + '/unpublish'"
+                              method="post" style="display: inline;">
+                            <button type="submit" class="btn-sm btn-unpublish"
+                                    onclick="return confirm('Снять с публикации?')">
+                                📝 Снять с публикации
+                            </button>
+                        </form>
+
+                        <form th:action="'/admin/news/' + ${news.id} + '/delete'"
+                              method="post" style="display: inline;">
+                            <button type="submit" class="btn-sm btn-delete"
+                                    onclick="return confirm('Удалить новость? Это действие нельзя отменить!')">
+                                🗑️ Удалить
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" th:if="${newsPage.hasNext || currentPage > 0}">
+                <a th:if="${currentPage > 0}"
+                   th:href="'/admin/news?page=' + ${currentPage - 1} + '&newsType=' + ${selectedType} + '&isPublished=' + ${selectedPublished}"
+                   class="pagination-btn">
+                    ← Предыдущая
+                </a>
+
+                <div class="pagination-info">
+                    <span>Страница </span>
+                    <strong th:text="${currentPage + 1}"></strong>
+                    <span th:if="${newsPage.totalPages}"> из <strong th:text="${newsPage.totalPages}"></strong></span>
+                </div>
+
+                <a th:if="${newsPage.hasNext}"
+                   th:href="'/admin/news?page=' + ${currentPage + 1} + '&newsType=' + ${selectedType} + '&isPublished=' + ${selectedPublished}"
+                   class="pagination-btn">
+                    Следующая →
+                </a>
+            </div>
+
+            <div class="pagination" style="border-top: none; padding-top: 0;">
+                <div class="pagination-info">
+                    Показано: <strong th:text="${newsPage.numberOfElements}"></strong>
+                    <span th:if="${newsPage.totalElements}"> из <strong th:text="${newsPage.totalElements}"></strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
