@@ -132,7 +132,7 @@ public class NotificationServiceImpl implements NotificationService {
             String message = String.format("%s лайкнул ваш пост \"%s\"",
                     likerName, truncateText(postTitle, 50));
 
-            String data = String.format("{\"postId\":%d,\"likerImageUrl\":\"%s\",\"postUrl\":\"/post/%d\"}",
+            String data = String.format("{\"postId\":%d,\"likerImageUrl\":\"%s\",\"postUrl\":\"/posts/%d\"}",
                     postId, liker.getImageUrl() != null ? liker.getImageUrl() : "", postId);
 
             createNotification(
@@ -156,6 +156,8 @@ public class NotificationServiceImpl implements NotificationService {
                 return;
             }
 
+
+
             User postOwner = userRepository.findById(postOwnerId)
                     .orElseThrow(() -> new RuntimeException("Post owner not found: " + postOwnerId));
             User commenter = userRepository.findById(commenterId)
@@ -166,8 +168,9 @@ public class NotificationServiceImpl implements NotificationService {
             String message = String.format("%s прокомментировал ваш пост: \"%s\"",
                     commenterName, truncateText(commentText, 100));
 
-            String data = String.format("{\"postId\":%d,\"commenterId\":%d,\"commenterImageUrl\":\"%s\",\"postUrl\":\"/post/%d\"}",
+            String data = String.format("{\"postId\":%d,\"commenterId\":%d,\"commenterImageUrl\":\"%s\",\"postUrl\":\"/posts/%d\"}",
                     postId, commenterId, commenter.getImageUrl() != null ? commenter.getImageUrl() : "", postId);
+
 
             createNotification(
                     postOwner, commenter, NotificationType.POST_COMMENT,

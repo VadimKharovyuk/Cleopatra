@@ -455,6 +455,78 @@
                 right: 1rem;
             }
         }
+        /* Добавьте эти стили в существующий CSS */
+
+        /* Кликабельные уведомления */
+        .notification-item[data-notification-data] {
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .notification-item[data-notification-data]:hover {
+            background: var(--bg-accent);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-item[data-notification-data]:active {
+            transform: translateY(0);
+        }
+
+        /* Визуальный индикатор кликабельности */
+        .notification-item[data-notification-data]::after {
+            content: '';
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 10px;
+            border-right: 2px solid var(--text-muted);
+            border-bottom: 2px solid var(--text-muted);
+            transform: translateY(-50%) rotate(-45deg);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .notification-item[data-notification-data]:hover::after {
+            opacity: 0.5;
+        }
+
+        /* Предотвращаем клик по действиям */
+        .notification-actions {
+            position: relative;
+            z-index: 10;
+        }
+
+        .avatar-link {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Стили для активного состояния */
+        .notification-item.clicking {
+            background: rgba(37, 99, 235, 0.1);
+            transform: scale(0.99);
+        }
+
+        /* Индикатор загрузки при переходе */
+        .notification-item.navigating {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .notification-item.navigating::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.1), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
     </style>
 </head>
 <body>
@@ -539,21 +611,29 @@
     <div class="notifications-container">
         <!-- Notifications List -->
         <div th:if="${notifications != null and notifications.hasContent()}">
+
+
+            <!-- Замените существующий блок notification-item на этот: -->
             <div th:each="notification : ${notifications.content}"
                  class="notification-item"
-                 th:classappend="${!notification.isRead} ? 'unread' : ''">
+                 th:classappend="${!notification.isRead} ? 'unread' : ''"
+                 th:attr="data-notification-data=${notification.data}"
+                 onclick="handleNotificationClick(this, event)">
 
                 <div class="notification-content">
                     <!-- Avatar -->
                     <div class="notification-avatar">
-                        <a th:href="@{/profile/{userId}(userId=${notification.actorId})}" class="avatar-link">
+                        <a th:href="@{/profile/{userId}(userId=${notification.actorId})}"
+                           class="avatar-link"
+                           onclick="event.stopPropagation()">
                             <img th:if="${notification.actorImageUrl}"
                                  th:src="${notification.actorImageUrl}"
                                  th:alt="${notification.actorName}">
                             <span th:unless="${notification.actorImageUrl}"
                                   class="default-avatar"
                                   th:text="${#strings.substring(notification.actorName ?: 'У', 0, 1)}">У</span>
-                        </a></div>
+                        </a>
+                    </div>
 
                     <!-- Content -->
                     <div class="notification-body">
@@ -569,36 +649,35 @@
                             <div class="notification-time">
                                 <i class="fas fa-clock"></i>
                                 <span th:text="${#temporals.format(notification.createdAt, 'dd.MM.yyyy HH:mm')}">
-                                        06.06.2025 14:30
-                                    </span>
+                        06.06.2025 14:30
+                    </span>
                             </div>
 
                             <div class="notification-type" th:switch="${notification.type.name()}">
-    <span th:case="'PROFILE_VISIT'">
-        <i class="fas fa-eye"></i> Просмотр
-    </span>
+                    <span th:case="'PROFILE_VISIT'">
+                        <i class="fas fa-eye"></i> Просмотр
+                    </span>
                                 <span th:case="'POST_LIKE'">
-        ❤️ Лайк
-    </span>
+                        ❤️ Лайк
+                    </span>
                                 <span th:case="'POST_COMMENT'">
-        💬 Комментарий
-    </span>
+                        💬 Комментарий
+                    </span>
                                 <span th:case="'FOLLOW'">
-        <i class="fas fa-user-plus"></i> Подписка
-    </span>
+                        <i class="fas fa-user-plus"></i> Подписка
+                    </span>
                                 <span th:case="'UNSUBSCRIBE'">
-        <i class="fas fa-user-minus"></i> Отписка
-    </span>
+                        <i class="fas fa-user-minus"></i> Отписка
+                    </span>
                                 <span th:case="'WALL_POST'">
-        📌 Запись на стене
-    </span>
+                        📌 Запись на стене
+                    </span>
                                 <span th:case="*">
-        <i class="fas fa-bell"></i> Уведомление
-    </span>
+                        <i class="fas fa-bell"></i> Уведомление
+                    </span>
                             </div>
                         </div>
                     </div>
-
 
                     <!-- Actions -->
                     <div class="notification-actions">
@@ -606,7 +685,8 @@
                         <form th:if="${!notification.isRead}"
                               th:action="@{/notifications/{id}/read(id=${notification.id})}"
                               method="post"
-                              style="display: inline;">
+                              style="display: inline;"
+                              onclick="event.stopPropagation()">
                             <button type="submit" class="notification-action read-btn" title="Пометить как прочитанное">
                                 <i class="fas fa-check"></i>
                             </button>
@@ -616,6 +696,7 @@
                         <form th:action="@{/notifications/{id}/delete(id=${notification.id})}"
                               method="post"
                               style="display: inline;"
+                              onclick="event.stopPropagation()"
                               onsubmit="return confirm('Удалить это уведомление?')">
                             <button type="submit" class="notification-action delete-btn" title="Удалить">
                                 <i class="fas fa-trash"></i>
@@ -678,5 +759,7 @@
 </main>
 <script th:src="@{/js/online-status.js}"></script>
 <script th:src="@{/js/notifications.js}"></script>
+<script th:src="@{/js/handleNotification/handleNotificationClick.js}"></script>
+
 </body>
 </html>
