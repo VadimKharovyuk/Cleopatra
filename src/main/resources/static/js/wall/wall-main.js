@@ -1,278 +1,288 @@
+// wall-main.js - Основной файл инициализации стены
+
 /**
- * wall-main.js
- * Главный класс приложения стены
+ * Основной класс для управления стеной пользователя
  */
+class WallManager {
+    constructor() {
+        // Переменные из Thymeleaf (должны быть определены в HTML)
+        this.wallOwnerId = window.wallOwnerId || 0;
+        this.currentUserId = window.currentUserId || null;
+        this.canWriteOnWall = window.canWriteOnWall || false;
 
-class WallApp {
+        // Инициализация компонентов
+        this.posts = null;
+        this.interactions = null;
+        this.form = null;
 
-    constructor(config) {
-        this.config = {
-            wallOwnerId: config.wallOwnerId,
-            currentUserId: config.currentUserId,
-            canWriteOnWall: config.canWriteOnWall,
-            pageSize: config.pageSize || 10
-        };
-
-        // Экземпляры модулей
-        this.wallPosts = null;
-        this.wallInteractions = null;
-        this.wallForm = null;
-
-        // Состояние приложения
-        this.isInitialized = false;
+        this.init();
     }
 
     /**
-     * Инициализация приложения
+     * Инициализирует все компоненты стены
      */
-    async init() {
+    init() {
+        // Проверяем, что все необходимые данные загружены
+        if (!this.wallOwnerId) {
+            console.error('wallOwnerId не определен');
+            return;
+        }
+
+        // Инициализируем компоненты
+        this.initComponents();
+
+        // Запускаем загрузку данных
+        this.loadInitialData();
+
+        console.log('Wall Manager инициализирован', {
+            wallOwnerId: this.wallOwnerId,
+            currentUserId: this.currentUserId,
+            canWriteOnWall: this.canWriteOnWall
+        });
+    }
+
+    /**
+     * Инициализирует все компоненты
+     */
+    initComponents() {
+        console.log('Инициализация компонентов...');
+
+        // Инициализируем взаимодействия
+        this.interactions = new WallInteractions();
+        console.log('WallInteractions инициализирован');
+
+        // Инициализируем управление постами
+        this.posts = new WallPosts(this.wallOwnerId, this.currentUserId);
+        console.log('WallPosts инициализирован');
+
+        // Инициализируем форму создания постов (если пользователь может писать на стене)
+        if (this.canWriteOnWall) {
+            this.form = new WallForm(this.wallOwnerId, (newPost) => {
+                this.posts.addNewPost(newPost);
+            });
+            console.log('WallForm инициализирован');
+        }
+
+        // Делаем компоненты доступными глобально для обратной совместимости
+        window.wallManager = this;
+        window.wallPosts = this.posts;
+        window.wallInteractions = this.interactions;
+        window.wallForm = this.form;
+
+        console.log('Все компоненты инициализированы и доступны глобально');
+    }
+
+    /**
+     * Загружает начальные данные
+     */
+    async loadInitialData() {
         try {
-            // Проверяем готовность DOM
-            if (document.readyState === 'loading') {
-                await this.waitForDOMReady();
-            }
+            // Настраиваем бесконечный скролл
+            this.posts.setupInfiniteScroll();
 
-            // Инициализируем модули
-            this.initializeModules();
-
-            // Настраиваем глобальные обработчики
-            this.setupGlobalHandlers();
-
-            // Помечаем как инициализированное
-            this.isInitialized = true;
-
-            console.log('🏛️ Wall App initialized successfully');
+            // Загружаем первую порцию постов
+            await this.posts.loadWallPosts();
 
         } catch (error) {
-            WallUtils.logError('init', error);
-            WallUtils.showNotification('Ошибка инициализации приложения', 'error');
+            console.error('Ошибка загрузки начальных данных:', error);
+            showNotification('Ошибка загрузки данных стены', 'error');
         }
     }
 
     /**
-     * Ожидание готовности DOM
+     * Обновляет всю стену
      */
-    waitForDOMReady() {
-        return new Promise((resolve) => {
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', resolve);
-            } else {
-                resolve();
-            }
-        });
-    }
+    async refresh() {
+        try {
+            // Сбрасываем состояние постов
+            this.posts.currentPage = 0;
+            this.posts.hasMorePosts = true;
+            this.posts.totalPostsCount = 0;
 
-    /**
-     * Инициализация всех модулей
-     */
-    initializeModules() {
-        // Инициализируем WallPosts
-        this.wallPosts = new WallPosts(this.config);
+            // Очищаем контейнер постов
+            this.posts.postsContainer.innerHTML = '';
 
-        // Инициализируем WallInteractions с ссылкой на WallPosts
-        this.wallInteractions = new WallInteractions({
-            ...this.config,
-            wallPosts: this.wallPosts
-        });
-
-        // Инициализируем WallForm с ссылкой на WallPosts
-        this.wallForm = new WallForm({
-            ...this.config,
-            wallPosts: this.wallPosts
-        });
-
-        // Запускаем инициализацию модулей
-        this.wallPosts.init();
-        this.wallForm.init();
-
-        // Делаем экземпляры доступными глобально для onclick обработчиков
-        window.wallInteractions = this.wallInteractions;
-        window.wallForm = this.wallForm;
-        window.wallPosts = this.wallPosts;
-    }
-
-    /**
-     * Настройка глобальных обработчиков
-     */
-    setupGlobalHandlers() {
-        // Обработчик ошибок
-        window.addEventListener('error', (event) => {
-            WallUtils.logError('Global', event.error);
-        });
-
-        // Обработчик необработанных промисов
-        window.addEventListener('unhandledrejection', (event) => {
-            WallUtils.logError('Unhandled Promise', event.reason);
-            event.preventDefault();
-        });
-
-        // Обработчик изменения размера окна
-        window.addEventListener('resize', WallUtils.debounce(() => {
-            this.handleWindowResize();
-        }, 250));
-
-        // Обработчик фокуса/потери фокуса окна
-        document.addEventListener('visibilitychange', () => {
-            this.handleVisibilityChange();
-        });
-    }
-
-    /**
-     * Обработка изменения размера окна
-     */
-    handleWindowResize() {
-        // Здесь можно добавить логику для адаптации под новый размер
-        console.log('Window resized');
-    }
-
-    /**
-     * Обработка изменения видимости страницы
-     */
-    handleVisibilityChange() {
-        if (document.hidden) {
-            // Страница скрыта
-            console.log('Page hidden');
-        } else {
-            // Страница видима
-            console.log('Page visible');
-            // Можно обновить данные, если нужно
-        }
-    }
-
-    /**
-     * Получить экземпляр WallPosts
-     */
-    getPosts() {
-        return this.wallPosts;
-    }
-
-    /**
-     * Получить экземпляр WallInteractions
-     */
-    getInteractions() {
-        return this.wallInteractions;
-    }
-
-    /**
-     * Получить экземпляр WallForm
-     */
-    getForm() {
-        return this.wallForm;
-    }
-
-    /**
-     * Получить конфигурацию
-     */
-    getConfig() {
-        return { ...this.config };
-    }
-
-    /**
-     * Проверить, инициализировано ли приложение
-     */
-    isReady() {
-        return this.isInitialized;
-    }
-
-    /**
-     * Перезагрузить посты
-     */
-    async reloadPosts() {
-        if (this.wallPosts) {
-            // Сбрасываем состояние пагинации
-            this.wallPosts.currentPage = 0;
-            this.wallPosts.hasMorePosts = true;
-            this.wallPosts.totalPostsCount = 0;
-
-            // Очищаем контейнер
-            const postsContainer = document.getElementById('postsContainer');
-            if (postsContainer) {
-                postsContainer.innerHTML = '';
-            }
-
-            // Скрываем все состояния
-            WallUtils.hideEmptyState();
-            const endMessage = document.getElementById('endMessage');
-            if (endMessage) {
-                endMessage.style.display = 'none';
-            }
+            // Скрываем состояния
+            this.posts.emptyState.style.display = 'none';
+            this.posts.endMessage.style.display = 'none';
 
             // Загружаем посты заново
-            await this.wallPosts.loadWallPosts();
+            await this.posts.loadWallPosts();
+
+            showNotification('Стена обновлена', 'success');
+
+        } catch (error) {
+            console.error('Ошибка обновления стены:', error);
+            showNotification('Ошибка обновления стены', 'error');
         }
     }
 
     /**
-     * Обновить настройки приложения
+     * Возвращает информацию о текущем состоянии стены
      */
-    updateConfig(newConfig) {
-        this.config = { ...this.config, ...newConfig };
-
-        // Обновляем конфигурацию в модулях
-        if (this.wallPosts) {
-            Object.assign(this.wallPosts, newConfig);
-        }
-        if (this.wallInteractions) {
-            Object.assign(this.wallInteractions, newConfig);
-        }
-        if (this.wallForm) {
-            Object.assign(this.wallForm, newConfig);
-        }
+    getState() {
+        return {
+            wallOwnerId: this.wallOwnerId,
+            currentUserId: this.currentUserId,
+            canWriteOnWall: this.canWriteOnWall,
+            totalPosts: this.posts ? this.posts.totalPostsCount : 0,
+            currentPage: this.posts ? this.posts.currentPage : 0,
+            hasMorePosts: this.posts ? this.posts.hasMorePosts : true,
+            isLoading: this.posts ? this.posts.isLoading : false
+        };
     }
 
     /**
-     * Уничтожить приложение (cleanup)
+     * Уничтожает все компоненты (cleanup)
      */
     destroy() {
-        // Удаляем глобальные ссылки
-        delete window.wallInteractions;
-        delete window.wallForm;
-        delete window.wallPosts;
-
-        // Вызываем cleanup методы модулей если они есть
-        if (this.wallForm && typeof this.wallForm.destroy === 'function') {
-            this.wallForm.destroy();
+        // Удаляем обработчики событий
+        if (this.posts) {
+            window.removeEventListener('scroll', this.posts.scrollHandler);
         }
 
-        // Сбрасываем состояние
-        this.isInitialized = false;
-        this.wallPosts = null;
-        this.wallInteractions = null;
-        this.wallForm = null;
+        // Очищаем глобальные ссылки
+        window.wallManager = null;
+        window.wallPosts = null;
+        window.wallInteractions = null;
+        window.wallForm = null;
 
-        console.log('🏛️ Wall App destroyed');
-    }
-
-    /**
-     * Показать информацию о приложении
-     */
-    getAppInfo() {
-        return {
-            version: '1.0.0',
-            initialized: this.isInitialized,
-            config: this.config,
-            modules: {
-                posts: !!this.wallPosts,
-                interactions: !!this.wallInteractions,
-                form: !!this.wallForm
-            }
-        };
-    }
-
-    /**
-     * Методы для отладки
-     */
-    debug() {
-        return {
-            app: this,
-            config: this.config,
-            posts: this.wallPosts,
-            interactions: this.wallInteractions,
-            form: this.wallForm,
-            utils: WallUtils
-        };
+        console.log('Wall Manager уничтожен');
     }
 }
 
-// Экспортируем для глобального использования
-window.WallApp = WallApp;
+// Глобальные переменные для обратной совместимости
+let wallManager = null;
+let wallPosts = null;
+let wallInteractions = null;
+let wallForm = null;
+
+// Определяем глобальные функции сразу (заглушки до инициализации)
+window.deletePost = function(postId) {
+    console.log('deletePost вызвана для поста:', postId);
+    if (window.wallPosts) {
+        window.wallPosts.deletePost(postId);
+    } else {
+        console.error('wallPosts еще не инициализирован, ожидаем...');
+        // Попробуем найти через wallManager
+        if (window.wallManager && window.wallManager.posts) {
+            window.wallManager.posts.deletePost(postId);
+        }
+    }
+};
+
+window.toggleLike = function(postId) {
+    console.log('toggleLike вызвана для поста:', postId);
+    if (window.wallInteractions) {
+        window.wallInteractions.toggleLike(postId);
+    } else {
+        console.error('wallInteractions еще не инициализирован');
+        if (window.wallManager && window.wallManager.interactions) {
+            window.wallManager.interactions.toggleLike(postId);
+        }
+    }
+};
+
+window.showComments = function(postId) {
+    console.log('showComments вызвана для поста:', postId);
+    if (window.wallInteractions) {
+        window.wallInteractions.showComments(postId);
+    } else {
+        console.error('wallInteractions еще не инициализирован');
+        if (window.wallManager && window.wallManager.interactions) {
+            window.wallManager.interactions.showComments(postId);
+        }
+    }
+};
+
+window.previewFile = function(input) {
+    console.log('previewFile вызвана');
+    if (window.wallForm) {
+        window.wallForm.previewFile(input);
+    } else {
+        console.error('wallForm еще не инициализирован');
+        if (window.wallManager && window.wallManager.form) {
+            window.wallManager.form.previewFile(input);
+        }
+    }
+};
+
+window.removeFile = function() {
+    console.log('removeFile вызвана');
+    if (window.wallForm) {
+        window.wallForm.removeFile();
+    } else {
+        console.error('wallForm еще не инициализирован');
+        if (window.wallManager && window.wallManager.form) {
+            window.wallManager.form.removeFile();
+        }
+    }
+};
+
+// Инициализация при загрузке DOM
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM загружен, начинаем инициализацию...');
+    // Проверяем, что мы на странице стены
+    if (typeof window.wallOwnerId !== 'undefined') {
+        console.log('wallOwnerId найден:', window.wallOwnerId);
+        wallManager = new WallManager();
+    } else {
+        console.error('wallOwnerId не определен, инициализация пропущена');
+    }
+});
+
+// Глобальные функции для обратной совместимости с существующим HTML (дублируем для надежности)
+window.deletePost = function(postId) {
+    console.log('deletePost вызвана для поста:', postId);
+    if (wallPosts) {
+        wallPosts.deletePost(postId);
+    } else {
+        console.error('wallPosts не инициализирован');
+    }
+};
+
+window.toggleLike = function(postId) {
+    console.log('toggleLike вызвана для поста:', postId);
+    if (wallInteractions) {
+        wallInteractions.toggleLike(postId);
+    } else {
+        console.error('wallInteractions не инициализирован');
+    }
+};
+
+window.showComments = function(postId) {
+    console.log('showComments вызвана для поста:', postId);
+    if (wallInteractions) {
+        wallInteractions.showComments(postId);
+    } else {
+        console.error('wallInteractions не инициализирован');
+    }
+};
+
+window.previewFile = function(input) {
+    console.log('previewFile вызвана');
+    if (wallForm) {
+        wallForm.previewFile(input);
+    } else {
+        console.error('wallForm не инициализирован');
+    }
+};
+
+window.removeFile = function() {
+    console.log('removeFile вызвана');
+    if (wallForm) {
+        wallForm.removeFile();
+    } else {
+        console.error('wallForm не инициализирован');
+    }
+};
+
+// Экспорт для возможного использования как модуль
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        WallManager,
+        WallPosts,
+        WallInteractions,
+        WallForm
+    };
+}

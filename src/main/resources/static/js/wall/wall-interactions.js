@@ -1,24 +1,25 @@
+// wall-interactions.js - Взаимодействия с постами (лайки, комментарии)
+
 /**
- * wall-interactions.js
- * Интерактивные действия со стеной (лайки, комментарии, удаление)
+ * Класс для управления взаимодействиями с постами
  */
-
 class WallInteractions {
-
-    constructor(config) {
-        this.wallOwnerId = config.wallOwnerId;
-        this.currentUserId = config.currentUserId;
-        this.wallPosts = config.wallPosts; // Ссылка на экземпляр WallPosts
+    constructor() {
+        // Можно добавить инициализацию если нужно
     }
 
     /**
-     * Переключение лайка поста
+     * Переключает лайк поста
+     * @param {number} postId - ID поста
      */
     async toggleLike(postId) {
         const likeBtn = document.querySelector(`[data-post-id="${postId}"] .like-btn`);
         const likeCount = document.querySelector(`[data-post-id="${postId}"] .like-count`);
 
-        if (!likeBtn || !likeCount) return;
+        if (!likeBtn || !likeCount) {
+            console.error('Элементы лайка не найдены');
+            return;
+        }
 
         const isLiked = likeBtn.classList.contains('liked');
 
@@ -35,211 +36,124 @@ class WallInteractions {
             if (response.ok) {
                 const data = await response.json();
 
-                // Обновляем UI через WallPosts
-                this.wallPosts.togglePostLikeState(postId);
-                this.wallPosts.updatePostLikeCount(postId, data.likesCount);
+                // Обновляем UI
+                likeBtn.classList.toggle('liked');
+                likeCount.textContent = data.likesCount;
 
+                // Анимация
+                this.animateLikeButton(likeBtn);
             } else {
                 throw new Error('Ошибка при лайке');
             }
         } catch (error) {
-            WallUtils.logError('toggleLike', error);
+            console.error('Ошибка лайка:', error);
 
-            // Временная заглушка - локальное изменение
-            this.handleLikeLocally(postId, isLiked, likeCount);
+            // Временная заглушка - просто меняем счетчик
+            const currentCount = parseInt(likeCount.textContent);
+            const newCount = isLiked ? currentCount - 1 : currentCount + 1;
 
-            WallUtils.showNotification(
-                isLiked ? 'Лайк убран' : 'Лайк поставлен',
-                'info'
-            );
+            likeBtn.classList.toggle('liked');
+            likeCount.textContent = newCount;
+
+            // Анимация
+            this.animateLikeButton(likeBtn);
+
+            showNotification(isLiked ? 'Лайк убран' : 'Лайк поставлен', 'info');
         }
     }
 
     /**
-     * Локальная обработка лайка (заглушка)
+     * Анимирует кнопку лайка
+     * @param {HTMLElement} likeBtn - Кнопка лайка
      */
-    handleLikeLocally(postId, wasLiked, likeCountElement) {
-        const currentCount = parseInt(likeCountElement.textContent);
-        const newCount = wasLiked ? currentCount - 1 : currentCount + 1;
-
-        this.wallPosts.togglePostLikeState(postId);
-        this.wallPosts.updatePostLikeCount(postId, Math.max(0, newCount));
+    animateLikeButton(likeBtn) {
+        likeBtn.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            likeBtn.style.transform = 'scale(1)';
+        }, 200);
     }
 
     /**
-     * Показать комментарии
+     * Показывает комментарии к посту
+     * @param {number} postId - ID поста
      */
     showComments(postId) {
         // TODO: Реализовать когда будет готова сущность Comment
-        WallUtils.showNotification('Комментарии будут доступны позже', 'info');
+        showNotification('Комментарии будут доступны позже', 'info');
 
         // Пример будущего функционала:
-        // this.openCommentsModal(postId);
-        // или
         // window.location.href = `/wall/posts/${postId}/comments`;
+        // или открыть модальное окно с комментариями
     }
 
     /**
-     * Удаление поста
+     * Открывает модальное окно с комментариями (заготовка)
+     * @param {number} postId - ID поста
      */
-    async deletePost(postId) {
-        const confirmMessage = this.getDeleteConfirmMessage();
-
-        if (!WallUtils.confirm(confirmMessage)) {
-            return;
-        }
-
+    async openCommentsModal(postId) {
+        // Заготовка для будущего функционала
         try {
-            const response = await fetch(`/wall/api/posts/${postId}`, {
-                method: 'DELETE'
-            });
+            // const response = await fetch(`/wall/api/posts/${postId}/comments`);
+            // const comments = await response.json();
 
-            if (!response.ok) {
-                throw new Error('Ошибка удаления поста');
-            }
-
-            // Удаляем пост через WallPosts
-            this.wallPosts.removePost(postId);
-
-            WallUtils.showNotification('Пост удален', 'success');
+            // Создать и показать модальное окно с комментариями
+            console.log(`Открытие комментариев для поста ${postId}`);
 
         } catch (error) {
-            WallUtils.logError('deletePost', error);
-            WallUtils.showNotification('Ошибка при удалении поста', 'error');
+            console.error('Ошибка загрузки комментариев:', error);
+            showNotification('Ошибка загрузки комментариев', 'error');
         }
     }
 
     /**
-     * Получить сообщение подтверждения удаления
+     * Добавляет новый комментарий (заготовка)
+     * @param {number} postId - ID поста
+     * @param {string} text - Текст комментария
      */
-    getDeleteConfirmMessage() {
-        return this.currentUserId == this.wallOwnerId
-            ? 'Удалить эту запись со своей стены?'
-            : 'Удалить свой пост с этой стены?';
-    }
-
-    /**
-     * Редактирование поста (будущий функционал)
-     */
-    editPost(postId) {
-        // TODO: Реализовать редактирование постов
-        WallUtils.showNotification('Функция редактирования будет добавлена позже', 'info');
-    }
-
-    /**
-     * Жалоба на пост
-     */
-    reportPost(postId) {
-        if (WallUtils.confirm('Пожаловаться на этот пост?')) {
-            // TODO: Реализовать систему жалоб
-            WallUtils.showNotification('Жалоба отправлена', 'success');
-        }
-    }
-
-    /**
-     * Поделиться постом
-     */
-    sharePost(postId) {
-        const postUrl = `${window.location.origin}/wall/posts/${postId}`;
-
-        if (navigator.share) {
-            // Используем Web Share API если доступен
-            navigator.share({
-                title: 'Пост на стене',
-                url: postUrl
-            }).catch(error => {
-                WallUtils.logError('sharePost', error);
-                this.copyToClipboard(postUrl);
-            });
-        } else {
-            // Копируем в буфер обмена
-            this.copyToClipboard(postUrl);
-        }
-    }
-
-    /**
-     * Копирование в буфер обмена
-     */
-    async copyToClipboard(text) {
+    async addComment(postId, text) {
+        // Заготовка для будущего функционала
         try {
-            await navigator.clipboard.writeText(text);
-            WallUtils.showNotification('Ссылка скопирована в буфер обмена', 'success');
-        } catch (error) {
-            WallUtils.logError('copyToClipboard', error);
-            WallUtils.showNotification('Не удалось скопировать ссылку', 'error');
-        }
-    }
+            // const response = await fetch(`/wall/api/posts/${postId}/comments`, {
+            //   method: 'POST',
+            //   headers: {
+            //     'Content-Type': 'application/json'
+            //   },
+            //   body: JSON.stringify({ text })
+            // });
 
-    /**
-     * Открыть модальное окно с комментариями (будущий функционал)
-     */
-    openCommentsModal(postId) {
-        // TODO: Создать модальное окно для комментариев
-        console.log('Opening comments modal for post:', postId);
-    }
-
-    /**
-     * Закрыть модальное окно комментариев
-     */
-    closeCommentsModal() {
-        // TODO: Закрыть модальное окно
-        console.log('Closing comments modal');
-    }
-
-    /**
-     * Добавить комментарий
-     */
-    async addComment(postId, commentText) {
-        try {
-            const response = await fetch(`/wall/api/posts/${postId}/comments`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ text: commentText })
-            });
-
-            if (!response.ok) {
-                throw new Error('Ошибка добавления комментария');
-            }
-
-            const comment = await response.json();
-            WallUtils.showNotification('Комментарий добавлен', 'success');
-
-            // TODO: Обновить счетчик комментариев в посте
-            return comment;
+            // if (response.ok) {
+            //   const newComment = await response.json();
+            //   // Обновить UI с новым комментарием
+            //   showNotification('Комментарий добавлен', 'success');
+            // }
 
         } catch (error) {
-            WallUtils.logError('addComment', error);
-            WallUtils.showNotification('Ошибка при добавлении комментария', 'error');
-            throw error;
+            console.error('Ошибка добавления комментария:', error);
+            showNotification('Ошибка добавления комментария', 'error');
         }
     }
 
     /**
-     * Удалить комментарий
+     * Удаляет комментарий (заготовка)
+     * @param {number} commentId - ID комментария
      */
     async deleteComment(commentId) {
-        if (!WallUtils.confirm('Удалить комментарий?')) {
-            return;
-        }
+        // Заготовка для будущего функционала
+        if (!confirm('Удалить комментарий?')) return;
 
         try {
-            const response = await fetch(`/wall/api/comments/${commentId}`, {
-                method: 'DELETE'
-            });
+            // const response = await fetch(`/wall/api/comments/${commentId}`, {
+            //   method: 'DELETE'
+            // });
 
-            if (!response.ok) {
-                throw new Error('Ошибка удаления комментария');
-            }
-
-            WallUtils.showNotification('Комментарий удален', 'success');
-
-            // TODO: Обновить UI после удаления комментария
+            // if (response.ok) {
+            //   // Удалить комментарий из DOM
+            //   showNotification('Комментарий удален', 'success');
+            // }
 
         } catch (error) {
-            WallUtils.logError('deleteComment', error);
-            WallUtils.showNotification('Ошибка при удалении комментария', 'error');
+            console.error('Ошибка удаления комментария:', error);
+            showNotification('Ошибка удаления комментария', 'error');
         }
     }
 }
