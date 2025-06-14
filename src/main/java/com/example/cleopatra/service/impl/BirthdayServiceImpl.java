@@ -23,13 +23,13 @@ import java.util.stream.Collectors;
 public class BirthdayServiceImpl implements BirthdayService {
 
 
+
     private final SubscriptionService subscriptionService ;
     private final BirthdayUserMapper birthdayUserMapper ;
     private final UserRepository userRepository;
 
     @Override
     public BirthdayPageResponse getSubscriptionsBirthdays(Long userId, Pageable pageable) {
-        log.info("Получение дней рождения подписок для пользователя: {}", userId);
 
         // Получаем ID всех подписок пользователя
         List<Long> subscriptionIds = subscriptionService.getSubscriptionIds(userId);

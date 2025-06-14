@@ -5,5 +5,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface BirthdayService {
 
+
      BirthdayPageResponse getSubscriptionsBirthdays(Long userId, Pageable pageable);
 }

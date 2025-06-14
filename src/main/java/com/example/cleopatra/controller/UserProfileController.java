@@ -260,6 +260,7 @@ public class UserProfileController {
             model.addAttribute("user", user);
             model.addAttribute("updateProfileDto", dto);
 
+
             model.addAttribute("maxFileSize", imageValidator.getMaxFileSizeMB());
             model.addAttribute("allowedFormats", imageValidator.getAllowedExtensions());
             model.addAttribute("validationRules", imageValidator.getValidationRulesDescription());

@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @Data
 public class UpdateProfileDto {
 
+
     @Size(max = 50, message = "Имя не должно превышать 50 символов")
     private String firstName;
 

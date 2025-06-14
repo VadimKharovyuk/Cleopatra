@@ -554,7 +554,12 @@
                                        id="showBirthday"
                                        name="showBirthday"
                                        th:checked="${updateProfileDto.showBirthday}"
-                                       class="form-check-input">
+                                       class="form-check-input"
+                                       value="true">
+
+                                <!-- Скрытое поле для Spring - ОБЯЗАТЕЛЬНО! -->
+                                <input type="hidden" name="_showBirthday" value="on">
+
                                 <label for="showBirthday" class="form-check-label">
                                     <i class="fas fa-birthday-cake"></i>
                                     Показывать дату рождения другим пользователям

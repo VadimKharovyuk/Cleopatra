@@ -23,6 +23,7 @@ public class BirthdayController {
     private final BirthdayService birthdayService;
     private final UserService userService;
 
+
     @GetMapping("/list")
     public String birthday(Model model,
                            Authentication authentication,
