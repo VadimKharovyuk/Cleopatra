@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Доступ запрещен - Cleopatra</title>
+
+  <!-- Подключаем Font Awesome для иконок -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Подключаем Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Подключаем существующие стили sidebar -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Main Content Layout */
+    .main-content {
+      margin-left: 280px;
+      margin-right: 0;
+      min-height: 100vh;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Error Container */
+    .error-container {
+      max-width: 600px;
+      text-align: center;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 3rem 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-secondary);
+    }
+
+    /* Error Icon */
+    .error-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 2rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .error-icon i {
+      font-size: 3rem;
+      color: #ef4444;
+    }
+
+    .error-icon::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid rgba(239, 68, 68, 0.2);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Error Content */
+    .error-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 1rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .error-code {
+      font-size: 1.125rem;
+      color: #ef4444;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .error-message {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .error-details {
+      background: var(--bg-accent);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-left: 4px solid #ef4444;
+    }
+
+    .error-details h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 0.75rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .error-details ul {
+      margin: 0;
+      padding-left: 1.5rem;
+      color: var(--text-secondary);
+    }
+
+    .error-details li {
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    /* Action Buttons */
+    .error-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .primary-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .secondary-actions {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-secondary);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+      text-decoration: none;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: var(--surface-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-secondary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-accent);
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .btn-link {
+      background: none;
+      color: var(--accent-primary);
+      border: none;
+      padding: 0.5rem;
+    }
+
+    .btn-link:hover {
+      color: var(--accent-secondary);
+      text-decoration: underline;
+    }
+
+    /* Help Section */
+    .help-section {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-secondary);
+    }
+
+    .help-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 1rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .help-text {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 80px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+        padding-top: 60px;
+      }
+
+      .error-container {
+        padding: 2rem 1.5rem;
+        border-radius: var(--radius-lg);
+      }
+
+      .error-title {
+        font-size: 2rem;
+      }
+
+      .error-icon {
+        width: 100px;
+        height: 100px;
+      }
+
+      .error-icon i {
+        font-size: 2.5rem;
+      }
+
+      .primary-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .btn {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .secondary-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Подключаем sidebar -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+<th:block th:replace="~{fragments/sidebar :: sidebar('')}"></th:block>
+
+<!-- Основной контент -->
+<div class="main-content">
+  <div class="error-container">
+    <!-- Error Icon -->
+    <div class="error-icon">
+      <i class="fas fa-shield-alt"></i>
+    </div>
+
+    <!-- Error Content -->
+    <div class="error-code">403 - Доступ запрещен</div>
+
+    <h1 class="error-title">Доступ ограничен</h1>
+
+    <p class="error-message">
+      У вас недостаточно прав для просмотра этой страницы или выполнения данного действия.
+    </p>
+
+    <!-- Error Details -->
+    <div class="error-details">
+      <h3>
+        <i class="fas fa-info-circle"></i>
+        Возможные причины:
+      </h3>
+      <ul>
+        <li>Пользователь ограничил доступ к своей стене</li>
+        <li>Вы не подписаны на этого пользователя</li>
+        <li>Контент доступен только для друзей</li>
+        <li>Ваша сессия истекла</li>
+        <li>У вас нет необходимых прав доступа</li>
+      </ul>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="error-actions">
+      <div class="primary-actions">
+        <button onclick="history.back()" class="btn btn-primary">
+          <i class="fas fa-arrow-left"></i>
+          Вернуться назад
+        </button>
+        <a href="/dashboard" class="btn btn-secondary">
+          <i class="fas fa-home"></i>
+          На главную
+        </a>
+      </div>
+
+      <div class="secondary-actions">
+        <a href="/recommendations" class="btn-link">
+          <i class="fas fa-search-plus"></i>
+          Найти друзей
+        </a>
+
+        <a th:href="@{/profile/{userId}(userId=${user.id})}" class="btn-link">
+          <i class="fas fa-user"></i>
+          Мой профиль
+        </a>
+        <button onclick="window.location.reload()" class="btn-link">
+          <i class="fas fa-sync-alt"></i>
+          Обновить страницу
+        </button>
+      </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="help-section">
+      <h3 class="help-title">
+        <i class="fas fa-question-circle"></i>
+        Нужна помощь?
+      </h3>
+      <p class="help-text">
+        Если вы считаете, что это ошибка, обратитесь в службу поддержки или попробуйте войти в систему заново.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Подключаем скрипты sidebar -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<script>
+  // Дополнительные действия при загрузке страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    // Логируем попытку доступа (для отладки)
+    console.log('Access denied page loaded');
+
+    // Можно добавить аналитику
+    // analytics.track('access_denied', { url: window.location.href });
+  });
+
+  // Функция для повторной попытки
+  function retryAccess() {
+    window.location.reload();
+  }
+
+  // Функция для возврата к безопасной странице
+  function goToSafePage() {
+    window.location.href = '/dashboard';
+  }
+</script>
+</body>
+</html>

@@ -15,3 +15,4 @@ public class WallSettingsResponse {
     private WallAccessLevel wallAccessLevel;
     private String displayName;
 }
+

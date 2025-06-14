@@ -24,9 +24,6 @@ public class WallSettingsController {
     private final WallSettingsService wallSettingsService;
     private final UserService userService;
 
-    /**
-     * Страница настроек стены (HTML)
-     */
     @GetMapping("/{userId}")
     public String getWallSettingsPage(@PathVariable Long userId,
                                       Authentication authentication,

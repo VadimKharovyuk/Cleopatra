@@ -158,7 +158,6 @@ public class WallPostServiceImpl implements WallPostService {
 
     }
 
-
     @Override
     public boolean canAccessWall(Long wallOwnerId, Long visitorId) {
         if (wallOwnerId.equals(visitorId)) {
@@ -168,30 +167,13 @@ public class WallPostServiceImpl implements WallPostService {
         User wallOwner = userRepository.findById(wallOwnerId)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
-        // 🔍 ДОБАВЬ ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ
-        log.info("Проверка доступа к стене: wallOwnerId={}, visitorId={}", wallOwnerId, visitorId);
-        log.info("Wall access level: {}", wallOwner.getWallAccessLevel());
-
-        boolean isSubscribed = subscriptionService.isSubscribed(visitorId, wallOwnerId);
-        log.info("Is subscribed: {}", isSubscribed);
-
         return switch (wallOwner.getWallAccessLevel()) {
-            case PUBLIC -> {
-                log.info("Wall is PUBLIC - access granted");
-                yield true;
-            }
-            case FRIENDS -> {
-                log.info("Wall is FRIENDS - checking subscription: {}", isSubscribed);
-                yield isSubscribed;
-            }
-            case PRIVATE -> {
-                log.info("Wall is PRIVATE - access denied");
-                yield false;
-            }
-            default -> {
-                log.info("Unknown wall access level - access denied");
-                yield false;
-            }
+            case PUBLIC -> true;
+            // ✅ ИСПРАВЛЕНО: проверяем, подписан ли ВЛАДЕЛЕЦ стены на ПОСЕТИТЕЛЯ
+            case FRIENDS -> subscriptionService.isSubscribed(wallOwnerId, visitorId);
+            case PRIVATE -> false;
+            case DISABLED -> false;
+            default -> false;
         };
     }
 
