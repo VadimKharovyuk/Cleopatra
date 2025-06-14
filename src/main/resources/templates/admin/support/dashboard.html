@@ -1,281 +1,1096 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Админ панель - Поддержка</title>-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">-->
+<!--  <style>-->
+<!--    .status-badge {-->
+<!--      font-size: 0.8em;-->
+<!--      padding: 0.4em 0.8em;-->
+<!--    }-->
+<!--    .status-open {-->
+<!--      background-color: #dc3545;-->
+<!--      color: white;-->
+<!--    }-->
+<!--    .status-in-progress {-->
+<!--      background-color: #ffc107;-->
+<!--      color: black;-->
+<!--    }-->
+<!--    .status-resolved {-->
+<!--      background-color: #28a745;-->
+<!--      color: white;-->
+<!--    }-->
+<!--    .status-closed {-->
+<!--      background-color: #6c757d;-->
+<!--      color: white;-->
+<!--    }-->
+<!--    .stats-card {-->
+<!--      transition: transform 0.2s;-->
+<!--    }-->
+<!--    .stats-card:hover {-->
+<!--      transform: translateY(-2px);-->
+<!--    }-->
+<!--    .priority-high {-->
+<!--      border-left: 4px solid #dc3545;-->
+<!--    }-->
+<!--    .table th {-->
+<!--      background-color: #f8f9fa;-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container-fluid">-->
+<!--  &lt;!&ndash; Header &ndash;&gt;-->
+<!--  <div class="row mb-4">-->
+<!--    <div class="col-12">-->
+<!--      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">-->
+<!--        <div class="container-fluid">-->
+<!--          <a class="navbar-brand" href="#">-->
+<!--            <i class="fas fa-headset me-2"></i>-->
+<!--            Админ панель поддержки-->
+<!--          </a>-->
+<!--          <div class="navbar-nav ms-auto">-->
+<!--            <a class="nav-link" href="/dashboard">-->
+<!--              <i class="fas fa-home"></i> Главная-->
+<!--            </a>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </nav>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Flash Messages &ndash;&gt;-->
+<!--  <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">-->
+<!--    <i class="fas fa-check-circle me-2"></i>-->
+<!--    <span th:text="${successMessage}"></span>-->
+<!--    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
+<!--  </div>-->
+
+<!--  <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">-->
+<!--    <i class="fas fa-exclamation-triangle me-2"></i>-->
+<!--    <span th:text="${errorMessage}"></span>-->
+<!--    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Statistics Cards &ndash;&gt;-->
+<!--  <div class="row mb-4">-->
+<!--    <div class="col-md-3">-->
+<!--      <div class="card stats-card text-center bg-primary text-white">-->
+<!--        <div class="card-body">-->
+<!--          <i class="fas fa-ticket-alt fa-2x mb-2"></i>-->
+<!--          <h4 th:text="${stats.totalRequests}">0</h4>-->
+<!--          <p class="mb-0">Всего заявок</p>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    <div class="col-md-3">-->
+<!--      <div class="card stats-card text-center bg-danger text-white">-->
+<!--        <div class="card-body">-->
+<!--          <i class="fas fa-folder-open fa-2x mb-2"></i>-->
+<!--          <h4 th:text="${stats.openRequests}">0</h4>-->
+<!--          <p class="mb-0">Открытых</p>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    <div class="col-md-3">-->
+<!--      <div class="card stats-card text-center bg-warning text-dark">-->
+<!--        <div class="card-body">-->
+<!--          <i class="fas fa-cog fa-spin fa-2x mb-2"></i>-->
+<!--          <h4 th:text="${stats.inProgressRequests}">0</h4>-->
+<!--          <p class="mb-0">В работе</p>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    <div class="col-md-3">-->
+<!--      <div class="card stats-card text-center bg-success text-white">-->
+<!--        <div class="card-body">-->
+<!--          <i class="fas fa-check-circle fa-2x mb-2"></i>-->
+<!--          <h4 th:text="${stats.resolvedRequests + stats.closedRequests}">0</h4>-->
+<!--          <p class="mb-0">Завершенных</p>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Active Requests Section &ndash;&gt;-->
+<!--  <div class="row">-->
+<!--    <div class="col-12">-->
+<!--      <div class="card">-->
+<!--        <div class="card-header d-flex justify-content-between align-items-center">-->
+<!--          <h5 class="mb-0">-->
+<!--            <i class="fas fa-list me-2"></i>-->
+<!--            Активные заявки-->
+<!--          </h5>-->
+<!--          <div class="btn-group" role="group">-->
+<!--            <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshData()">-->
+<!--              <i class="fas fa-sync-alt"></i> Обновить-->
+<!--            </button>-->
+<!--            <a href="/support/admin/statistics" class="btn btn-outline-info btn-sm">-->
+<!--              <i class="fas fa-chart-bar"></i> Статистика-->
+<!--            </a>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        <div class="card-body">-->
+<!--          <div th:if="${#lists.isEmpty(activeRequests)}" class="text-center py-4">-->
+<!--            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>-->
+<!--            <h5 class="text-muted">Нет активных заявок</h5>-->
+<!--            <p class="text-muted">Все заявки обработаны!</p>-->
+<!--          </div>-->
+
+<!--          <div th:unless="${#lists.isEmpty(activeRequests)}" class="table-responsive">-->
+<!--            <table class="table table-hover">-->
+<!--              <thead>-->
+<!--              <tr>-->
+<!--                <th scope="col">#</th>-->
+<!--                <th scope="col">Заголовок</th>-->
+<!--                <th scope="col">Пользователь</th>-->
+<!--                <th scope="col">Категория</th>-->
+<!--                <th scope="col">Статус</th>-->
+<!--                <th scope="col">Создано</th>-->
+<!--                <th scope="col">Действия</th>-->
+<!--              </tr>-->
+<!--              </thead>-->
+<!--              <tbody>-->
+<!--              <tr th:each="request : ${activeRequests}"-->
+<!--                  th:class="${request.status.name() == 'OPEN'} ? 'priority-high' : ''">-->
+<!--                <td>-->
+<!--                  <strong th:text="'#' + ${request.id}"></strong>-->
+<!--                </td>-->
+<!--                <td>-->
+<!--                  <div>-->
+<!--                    <strong th:text="${request.title}"></strong>-->
+<!--                    <br>-->
+<!--                    <small class="text-muted" th:text="${#strings.abbreviate(request.description, 50)}"></small>-->
+<!--                  </div>-->
+<!--                </td>-->
+<!--                <td>-->
+<!--                  <div>-->
+<!--                    <i class="fas fa-user me-1"></i>-->
+<!--                    <span th:text="${request.user.firstName + ' ' + request.user.lastName}"></span>-->
+<!--                    <br>-->
+<!--                    <small class="text-muted" th:text="${request.user.email}"></small>-->
+<!--                  </div>-->
+<!--                </td>-->
+<!--                <td>-->
+<!--                  <span class="badge bg-secondary" th:text="${request.category.displayName}"></span>-->
+<!--                </td>-->
+<!--                <td>-->
+<!--                                            <span class="badge status-badge"-->
+<!--                                                  th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(request.status.name(), '_', '-'))}"-->
+<!--                                                  th:text="${request.status.displayName}">-->
+<!--                                            </span>-->
+<!--                </td>-->
+<!--                <td>-->
+<!--                  <small th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy HH:mm')}"></small>-->
+<!--                </td>-->
+<!--                <td>-->
+<!--                  <div class="btn-group" role="group">-->
+<!--                    &lt;!&ndash; Быстрые действия &ndash;&gt;-->
+<!--                    <form th:if="${request.status.name() == 'OPEN'}"-->
+<!--                          th:action="@{/support/admin/take/{id}(id=${request.id})}"-->
+<!--                          method="post" class="d-inline">-->
+<!--                      <button type="submit" class="btn btn-warning btn-sm" title="Взять в работу">-->
+<!--                        <i class="fas fa-play"></i>-->
+<!--                      </button>-->
+<!--                    </form>-->
+
+<!--                    &lt;!&ndash; Модальное окно для обновления статуса &ndash;&gt;-->
+<!--                    <button type="button" class="btn btn-primary btn-sm"-->
+<!--                            data-bs-toggle="modal"-->
+<!--                            th:data-bs-target="'#updateModal' + ${request.id}"-->
+<!--                            title="Изменить статус">-->
+<!--                      <i class="fas fa-edit"></i>-->
+<!--                    </button>-->
+
+<!--                    <a th:href="@{/support/admin/request/{id}(id=${request.id})}"-->
+<!--                       class="btn btn-info btn-sm" title="Подробности">-->
+<!--                      <i class="fas fa-eye"></i>-->
+<!--                    </a>-->
+<!--                  </div>-->
+
+<!--                  &lt;!&ndash; Модальное окно для обновления статуса &ndash;&gt;-->
+<!--                  <div class="modal fade" th:id="'updateModal' + ${request.id}" tabindex="-1">-->
+<!--                    <div class="modal-dialog">-->
+<!--                      <div class="modal-content">-->
+<!--                        <div class="modal-header">-->
+<!--                          <h5 class="modal-title">-->
+<!--                            Обновить заявку #<span th:text="${request.id}"></span>-->
+<!--                          </h5>-->
+<!--                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>-->
+<!--                        </div>-->
+<!--                        <form th:action="@{/support/admin/update-status}" method="post">-->
+<!--                          <div class="modal-body">-->
+<!--                            <input type="hidden" name="requestId" th:value="${request.id}">-->
+
+<!--                            <div class="mb-3">-->
+<!--                              <label class="form-label">Новый статус:</label>-->
+<!--                              <select name="status" class="form-select" required>-->
+<!--                                <option th:each="status : ${statuses}"-->
+<!--                                        th:value="${status.name()}"-->
+<!--                                        th:text="${status.displayName}"-->
+<!--                                        th:selected="${status == request.status}">-->
+<!--                                </option>-->
+<!--                              </select>-->
+<!--                            </div>-->
+
+<!--                            <div class="mb-3">-->
+<!--                              <label class="form-label">Комментарий админа:</label>-->
+<!--                              <textarea name="adminResponse" class="form-control" rows="3"-->
+<!--                                        placeholder="Дополнительная информация (необязательно)"></textarea>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                          <div class="modal-footer">-->
+<!--                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">-->
+<!--                              Отмена-->
+<!--                            </button>-->
+<!--                            <button type="submit" class="btn btn-primary">-->
+<!--                              <i class="fas fa-save me-1"></i>-->
+<!--                              Сохранить-->
+<!--                            </button>-->
+<!--                          </div>-->
+<!--                        </form>-->
+<!--                      </div>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                </td>-->
+<!--              </tr>-->
+<!--              </tbody>-->
+<!--            </table>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>-->
+<!--<script>-->
+<!--  function refreshData() {-->
+<!--    location.reload();-->
+<!--  }-->
+
+<!--  // Автообновление каждые 30 секунд-->
+<!--  setInterval(function() {-->
+<!--    // Можно добавить AJAX обновление вместо полной перезагрузки-->
+<!--    console.log('Auto refresh check...');-->
+<!--  }, 30000);-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Админ панель - Поддержка</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    .status-badge {
-      font-size: 0.8em;
-      padding: 0.4em 0.8em;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    .status-open {
-      background-color: #dc3545;
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      color: #334155;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .header-left p {
+      color: #64748b;
+      font-size: 1.1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
       color: white;
     }
-    .status-in-progress {
-      background-color: #ffc107;
-      color: black;
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
     }
-    .status-resolved {
-      background-color: #28a745;
-      color: white;
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
-    .status-closed {
-      background-color: #6c757d;
-      color: white;
+
+    .btn-primary:hover {
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
-    .stats-card {
-      transition: transform 0.2s;
+
+    /* Flash Messages */
+    .alert {
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 500;
     }
-    .stats-card:hover {
+
+    .alert-success {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .alert-error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .alert-close {
+      margin-left: auto;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      opacity: 0.6;
+    }
+
+    /* Statistics Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
       transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
-    .priority-high {
-      border-left: 4px solid #dc3545;
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
     }
+
+    .stat-card.total::before { background: linear-gradient(90deg, #3b82f6, #06b6d4); }
+    .stat-card.open::before { background: linear-gradient(90deg, #ef4444, #dc2626); }
+    .stat-card.progress::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+    .stat-card.completed::before { background: linear-gradient(90deg, #10b981, #059669); }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+    }
+
+    .stat-card.total .stat-icon { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+    .stat-card.open .stat-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .stat-card.progress .stat-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .stat-card.completed .stat-icon { background: linear-gradient(135deg, #10b981, #059669); }
+
+    .stat-title {
+      font-size: 0.9rem;
+      color: #64748b;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .stat-subtitle {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    /* Requests Section */
+    .requests-section {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 24px 30px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 30px;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      color: #cbd5e1;
+      margin-bottom: 20px;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .empty-text {
+      color: #94a3b8;
+    }
+
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
     .table th {
-      background-color: #f8f9fa;
+      background: #f8fafc;
+      padding: 16px 20px;
+      text-align: left;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #e5e7eb;
     }
+
+    .table td {
+      padding: 20px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+
+    .table tbody tr {
+      transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .priority-high {
+      border-left: 4px solid #ef4444;
+    }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-open {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .status-in-progress {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-resolved, .status-closed {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    /* Category Badge */
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      background: #f1f5f9;
+      color: #64748b;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    /* Request Info */
+    .request-title {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+
+    .request-description {
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    .user-details {
+      flex: 1;
+    }
+
+    .user-name {
+      font-weight: 500;
+      color: #1e293b;
+      font-size: 0.875rem;
+    }
+
+    .user-email {
+      color: #64748b;
+      font-size: 0.75rem;
+    }
+
+    /* Action Buttons */
+    .action-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      border-radius: 8px;
+    }
+
+    .btn-action {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+
+    .btn-warning {
+      background: #fbbf24;
+      color: white;
+    }
+
+    .btn-info {
+      background: #06b6d4;
+      color: white;
+    }
+
+    .btn-edit {
+      background: #8b5cf6;
+      color: white;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 0;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      padding: 24px 30px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #64748b;
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    .modal-footer {
+      padding: 20px 30px;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      .header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .header-left h1 {
+        font-size: 2rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      .action-group {
+        flex-direction: column;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stat-card, .requests-section {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+    .requests-section { animation-delay: 0.5s; }
   </style>
 </head>
 <body>
-<div class="container-fluid">
+<div class="container">
   <!-- Header -->
-  <div class="row mb-4">
-    <div class="col-12">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">
-            <i class="fas fa-headset me-2"></i>
-            Админ панель поддержки
-          </a>
-          <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/dashboard">
-              <i class="fas fa-home"></i> Главная
-            </a>
-          </div>
-        </div>
-      </nav>
+  <div class="header">
+    <div class="header-left">
+      <h1>🎧 Центр поддержки</h1>
+      <p>Управление заявками и тикетами пользователей</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="refreshData()">
+        🔄 Обновить
+      </button>
+      <a href="/admin" class="btn btn-primary">
+        🏠 Главная
+      </a>
     </div>
   </div>
 
   <!-- Flash Messages -->
-  <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="fas fa-check-circle me-2"></i>
-    <span th:text="${successMessage}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  <div th:if="${successMessage}" class="alert alert-success">
+    ✅ <span th:text="${successMessage}"></span>
+    <button class="alert-close" onclick="this.parentElement.remove()">×</button>
   </div>
 
-  <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="fas fa-exclamation-triangle me-2"></i>
-    <span th:text="${errorMessage}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  <div th:if="${errorMessage}" class="alert alert-error">
+    ⚠️ <span th:text="${errorMessage}"></span>
+    <button class="alert-close" onclick="this.parentElement.remove()">×</button>
   </div>
 
-  <!-- Statistics Cards -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="card stats-card text-center bg-primary text-white">
-        <div class="card-body">
-          <i class="fas fa-ticket-alt fa-2x mb-2"></i>
-          <h4 th:text="${stats.totalRequests}">0</h4>
-          <p class="mb-0">Всего заявок</p>
+  <!-- Statistics -->
+  <div class="stats-grid">
+    <div class="stat-card total">
+      <div class="stat-header">
+        <div>
+          <div class="stat-title">Всего заявок</div>
+          <div class="stat-value" th:text="${stats.totalRequests}">0</div>
+          <div class="stat-subtitle">За все время</div>
         </div>
+        <div class="stat-icon">🎫</div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card stats-card text-center bg-danger text-white">
-        <div class="card-body">
-          <i class="fas fa-folder-open fa-2x mb-2"></i>
-          <h4 th:text="${stats.openRequests}">0</h4>
-          <p class="mb-0">Открытых</p>
+
+    <div class="stat-card open">
+      <div class="stat-header">
+        <div>
+          <div class="stat-title">Открытых</div>
+          <div class="stat-value" th:text="${stats.openRequests}">0</div>
+          <div class="stat-subtitle">Требуют внимания</div>
         </div>
+        <div class="stat-icon">🔓</div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card stats-card text-center bg-warning text-dark">
-        <div class="card-body">
-          <i class="fas fa-cog fa-spin fa-2x mb-2"></i>
-          <h4 th:text="${stats.inProgressRequests}">0</h4>
-          <p class="mb-0">В работе</p>
+
+    <div class="stat-card progress">
+      <div class="stat-header">
+        <div>
+          <div class="stat-title">В работе</div>
+          <div class="stat-value" th:text="${stats.inProgressRequests}">0</div>
+          <div class="stat-subtitle">Обрабатываются</div>
         </div>
+        <div class="stat-icon">⚙️</div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card stats-card text-center bg-success text-white">
-        <div class="card-body">
-          <i class="fas fa-check-circle fa-2x mb-2"></i>
-          <h4 th:text="${stats.resolvedRequests + stats.closedRequests}">0</h4>
-          <p class="mb-0">Завершенных</p>
+
+    <div class="stat-card completed">
+      <div class="stat-header">
+        <div>
+          <div class="stat-title">Завершенных</div>
+          <div class="stat-value" th:text="${stats.resolvedRequests + stats.closedRequests}">0</div>
+          <div class="stat-subtitle">Решено и закрыто</div>
         </div>
+        <div class="stat-icon">✅</div>
       </div>
     </div>
   </div>
 
-  <!-- Active Requests Section -->
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">
-            <i class="fas fa-list me-2"></i>
-            Активные заявки
-          </h5>
-          <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshData()">
-              <i class="fas fa-sync-alt"></i> Обновить
-            </button>
-            <a href="/support/admin/statistics" class="btn btn-outline-info btn-sm">
-              <i class="fas fa-chart-bar"></i> Статистика
-            </a>
-          </div>
-        </div>
-        <div class="card-body">
-          <div th:if="${#lists.isEmpty(activeRequests)}" class="text-center py-4">
-            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-            <h5 class="text-muted">Нет активных заявок</h5>
-            <p class="text-muted">Все заявки обработаны!</p>
-          </div>
+  <!-- Active Requests -->
+  <div class="requests-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        📋 Активные заявки
+      </h2>
+      <div class="header-actions">
+        <a href="/support/admin/statistics" class="btn btn-secondary btn-sm">
+          📊 Статистика
+        </a>
+      </div>
+    </div>
 
-          <div th:unless="${#lists.isEmpty(activeRequests)}" class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Заголовок</th>
-                <th scope="col">Пользователь</th>
-                <th scope="col">Категория</th>
-                <th scope="col">Статус</th>
-                <th scope="col">Создано</th>
-                <th scope="col">Действия</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr th:each="request : ${activeRequests}"
-                  th:class="${request.status.name() == 'OPEN'} ? 'priority-high' : ''">
-                <td>
-                  <strong th:text="'#' + ${request.id}"></strong>
-                </td>
-                <td>
-                  <div>
-                    <strong th:text="${request.title}"></strong>
-                    <br>
-                    <small class="text-muted" th:text="${#strings.abbreviate(request.description, 50)}"></small>
-                  </div>
-                </td>
-                <td>
-                  <div>
-                    <i class="fas fa-user me-1"></i>
-                    <span th:text="${request.user.firstName + ' ' + request.user.lastName}"></span>
-                    <br>
-                    <small class="text-muted" th:text="${request.user.email}"></small>
-                  </div>
-                </td>
-                <td>
-                  <span class="badge bg-secondary" th:text="${request.category.displayName}"></span>
-                </td>
-                <td>
-                                            <span class="badge status-badge"
-                                                  th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(request.status.name(), '_', '-'))}"
-                                                  th:text="${request.status.displayName}">
-                                            </span>
-                </td>
-                <td>
-                  <small th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy HH:mm')}"></small>
-                </td>
-                <td>
-                  <div class="btn-group" role="group">
-                    <!-- Быстрые действия -->
-                    <form th:if="${request.status.name() == 'OPEN'}"
-                          th:action="@{/support/admin/take/{id}(id=${request.id})}"
-                          method="post" class="d-inline">
-                      <button type="submit" class="btn btn-warning btn-sm" title="Взять в работу">
-                        <i class="fas fa-play"></i>
-                      </button>
-                    </form>
+    <div th:if="${#lists.isEmpty(activeRequests)}" class="empty-state">
+      <div class="empty-icon">📥</div>
+      <h3 class="empty-title">Нет активных заявок</h3>
+      <p class="empty-text">Все заявки обработаны! Отличная работа!</p>
+    </div>
 
-                    <!-- Модальное окно для обновления статуса -->
-                    <button type="button" class="btn btn-primary btn-sm"
-                            data-bs-toggle="modal"
-                            th:data-bs-target="'#updateModal' + ${request.id}"
-                            title="Изменить статус">
-                      <i class="fas fa-edit"></i>
-                    </button>
+    <div th:unless="${#lists.isEmpty(activeRequests)}" class="table-container">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Заявка</th>
+          <th>Пользователь</th>
+          <th>Категория</th>
+          <th>Статус</th>
+          <th>Создано</th>
+          <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="request : ${activeRequests}"
+            th:class="${request.status.name() == 'OPEN'} ? 'priority-high' : ''">
+          <td>
+            <strong th:text="'#' + ${request.id}"></strong>
+          </td>
+          <td>
+            <div class="request-title" th:text="${request.title}"></div>
+            <div class="request-description" th:text="${#strings.abbreviate(request.description, 60)}"></div>
+          </td>
+          <td>
+            <div class="user-info">
+              <div class="user-avatar" th:text="${#strings.substring(request.user.firstName, 0, 1)}">U</div>
+              <div class="user-details">
+                <div class="user-name" th:text="${request.user.firstName + ' ' + request.user.lastName}"></div>
+                <div class="user-email" th:text="${request.user.email}"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="category-badge" th:text="${request.category.displayName}"></span>
+          </td>
+          <td>
+                <span class="status-badge"
+                      th:classappend="'status-' + ${#strings.toLowerCase(#strings.replace(request.status.name(), '_', '-'))}"
+                      th:text="${request.status.displayName}">
+                </span>
+          </td>
+          <td>
+            <div th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy')}"></div>
+            <div style="font-size: 0.75rem; color: #64748b;" th:text="${#temporals.format(request.createdAt, 'HH:mm')}"></div>
+          </td>
+          <td>
+            <div class="action-group">
+              <!-- Взять в работу -->
+              <form th:if="${request.status.name() == 'OPEN'}"
+                    th:action="@{/support/admin/take/{id}(id=${request.id})}"
+                    method="post" style="display: inline;">
+                <button type="submit" class="btn btn-warning btn-action" title="Взять в работу">
+                  ▶️
+                </button>
+              </form>
 
-                    <a th:href="@{/support/admin/request/{id}(id=${request.id})}"
-                       class="btn btn-info btn-sm" title="Подробности">
-                      <i class="fas fa-eye"></i>
-                    </a>
-                  </div>
+              <!-- Изменить статус -->
+              <button type="button" class="btn btn-edit btn-action"
+                      onclick="openModal('updateModal' + ${request.id})"
+                      title="Изменить статус">
+                ✏️
+              </button>
 
-                  <!-- Модальное окно для обновления статуса -->
-                  <div class="modal fade" th:id="'updateModal' + ${request.id}" tabindex="-1">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title">
-                            Обновить заявку #<span th:text="${request.id}"></span>
-                          </h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <form th:action="@{/support/admin/update-status}" method="post">
-                          <div class="modal-body">
-                            <input type="hidden" name="requestId" th:value="${request.id}">
+              <!-- Подробности -->
+              <a th:href="@{/support/admin/request/{id}(id=${request.id})}"
+                 class="btn btn-info btn-action" title="Подробности">
+                👁️
+              </a>
+            </div>
 
-                            <div class="mb-3">
-                              <label class="form-label">Новый статус:</label>
-                              <select name="status" class="form-select" required>
-                                <option th:each="status : ${statuses}"
-                                        th:value="${status.name()}"
-                                        th:text="${status.displayName}"
-                                        th:selected="${status == request.status}">
-                                </option>
-                              </select>
-                            </div>
+            <!-- Модальное окно -->
+            <div class="modal-overlay" th:id="'updateModal' + ${request.id}">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h3 class="modal-title">
+                    Обновить заявку #<span th:text="${request.id}"></span>
+                  </h3>
+                  <button class="modal-close" onclick="closeModal('updateModal' + ${request.id})">×</button>
+                </div>
+                <form th:action="@{/support/admin/update-status}" method="post">
+                  <div class="modal-body">
+                    <input type="hidden" name="requestId" th:value="${request.id}">
 
-                            <div class="mb-3">
-                              <label class="form-label">Комментарий админа:</label>
-                              <textarea name="adminResponse" class="form-control" rows="3"
-                                        placeholder="Дополнительная информация (необязательно)"></textarea>
-                            </div>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                              Отмена
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                              <i class="fas fa-save me-1"></i>
-                              Сохранить
-                            </button>
-                          </div>
-                        </form>
-                      </div>
+                    <div class="form-group">
+                      <label class="form-label">Новый статус:</label>
+                      <select name="status" class="form-control" required>
+                        <option th:each="status : ${statuses}"
+                                th:value="${status.name()}"
+                                th:text="${status.displayName}"
+                                th:selected="${status == request.status}">
+                        </option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">Комментарий админа:</label>
+                      <textarea name="adminResponse" class="form-control" rows="3"
+                                placeholder="Дополнительная информация (необязательно)"></textarea>
                     </div>
                   </div>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('updateModal' + ${request.id})">
+                      Отмена
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                      💾 Сохранить
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
   function refreshData() {
     location.reload();
   }
 
+  function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // Закрытие модалки по клику вне её
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-overlay')) {
+      closeModal(e.target.id);
+    }
+  });
+
+  // Закрытие модалки по Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const activeModal = document.querySelector('.modal-overlay.active');
+      if (activeModal) {
+        closeModal(activeModal.id);
+      }
+    }
+  });
+
   // Автообновление каждые 30 секунд
   setInterval(function() {
-    // Можно добавить AJAX обновление вместо полной перезагрузки
     console.log('Auto refresh check...');
+    // Можно добавить AJAX обновление
   }, 30000);
 </script>
 </body>

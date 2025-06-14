@@ -1,110 +1,887 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <title>Админ панель - Рекламы</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>Управление рекламами</h1>-->
+
+<!--<nav>-->
+<!--  <a href="/admin/advertisements">Все рекламы</a> |-->
+<!--  <a href="/admin/advertisements/moderation">На модерации</a> |-->
+<!--  <a href="/admin/advertisements/reports">С жалобами</a>-->
+<!--</nav>-->
+
+<!--<div th:if="${successMessage}">-->
+<!--  <p><strong>Успех:</strong> <span th:text="${successMessage}"></span></p>-->
+<!--</div>-->
+<!--<div th:if="${errorMessage}">-->
+<!--  <p><strong>Ошибка:</strong> <span th:text="${errorMessage}"></span></p>-->
+<!--</div>-->
+
+<!--<h2>Поиск</h2>-->
+<!--<form method="get">-->
+<!--  <input type="text" name="search" th:value="${search}" placeholder="Поиск по названию или описанию...">-->
+<!--  <button type="submit">Найти</button>-->
+<!--  <a th:if="${search}" href="/admin/advertisements">Сбросить</a>-->
+<!--</form>-->
+
+<!--<h2>Статистика</h2>-->
+<!--<p>Всего реклам: <strong th:text="${advertisementList.totalItems}">0</strong></p>-->
+
+<!--<h2>Список реклам</h2>-->
+<!--<table border="1">-->
+<!--  <thead>-->
+<!--  <tr>-->
+<!--    <th>ID</th>-->
+<!--    <th>Название</th>-->
+<!--    <th>Категория</th>-->
+<!--    <th>Статус</th>-->
+<!--    <th>Создатель</th>-->
+<!--    <th>Бюджет</th>-->
+<!--    <th>Остаток</th>-->
+<!--    <th>Просмотры</th>-->
+<!--    <th>Клики</th>-->
+<!--    <th>CTR</th>-->
+<!--    <th>Жалобы</th>-->
+<!--    <th>Создана</th>-->
+<!--    <th>Действия</th>-->
+<!--  </tr>-->
+<!--  </thead>-->
+<!--  <tbody>-->
+<!--  <tr th:each="ad : ${advertisementList.advertisementListDTOS}">-->
+<!--    <td th:text="${ad.id}">1</td>-->
+<!--    <td>-->
+<!--      <strong th:text="${ad.title}">Название</strong><br>-->
+<!--      <small th:text="${ad.shortDescription}">Описание</small>-->
+<!--    </td>-->
+<!--    <td th:text="${ad.category.getDescription()}">Категория</td>-->
+<!--    <td th:text="${ad.status.displayName}">Статус</td>-->
+<!--    <td>-->
+<!--      <span th:text="${ad.createdByName}">Имя</span><br>-->
+<!--      <small th:text="${ad.createdByEmail}">email</small>-->
+<!--    </td>-->
+<!--    <td th:text="${ad.totalBudget} + ' ₽'">1000 ₽</td>-->
+<!--    <td th:text="${ad.remainingBudget} + ' ₽'">800 ₽</td>-->
+<!--    <td th:text="${ad.viewsCount}">100</td>-->
+<!--    <td th:text="${ad.clicksCount}">15</td>-->
+<!--    <td th:text="${#numbers.formatDecimal(ad.ctr, 0, 2)} + '%'">15%</td>-->
+<!--    <td>-->
+<!--      <span th:if="${ad.reportCount > 0}" th:text="${ad.reportCount}">2</span>-->
+<!--      <span th:if="${ad.reportCount == 0}">0</span>-->
+<!--    </td>-->
+<!--    <td th:text="${#temporals.format(ad.createdAt, 'dd.MM.yyyy')}">01.01.2024</td>-->
+<!--    <td>-->
+<!--      <a th:href="@{/advertisements/details/{id}(id=${ad.id})}">Детали</a>-->
+
+<!--      <div th:if="${ad.status.name() == 'PENDING'}">-->
+<!--        <form method="post" th:action="@{/admin/advertisements/approve/{id}(id=${ad.id})}" style="display: inline;">-->
+<!--          <button type="submit">Одобрить</button>-->
+<!--        </form>-->
+<!--        <form method="post" th:action="@{/admin/advertisements/reject/{id}(id=${ad.id})}" style="display: inline;">-->
+<!--          <input type="hidden" name="rejectionReason" value="MANUAL_REVIEW">-->
+<!--          <button type="submit">Отклонить</button>-->
+<!--        </form>-->
+<!--      </div>-->
+<!--    </td>-->
+<!--  </tr>-->
+<!--  </tbody>-->
+<!--</table>-->
+
+<!--<h2>Пагинация</h2>-->
+<!--<div>-->
+<!--  <a th:if="${advertisementList.hasPrevious}"-->
+<!--     th:href="@{/admin/advertisements(page=${advertisementList.previousPage}, size=${advertisementList.itemsPerPage}, search=${search})}">-->
+<!--    ← Предыдущая-->
+<!--  </a>-->
+
+<!--  <span>-->
+<!--            Страница <span th:text="${advertisementList.currentPage + 1}">1</span>-->
+<!--            из <span th:text="${advertisementList.totalPages}">5</span>-->
+<!--        </span>-->
+
+<!--  <a th:if="${advertisementList.hasNext}"-->
+<!--     th:href="@{/admin/advertisements(page=${advertisementList.nextPage}, size=${advertisementList.itemsPerPage}, search=${search})}">-->
+<!--    Следующая →-->
+<!--  </a>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Админ панель - Рекламы</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ панель - Управление рекламами</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      color: #334155;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #64748b;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    /* Navigation */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .nav-tab {
+      padding: 12px 20px;
+      background: #f1f5f9;
+      color: #64748b;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: 1px solid #e2e8f0;
+    }
+
+    .nav-tab:hover, .nav-tab.active {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Flash Messages */
+    .alert {
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 500;
+    }
+
+    .alert-success {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .alert-error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .alert-close {
+      margin-left: auto;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      opacity: 0.6;
+    }
+
+    /* Search and Stats Section */
+    .controls-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 30px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+    }
+
+    .search-form {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 300px;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 500;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .stats-info {
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 12px;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .stats-title {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+
+    .stats-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #3b82f6;
+    }
+
+    /* Table Section */
+    .table-section {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 24px 30px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px;
+    }
+
+    .table th {
+      background: #f8fafc;
+      padding: 16px 20px;
+      text-align: left;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+    }
+
+    .table td {
+      padding: 20px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+
+    .table tbody tr {
+      transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-approved {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .status-rejected {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .status-paused {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    /* Category Badge */
+    .category-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #e0e7ff;
+      color: #3730a3;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    /* Ad Content */
+    .ad-title {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 4px;
+      max-width: 200px;
+    }
+
+    .ad-description {
+      color: #64748b;
+      font-size: 0.875rem;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* User Info */
+    .user-info {
+      max-width: 150px;
+    }
+
+    .user-name {
+      font-weight: 500;
+      color: #1e293b;
+      font-size: 0.875rem;
+    }
+
+    .user-email {
+      color: #64748b;
+      font-size: 0.75rem;
+    }
+
+    /* Budget and Stats */
+    .budget-info {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .budget-remaining {
+      color: #059669;
+      font-size: 0.875rem;
+    }
+
+    .metric-value {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .ctr-good {
+      color: #059669;
+    }
+
+    .ctr-average {
+      color: #d97706;
+    }
+
+    .ctr-poor {
+      color: #dc2626;
+    }
+
+    /* Reports Count */
+    .reports-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .reports-none {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .reports-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .reports-danger {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    /* Action Buttons */
+    .action-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-sm {
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      border-radius: 8px;
+    }
+
+    .btn-approve {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-reject {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-details {
+      background: #06b6d4;
+      color: white;
+    }
+
+    /* Pagination */
+    .pagination {
+      padding: 24px 30px;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: between;
+      align-items: center;
+    }
+
+    .pagination-info {
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    .pagination-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+      background: white;
+      transition: all 0.2s ease;
+    }
+
+    .pagination-btn:hover:not(.disabled) {
+      background: #f8fafc;
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+
+    .pagination-btn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 30px;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      color: #cbd5e1;
+      margin-bottom: 20px;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .empty-text {
+      color: #94a3b8;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .nav-tabs {
+        flex-wrap: wrap;
+      }
+
+      .search-form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-input {
+        min-width: auto;
+      }
+
+      .action-group {
+        flex-direction: column;
+      }
+
+      .pagination {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .pagination-controls {
+        margin-left: 0;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .controls-section, .table-section {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .controls-section { animation-delay: 0.1s; }
+    .table-section { animation-delay: 0.2s; }
+  </style>
 </head>
 <body>
-<h1>Управление рекламами</h1>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>📢 Управление рекламами</h1>
+    <p>Модерация, контроль и аналитика рекламных кампаний</p>
 
-<nav>
-  <a href="/admin/advertisements">Все рекламы</a> |
-  <a href="/admin/advertisements/moderation">На модерации</a> |
-  <a href="/admin/advertisements/reports">С жалобами</a>
-</nav>
+    <!-- Navigation -->
+    <div class="nav-tabs">
+      <a href="/admin/advertisements" class="nav-tab active">
+        📋 Все рекламы
+      </a>
+      <a href="/admin/advertisements/moderation" class="nav-tab">
+        ⏳ На модерации
+      </a>
+      <a href="/admin/advertisements/reports" class="nav-tab">
+        ⚠️ С жалобами
+      </a>
+    </div>
+  </div>
 
-<div th:if="${successMessage}">
-  <p><strong>Успех:</strong> <span th:text="${successMessage}"></span></p>
-</div>
-<div th:if="${errorMessage}">
-  <p><strong>Ошибка:</strong> <span th:text="${errorMessage}"></span></p>
-</div>
+  <!-- Flash Messages -->
+  <div th:if="${successMessage}" class="alert alert-success">
+    ✅ <span th:text="${successMessage}"></span>
+    <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+  </div>
 
-<h2>Поиск</h2>
-<form method="get">
-  <input type="text" name="search" th:value="${search}" placeholder="Поиск по названию или описанию...">
-  <button type="submit">Найти</button>
-  <a th:if="${search}" href="/admin/advertisements">Сбросить</a>
-</form>
+  <div th:if="${errorMessage}" class="alert alert-error">
+    ⚠️ <span th:text="${errorMessage}"></span>
+    <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+  </div>
 
-<h2>Статистика</h2>
-<p>Всего реклам: <strong th:text="${advertisementList.totalItems}">0</strong></p>
+  <!-- Search and Stats -->
+  <div class="controls-section">
+    <!-- Search Form -->
+    <form method="get" class="search-form">
+      <input type="text" name="search" th:value="${search}"
+             placeholder="🔍 Поиск по названию или описанию..."
+             class="search-input">
+      <button type="submit" class="btn btn-primary">
+        Найти
+      </button>
+      <a th:if="${search}" href="/admin/advertisements" class="btn btn-secondary">
+        Сбросить
+      </a>
+    </form>
 
-<h2>Список реклам</h2>
-<table border="1">
-  <thead>
-  <tr>
-    <th>ID</th>
-    <th>Название</th>
-    <th>Категория</th>
-    <th>Статус</th>
-    <th>Создатель</th>
-    <th>Бюджет</th>
-    <th>Остаток</th>
-    <th>Просмотры</th>
-    <th>Клики</th>
-    <th>CTR</th>
-    <th>Жалобы</th>
-    <th>Создана</th>
-    <th>Действия</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr th:each="ad : ${advertisementList.advertisementListDTOS}">
-    <td th:text="${ad.id}">1</td>
-    <td>
-      <strong th:text="${ad.title}">Название</strong><br>
-      <small th:text="${ad.shortDescription}">Описание</small>
-    </td>
-    <td th:text="${ad.category.getDescription()}">Категория</td>
-    <td th:text="${ad.status.displayName}">Статус</td>
-    <td>
-      <span th:text="${ad.createdByName}">Имя</span><br>
-      <small th:text="${ad.createdByEmail}">email</small>
-    </td>
-    <td th:text="${ad.totalBudget} + ' ₽'">1000 ₽</td>
-    <td th:text="${ad.remainingBudget} + ' ₽'">800 ₽</td>
-    <td th:text="${ad.viewsCount}">100</td>
-    <td th:text="${ad.clicksCount}">15</td>
-    <td th:text="${#numbers.formatDecimal(ad.ctr, 0, 2)} + '%'">15%</td>
-    <td>
-      <span th:if="${ad.reportCount > 0}" th:text="${ad.reportCount}">2</span>
-      <span th:if="${ad.reportCount == 0}">0</span>
-    </td>
-    <td th:text="${#temporals.format(ad.createdAt, 'dd.MM.yyyy')}">01.01.2024</td>
-    <td>
-      <a th:href="@{/advertisements/details/{id}(id=${ad.id})}">Детали</a>
-
-      <div th:if="${ad.status.name() == 'PENDING'}">
-        <form method="post" th:action="@{/admin/advertisements/approve/{id}(id=${ad.id})}" style="display: inline;">
-          <button type="submit">Одобрить</button>
-        </form>
-        <form method="post" th:action="@{/admin/advertisements/reject/{id}(id=${ad.id})}" style="display: inline;">
-          <input type="hidden" name="rejectionReason" value="MANUAL_REVIEW">
-          <button type="submit">Отклонить</button>
-        </form>
+    <!-- Stats -->
+    <div class="stats-info">
+      <div class="stats-title">Общая статистика</div>
+      <div class="stats-value">
+        <span th:text="${advertisementList.totalItems}">0</span> реклам в системе
       </div>
-    </td>
-  </tr>
-  </tbody>
-</table>
+    </div>
+  </div>
 
-<h2>Пагинация</h2>
-<div>
-  <a th:if="${advertisementList.hasPrevious}"
-     th:href="@{/admin/advertisements(page=${advertisementList.previousPage}, size=${advertisementList.itemsPerPage}, search=${search})}">
-    ← Предыдущая
-  </a>
+  <!-- Advertisements Table -->
+  <div class="table-section">
+    <div class="section-header">
+      <h2 class="section-title">📊 Список реклам</h2>
+    </div>
 
-  <span>
-            Страница <span th:text="${advertisementList.currentPage + 1}">1</span>
-            из <span th:text="${advertisementList.totalPages}">5</span>
-        </span>
+    <div th:if="${#lists.isEmpty(advertisementList.advertisementListDTOS)}" class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3 class="empty-title">Рекламы не найдены</h3>
+      <p class="empty-text">Попробуйте изменить параметры поиска</p>
+    </div>
 
-  <a th:if="${advertisementList.hasNext}"
-     th:href="@{/admin/advertisements(page=${advertisementList.nextPage}, size=${advertisementList.itemsPerPage}, search=${search})}">
-    Следующая →
-  </a>
+    <div th:unless="${#lists.isEmpty(advertisementList.advertisementListDTOS)}" class="table-container">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Реклама</th>
+          <th>Категория</th>
+          <th>Статус</th>
+          <th>Создатель</th>
+          <th>Бюджет</th>
+          <th>Просмотры</th>
+          <th>Клики</th>
+          <th>CTR</th>
+          <th>Жалобы</th>
+          <th>Создана</th>
+          <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="ad : ${advertisementList.advertisementListDTOS}">
+          <td>
+            <strong th:text="'#' + ${ad.id}"></strong>
+          </td>
+          <td>
+            <div class="ad-title" th:text="${ad.title}"></div>
+            <div class="ad-description" th:text="${ad.shortDescription}"></div>
+          </td>
+          <td>
+            <span class="category-badge" th:text="${ad.category.getDescription()}"></span>
+          </td>
+          <td>
+                <span class="status-badge"
+                      th:classappend="'status-' + ${#strings.toLowerCase(ad.status.name())}"
+                      th:text="${ad.status.displayName}">
+                </span>
+          </td>
+          <td>
+            <div class="user-info">
+              <div class="user-name" th:text="${ad.createdByName}"></div>
+              <div class="user-email" th:text="${ad.createdByEmail}"></div>
+            </div>
+          </td>
+          <td>
+            <div class="budget-info" th:text="${ad.totalBudget} + ' ₽'"></div>
+            <div class="budget-remaining" th:text="'остаток: ' + ${ad.remainingBudget} + ' ₽'"></div>
+          </td>
+          <td>
+            <span class="metric-value" th:text="${ad.viewsCount}"></span>
+          </td>
+          <td>
+            <span class="metric-value" th:text="${ad.clicksCount}"></span>
+          </td>
+          <td>
+                <span class="metric-value"
+                      th:classappend="${ad.ctr >= 5} ? 'ctr-good' : (${ad.ctr >= 2} ? 'ctr-average' : 'ctr-poor')"
+                      th:text="${#numbers.formatDecimal(ad.ctr, 0, 2)} + '%'">
+                </span>
+          </td>
+          <td>
+                <span class="reports-count"
+                      th:classappend="${ad.reportCount == 0} ? 'reports-none' : (${ad.reportCount < 5} ? 'reports-warning' : 'reports-danger')"
+                      th:text="${ad.reportCount}">
+                </span>
+          </td>
+          <td>
+            <div th:text="${#temporals.format(ad.createdAt, 'dd.MM.yyyy')}"></div>
+            <div style="font-size: 0.75rem; color: #64748b;" th:text="${#temporals.format(ad.createdAt, 'HH:mm')}"></div>
+          </td>
+          <td>
+            <div class="action-group">
+              <!-- Детали -->
+              <a th:href="@{/advertisements/details/{id}(id=${ad.id})}"
+                 class="btn btn-details btn-sm">
+                👁️ Детали
+              </a>
+
+              <!-- Модерация для заявок на рассмотрении -->
+              <div th:if="${ad.status.name() == 'PENDING'}">
+                <form method="post" th:action="@{/admin/advertisements/approve/{id}(id=${ad.id})}" style="display: inline;">
+                  <button type="submit" class="btn btn-approve btn-sm">
+                    ✅ Одобрить
+                  </button>
+                </form>
+                <form method="post" th:action="@{/admin/advertisements/reject/{id}(id=${ad.id})}" style="display: inline;">
+                  <input type="hidden" name="rejectionReason" value="MANUAL_REVIEW">
+                  <button type="submit" class="btn btn-reject btn-sm">
+                    ❌ Отклонить
+                  </button>
+                </form>
+              </div>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <div class="pagination-info">
+        Страница <strong th:text="${advertisementList.currentPage + 1}">1</strong>
+        из <strong th:text="${advertisementList.totalPages}">5</strong>
+        (<strong th:text="${advertisementList.totalItems}">0</strong> всего)
+      </div>
+
+      <div class="pagination-controls">
+        <a th:if="${advertisementList.hasPrevious}"
+           th:href="@{/admin/advertisements(page=${advertisementList.previousPage}, size=${advertisementList.itemsPerPage}, search=${search})}"
+           class="pagination-btn">
+          ← Предыдущая
+        </a>
+        <span th:unless="${advertisementList.hasPrevious}" class="pagination-btn disabled">
+            ← Предыдущая
+          </span>
+
+        <a th:if="${advertisementList.hasNext}"
+           th:href="@{/admin/advertisements(page=${advertisementList.nextPage}, size=${advertisementList.itemsPerPage}, search=${search})}"
+           class="pagination-btn">
+          Следующая →
+        </a>
+        <span th:unless="${advertisementList.hasNext}" class="pagination-btn disabled">
+            Следующая →
+          </span>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script>
+  // Автоматическое скрытие alert-ов через 5 секунд
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+      alert.style.opacity = '0';
+      alert.style.transform = 'translateY(-10px)';
+      setTimeout(() => alert.remove(), 300);
+    });
+  }, 5000);
+
+  // Подтверждение для действий модерации
+  document.querySelectorAll('.btn-reject').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      if (!confirm('Вы уверены, что хотите отклонить эту рекламу?')) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  document.querySelectorAll('.btn-approve').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      if (!confirm('Одобрить эту рекламу для публикации?')) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  // Подсветка активной вкладки навигации
+  function setActiveTab() {
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.classList.remove('active');
+      if (tab.getAttribute('href') === currentPath) {
+        tab.classList.add('active');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setActiveTab);
+</script>
 </body>
 </html>

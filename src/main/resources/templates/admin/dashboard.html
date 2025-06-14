@@ -11,6 +11,7 @@
       box-sizing: border-box;
     }
 
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f8f9fa;
@@ -420,9 +421,20 @@
     <nav class="sidebar-menu">
       <div class="menu-section">
         <div class="menu-section-title">Основное</div>
+
+
+        <a th:href="@{'/profile/' + ${currentUserId}}" class="menu-item"
+           th:classappend="${activeSection == 'profile'} ? 'active'">
+          <i>👤</i>
+          <span class="nav-text">Profile</span>
+        </a>
+
+
         <a href="/admin" class="menu-item active">
           <i>📊</i> Dashboard
         </a>
+
+
         <a href="/admin/analytics" class="menu-item">
           <i>📈</i> Аналитика
         </a>
@@ -439,6 +451,19 @@
         <a href="/admin/users/manage-roles" class="menu-item">
           <i>👥</i> Управление пользователями
         </a>
+
+        <a th:href="@{/admin/advertisements}" class="menu-item"
+           th:classappend="${activeSection == 'advertisements'} ? 'active'">
+          <i>📢</i>
+          <span class="nav-text">Рекламы </span>
+        </a>
+
+        <a th:href="@{/support/admin}" class="menu-item"
+           th:classappend="${activeSection == 'support'} ? 'active'">
+          <i>🛠️</i>
+          <span class="nav-text">Support</span>
+        </a>
+
       </div>
 
       <div class="menu-section">

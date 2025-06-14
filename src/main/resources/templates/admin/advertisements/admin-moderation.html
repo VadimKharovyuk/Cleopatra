@@ -1,118 +1,871 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <title>Модерация рекламы</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>Модерация рекламы</h1>-->
+
+<!--<nav>-->
+<!--  <a href="/admin/advertisements">Все рекламы</a> |-->
+<!--  <a href="/admin/advertisements/moderation">На модерации</a> |-->
+<!--  <a href="/admin/advertisements/reports">С жалобами</a>-->
+<!--</nav>-->
+
+<!--<div th:if="${successMessage}">-->
+<!--  <p><strong>Успех:</strong> <span th:text="${successMessage}"></span></p>-->
+<!--</div>-->
+<!--<div th:if="${errorMessage}">-->
+<!--  <p><strong>Ошибка:</strong> <span th:text="${errorMessage}"></span></p>-->
+<!--</div>-->
+
+<!--<h2>Статистика модерации</h2>-->
+<!--<p>Ожидают модерации: <strong th:text="${advertisementList.totalItems}">0</strong> объявлений</p>-->
+
+<!--<div th:if="${advertisementList.advertisementListDTOS.empty}">-->
+<!--  <h3>Все рекламы проверены!</h3>-->
+<!--  <p>В данный момент нет рекламных объявлений, ожидающих модерации.</p>-->
+<!--  <a href="/admin/advertisements">Перейти ко всем рекламам</a>-->
+<!--</div>-->
+
+<!--<div th:if="${!advertisementList.advertisementListDTOS.empty}">-->
+<!--  <h2>Список реклам на модерации</h2>-->
+
+<!--  <div th:each="ad : ${advertisementList.advertisementListDTOS}">-->
+<!--    <hr>-->
+<!--    <h3 th:text="${ad.title}">Название рекламы</h3>-->
+<!--    <p><strong>ID:</strong> <span th:text="${ad.id}">123</span></p>-->
+
+<!--    <h4>Информация о рекламе:</h4>-->
+<!--    <ul>-->
+<!--      <li><strong>Создатель:</strong> <span th:text="${ad.createdByName}">Имя</span> (<span th:text="${ad.createdByEmail}">email</span>)</li>-->
+<!--      <li><strong>Категория:</strong> <span th:text="${ad.category.getDescription()}">Категория</span></li>-->
+<!--      <li><strong>Бюджет:</strong> <span th:text="${ad.totalBudget} + ' руб.'">1000 руб.</span></li>-->
+<!--      <li><strong>Создана:</strong> <span th:text="${#temporals.format(ad.createdAt, 'dd.MM.yyyy HH:mm')}">дата</span></li>-->
+<!--    </ul>-->
+
+<!--    <h4>Описание:</h4>-->
+<!--    <p th:text="${ad.shortDescription}">Краткое описание рекламы</p>-->
+
+<!--    <h4>Действия модерации:</h4>-->
+<!--    <form method="post" th:action="@{/admin/advertisements/approve/{id}(id=${ad.id})}" style="display: inline;">-->
+<!--      <button type="submit" onclick="return confirm('Вы уверены, что хотите одобрить эту рекламу?')">-->
+<!--        Одобрить-->
+<!--      </button>-->
+<!--    </form>-->
+
+<!--    <button onclick="showRejectForm(${ad.id})">Отклонить</button>-->
+
+<!--    <a th:href="@{/advertisements/details/{id}(id=${ad.id})}" target="_blank">Просмотреть детали</a>-->
+
+<!--    &lt;!&ndash; Форма отклонения (скрыта по умолчанию) &ndash;&gt;-->
+<!--    <div th:id="'reject-form-' + ${ad.id}" style="display: none; margin-top: 10px; border: 1px solid #ccc; padding: 10px;">-->
+<!--      <form method="post" th:action="@{/admin/advertisements/reject/{id}(id=${ad.id})}">-->
+<!--        <h5>Причина отклонения:</h5>-->
+<!--        <select name="rejectionReason" required>-->
+<!--          <option value="">Выберите причину</option>-->
+<!--          <option value="SPAM">Спам</option>-->
+<!--          <option value="INAPPROPRIATE_CONTENT">Неподходящий контент</option>-->
+<!--          <option value="ADULT_CONTENT">Контент 18+</option>-->
+<!--          <option value="VIOLENCE">Пропаганда насилия</option>-->
+<!--          <option value="MISLEADING">Ложная информация</option>-->
+<!--          <option value="COPYRIGHT">Нарушение авторских прав</option>-->
+<!--          <option value="OTHER">Другое</option>-->
+<!--        </select>-->
+
+<!--        <h5>Комментарий (необязательно):</h5>-->
+<!--        <textarea name="rejectionComment" rows="3"-->
+<!--                  placeholder="Дополнительные пояснения для рекламодателя..."></textarea>-->
+
+<!--        <br><br>-->
+<!--        <button type="submit">Отклонить рекламу</button>-->
+<!--        <button type="button" onclick="hideRejectForm(${ad.id})">Отмена</button>-->
+<!--      </form>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--<h2>Пагинация</h2>-->
+<!--<div th:if="${!advertisementList.advertisementListDTOS.empty}">-->
+<!--  <a th:if="${advertisementList.hasPrevious}"-->
+<!--     th:href="@{/admin/advertisements/moderation(page=${advertisementList.previousPage}, size=${advertisementList.itemsPerPage})}">-->
+<!--    ← Предыдущая-->
+<!--  </a>-->
+
+<!--  <span>-->
+<!--            Страница <span th:text="${advertisementList.currentPage + 1}">1</span>-->
+<!--            из <span th:text="${advertisementList.totalPages}">5</span>-->
+<!--            (всего <span th:text="${advertisementList.totalItems}">50</span> на модерации)-->
+<!--        </span>-->
+
+<!--  <a th:if="${advertisementList.hasNext}"-->
+<!--     th:href="@{/admin/advertisements/moderation(page=${advertisementList.nextPage}, size=${advertisementList.itemsPerPage})}">-->
+<!--    Следующая →-->
+<!--  </a>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--  function showRejectForm(adId) {-->
+<!--    document.getElementById('reject-form-' + adId).style.display = 'block';-->
+<!--  }-->
+
+<!--  function hideRejectForm(adId) {-->
+<!--    document.getElementById('reject-form-' + adId).style.display = 'none';-->
+<!--  }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Модерация рекламы</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Модерация рекламы - Админ панель</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      color: #334155;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #64748b;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    /* Navigation */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .nav-tab {
+      padding: 12px 20px;
+      background: #f1f5f9;
+      color: #64748b;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: 1px solid #e2e8f0;
+    }
+
+    .nav-tab:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+
+    .nav-tab.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    /* Flash Messages */
+    .alert {
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 500;
+    }
+
+    .alert-success {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .alert-error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .alert-close {
+      margin-left: auto;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      opacity: 0.6;
+    }
+
+    /* Stats Section */
+    .stats-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 30px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #f59e0b;
+    }
+
+    .stats-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .stats-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #f59e0b;
+    }
+
+    .stats-subtitle {
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+      background: white;
+      border-radius: 16px;
+      padding: 60px 30px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      color: #cbd5e1;
+      margin-bottom: 20px;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .empty-text {
+      color: #94a3b8;
+      margin-bottom: 20px;
+    }
+
+    .empty-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .empty-link:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Ad Cards */
+    .ads-grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .ad-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+    }
+
+    .ad-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .ad-header {
+      display: flex;
+      justify-content: between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .ad-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .ad-id {
+      color: #64748b;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .ad-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      background: #fef3c7;
+      color: #92400e;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Ad Info Grid */
+    .ad-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .info-item {
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 12px;
+      border-left: 3px solid #e2e8f0;
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .info-creator { border-left-color: #3b82f6; }
+    .info-category { border-left-color: #8b5cf6; }
+    .info-budget { border-left-color: #10b981; }
+    .info-date { border-left-color: #f59e0b; }
+
+    /* Description */
+    .ad-description {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      border-left: 3px solid #64748b;
+    }
+
+    .description-label {
+      font-size: 0.875rem;
+      color: #64748b;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .description-text {
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    /* Action Buttons */
+    .action-section {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 24px;
+    }
+
+    .action-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 16px;
+    }
+
+    .action-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 500;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .btn-approve {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .btn-reject {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+
+    .btn-details {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-approve:hover {
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-reject:hover {
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Reject Form */
+    .reject-form {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    .reject-form.active {
+      display: block;
+    }
+
+    .reject-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+      font-size: 0.875rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-submit {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-cancel {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Pagination */
+    .pagination {
+      background: white;
+      border-radius: 16px;
+      padding: 24px 30px;
+      margin-top: 30px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: between;
+      align-items: center;
+    }
+
+    .pagination-info {
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    .pagination-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+      background: white;
+      transition: all 0.2s ease;
+    }
+
+    .pagination-btn:hover:not(.disabled) {
+      background: #f8fafc;
+      border-color: #f59e0b;
+      color: #f59e0b;
+    }
+
+    .pagination-btn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .nav-tabs {
+        flex-wrap: wrap;
+      }
+
+      .ad-info {
+        grid-template-columns: 1fr;
+      }
+
+      .action-group {
+        flex-direction: column;
+      }
+
+      .pagination {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .pagination-controls {
+        margin-left: 0;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stats-section, .ad-card, .empty-state {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .stats-section { animation-delay: 0.1s; }
+    .ad-card:nth-child(1) { animation-delay: 0.2s; }
+    .ad-card:nth-child(2) { animation-delay: 0.3s; }
+    .ad-card:nth-child(3) { animation-delay: 0.4s; }
+  </style>
 </head>
 <body>
-<h1>Модерация рекламы</h1>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>⏳ Модерация рекламы</h1>
+    <p>Проверка и одобрение рекламных объявлений</p>
 
-<nav>
-  <a href="/admin/advertisements">Все рекламы</a> |
-  <a href="/admin/advertisements/moderation">На модерации</a> |
-  <a href="/admin/advertisements/reports">С жалобами</a>
-</nav>
+    <!-- Navigation -->
+    <div class="nav-tabs">
+      <a href="/admin/advertisements" class="nav-tab">
+        📋 Все рекламы
+      </a>
+      <a href="/admin/advertisements/moderation" class="nav-tab active">
+        ⏳ На модерации
+      </a>
+      <a href="/admin/advertisements/reports" class="nav-tab">
+        ⚠️ С жалобами
+      </a>
+    </div>
+  </div>
 
-<div th:if="${successMessage}">
-  <p><strong>Успех:</strong> <span th:text="${successMessage}"></span></p>
-</div>
-<div th:if="${errorMessage}">
-  <p><strong>Ошибка:</strong> <span th:text="${errorMessage}"></span></p>
-</div>
+  <!-- Flash Messages -->
+  <div th:if="${successMessage}" class="alert alert-success">
+    ✅ <span th:text="${successMessage}"></span>
+    <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+  </div>
 
-<h2>Статистика модерации</h2>
-<p>Ожидают модерации: <strong th:text="${advertisementList.totalItems}">0</strong> объявлений</p>
+  <div th:if="${errorMessage}" class="alert alert-error">
+    ⚠️ <span th:text="${errorMessage}"></span>
+    <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+  </div>
 
-<div th:if="${advertisementList.advertisementListDTOS.empty}">
-  <h3>Все рекламы проверены!</h3>
-  <p>В данный момент нет рекламных объявлений, ожидающих модерации.</p>
-  <a href="/admin/advertisements">Перейти ко всем рекламам</a>
-</div>
+  <!-- Statistics -->
+  <div class="stats-section">
+    <div class="stats-title">📊 Статистика модерации</div>
+    <div class="stats-value" th:text="${advertisementList.totalItems}">0</div>
+    <div class="stats-subtitle">объявлений ожидают проверки</div>
+  </div>
 
-<div th:if="${!advertisementList.advertisementListDTOS.empty}">
-  <h2>Список реклам на модерации</h2>
+  <!-- Empty State -->
+  <div th:if="${advertisementList.advertisementListDTOS.empty}" class="empty-state">
+    <div class="empty-icon">🎉</div>
+    <h3 class="empty-title">Все рекламы проверены!</h3>
+    <p class="empty-text">В данный момент нет рекламных объявлений, ожидающих модерации.</p>
+    <a href="/admin/advertisements" class="empty-link">
+      📋 Перейти ко всем рекламам
+    </a>
+  </div>
 
-  <div th:each="ad : ${advertisementList.advertisementListDTOS}">
-    <hr>
-    <h3 th:text="${ad.title}">Название рекламы</h3>
-    <p><strong>ID:</strong> <span th:text="${ad.id}">123</span></p>
+  <!-- Ads List -->
+  <div th:if="${!advertisementList.advertisementListDTOS.empty}" class="ads-grid">
+    <div th:each="ad : ${advertisementList.advertisementListDTOS}" class="ad-card">
+      <!-- Ad Header -->
+      <div class="ad-header">
+        <div>
+          <h3 class="ad-title" th:text="${ad.title}">Название рекламы</h3>
+          <div class="ad-id">ID: <span th:text="${ad.id}">123</span></div>
+        </div>
+        <div class="ad-status">⏳ На модерации</div>
+      </div>
 
-    <h4>Информация о рекламе:</h4>
-    <ul>
-      <li><strong>Создатель:</strong> <span th:text="${ad.createdByName}">Имя</span> (<span th:text="${ad.createdByEmail}">email</span>)</li>
-      <li><strong>Категория:</strong> <span th:text="${ad.category.getDescription()}">Категория</span></li>
-      <li><strong>Бюджет:</strong> <span th:text="${ad.totalBudget} + ' руб.'">1000 руб.</span></li>
-      <li><strong>Создана:</strong> <span th:text="${#temporals.format(ad.createdAt, 'dd.MM.yyyy HH:mm')}">дата</span></li>
-    </ul>
+      <!-- Ad Information -->
+      <div class="ad-info">
+        <div class="info-item info-creator">
+          <div class="info-label">Создатель</div>
+          <div class="info-value" th:text="${ad.createdByName}">Имя</div>
+          <div style="font-size: 0.75rem; color: #64748b;" th:text="${ad.createdByEmail}">email</div>
+        </div>
 
-    <h4>Описание:</h4>
-    <p th:text="${ad.shortDescription}">Краткое описание рекламы</p>
+        <div class="info-item info-category">
+          <div class="info-label">Категория</div>
+          <div class="info-value" th:text="${ad.category.getDescription()}">Категория</div>
+        </div>
 
-    <h4>Действия модерации:</h4>
-    <form method="post" th:action="@{/admin/advertisements/approve/{id}(id=${ad.id})}" style="display: inline;">
-      <button type="submit" onclick="return confirm('Вы уверены, что хотите одобрить эту рекламу?')">
-        Одобрить
-      </button>
-    </form>
+        <div class="info-item info-budget">
+          <div class="info-label">Бюджет</div>
+          <div class="info-value" th:text="${ad.totalBudget} + ' ₽'">1000 ₽</div>
+        </div>
 
-    <button onclick="showRejectForm(${ad.id})">Отклонить</button>
+        <div class="info-item info-date">
+          <div class="info-label">Создана</div>
+          <div class="info-value" th:text="${#temporals.format(ad.createdAt, 'dd.MM.yyyy')}">дата</div>
+          <div style="font-size: 0.75rem; color: #64748b;" th:text="${#temporals.format(ad.createdAt, 'HH:mm')}">время</div>
+        </div>
+      </div>
 
-    <a th:href="@{/advertisements/details/{id}(id=${ad.id})}" target="_blank">Просмотреть детали</a>
+      <!-- Description -->
+      <div class="ad-description">
+        <div class="description-label">📝 Описание рекламы:</div>
+        <div class="description-text" th:text="${ad.shortDescription}">Краткое описание рекламы</div>
+      </div>
 
-    <!-- Форма отклонения (скрыта по умолчанию) -->
-    <div th:id="'reject-form-' + ${ad.id}" style="display: none; margin-top: 10px; border: 1px solid #ccc; padding: 10px;">
-      <form method="post" th:action="@{/admin/advertisements/reject/{id}(id=${ad.id})}">
-        <h5>Причина отклонения:</h5>
-        <select name="rejectionReason" required>
-          <option value="">Выберите причину</option>
-          <option value="SPAM">Спам</option>
-          <option value="INAPPROPRIATE_CONTENT">Неподходящий контент</option>
-          <option value="ADULT_CONTENT">Контент 18+</option>
-          <option value="VIOLENCE">Пропаганда насилия</option>
-          <option value="MISLEADING">Ложная информация</option>
-          <option value="COPYRIGHT">Нарушение авторских прав</option>
-          <option value="OTHER">Другое</option>
-        </select>
+      <!-- Actions -->
+      <div class="action-section">
+        <div class="action-title">⚙️ Действия модерации:</div>
+        <div class="action-group">
+          <!-- Approve Button -->
+          <form method="post" th:action="@{/admin/advertisements/approve/{id}(id=${ad.id})}" style="display: inline;">
+            <button type="submit" class="btn btn-approve"
+                    onclick="return confirm('Вы уверены, что хотите одобрить эту рекламу?')">
+              ✅ Одобрить
+            </button>
+          </form>
 
-        <h5>Комментарий (необязательно):</h5>
-        <textarea name="rejectionComment" rows="3"
-                  placeholder="Дополнительные пояснения для рекламодателя..."></textarea>
+          <!-- Reject Button -->
+          <button class="btn btn-reject" th:onclick="'showRejectForm(' + ${ad.id} + ')'">
+            ❌ Отклонить
+          </button>
 
-        <br><br>
-        <button type="submit">Отклонить рекламу</button>
-        <button type="button" onclick="hideRejectForm(${ad.id})">Отмена</button>
-      </form>
+          <!-- Details Link -->
+          <a th:href="@{/advertisements/details/{id}(id=${ad.id})}"
+             target="_blank" class="btn btn-details">
+            👁️ Просмотреть детали
+          </a>
+        </div>
+
+        <!-- Reject Form -->
+        <div th:id="'reject-form-' + ${ad.id}" class="reject-form">
+          <div class="reject-title">❌ Отклонение рекламы</div>
+          <form method="post" th:action="@{/admin/advertisements/reject/{id}(id=${ad.id})}">
+            <div class="form-group">
+              <label class="form-label">Причина отклонения:</label>
+              <select name="rejectionReason" class="form-control" required>
+                <option value="">Выберите причину</option>
+                <option value="SPAM">🚫 Спам</option>
+                <option value="INAPPROPRIATE_CONTENT">⚠️ Неподходящий контент</option>
+                <option value="ADULT_CONTENT">🔞 Контент 18+</option>
+                <option value="VIOLENCE">⚔️ Пропаганда насилия</option>
+                <option value="MISLEADING">❌ Ложная информация</option>
+                <option value="COPYRIGHT">©️ Нарушение авторских прав</option>
+                <option value="OTHER">📝 Другое</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Комментарий (необязательно):</label>
+              <textarea name="rejectionComment" rows="3" class="form-control"
+                        placeholder="Дополнительные пояснения для рекламодателя..."></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-submit">
+                ❌ Отклонить рекламу
+              </button>
+              <button type="button" class="btn btn-cancel" th:onclick="'hideRejectForm(' + ${ad.id} + ')'">
+                Отмена
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div th:if="${!advertisementList.advertisementListDTOS.empty}" class="pagination">
+    <div class="pagination-info">
+      Страница <strong th:text="${advertisementList.currentPage + 1}">1</strong>
+      из <strong th:text="${advertisementList.totalPages}">5</strong>
+      (всего <strong th:text="${advertisementList.totalItems}">50</strong> на модерации)
+    </div>
+
+    <div class="pagination-controls">
+      <a th:if="${advertisementList.hasPrevious}"
+         th:href="@{/admin/advertisements/moderation(page=${advertisementList.previousPage}, size=${advertisementList.itemsPerPage})}"
+         class="pagination-btn">
+        ← Предыдущая
+      </a>
+      <span th:unless="${advertisementList.hasPrevious}" class="pagination-btn disabled">
+          ← Предыдущая
+        </span>
+
+      <a th:if="${advertisementList.hasNext}"
+         th:href="@{/admin/advertisements/moderation(page=${advertisementList.nextPage}, size=${advertisementList.itemsPerPage})}"
+         class="pagination-btn">
+        Следующая →
+      </a>
+      <span th:unless="${advertisementList.hasNext}" class="pagination-btn disabled">
+          Следующая →
+        </span>
     </div>
   </div>
 </div>
 
-<h2>Пагинация</h2>
-<div th:if="${!advertisementList.advertisementListDTOS.empty}">
-  <a th:if="${advertisementList.hasPrevious}"
-     th:href="@{/admin/advertisements/moderation(page=${advertisementList.previousPage}, size=${advertisementList.itemsPerPage})}">
-    ← Предыдущая
-  </a>
-
-  <span>
-            Страница <span th:text="${advertisementList.currentPage + 1}">1</span>
-            из <span th:text="${advertisementList.totalPages}">5</span>
-            (всего <span th:text="${advertisementList.totalItems}">50</span> на модерации)
-        </span>
-
-  <a th:if="${advertisementList.hasNext}"
-     th:href="@{/admin/advertisements/moderation(page=${advertisementList.nextPage}, size=${advertisementList.itemsPerPage})}">
-    Следующая →
-  </a>
-</div>
-
 <script>
   function showRejectForm(adId) {
-    document.getElementById('reject-form-' + adId).style.display = 'block';
+    const form = document.getElementById('reject-form-' + adId);
+    form.classList.add('active');
+    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function hideRejectForm(adId) {
-    document.getElementById('reject-form-' + adId).style.display = 'none';
+    const form = document.getElementById('reject-form-' + adId);
+    form.classList.remove('active');
   }
+
+  // Автоматическое скрытие alert-ов через 5 секунд
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+      alert.style.opacity = '0';
+      alert.style.transform = 'translateY(-10px)';
+      setTimeout(() => alert.remove(), 300);
+    });
+  }, 5000);
+
+  // Подсветка активной вкладки навигации
+  function setActiveTab() {
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.classList.remove('active');
+      if (tab.getAttribute('href') === currentPath) {
+        tab.classList.add('active');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setActiveTab);
+
+  // Закрытие форм отклонения по клику вне
+  document.addEventListener('click', function(event) {
+    if (!event.target.closest('.reject-form') && !event.target.closest('.btn-reject')) {
+      document.querySelectorAll('.reject-form.active').forEach(form => {
+        form.classList.remove('active');
+      });
+    }
+  });
 </script>
 </body>
 </html>

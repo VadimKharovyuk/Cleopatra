@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 public class UserRoleController {
 
     private final UserRepository userRepository;
-    private final UserBlockingService userBlockingService;
 
     /**
      * Страница управления ролями пользователей
