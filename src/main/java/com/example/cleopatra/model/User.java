@@ -145,9 +145,6 @@ public class User {
     private Long totalVisits = 0L;
 
 
-
-
-
     // Посты пользователя
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderBy("createdAt DESC")

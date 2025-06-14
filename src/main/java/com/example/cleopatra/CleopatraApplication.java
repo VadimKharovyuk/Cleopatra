@@ -17,6 +17,10 @@ public class CleopatraApplication {
 
 
 
+//
+//        WALL_POST_CREATED - кто-то написал на моей стене
+//        WALL_POST_LIKED - лайкнули мой пост на стене
+//        WALL_POST_COMMENTED - прокомментировали пост
 
 //public enum ProfilePrivacyLevel {
 //    PUBLIC,           // Все могут видеть

@@ -178,6 +178,8 @@ public class WallPostServiceImpl implements WallPostService {
     }
 
 
+
+
     // Вспомогательные методы
 
     private boolean canDeletePost(WallPost wallPost, Long currentUserId) {

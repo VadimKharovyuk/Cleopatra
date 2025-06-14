@@ -4,6 +4,7 @@ package com.example.cleopatra.controller;
 import com.example.cleopatra.dto.WallPost.WallPostCardResponse;
 import com.example.cleopatra.dto.WallPost.WallPostCreateRequest;
 import com.example.cleopatra.dto.WallPost.WallPostPageResponse;
+import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.service.SubscriptionService;
 import com.example.cleopatra.service.UserService;
 import com.example.cleopatra.service.WallPostService;
@@ -17,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Controller
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class WallPostController {
     private final WallPostService wallPostService;
     private final UserService userService;
     private final SubscriptionService subscriptionService;
+    private final UserRepository userRepository;
 
 
 //    @PostMapping("/wall/api/posts/{postId}/like")

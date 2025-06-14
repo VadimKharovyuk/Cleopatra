@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 // В WallPostRepository изменить методы:
@@ -23,4 +24,5 @@ public interface WallPostRepository extends JpaRepository<WallPost, Long> {
     Slice<WallPost> findWallPosts(@Param("wallOwnerId") Long wallOwnerId, Pageable pageable);
 
     Optional<WallPost> findByIdAndIsDeletedFalse(Long id);
+
 }
