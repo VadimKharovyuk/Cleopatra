@@ -14,6 +14,7 @@ import java.util.List;
 public class WallPostPageResponse {
     private List<WallPostCardResponse> wallPosts;
 
+
     // Метаданные пагинации для Slice
     private Boolean hasNext;
     private Integer currentPage;

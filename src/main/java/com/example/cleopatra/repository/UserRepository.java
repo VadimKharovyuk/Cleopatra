@@ -54,11 +54,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @Query("""
 
-            SELECT u FROM User u 
-    WHERE u.id != :currentUserId 
-    AND u.firstName IS NOT NULL 
-    AND u.lastName IS NOT NULL
-    ORDER BY 
+            SELECT u FROM User u
+            WHERE u.id != :currentUserId
+            AND u.firstName IS NOT NULL
+            AND u.lastName IS NOT NULL
+            ORDER BY 
         CASE 
             WHEN u.id = 1 THEN 6                   
             WHEN u.followersCount >= 10000 THEN 5
@@ -69,7 +69,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
         END DESC,
         u.followersCount DESC,
         u.createdAt DESC
-    """)
+    """
+            )
     List<User> findTopRecommendations(
             @Param("currentUserId") Long currentUserId,
             Pageable pageable
@@ -205,5 +206,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     LIMIT 10
     """)
     List<User> searchUsersForMentions(@Param("query") String query);
-}
+
+
+    @Query("SELECT u FROM User u WHERE u.id IN :userIds AND u.birthDate IS NOT NULL ORDER BY u.birthDate")
+    Page<User> findUsersWithBirthdaysByIds(@Param("userIds") List<Long> userIds, Pageable pageable);
+    }
 

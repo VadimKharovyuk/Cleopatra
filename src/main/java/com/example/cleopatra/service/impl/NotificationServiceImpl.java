@@ -62,7 +62,6 @@ public class NotificationServiceImpl implements NotificationService {
                 return;
             }
 
-            log.info("✅ Visit notifications enabled for user {}, proceeding...", visitedUserId);
 
             if (!Boolean.TRUE.equals(receiveNotifications)) {
                 log.info("🚫 User {} disabled visit notifications, skipping", visitedUserId);
@@ -71,7 +70,6 @@ public class NotificationServiceImpl implements NotificationService {
 
             // Проверяем, что нет недавнего аналогичного уведомления
             LocalDateTime recentThreshold = LocalDateTime.now().minusHours(1);
-            log.debug("🕐 Checking for recent notifications since: {}", recentThreshold);
 
             boolean recentNotificationExists = notificationRepository.existsByRecipientIdAndActorIdAndTypeAndCreatedAtAfter(
                     visitedUserId, visitorId, NotificationType.PROFILE_VISIT, recentThreshold);
@@ -79,7 +77,6 @@ public class NotificationServiceImpl implements NotificationService {
             log.info("🔍 Recent notification exists: {}", recentNotificationExists);
 
             if (recentNotificationExists) {
-                log.info("🚫 Recent profile visit notification already exists, skipping");
                 return;
             }
 
@@ -88,7 +85,6 @@ public class NotificationServiceImpl implements NotificationService {
             String title = "Посещение профиля";
             String message = String.format("%s посетил ваш профиль", visitorName);
 
-            log.info("📝 Creating notification: title='{}', message='{}'", title, message);
 
             // Дополнительные данные в JSON
             String data = String.format("{\"visitorImageUrl\":\"%s\",\"profileUrl\":\"/profile/%d\"}",
@@ -102,8 +98,6 @@ public class NotificationServiceImpl implements NotificationService {
             );
 
 
-            log.info("✅ Created profile visit notification: id={}", notification.getId());
-
         } catch (Exception e) {
             log.error("❌ Error creating profile visit notification", e);
             e.printStackTrace();
@@ -114,7 +108,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void createLikeNotification(Long postOwnerId, Long likerId, Long postId, String postTitle) {
-        log.debug("Creating like notification: liker={}, postOwner={}, post={}", likerId, postOwnerId, postId);
 
         try {
             // Не уведомляем, если лайк поставил сам автор
@@ -140,7 +133,6 @@ public class NotificationServiceImpl implements NotificationService {
                     title, message, data, postId, "POST"
             );
 
-            log.info("✅ Created like notification for post: {}", postId);
 
         } catch (Exception e) {
             log.error("❌ Error creating like notification", e);

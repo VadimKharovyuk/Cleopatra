@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дни рождения</title>
+
+    <!-- External CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Стили sidebar -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+    <style>
+        /* Основные стили страницы */
+        body {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 400;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            margin: 0;
+        }
+
+        /* Birthday Cards Container */
+        .birthday-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
+            overflow: hidden;
+        }
+
+        .birthday-section {
+            padding: 2.5rem;
+        }
+
+        /* Birthday Card */
+        .birthday-card {
+            background: var(--bg-accent);
+            border: 1px solid var(--border-secondary);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .birthday-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .birthday-card.today {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(248, 113, 113, 0.1));
+            border-color: #dc2626;
+            border-left: 4px solid #dc2626;
+        }
+
+        .birthday-card.tomorrow {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+            border-color: #f59e0b;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .birthday-card.this_week {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.1));
+            border-color: #2563eb;
+            border-left: 4px solid #2563eb;
+        }
+
+        /* Card Content */
+        .card-content {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .avatar-container {
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--bg-secondary);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--bg-accent), #f1f5f9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 2rem;
+            text-decoration: none;
+        }
+
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .birthday-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc2626;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            text-decoration: none;
+        }
+
+        .user-name:hover {
+            color: var(--accent-primary);
+        }
+
+        .birthday-info {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .age-info {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .date-info {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .days-until {
+            display: flex;
+            align-items: center;
+            font-size: 0.8125rem;
+            color: var(--accent-primary);
+            font-weight: 500;
+        }
+
+        .birthday-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .birthday-type.today {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }
+
+        .birthday-type.tomorrow {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .birthday-type.this_week {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-wall {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-wall:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Loading State */
+        .loading-container {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid var(--border-secondary);
+            border-top: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Infinite Scroll */
+        .load-more {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .btn-load-more {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-secondary);
+            padding: 0.875rem 2rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-load-more:hover {
+            background: var(--bg-accent);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                margin-top: 60px;
+                padding: 1rem;
+            }
+
+            .birthday-section {
+                padding: 1.5rem;
+            }
+
+            .card-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .user-info {
+                text-align: center;
+            }
+
+            .card-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Mobile Header -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+
+<!-- Sidebar с активной секцией -->
+<th:block th:replace="~{fragments/sidebar :: sidebar('birthday')}"></th:block>
+
+<div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-birthday-cake me-3"></i>
+            Дни рождения
+        </h1>
+        <p class="page-subtitle">
+            Дни рождения ваших друзей
+        </p>
+    </div>
+
+    <!-- Birthday Container -->
+    <div class="birthday-container">
+        <div class="birthday-section">
+            <!-- Birthday Cards -->
+            <div th:if="${!birthdayResponse.isEmpty}" class="birthday-list">
+                <div th:each="user : ${birthdayResponse.users}"
+                     th:class="'birthday-card ' + ${user.birthdayType}">
+
+                    <div class="card-content">
+                        <!-- Avatar -->
+                        <div class="avatar-container">
+                            <a th:href="@{/wall/{userId}(userId=${user.id})}" class="user-avatar">
+                                <img th:if="${user.imageUrl}"
+                                     th:src="${user.imageUrl}"
+                                     th:alt="${user.firstName + ' ' + user.lastName}"
+                                     class="avatar-image">
+                                <i th:unless="${user.imageUrl}" class="fas fa-user"></i>
+                            </a>
+
+                            <div th:if="${user.birthdayType == 'today'}" class="birthday-badge">
+                                🎂
+                            </div>
+                            <div th:if="${user.birthdayType == 'tomorrow'}" class="birthday-badge">
+                                🎈
+                            </div>
+                        </div>
+
+                        <!-- User Info -->
+                        <div class="user-info">
+                            <a th:href="@{/wall/{userId}(userId=${user.id})}" class="user-name">
+                                <span th:text="${user.firstName}">Имя</span>
+                                <span th:text="${user.lastName}">Фамилия</span>
+                            </a>
+
+                            <div class="birthday-info">
+                                <div class="age-info">
+                                    <span th:text="'Исполняется ' + ${user.age} + ' лет'">Исполняется 25 лет</span>
+                                </div>
+                                <div class="date-info">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    <span th:text="${#temporals.format(user.birthDate, 'd MMMM', #locale)}">1 ноября</span>
+                                </div>
+                                <div class="days-until" th:unless="${user.birthdayType == 'today'}">
+                                    <i class="fas fa-clock me-1"></i>
+                                    <span th:if="${user.birthdayType == 'tomorrow'}">через 1 день</span>
+                                    <span th:if="${user.birthdayType == 'this_week'}"
+                                          th:with="days=${T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), user.birthDate.withYear(T(java.time.LocalDate).now().getYear()) >= T(java.time.LocalDate).now() ? user.birthDate.withYear(T(java.time.LocalDate).now().getYear()) : user.birthDate.withYear(T(java.time.LocalDate).now().getYear() + 1))}"
+                                          th:text="'через ' + ${days} + ' ' + ${days == 1 ? 'день' : (days < 5 ? 'дня' : 'дней')}">через 3 дня</span>
+                                    <span th:if="${user.birthdayType == 'this_month'}"
+                                          th:with="days=${T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), user.birthDate.withYear(T(java.time.LocalDate).now().getYear()) >= T(java.time.LocalDate).now() ? user.birthDate.withYear(T(java.time.LocalDate).now().getYear()) : user.birthDate.withYear(T(java.time.LocalDate).now().getYear() + 1))}"
+                                          th:text="'через ' + ${days} + ' ' + ${days == 1 ? 'день' : (days < 5 ? 'дня' : 'дней')}">через 15 дней</span>
+                                </div>
+                            </div>
+
+                            <div th:class="'birthday-type ' + ${user.birthdayType}">
+                                <i th:if="${user.birthdayType == 'today'}" class="fas fa-birthday-cake"></i>
+                                <i th:if="${user.birthdayType == 'tomorrow'}" class="fas fa-calendar-day"></i>
+                                <i th:if="${user.birthdayType == 'this_week'}" class="fas fa-calendar-week"></i>
+
+                                <span th:if="${user.birthdayType == 'today'}">Сегодня день рождения!</span>
+                                <span th:if="${user.birthdayType == 'tomorrow'}">Завтра день рождения</span>
+                                <span th:if="${user.birthdayType == 'this_week'}">На этой неделе</span>
+                                <span th:if="${user.birthdayType == 'this_month'}">В этом месяце</span>
+                            </div>
+
+                            <div class="card-actions">
+                                <a th:href="@{/wall/{userId}(userId=${user.id})}" class="btn-wall">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Перейти на стену
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${birthdayResponse.isEmpty}" class="empty-state">
+                <i class="fas fa-birthday-cake"></i>
+                <h3>Нет дней рождения</h3>
+                <p>У ваших подписок пока нет ближайших дней рождения или они не указали дату рождения.</p>
+            </div>
+
+            <!-- Load More Button -->
+            <div th:if="${birthdayResponse.hasNext}" class="load-more">
+                <button class="btn-load-more" onclick="loadMore()">
+                    <i class="fas fa-chevron-down me-2"></i>
+                    Загрузить ещё
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<script>
+    let currentPage = 0;
+
+    function loadMore() {
+        currentPage++;
+
+        fetch(`/birthday/list?page=${currentPage}`)
+            .then(response => response.text())
+            .then(html => {
+                // Парсим ответ и добавляем новые карточки
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newCards = doc.querySelectorAll('.birthday-card');
+                const loadMoreButton = doc.querySelector('.load-more');
+
+                // Добавляем новые карточки
+                const birthdayList = document.querySelector('.birthday-list');
+                newCards.forEach(card => {
+                    birthdayList.appendChild(card);
+                });
+
+                // Обновляем кнопку "Загрузить ещё"
+                const currentLoadMore = document.querySelector('.load-more');
+                if (loadMoreButton) {
+                    currentLoadMore.replaceWith(loadMoreButton);
+                } else {
+                    currentLoadMore.remove();
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки:', error);
+            });
+    }
+</script>
+
+<script th:src="@{/js/online-status.js}"></script>
+<script th:src="@{/js/notifications.js}"></script>
+</body>
+</html>
