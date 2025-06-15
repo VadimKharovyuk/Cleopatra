@@ -51,6 +51,7 @@ public class SettingsController {
             model.addAttribute("userId", userId);
         }
 
+
         return "settings/privacy";
     }
 
