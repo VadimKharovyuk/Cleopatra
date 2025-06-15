@@ -1,6 +1,7 @@
 package com.example.cleopatra.model;
 
 import com.example.cleopatra.enums.Gender;
+import com.example.cleopatra.enums.ProfileAccessLevel;
 import com.example.cleopatra.enums.Role;
 import com.example.cleopatra.enums.WallAccessLevel;
 import jakarta.persistence.*;
@@ -41,6 +42,23 @@ public class User {
 
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "profile_access_level", nullable = false)
+    @Builder.Default
+    private ProfileAccessLevel profileAccessLevel = ProfileAccessLevel.PUBLIC;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "photos_access_level", nullable = false)
+    @Builder.Default
+    private ProfileAccessLevel photosAccessLevel = ProfileAccessLevel.PUBLIC;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "posts_access_level", nullable = false)
+    @Builder.Default
+    private ProfileAccessLevel postsAccessLevel = ProfileAccessLevel.PUBLIC;
+
+
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Gender gender ;
 
@@ -60,7 +78,6 @@ public class User {
 
     private String imgBackgroundID;
 
-
     @Column(name = "followers_count")
     private Long followersCount = 0L;
 
@@ -68,12 +85,11 @@ public class User {
     private Long followingCount = 0L;
 
 
-    @Column(name = "is_private_profile")
-    private Boolean isPrivateProfile = false;
-
     @Column(nullable = false, precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal balance = BigDecimal.ZERO;
+
+
 
     // Добавить в User entity:
     @Column(name = "is_online")
@@ -96,10 +112,9 @@ public class User {
     private Boolean receiveVisitNotifications = true;
 
 
-
-    @Column(name = "is_blocked")
+    @Column(name = "is_blocked", nullable = false)
     @Builder.Default
-    private Boolean isBlocked = false;
+    private boolean isBlocked = false;
 
     @Column(name = "blocked_at")
     private LocalDateTime blockedAt;
@@ -122,6 +137,11 @@ public class User {
     private Integer photoCount = 0;
 
 
+    @Column(name = "total_visits")
+    @Builder.Default
+    private Long totalVisits = 0L;
+
+
     @OneToMany(mappedBy = "blockedUser", fetch = FetchType.LAZY)
     @OrderBy("blockedAt DESC")
     @Builder.Default
@@ -130,7 +150,6 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<TrustedDevice> trustedDevices = new ArrayList<>();
-
 
 
     // Подписчики (кто подписался на этого пользователя)
@@ -154,12 +173,6 @@ public class User {
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Photo> photos = new ArrayList<>();
-
-    @Column(name = "total_visits")
-    @Builder.Default
-    private Long totalVisits = 0L;
-
-
 
 
     // В модель User добавьте поле:
@@ -216,7 +229,6 @@ public class User {
     @OneToMany(mappedBy = "blocked", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private Set<UserBlock> blockedByUsers = new HashSet<>();
-
 
 
     // Истории пользователя

@@ -4,6 +4,7 @@ import com.example.cleopatra.dto.user.PhotoCreateDto;
 import com.example.cleopatra.dto.user.PhotoResponseDto;
 import com.example.cleopatra.model.User;
 import com.example.cleopatra.service.PhotoService;
+import com.example.cleopatra.service.ProfileAccessService;
 import com.example.cleopatra.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,16 +27,14 @@ public class PhotoController {
 
     private final PhotoService photoService;
     private final UserService userService;
+    private final ProfileAccessService profileAccessService;
 
 
-    // Главная страница с фотографиями
-// Главная страница с фотографиями
     @GetMapping
     public String photosPage(Model model, Authentication authentication) {
         if (authentication == null) {
             return "redirect:/login";
         }
-
         Long userId = getCurrentUserId(authentication);
 
         // Проверяем, может ли пользователь загружать фото
@@ -233,6 +232,12 @@ public class PhotoController {
                 model.addAttribute("errorMessage", "Пользователь не найден");
                 return "error/404";
             }
+
+
+//            if (!profileAccessService.canViewProfileSection(viewerId, userId, "photos")) {
+//                return ResponseEntity.status(403)
+//                        .body(profileAccessService.getAccessDeniedMessage(viewerId, userId));
+//            }
 
             // Получаем фото пользователя
             List<PhotoResponseDto> photos = photoService.getPublicPhotos(userId);

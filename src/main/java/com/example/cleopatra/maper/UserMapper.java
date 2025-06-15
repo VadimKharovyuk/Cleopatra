@@ -3,6 +3,7 @@ package com.example.cleopatra.maper;
 import com.example.cleopatra.dto.user.RegisterDto;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
+import com.example.cleopatra.enums.ProfileAccessLevel;
 import com.example.cleopatra.enums.Role;
 import com.example.cleopatra.model.User;
 import org.springframework.stereotype.Component;
@@ -37,14 +38,13 @@ public class UserMapper {
         ///фон
         response.setImgBackground(user.getImgBackground());
         response.setImgBackgroundID(user.getImgBackgroundID());
-        ///подпищики
+
+        ///подписчики
         // Устанавливаем значения по умолчанию, если в User они null
         response.setFollowersCount(user.getFollowersCount() != null ? user.getFollowersCount() : 0L);
         response.setFollowingCount(user.getFollowingCount() != null ? user.getFollowingCount() : 0L);
 
-
         response.setCity(user.getCity());
-
         response.setCreatedAt(user.getCreatedAt());
 
         response.setIsOnline(user.getIsOnline());
@@ -52,11 +52,19 @@ public class UserMapper {
 
         response.setReceiveVisitNotifications(user.getReceiveVisitNotifications());
 
-        response.setIsPrivateProfile(user.getIsPrivateProfile());
+        // СТАРОЕ ПОЛЕ - для совместимости (вычисляем из нового)
+        response.setIsPrivateProfile(user.getProfileAccessLevel() == ProfileAccessLevel.PRIVATE);
+
+        // НОВЫЕ ПОЛЯ ПРИВАТНОСТИ
+        response.setProfileAccessLevel(user.getProfileAccessLevel());
+        response.setPhotosAccessLevel(user.getPhotosAccessLevel());
+        response.setPostsAccessLevel(user.getPostsAccessLevel());
+
+        // БЛОКИРОВКА
+        response.setIsBlocked(user.isBlocked());
 
         response.setBirthDate(user.getBirthDate());
         response.setShowBirthday(user.getShowBirthday());
-
 
         return response;
     }

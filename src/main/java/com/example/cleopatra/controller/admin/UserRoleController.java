@@ -222,11 +222,16 @@ public class UserRoleController {
                 .lastName(user.getLastName())
                 .role(user.getRole())
                 .imageUrl(user.getImageUrl())
-                .isPrivateProfile(user.getIsPrivateProfile())
-                .isBlocked(user.getIsBlocked())
+                .isBlocked(user.isBlocked())
                 .followersCount(user.getFollowersCount())
                 .followingCount(user.getFollowingCount())
                 .createdAt(user.getCreatedAt())
+
+
+                .profileAccessLevel(user.getProfileAccessLevel())
+                .photosAccessLevel(user.getPhotosAccessLevel())
+                .postsAccessLevel(user.getPostsAccessLevel())
+
                 .build();
     }
 }

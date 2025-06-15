@@ -640,10 +640,6 @@
         <div class="stat-value" th:text="${#temporals.format(news.publishedAt, 'dd.MM')}"></div>
         <div class="stat-label">Дата публикации</div>
       </div>
-      <div class="stat-item">
-        <div class="stat-value" th:text="${news.photoUrl != null ? 'ДА' : 'НЕТ'}"></div>
-        <div class="stat-label">Есть изображение</div>
-      </div>
     </div>
   </section>
 

@@ -30,7 +30,7 @@ public class UserBlockingService {
      */
     public boolean isUserBlocked(String email) {
         User user = userRepository.findByEmail(email).orElse(null);
-        return user != null && Boolean.TRUE.equals(user.getIsBlocked());
+        return user != null && user.isBlocked(); // ИСПРАВЛЕНО
     }
 
     /**
@@ -38,7 +38,7 @@ public class UserBlockingService {
      */
     public boolean isUserBlocked(Long userId) {
         User user = userRepository.findById(userId).orElse(null);
-        return user != null && Boolean.TRUE.equals(user.getIsBlocked());
+        return user != null && user.isBlocked(); // ИСПРАВЛЕНО
     }
 
     /**
@@ -53,7 +53,7 @@ public class UserBlockingService {
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found with ID: " + adminId));
 
         // Проверяем, не заблокирован ли уже пользователь
-        if (Boolean.TRUE.equals(user.getIsBlocked())) {
+        if (user.isBlocked()) { // ИСПРАВЛЕНО
             throw new IllegalStateException("User is already blocked");
         }
 
@@ -65,7 +65,7 @@ public class UserBlockingService {
         LocalDateTime now = LocalDateTime.now();
 
         // Обновляем пользователя
-        user.setIsBlocked(true);
+        user.setBlocked(true); // ИСПРАВЛЕНО
         user.setBlockedAt(now);
         user.setBlockReason(reason);
         user.setBlockedByAdminId(adminId);
@@ -99,12 +99,12 @@ public class UserBlockingService {
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found with ID: " + adminId));
 
         // Проверяем, заблокирован ли пользователь
-        if (!Boolean.TRUE.equals(user.getIsBlocked())) {
+        if (!user.isBlocked()) { // ИСПРАВЛЕНО
             throw new IllegalStateException("User is not blocked");
         }
 
         // Обновляем пользователя
-        user.setIsBlocked(false);
+        user.setBlocked(false); // ИСПРАВЛЕНО
         user.setBlockedAt(null);
         user.setBlockReason(null);
         user.setBlockedByAdminId(null);
@@ -187,6 +187,7 @@ public class UserBlockingService {
 
         return convertToUserResponse(user);
     }
+
     // Метод для конвертации User в UserResponse
     private UserResponse convertToUserResponse(User user) {
         return UserResponse.builder()
@@ -195,8 +196,7 @@ public class UserBlockingService {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .imageUrl(user.getImageUrl())
-                .isPrivateProfile(user.getIsPrivateProfile())
-                .isBlocked(user.getIsBlocked())
+                .isBlocked(user.isBlocked()) // ИСПРАВЛЕНО
                 .build();
     }
 

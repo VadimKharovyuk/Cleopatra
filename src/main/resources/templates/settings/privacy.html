@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Настройки приватности</title>
+
+  <!-- External CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-accent: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --border-primary: #334155;
+      --border-secondary: #475569;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-md);
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 2rem;
+      max-width: 200px;
+    }
+
+    .back-button:hover {
+      background: rgba(99, 102, 241, 0.15);
+      transform: translateX(-2px);
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+
+    .privacy-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      padding: 2rem 2.5rem;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .card-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1rem;
+      margin: 0.5rem 0 0 0;
+      font-weight: 400;
+    }
+
+    .card-body {
+      padding: 2.5rem;
+    }
+
+    .setting-section {
+      margin-bottom: 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+
+    .setting-section:last-child {
+      margin-bottom: 0;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .setting-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .setting-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .setting-info h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .setting-description {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .setting-control {
+      background: var(--bg-accent);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-label {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+
+    .privacy-select {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      min-width: 200px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .privacy-select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .privacy-select option {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      padding: 0.5rem;
+    }
+
+    .current-setting {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-primary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-primary);
+    }
+
+    .setting-status {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .setting-badge {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-public {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success-color);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-subscribers {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning-color);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-mutual {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent-primary);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .badge-private {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger-color);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .level-descriptions {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-primary);
+    }
+
+    .level-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: var(--bg-primary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-primary);
+    }
+
+    .level-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .level-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .level-content h4 {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin: 0 0 0.25rem 0;
+    }
+
+    .level-content p {
+      font-size: 0.825rem;
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+    }
+
+    .toast {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      min-width: 300px;
+      margin-bottom: 1rem;
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success-color);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--danger-color);
+    }
+
+    .toast-body {
+      color: var(--text-primary);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .card-header {
+        padding: 1.5rem;
+      }
+
+      .card-body {
+        padding: 1.5rem;
+      }
+
+      .control-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+      }
+
+      .privacy-select {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Back Button -->
+<a href="/settings" class="back-button">
+  <i class="fas fa-arrow-left"></i>
+  Назад к настройкам
+</a>
+
+<!-- Toast Container -->
+<div class="toast-container"></div>
+
+<!-- Privacy Settings Card -->
+<div class="privacy-card">
+  <div class="card-header">
+    <h2 class="card-title">
+      <i class="fas fa-shield-alt"></i>
+      Настройки приватности
+    </h2>
+    <p class="card-subtitle">
+      Управляйте доступом к различным разделам вашего профиля
+    </p>
+  </div>
+
+  <div class="card-body">
+    <!-- Profile Privacy Section -->
+    <div class="setting-section">
+      <div class="setting-header">
+        <div class="setting-icon">
+          <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="setting-info">
+          <h3>Доступ к профилю</h3>
+          <p class="setting-description">
+            Определяет, кто может просматривать ваш профиль, основную информацию и активность
+          </p>
+        </div>
+      </div>
+
+      <div class="setting-control">
+        <div class="control-group">
+          <label class="control-label">Уровень доступа к профилю:</label>
+          <select id="profilePrivacy" class="privacy-select">
+            <option th:each="level : ${accessLevels}"
+                    th:value="${level.name()}"
+                    th:text="${level.displayName}"
+                    th:selected="${level == profileAccessLevel}">
+            </option>
+          </select>
+        </div>
+
+        <div class="current-setting">
+          <span class="setting-status">Текущий статус:</span>
+          <span class="setting-badge"
+                th:classappend="${profileAccessLevel?.name() == 'PUBLIC' ? 'badge-public' : (profileAccessLevel?.name() == 'SUBSCRIBERS_ONLY' ? 'badge-subscribers' : (profileAccessLevel?.name() == 'MUTUAL_SUBSCRIPTIONS' ? 'badge-mutual' : 'badge-private'))}"
+                th:text="${profileAccessLevel?.displayName ?: 'Публичный'}">
+                            Публичный
+                        </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photos Privacy Section -->
+    <div class="setting-section">
+      <div class="setting-header">
+        <div class="setting-icon">
+          <i class="fas fa-images"></i>
+        </div>
+        <div class="setting-info">
+          <h3>Доступ к фотографиям</h3>
+          <p class="setting-description">
+            Управляет доступом к вашему фотоальбому и загруженным изображениям
+          </p>
+        </div>
+      </div>
+
+      <div class="setting-control">
+        <div class="control-group">
+          <label class="control-label">Уровень доступа к фото:</label>
+          <select id="photosPrivacy" class="privacy-select">
+            <option th:each="level : ${accessLevels}"
+                    th:value="${level.name()}"
+                    th:text="${level.displayName}"
+                    th:selected="${level == photosAccessLevel}">
+            </option>
+          </select>
+        </div>
+
+        <div class="current-setting">
+          <span class="setting-status">Текущий статус:</span>
+          <span class="setting-badge"
+                th:classappend="${photosAccessLevel?.name() == 'PUBLIC' ? 'badge-public' : (photosAccessLevel?.name() == 'SUBSCRIBERS_ONLY' ? 'badge-subscribers' : (photosAccessLevel?.name() == 'MUTUAL_SUBSCRIPTIONS' ? 'badge-mutual' : 'badge-private'))}"
+                th:text="${photosAccessLevel?.displayName ?: 'Публичный'}">
+                            Публичный
+                        </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Posts Privacy Section -->
+    <div class="setting-section">
+      <div class="setting-header">
+        <div class="setting-icon">
+          <i class="fas fa-newspaper"></i>
+        </div>
+        <div class="setting-info">
+          <h3>Доступ к постам</h3>
+          <p class="setting-description">
+            Определяет, кто может видеть ваши посты, комментарии и публикации на стене
+          </p>
+        </div>
+      </div>
+
+      <div class="setting-control">
+        <div class="control-group">
+          <label class="control-label">Уровень доступа к постам:</label>
+          <select id="postsPrivacy" class="privacy-select">
+            <option th:each="level : ${accessLevels}"
+                    th:value="${level.name()}"
+                    th:text="${level.displayName}"
+                    th:selected="${level == postsAccessLevel}">
+            </option>
+          </select>
+        </div>
+
+        <div class="current-setting">
+          <span class="setting-status">Текущий статус:</span>
+          <span class="setting-badge"
+                th:classappend="${postsAccessLevel?.name() == 'PUBLIC' ? 'badge-public' : (postsAccessLevel?.name() == 'SUBSCRIBERS_ONLY' ? 'badge-subscribers' : (postsAccessLevel?.name() == 'MUTUAL_SUBSCRIPTIONS' ? 'badge-mutual' : 'badge-private'))}"
+                th:text="${postsAccessLevel?.displayName ?: 'Публичный'}">
+                            Публичный
+                        </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Descriptions Section -->
+    <div class="level-descriptions">
+      <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-family: 'Playfair Display', serif;">
+        <i class="fas fa-info-circle" style="margin-right: 0.5rem; color: var(--accent-primary);"></i>
+        Описание уровней доступа
+      </h4>
+
+      <div class="level-item">
+        <div class="level-icon badge-public">
+          <i class="fas fa-globe"></i>
+        </div>
+        <div class="level-content">
+          <h4>Публичный</h4>
+          <p>Контент доступен всем пользователям, включая неавторизованных посетителей</p>
+        </div>
+      </div>
+
+      <div class="level-item">
+        <div class="level-icon badge-subscribers">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="level-content">
+          <h4>Только подписчики</h4>
+          <p>Контент видят только пользователи, которые подписаны на вас</p>
+        </div>
+      </div>
+
+      <div class="level-item">
+        <div class="level-icon badge-mutual">
+          <i class="fas fa-handshake"></i>
+        </div>
+        <div class="level-content">
+          <h4>Взаимные подписки</h4>
+          <p>Контент доступен только при взаимной подписке (вы подписаны друг на друга)</p>
+        </div>
+      </div>
+
+      <div class="level-item">
+        <div class="level-icon badge-private">
+          <i class="fas fa-lock"></i>
+        </div>
+        <div class="level-content">
+          <h4>Приватный</h4>
+          <p>Контент полностью скрыт от всех пользователей, кроме вас</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- External JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+    console.log('Privacy page loaded'); // Для отладки
+
+    // Обработка изменения приватности профиля
+    $('#profilePrivacy').change(function() {
+      console.log('Profile privacy changed to:', $(this).val());
+      updatePrivacy('profile', $(this).val());
+    });
+
+    // Обработка изменения приватности фото
+    $('#photosPrivacy').change(function() {
+      console.log('Photos privacy changed to:', $(this).val());
+      updatePrivacy('photos', $(this).val());
+    });
+
+    // Обработка изменения приватности постов
+    $('#postsPrivacy').change(function() {
+      console.log('Posts privacy changed to:', $(this).val());
+      updatePrivacy('posts', $(this).val());
+    });
+  });
+
+  function updatePrivacy(section, accessLevel) {
+    console.log('Updating privacy for section:', section, 'to level:', accessLevel);
+
+    // Получаем CSRF токен
+    const token = $("meta[name='_csrf']").attr("content");
+    const header = $("meta[name='_csrf_header']").attr("content");
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    };
+
+    // Добавляем CSRF токен если есть
+    if (token && header) {
+      headers[header] = token;
+    }
+
+    fetch(`/settings/privacy/${section}`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({accessLevel: accessLevel})
+    })
+            .then(response => {
+              console.log('Response status:', response.status);
+              return response.json();
+            })
+            .then(data => {
+              console.log('Response data:', data);
+              if (data.success) {
+                showToast('success', data.message);
+                updateBadge(section, accessLevel, data.displayName);
+              } else {
+                showToast('error', data.message || 'Не удалось обновить настройки');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showToast('error', 'Произошла ошибка при обновлении настроек');
+            });
+  }
+
+  function updateBadge(section, accessLevel, displayName) {
+    console.log('Updating badge for section:', section);
+
+    const sectionMap = {
+      'profile': '#profilePrivacy',
+      'photos': '#photosPrivacy',
+      'posts': '#postsPrivacy'
+    };
+
+    const select = $(sectionMap[section]);
+    const badge = select.closest('.setting-control').find('.setting-badge');
+
+    // Удаляем старые классы
+    badge.removeClass('badge-public badge-subscribers badge-mutual badge-private');
+
+    // Добавляем новый класс
+    const classMap = {
+      'PUBLIC': 'badge-public',
+      'SUBSCRIBERS_ONLY': 'badge-subscribers',
+      'MUTUAL_SUBSCRIPTIONS': 'badge-mutual',
+      'PRIVATE': 'badge-private'
+    };
+
+    badge.addClass(classMap[accessLevel]);
+    badge.text(displayName);
+  }
+
+  function showToast(type, message) {
+    const toast = $(`
+                <div class="toast ${type}" role="alert">
+                    <div class="toast-body">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                        ${message}
+                    </div>
+                </div>
+            `);
+
+    $('.toast-container').append(toast);
+
+    // Показываем toast
+    toast.fadeIn();
+
+    // Автоматически скрываем через 4 секунды
+    setTimeout(() => {
+      toast.fadeOut(() => {
+        toast.remove();
+      });
+    }, 4000);
+  }
+</script>
+</body>
+</html>

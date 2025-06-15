@@ -5,6 +5,7 @@ import com.example.cleopatra.dto.user.ChangePasswordDto;
 import com.example.cleopatra.dto.user.RegisterDto;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
+import com.example.cleopatra.enums.ProfileAccessLevel;
 import com.example.cleopatra.model.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
@@ -73,22 +74,6 @@ public interface UserService {
     User findById(Long blockerId);
 
 
-    /**
-     * Проверяет, может ли currentUser видеть профиль targetUser
-     * @param targetUserId ID пользователя, чей профиль хотят посмотреть
-     * @param currentUserId ID текущего пользователя (может быть null если не авторизован)
-     * @return true если профиль доступен для просмотра
-     */
-    boolean canViewProfile(Long targetUserId, Long currentUserId);
-
-    /**
-     * Обновляет настройки приватности профиля
-     * @param userId ID пользователя
-     * @param isPrivate true для приватного профиля
-     */
-    void updateProfilePrivacy(Long userId, Boolean isPrivate);
-
-
     void changePassword(Long userId, ChangePasswordDto changePasswordDto);
 
     void resetPasswordByEmail(String email, String newPassword);
@@ -115,4 +100,16 @@ public interface UserService {
     long getActiveUsersCountByDate(LocalDate date);
     long getActiveUsersCountFromDate(LocalDate fromDate);
     long getOnlineUsersCount();
+
+
+
+
+
+    // Для настроек в личном кабинете
+     boolean updateProfilePrivacy(Long userId, ProfileAccessLevel accessLevel);
+     boolean updatePhotosPrivacy(Long userId, ProfileAccessLevel accessLevel) ;
+     boolean updatePostsPrivacy(Long userId, ProfileAccessLevel accessLevel);
+
+
+
 }

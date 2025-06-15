@@ -9,6 +9,7 @@ import com.example.cleopatra.dto.user.ChangePasswordDto;
 import com.example.cleopatra.dto.user.RegisterDto;
 import com.example.cleopatra.dto.user.UpdateProfileDto;
 import com.example.cleopatra.dto.user.UserResponse;
+import com.example.cleopatra.enums.ProfileAccessLevel;
 import com.example.cleopatra.maper.UserMapper;
 import com.example.cleopatra.model.SystemBlock;
 import com.example.cleopatra.model.User;
@@ -51,6 +52,7 @@ public class UserServiceImpl implements UserService {
     private final UserOnlineStatusRepository onlineStatusRepository;
     private final SubscriptionService subscriptionService;
     private final SystemBlockRepository systemBlockRepository;
+    private final ProfileAccessService profileAccessService;
 
 
     @Override
@@ -376,42 +378,7 @@ public User getCurrentUserEntity(Authentication authentication) {
         return  userRepository.findById(blockerId).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    @Override
-    public boolean canViewProfile(Long targetUserId, Long currentUserId) {
-        // Получаем целевого пользователя
-        User targetUser = findById(targetUserId);
-        if (targetUser == null) {
-            return false;
-        }
 
-        // Если профиль публичный - доступен всем
-        if (!Boolean.TRUE.equals(targetUser.getIsPrivateProfile())) {
-            return true;
-        }
-
-        // Если пользователь не авторизован - нет доступа к приватному профилю
-        if (currentUserId == null) {
-            return false;
-        }
-
-        // Владелец всегда может видеть свой профиль
-        if (targetUserId.equals(currentUserId)) {
-            return true;
-        }
-
-        // Проверяем, подписан ли текущий пользователь на целевого
-        // Если да - то может видеть приватный профиль
-        return subscriptionService.isSubscribed(currentUserId, targetUserId);
-    }
-
-    @Override
-    public void updateProfilePrivacy(Long userId, Boolean isPrivate) {
-        User user = findById(userId);
-        if (user != null) {
-            user.setIsPrivateProfile(isPrivate);
-            userRepository.save(user);
-        }
-    }
 
     @Override
     public void changePassword(Long userId, ChangePasswordDto changePasswordDto) {
@@ -661,6 +628,22 @@ public User getCurrentUserEntity(Authentication authentication) {
             return user.getFirstName().substring(0, 1).toUpperCase();
         }
         return "?";
+    }
+
+
+
+
+    // Для настроек в личном кабинете
+    public boolean updateProfilePrivacy(Long userId, ProfileAccessLevel accessLevel) {
+        return profileAccessService.updateProfileAccessLevel(userId, userId, accessLevel);
+    }
+
+    public boolean updatePhotosPrivacy(Long userId, ProfileAccessLevel accessLevel) {
+        return profileAccessService.updatePhotosAccessLevel(userId, userId, accessLevel);
+    }
+
+    public boolean updatePostsPrivacy(Long userId, ProfileAccessLevel accessLevel) {
+        return profileAccessService.updatePostsAccessLevel(userId, userId, accessLevel);
     }
 }
 

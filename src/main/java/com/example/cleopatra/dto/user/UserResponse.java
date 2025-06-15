@@ -1,6 +1,7 @@
 package com.example.cleopatra.dto.user;
 
 import com.example.cleopatra.enums.Gender;
+import com.example.cleopatra.enums.ProfileAccessLevel;
 import com.example.cleopatra.enums.Role;
 import com.example.cleopatra.model.User;
 import jakarta.persistence.Column;
@@ -54,5 +55,10 @@ public class UserResponse {
     private LocalDate birthDate;
     private Boolean showBirthday;
 
+
+
+    private ProfileAccessLevel profileAccessLevel;
+    private ProfileAccessLevel photosAccessLevel;
+    private ProfileAccessLevel postsAccessLevel;
 
 }

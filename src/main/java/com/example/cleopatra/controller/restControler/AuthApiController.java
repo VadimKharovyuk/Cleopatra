@@ -60,7 +60,7 @@ public class AuthApiController {
             // ДОБАВЛЯЕМ: Проверяем, не заблокирован ли пользователь ДО аутентификации
             try {
                 Optional<User> blockedUserOpt = userRepository.findByEmail(request.getEmail());
-                if (blockedUserOpt.isPresent() && Boolean.TRUE.equals(blockedUserOpt.get().getIsBlocked())) {
+                if (blockedUserOpt.isPresent() && Boolean.TRUE.equals(blockedUserOpt.get().isBlocked())) {
                     User blockedUser = blockedUserOpt.get();
                     log.warn("🚫 User {} is blocked, sending blocked response", request.getEmail());
 
@@ -105,7 +105,7 @@ public class AuthApiController {
                 // Дополнительная проверка - может быть пользователь заблокирован
                 try {
                     Optional<User> userCheckOpt = userRepository.findByEmail(request.getEmail());
-                    if (userCheckOpt.isPresent() && Boolean.TRUE.equals(userCheckOpt.get().getIsBlocked())) {
+                    if (userCheckOpt.isPresent() && Boolean.TRUE.equals(userCheckOpt.get().isBlocked())) {
                         log.warn("🚫 User {} is blocked (detected in step 3)", request.getEmail());
 
                         Map<String, Object> blockedResponse = new HashMap<>();
@@ -232,7 +232,6 @@ public class AuthApiController {
         userInfo.put("lastName", user.getLastName());
         userInfo.put("role", user.getRole().name());
         userInfo.put("imageUrl", user.getImageUrl());
-        userInfo.put("isPrivateProfile", user.getIsPrivateProfile());
         userInfo.put("followersCount", user.getFollowersCount());
         userInfo.put("followingCount", user.getFollowingCount());
 
