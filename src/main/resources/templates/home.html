@@ -59,6 +59,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+
   <style>
     :root {
       --primary-gold: #D4AF37;
@@ -883,6 +885,7 @@
   </style>
 </head>
 <body>
+
 <!-- Navigation -->
 <nav class="navbar">
   <div class="nav-container">
@@ -890,9 +893,9 @@
 
     <!-- Desktop Menu -->
     <ul class="nav-menu">
-      <li><a href="#about" class="nav-link">О нас</a></li>
-      <li><a href="#" class="nav-link">Шоу</a></li>
-      <li><a href="#" class="nav-link">Галерея</a></li>
+<!--      <li><a href="#about" class="nav-link">О нас</a></li>-->
+      <li><a href="/show" class="nav-link">Шоу</a></li>
+      <li><a href="/gallery" class="nav-link">Галерея</a></li>
       <li><a href="/news" class="nav-link">Новости</a></li>
 <!--      <li><a href="/login" class="nav-link">Вход</a></li>-->
       <li th:if="${currentUserId == null}">
@@ -925,10 +928,10 @@
         <a href="#about" class="mobile-nav-link">О нас</a>
       </li>
       <li class="mobile-nav-item">
-        <a href="#" class="mobile-nav-link">Шоу</a>
+        <a href="/show" class="mobile-nav-link">Шоу</a>
       </li>
       <li class="mobile-nav-item">
-        <a href="#" class="mobile-nav-link">Галерея</a>
+        <a href="/gallery" class="mobile-nav-link">Галерея</a>
       </li>
       <li class="mobile-nav-item">
         <a href="/news" class="mobile-nav-link">Новости</a>
@@ -975,7 +978,7 @@
     </p>
     <div class="hero-buttons">
       <a href="/register" class="btn btn-primary">Стать частью команды</a>
-      <a href="#about" class="btn btn-secondary">Узнать больше</a>
+<!--      <a href="#about" class="btn btn-secondary">Узнать больше</a>-->
     </div>
   </div>
 

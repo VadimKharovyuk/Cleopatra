@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Шоу - Клеопатра</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-gold: #D4AF37;
+      --hover-gold: #B8941F;
+      --deep-black: #000000;
+      --dark-surface: #1C1C1E;
+      --soft-gray: #2C2C2E;
+      --text-primary: #FFFFFF;
+      --text-secondary: #A1A1A6;
+      --accent-shadow: rgba(212, 175, 55, 0.25);
+      --dark-overlay: rgba(0, 0, 0, 0.6);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background: var(--deep-black);
+      overflow-x: hidden;
+    }
+
+    .dev-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(90deg, var(--primary-gold), var(--hover-gold));
+      color: var(--deep-black);
+      text-align: center;
+      padding: 8px 0;
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 1000;
+      box-shadow: 0 2px 10px var(--accent-shadow);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header {
+      background: var(--dark-surface);
+      padding: 60px 0 20px;
+      border-bottom: 1px solid var(--soft-gray);
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary-gold);
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 30px;
+    }
+
+    .nav-link {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--primary-gold);
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: 700;
+      text-align: center;
+      margin: 40px 0;
+      background: linear-gradient(135deg, var(--primary-gold), var(--hover-gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .dev-section {
+      background: var(--dark-surface);
+      margin: 40px 0;
+      padding: 40px;
+      border-radius: 12px;
+      border: 2px dashed var(--primary-gold);
+      position: relative;
+    }
+
+    .dev-section::before {
+      content: "🚧 В РАЗРАБОТКЕ 🚧";
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary-gold);
+      color: var(--deep-black);
+      padding: 5px 20px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .dev-content {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .dev-content h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      color: var(--primary-gold);
+      margin-bottom: 15px;
+    }
+
+    .dev-content p {
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .dev-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin: 40px 0;
+    }
+
+    .show-card {
+      background: var(--soft-gray);
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .show-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px var(--accent-shadow);
+    }
+
+    .show-card h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: var(--primary-gold);
+      margin-bottom: 15px;
+    }
+
+    .placeholder-img {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, var(--dark-surface), var(--soft-gray));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      border: 1px solid var(--primary-gold);
+    }
+
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary-gold), var(--hover-gold));
+      color: var(--deep-black);
+      padding: 12px 30px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px var(--accent-shadow);
+    }
+
+    footer {
+      background: var(--dark-surface);
+      padding: 40px 0;
+      text-align: center;
+      margin-top: 80px;
+      border-top: 1px solid var(--soft-gray);
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+
+      .page-title {
+        font-size: 36px;
+      }
+
+      .dev-section {
+        margin: 20px 0;
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="dev-banner">
+  🔧 РЕЖИМ РАЗРАБОТКИ - Страница находится в стадии создания
+</div>
+
+<header>
+  <div class="container">
+    <nav>
+      <div class="logo">Клеопатра</div>
+      <ul class="nav-links">
+        <li><a href="/" class="nav-link">Главная</a></li>
+        <li><a href="/show" class="nav-link active">Шоу</a></li>
+        <li><a href="/gallery" class="nav-link">Галерея</a></li>
+        <li><a href="#" class="nav-link">Контакты</a></li>
+      </ul>
+    </nav>
+
+    <h1 class="page-title">Наши Шоу</h1>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="dev-section">
+      <div class="dev-content">
+        <h3>Премиальные Шоу-Программы</h3>
+        <p>Здесь будет представлена информация о наших эксклюзивных шоу-программах</p>
+        <p>Описания выступлений, расписание, артисты и многое другое</p>
+      </div>
+    </div>
+
+    <div class="dev-grid">
+      <div class="show-card">
+        <div class="placeholder-img">
+          <span style="color: var(--primary-gold); font-size: 18px;">🎭 Основное шоу</span>
+        </div>
+        <h4>Вечернее шоу "Клеопатра"</h4>
+        <p style="color: var(--text-secondary);">Главная программа с участием лучших артистов. Роскошные костюмы, профессиональная хореография и незабываемая атмосфера.</p>
+        <a href="#" class="btn">Подробнее</a>
+      </div>
+
+
+      <div class="show-card">
+        <div class="placeholder-img">
+          <span style="color: var(--primary-gold); font-size: 18px;">🌟 Тематические</span>
+        </div>
+        <h4>Тематические программы</h4>
+        <p style="color: var(--text-secondary);">Специальные шоу к праздникам и событиям. Уникальные постановки и сезонные программы.</p>
+        <a href="#" class="btn">Расписание</a>
+      </div>
+    </div>
+
+    <div class="dev-section">
+      <div class="dev-content">
+        <h3>Что будет на этой странице:</h3>
+        <p>📋 Подробное описание каждого шоу</p>
+        <p>🎵 Музыкальная программа и плейлисты</p>
+        <p>👥 Информация об артистах</p>
+        <p>📅 Расписание выступлений</p>
+        <p>🎫 Система бронирования</p>
+        <p>💰 Стоимость программ</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p style="color: var(--text-secondary);">&copy; 2025 Клеопатра. Премиальное шоу.</p>
+  </div>
+</footer>
+</body>
+</html>
