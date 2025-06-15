@@ -78,22 +78,10 @@ public class User {
 
     private String imgBackgroundID;
 
-    @Column(name = "followers_count")
-    private Long followersCount = 0L;
-
-    @Column(name = "following_count")
-    private Long followingCount = 0L;
-
-
     @Column(nullable = false, precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal balance = BigDecimal.ZERO;
 
-
-
-    // Добавить в User entity:
-    @Column(name = "is_online")
-    private Boolean isOnline = false;
 
     @Column(name = "show_online_status")
     private Boolean showOnlineStatus = true;
@@ -103,6 +91,8 @@ public class User {
 
     @Column(name = "last_seen")
     private LocalDateTime lastSeen;
+
+
 
 
     @Column(name = "city")
@@ -133,8 +123,28 @@ public class User {
     private LocalDate birthDate;
 
 
+
+    @Column(name = "followers_count", nullable = false)
+    @Builder.Default  // ← Добавить эту аннотацию
+    private Long followersCount = 0L;
+
+    @Column(name = "following_count", nullable = false)
+    @Builder.Default  // ← Добавить эту аннотацию
+    private Long followingCount = 0L;
+
+    @Column(name = "is_online", nullable = false)
+    @Builder.Default  // ← Добавить эту аннотацию
+    private Boolean isOnline = false;
+
     @Column(name = "photo_count", nullable = false)
+    @Builder.Default  // ← Добавить эту аннотацию
     private Integer photoCount = 0;
+
+    @Column(name = "welcome_bonus_claimed", nullable = false)
+    @Builder.Default  // ← Добавить эту аннотацию
+    private Boolean welcomeBonusClaimed = false;
+
+
 
 
     @Column(name = "total_visits")
@@ -174,10 +184,6 @@ public class User {
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Photo> photos = new ArrayList<>();
 
-
-    // В модель User добавьте поле:
-    @Column(name = "welcome_bonus_claimed", nullable = false)
-    private Boolean welcomeBonusClaimed = false;
 
     // Посты пользователя
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -257,18 +263,51 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;
+
+        // Установите значения по умолчанию для полей, которые могут быть null
+        if (this.followersCount == null) {
+            this.followersCount = 0L;
+        }
+        if (this.followingCount == null) {
+            this.followingCount = 0L;
+        }
+        if (this.photoCount == null) {
+            this.photoCount = 0;
+        }
+        if (this.totalVisits == null) {
+            this.totalVisits = 0L;
+        }
+        if (this.isOnline == null) {
+            this.isOnline = false;
+        }
+        if (this.showOnlineStatus == null) {
+            this.showOnlineStatus = true;
+        }
+        if (this.receiveVisitNotifications == null) {
+            this.receiveVisitNotifications = true;
+        }
+        if (this.showBirthday == null) {
+            this.showBirthday = true;
+        }
+        if (this.welcomeBonusClaimed == null) {
+            this.welcomeBonusClaimed = false;
+        }
+        if (this.balance == null) {
+            this.balance = BigDecimal.ZERO;
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+
 
 
 
