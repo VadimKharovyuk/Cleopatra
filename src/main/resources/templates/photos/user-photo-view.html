@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Фото ' + ${user.firstName} + ' ' + ${user.lastName}">Фото пользователя</title>
+
+    <!-- External CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <!-- Стили sidebar -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+    <style>
+        /* Основные стили страницы */
+        body {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 400;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 1rem;
+        }
+
+        .back-button:hover {
+            background: rgba(99, 102, 241, 0.15);
+            transform: translateX(-2px);
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        /* User Info */
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--border-secondary);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--bg-accent), #f1f5f9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-name {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.125rem;
+        }
+
+        .user-name:hover {
+            color: var(--accent-secondary);
+            text-decoration: none;
+        }
+
+        .ownership-badge {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        /* Photo Container */
+        .photo-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
+            overflow: hidden;
+        }
+
+        /* Photo Display Section */
+        .photo-display-section {
+            padding: 2.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .photo-image-container {
+            background: var(--bg-accent);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .photo-image {
+            max-width: 100%;
+            max-height: 70vh;
+            width: auto;
+            height: auto;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            cursor: zoom-in;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .photo-image:hover {
+            transform: scale(1.02);
+        }
+
+        .image-error {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(239, 68, 68, 0.05);
+            border: 2px dashed rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius-md);
+            color: #dc2626;
+        }
+
+        .image-error i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+
+        /* Photo Info Section */
+        .photo-info-section {
+            padding: 2.5rem;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .photo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .photo-title-group {
+            flex: 1;
+        }
+
+        .photo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .photo-id {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .photo-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .meta-item {
+            background: var(--bg-accent);
+            padding: 1.25rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .meta-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .meta-value {
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+
+        .meta-value.author {
+            color: var(--accent-primary);
+            font-weight: 500;
+        }
+
+        /* Description Section */
+        .description-section {
+            background: var(--bg-accent);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .description-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .description-content {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .description-content.empty {
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        /* Actions Section */
+        .actions-section {
+            padding: 2.5rem;
+        }
+
+        .actions-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            border: none;
+            background: none;
+        }
+
+        .btn-view-original {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .btn-view-original:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-copy-link {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .btn-copy-link:hover {
+            background: var(--bg-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-gallery {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-gallery:hover {
+            background: rgba(99, 102, 241, 0.15);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Technical Info */
+        .technical-section {
+            background: var(--bg-accent);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-secondary);
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+
+        .technical-header {
+            background: var(--bg-primary);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-secondary);
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .technical-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .technical-table td {
+            padding: 0.875rem 1.5rem;
+            border-bottom: 1px solid var(--border-secondary);
+            vertical-align: top;
+        }
+
+        .technical-table td:first-child {
+            font-weight: 500;
+            color: var(--text-secondary);
+            width: 30%;
+            min-width: 120px;
+        }
+
+        .technical-table td:last-child {
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            word-break: break-all;
+        }
+
+        .technical-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Messages */
+        .message {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Modal for Fullscreen */
+        .photo-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            cursor: zoom-out;
+        }
+
+        .photo-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .photo-modal img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: var(--radius-md);
+        }
+
+        /* Access Control */
+        .access-info {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--accent-primary);
+        }
+
+        .access-info.owner {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.2);
+            color: #16a34a;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                margin-top: 60px;
+                padding: 1rem;
+            }
+
+            .photo-display-section,
+            .photo-info-section,
+            .actions-section {
+                padding: 1.5rem;
+            }
+
+            .photo-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .photo-meta-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .technical-table td:first-child {
+                width: auto;
+                min-width: auto;
+            }
+
+            .user-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Mobile Header -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+
+<!-- Sidebar с активной секцией -->
+<th:block th:replace="~{fragments/sidebar :: sidebar('photos')}"></th:block>
+
+<div class="main-content">
+    <!-- Back Button -->
+    <a th:href="@{/photos/user/{userId}(userId=${user.id})}" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        Назад к галерее
+    </a>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="user-header">
+            <div class="user-avatar">
+                <img th:if="${user.imageUrl}"
+                     th:src="${user.imageUrl}"
+                     th:alt="${user.firstName} + ' ' + ${user.lastName}">
+                <i th:unless="${user.imageUrl}" class="fas fa-user"></i>
+            </div>
+            <div>
+                <a th:href="@{/wall/{userId}(userId=${user.id})}" class="user-name">
+                    <span th:text="${user.firstName}">Имя</span>
+                    <span th:text="${user.lastName}">Фамилия</span>
+                </a>
+                <span th:if="${isOwner}" class="ownership-badge">
+                    <i class="fas fa-crown"></i>
+                    Ваше фото
+                </span>
+            </div>
+        </div>
+
+        <h1 class="page-title">
+            <i class="fas fa-image me-3"></i>
+            Просмотр фотографии
+        </h1>
+        <p class="page-subtitle">
+            <i class="fas fa-info-circle"></i>
+            Детальная информация о фотографии
+        </p>
+    </div>
+
+    <!-- Access Info -->
+    <div th:if="${isOwner}" class="access-info owner">
+        <i class="fas fa-check-circle"></i>
+        <span>Это ваша фотография. У вас есть полные права на управление.</span>
+    </div>
+
+    <div th:unless="${isOwner}" class="access-info">
+        <i class="fas fa-eye"></i>
+        <span>Вы просматриваете фотографию другого пользователя.</span>
+    </div>
+
+    <!-- Error Message -->
+    <div th:if="${errorMessage}" class="message error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Photo Container -->
+    <div th:if="${photo}" class="photo-container">
+        <!-- Photo Display -->
+        <div class="photo-display-section">
+            <div class="photo-image-container">
+                <img th:src="${photo.picUrl}"
+                     th:alt="${photo.description ?: 'Фотография'}"
+                     class="photo-image"
+                     id="mainPhoto"
+                     onclick="openFullscreen()">
+            </div>
+        </div>
+
+        <!-- Photo Info -->
+        <div class="photo-info-section">
+            <!-- Meta Information -->
+            <div class="photo-meta-grid">
+                <div class="meta-item">
+                    <div class="meta-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        Дата загрузки
+                    </div>
+                    <div class="meta-value"
+                         th:text="${#temporals.format(photo.uploadDate, 'dd MMMM yyyy, HH:mm', #locale)}">
+                        15 июня 2025, 14:30
+                    </div>
+                </div>
+
+                <div class="meta-item">
+                    <div class="meta-label">
+                        <i class="fas fa-user"></i>
+                        Автор
+                    </div>
+                    <div class="meta-value author" th:text="${photo.authorName}">
+                        Иван Петров
+                    </div>
+                </div>
+
+
+                <div class="meta-item">
+                    <div class="meta-label">
+                        <i class="fas fa-eye"></i>
+                        Доступ
+                    </div>
+                    <div class="meta-value">
+                        <span th:if="${isOwner}" style="color: #16a34a;">Владелец</span>
+                        <span th:unless="${isOwner}" style="color: #6366f1;">Просмотр</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="description-section">
+                <div class="description-title">
+                    <i class="fas fa-align-left"></i>
+                    Описание
+                </div>
+                <div th:if="${photo.description}"
+                     class="description-content"
+                     th:text="${photo.description}">
+                    Красивый закат на берегу моря
+                </div>
+                <div th:unless="${photo.description}"
+                     class="description-content empty">
+                    Описание не добавлено
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions-section">
+            <h3 class="actions-title">
+                <i class="fas fa-tools"></i>
+                Действия
+            </h3>
+
+            <div class="actions-grid">
+                <a th:href="${photo.picUrl}"
+                   target="_blank"
+                   class="action-button btn-view-original">
+                    <i class="fas fa-external-link-alt"></i>
+                    Открыть оригинал
+                </a>
+
+
+                <a th:href="@{/photos/user/{userId}(userId=${user.id})}"
+                   class="action-button btn-gallery">
+                    <i class="fas fa-images"></i>
+                    Вся галерея
+                </a>
+
+                <!-- Кнопка удаления только для владельца -->
+                <form th:if="${isOwner}"
+                      th:action="@{/photos/{id}/delete(id=${photo.id})}"
+                      method="post"
+                      style="display: contents;"
+                      onsubmit="return confirm('Вы уверены, что хотите удалить это фото? Это действие нельзя отменить.')">
+                    <button type="submit" class="action-button btn-delete">
+                        <i class="fas fa-trash"></i>
+                        Удалить фото
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Fullscreen Modal -->
+<div class="photo-modal" id="photoModal" onclick="closeFullscreen()">
+    <img th:src="${photo?.picUrl}" alt="Фото в полном размере" id="modalImage">
+</div>
+
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<script th:if="${photo}">
+
+    // Полноэкранный просмотр
+    function openFullscreen() {
+        const modal = document.getElementById('photoModal');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeFullscreen() {
+        const modal = document.getElementById('photoModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Закрытие по Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeFullscreen();
+        }
+    });
+
+    // Обработка ошибок загрузки изображения
+    document.addEventListener('DOMContentLoaded', function () {
+        const mainImg = document.getElementById('mainPhoto');
+        const modalImg = document.getElementById('modalImage');
+
+        if (mainImg) {
+            mainImg.addEventListener('error', function () {
+                this.parentElement.innerHTML = `
+                    <div class="image-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Ошибка загрузки изображения</h3>
+                        <p>Не удалось загрузить изображение</p>
+                        <p><small>URL: <a href="${this.src}" target="_blank">${this.src}</a></small></p>
+                    </div>
+                `;
+            });
+
+            mainImg.addEventListener('load', function () {
+                console.log('Изображение успешно загружено');
+            });
+        }
+    });
+
+    // Простая система уведомлений
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#16a34a' : '#dc2626'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1001;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        `;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        // Анимация появления
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+
+        // Автоудаление
+        setTimeout(() => {
+            notification.style.transform = 'translateX(400px)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+</script>
+
+<script th:src="@{/js/online-status.js}"></script>
+<script th:src="@{/js/notifications.js}"></script>
+</body>
+</html>

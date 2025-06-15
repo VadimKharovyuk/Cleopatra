@@ -829,10 +829,6 @@
                         <span id="follow-text" th:text="${isSubscribed} ? 'Подписан' : 'Подписаться'">Подписаться</span>
                     </button>
 
-<!--                    <button type="button" onclick="shareProfile()" class="btn-luxury btn-secondary-luxury">-->
-<!--                        <i class="fas fa-share"></i>-->
-<!--                        <span>Поделиться</span>-->
-<!--                    </button>-->
 
 
                     <!-- Показывается только для чужих профилей -->
@@ -1154,6 +1150,12 @@
                     <a th:href="@{'/wall/' + ${userId}}" class="nav-tab-luxury-link">
                         <button class="nav-tab-luxury">
                             Стена
+                        </button>
+                    </a>
+
+                    <a th:href="@{/photos/user/{userId}(userId=${user.id})}" class="nav-tab-luxury-link">
+                        <button class="nav-tab-luxury">
+                            Фотографии
                         </button>
                     </a>
                 </div>

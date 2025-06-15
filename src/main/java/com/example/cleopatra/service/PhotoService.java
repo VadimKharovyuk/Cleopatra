@@ -7,6 +7,7 @@ import com.example.cleopatra.model.User;
 import java.util.List;
 
 
+
 public interface PhotoService {
 
     boolean canUploadPhoto(Long userId);
@@ -19,6 +20,15 @@ public interface PhotoService {
     PhotoResponseDto getPhotoById(Long userId, Long photoId);
 
     List<PhotoResponseDto> getUserPhotos(Long userId);
+
+    List<PhotoResponseDto> getPublicPhotos(Long userId);
+    PhotoResponseDto getPublicPhotoById(Long photoId);
+
+    int getRemainingPhotoLimit(Long userId);
+    int getPhotoLimitForUserId(Long userId);
+
+
+
 
 
 }

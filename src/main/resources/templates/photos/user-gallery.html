@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'Фотографии ' + ${user.firstName} + ' ' + ${user.lastName}">Фотографии пользователя</title>
+
+  <!-- External CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Стили sidebar -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+  <style>
+    /* Основные стили страницы */
+    body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 1rem;
+    }
+
+    .back-button:hover {
+      background: rgba(99, 102, 241, 0.15);
+      transform: translateX(-2px);
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+
+    .user-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .user-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid var(--border-secondary);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--bg-accent), #f1f5f9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 2rem;
+    }
+
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-info h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .user-info p {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .owner-badge {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-md);
+      font-size: 0.8125rem;
+      font-weight: 500;
+    }
+
+    /* Gallery Container */
+    .gallery-container {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+      overflow: hidden;
+    }
+
+    .gallery-header {
+      padding: 2rem 2.5rem 1rem;
+      border-bottom: 1px solid var(--border-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .gallery-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .photo-count {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      background: var(--bg-accent);
+      padding: 0.375rem 0.75rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-secondary);
+    }
+
+    /* Photo Grid */
+    .photos-section {
+      padding: 2.5rem;
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .photo-card {
+      background: var(--bg-accent);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .photo-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .photo-card-image {
+      width: 100%;
+      height: 250px;
+      background: var(--bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .photo-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .photo-card:hover .photo-card-image img {
+      transform: scale(1.05);
+    }
+
+    .photo-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+              to bottom,
+              rgba(0, 0, 0, 0) 0%,
+              rgba(0, 0, 0, 0.1) 70%,
+              rgba(0, 0, 0, 0.7) 100%
+      );
+      opacity: 0;
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: flex-end;
+      padding: 1rem;
+    }
+
+    .photo-card:hover .photo-overlay {
+      opacity: 1;
+    }
+
+    .photo-overlay-content {
+      color: white;
+      width: 100%;
+    }
+
+    .photo-overlay-title {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .photo-overlay-date {
+      font-size: 0.8125rem;
+      opacity: 0.9;
+    }
+
+    .photo-card-content {
+      padding: 1.25rem;
+    }
+
+    .photo-title {
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      font-size: 0.9375rem;
+    }
+
+    .photo-description {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .photo-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      margin-bottom: 1rem;
+    }
+
+    .photo-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-photo {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .btn-view {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border: none;
+    }
+
+    .btn-view:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+      color: white;
+      text-decoration: none;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
+
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 3rem;
+    }
+
+    .loading-spinner {
+      width: 2rem;
+      height: 2rem;
+      border: 2px solid var(--border-secondary);
+      border-top: 2px solid var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Messages */
+    .message {
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 80px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        margin-top: 60px;
+        padding: 1rem;
+      }
+
+      .photos-section {
+        padding: 1.5rem;
+      }
+
+      .photo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      }
+
+      .user-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+      }
+
+      .gallery-header {
+        padding: 1.5rem;
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Mobile Header -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+
+<!-- Sidebar с активной секцией -->
+<th:block th:replace="~{fragments/sidebar :: sidebar('photos')}"></th:block>
+
+<div class="main-content">
+  <!-- Back Button -->
+  <a th:href="@{/wall/{userId}(userId=${user.id})}" class="back-button">
+    <i class="fas fa-arrow-left"></i>
+    Вернуться на стену
+  </a>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="user-header">
+      <div class="user-avatar">
+        <img th:if="${user.imageUrl}"
+             th:src="${user.imageUrl}"
+             th:alt="${user.firstName} + ' ' + ${user.lastName}">
+        <i th:unless="${user.imageUrl}" class="fas fa-user"></i>
+      </div>
+      <div class="user-info">
+        <h1>
+          <span th:text="${user.firstName}">Имя</span>
+          <span th:text="${user.lastName}">Фамилия</span>
+          <span th:if="${isOwner}" class="owner-badge">
+                        <i class="fas fa-crown"></i>
+                        Ваши фото
+                    </span>
+        </h1>
+        <p>
+          <i class="fas fa-images"></i>
+          Фотоальбом пользователя
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div th:if="${errorMessage}" class="message error">
+    <i class="fas fa-exclamation-circle"></i>
+    <span th:text="${errorMessage}"></span>
+  </div>
+
+  <!-- Gallery Container -->
+  <div class="gallery-container">
+    <div class="gallery-header">
+      <h2 class="gallery-title">
+        <i class="fas fa-photo-video"></i>
+        Фотографии
+      </h2>
+      <div class="photo-count" th:text="${photos != null ? photos.size() : 0} + ' фото'">
+        0 фото
+      </div>
+    </div>
+
+    <div class="photos-section">
+      <!-- Photos Grid -->
+      <div th:if="${photos != null and !photos.isEmpty()}" class="photo-grid">
+        <div th:each="photo : ${photos}" class="photo-card">
+          <div class="photo-card-image">
+            <img th:src="${photo.picUrl}"
+                 th:alt="${photo.description ?: 'Фото'}"
+                 loading="lazy"
+                 onerror="this.parentElement.innerHTML='<i class=\\'fas fa-image\\' style=\\'font-size: 2rem;\\'></i>'">
+
+            <div class="photo-overlay">
+              <div class="photo-overlay-content">
+                <div class="photo-overlay-title" th:text="'Фото #' + ${photo.id}">
+                  Фото #1
+                </div>
+                <div class="photo-overlay-date"
+                     th:text="${#temporals.format(photo.uploadDate, 'd MMMM yyyy', #locale)}">
+                  15 июня 2025
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="photo-card-content">
+            <div class="photo-title" th:text="'Фото #' + ${photo.id}">
+              Фото #1
+            </div>
+
+            <div class="photo-description"
+                 th:text="${photo.description ?: 'Без описания'}">
+              Описание фотографии
+            </div>
+
+            <div class="photo-meta">
+                            <span th:text="${#temporals.format(photo.uploadDate, 'd MMM yyyy', #locale)}">
+                                15 июн 2025
+                            </span>
+              <span th:text="'ID: ' + ${photo.picId}">
+                                ID: abc123
+                            </span>
+            </div>
+
+            <div class="photo-actions">
+              <a th:href="@{/photos/user/{userId}/photo/{photoId}(userId=${user.id}, photoId=${photo.id})}"
+                 class="btn-photo btn-view">
+                <i class="fas fa-eye"></i>
+                Просмотреть
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div th:if="${photos == null or photos.isEmpty()}" class="empty-state">
+        <i class="fas fa-images"></i>
+        <h3>Нет фотографий</h3>
+        <p th:if="${isOwner}">Вы пока не загрузили ни одной фотографии.</p>
+        <p th:unless="${isOwner}" th:text="${user.firstName} + ' пока не загружал фотографии.'">
+          Пользователь пока не загружал фотографии.
+        </p>
+        <a th:if="${isOwner}" href="/photos" class="btn-photo btn-view" style="margin-top: 1rem;">
+          <i class="fas fa-plus"></i>
+          Загрузить первое фото
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<script>
+  // Lazy loading для изображений
+  document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('img[loading="lazy"]');
+
+    if ('IntersectionObserver' in window) {
+      const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src || img.src;
+            img.classList.remove('lazy');
+            imageObserver.unobserve(img);
+          }
+        });
+      });
+
+      images.forEach(img => imageObserver.observe(img));
+    }
+  });
+</script>
+
+<script th:src="@{/js/online-status.js}"></script>
+<script th:src="@{/js/notifications.js}"></script>
+</body>
+</html>

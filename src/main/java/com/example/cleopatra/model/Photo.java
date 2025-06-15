@@ -28,6 +28,10 @@ public class Photo {
 
     private String description;
 
+
+//    @Column(name = "is_public", nullable = false)
+//    private Boolean isPublic = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User author;

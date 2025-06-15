@@ -515,6 +515,12 @@
                 <span class="nav-text">Найти людей</span>
             </a>
 
+            <a th:href="@{/photos}"
+               class="nav-item"
+               th:classappend="${activeSection == 'photos'} ? 'active' : ''">
+                <i class="fas fa-camera nav-icon"></i>
+                <span class="nav-text">Фото</span>
+            </a>
 
 
             <a href="/notifications"

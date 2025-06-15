@@ -2,6 +2,7 @@ package com.example.cleopatra.controller;
 
 import com.example.cleopatra.dto.user.PhotoCreateDto;
 import com.example.cleopatra.dto.user.PhotoResponseDto;
+import com.example.cleopatra.model.User;
 import com.example.cleopatra.service.PhotoService;
 import com.example.cleopatra.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,9 @@ public class PhotoController {
     private final PhotoService photoService;
     private final UserService userService;
 
+
     // Главная страница с фотографиями
+// Главная страница с фотографиями
     @GetMapping
     public String photosPage(Model model, Authentication authentication) {
         if (authentication == null) {
@@ -37,8 +40,25 @@ public class PhotoController {
 
         // Проверяем, может ли пользователь загружать фото
         boolean canUpload = photoService.canUploadPhoto(userId);
+
+        // Получаем информацию о квоте
+        int totalLimit = photoService.getPhotoLimitForUserId(userId);
+        int remainingLimit = photoService.getRemainingPhotoLimit(userId);
+        int usedCount = totalLimit - remainingLimit;
+
+        // Рассчитываем процент использования
+        int usagePercentage = totalLimit > 0 ? Math.round((usedCount * 100.0f) / totalLimit) : 0;
+        double strokeDashoffset = 314.16 - (totalLimit > 0 ? (usedCount * 314.16 / totalLimit) : 0);
+
         model.addAttribute("canUpload", canUpload);
         model.addAttribute("photoCreateDto", new PhotoCreateDto());
+
+        // Добавляем информацию о лимитах
+        model.addAttribute("totalLimit", totalLimit);
+        model.addAttribute("remainingLimit", remainingLimit);
+        model.addAttribute("usedCount", usedCount);
+        model.addAttribute("usagePercentage", usagePercentage);
+        model.addAttribute("strokeDashoffset", strokeDashoffset);
 
         return "photos/index";
     }
@@ -192,6 +212,93 @@ public class PhotoController {
         } catch (Exception e) {
             log.error("API Error getting user photos: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+
+
+    // Просмотр фотографий другого пользователя
+    @GetMapping("/user/{userId}")
+    public String viewUserPhotos(@PathVariable Long userId,
+                                 Model model,
+                                 Authentication authentication) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // Получаем информацию о пользователе
+            User user = userService.findById(userId);
+            if (user == null) {
+                model.addAttribute("errorMessage", "Пользователь не найден");
+                return "error/404";
+            }
+
+            // Получаем фото пользователя
+            List<PhotoResponseDto> photos = photoService.getPublicPhotos(userId);
+
+            model.addAttribute("user", user);
+            model.addAttribute("photos", photos);
+            model.addAttribute("isOwner", userId.equals(getCurrentUserId(authentication)));
+
+            return "photos/user-gallery";
+
+        } catch (Exception e) {
+            log.error("Error viewing user photos {}: {}", userId, e.getMessage(), e);
+            model.addAttribute("errorMessage", "Ошибка загрузки фотографий: " + e.getMessage());
+            return "error/500";
+        }
+    }
+
+    // API для получения фотографий пользователя
+    @GetMapping("/api/user/{userId}")
+    @ResponseBody
+    public ResponseEntity<List<PhotoResponseDto>> getUserPhotosApi(@PathVariable Long userId,
+                                                                   Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            List<PhotoResponseDto> photos = photoService.getPublicPhotos(userId);
+            return ResponseEntity.ok(photos);
+        } catch (Exception e) {
+            log.error("API Error getting user photos {}: {}", userId, e.getMessage(), e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // Просмотр конкретного фото другого пользователя
+    @GetMapping("/user/{userId}/photo/{photoId}")
+    public String viewUserPhoto(@PathVariable Long userId,
+                                @PathVariable Long photoId,
+                                Model model,
+                                Authentication authentication) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            PhotoResponseDto photo = photoService.getPublicPhotoById(photoId);
+
+            // Проверяем, что фото принадлежит указанному пользователю
+            if (!photo.getAuthorId().equals(userId)) {
+                model.addAttribute("errorMessage", "Фото не найдено");
+                return "error/404";
+            }
+
+            User user = userService.findById(userId);
+
+            model.addAttribute("photo", photo);
+            model.addAttribute("user", user);
+            model.addAttribute("isOwner", userId.equals(getCurrentUserId(authentication)));
+
+            return "photos/user-photo-view";
+
+        } catch (Exception e) {
+            log.error("Error viewing user photo {}/{}: {}", userId, photoId, e.getMessage(), e);
+            model.addAttribute("errorMessage", "Фото не найдено: " + e.getMessage());
+            return "photos/user-gallery";
         }
     }
 

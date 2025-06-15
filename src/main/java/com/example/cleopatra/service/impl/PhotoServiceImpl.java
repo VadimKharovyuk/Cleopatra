@@ -139,8 +139,53 @@ public class PhotoServiceImpl implements PhotoService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<PhotoResponseDto> getPublicPhotos(Long userId) {
+        // Проверяем, что пользователь существует
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UsernameNotFoundException("User not found: " + userId)
+        );
+
+        // Получаем публичные фото (все фото пользователя видны другим)
+        List<Photo> photos = photoRepository.findByAuthorIdOrderByUploadDateDesc(userId);
+
+        return photos.stream()
+                .map(photoServiceMapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public PhotoResponseDto getPublicPhotoById(Long photoId) {
+        Photo photo = photoRepository.findById(photoId).orElseThrow(
+                () -> new PhotoNotFoundException("Photo not found: " + photoId)
+        );
+
+        return photoServiceMapper.toResponseDto(photo);
+    }
+
     private String generateUniqueId() {
         return UUID.randomUUID().toString();
+    }
+
+    @Override
+    public int getRemainingPhotoLimit(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UsernameNotFoundException("User not found: " + userId)
+        );
+
+        int limit = getPhotoLimitForUser(user);
+        int used = user.getPhotoCount() != null ? user.getPhotoCount() : 0;
+
+        return Math.max(0, limit - used);
+    }
+
+    @Override
+    public int getPhotoLimitForUserId(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UsernameNotFoundException("User not found: " + userId)
+        );
+
+        return getPhotoLimitForUser(user);
     }
 
 

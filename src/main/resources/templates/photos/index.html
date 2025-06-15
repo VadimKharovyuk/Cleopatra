@@ -4,203 +4,790 @@
 <!--  <meta charset="UTF-8">-->
 <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
 <!--  <title>Мои фотографии</title>-->
+
+<!--  &lt;!&ndash; External CSS &ndash;&gt;-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">-->
+<!--  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">-->
+<!--  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+
+<!--  &lt;!&ndash; Стили sidebar &ndash;&gt;-->
+<!--  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>-->
+
+<!--  <style>-->
+<!--    /* Основные стили страницы */-->
+<!--    body {-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;bg-primary) 0%, var(&#45;&#45;bg-accent) 100%);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;-->
+<!--      font-weight: 400;-->
+<!--      line-height: 1.6;-->
+<!--      min-height: 100vh;-->
+<!--    }-->
+
+<!--    /* Main Content */-->
+<!--    .main-content {-->
+<!--      margin-left: 280px;-->
+<!--      min-height: 100vh;-->
+<!--      padding: 2rem;-->
+<!--    }-->
+
+<!--    /* Page Header */-->
+<!--    .page-header {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-xl);-->
+<!--      padding: 2rem 2.5rem;-->
+<!--      margin-bottom: 2rem;-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .page-title {-->
+<!--      font-family: 'Playfair Display', serif;-->
+<!--      font-size: 2.25rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin: 0 0 0.5rem 0;-->
+<!--      letter-spacing: -0.02em;-->
+<!--    }-->
+
+<!--    .page-subtitle {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 1.125rem;-->
+<!--      margin: 0;-->
+<!--    }-->
+
+<!--    /* Photo Container */-->
+<!--    .photo-container {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-xl);-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--      overflow: hidden;-->
+<!--      margin-bottom: 2rem;-->
+<!--    }-->
+
+<!--    /* Upload Section */-->
+<!--    .upload-section {-->
+<!--      padding: 2.5rem;-->
+<!--      border-bottom: 1px solid var(&#45;&#45;border-secondary);-->
+<!--    }-->
+
+<!--    .upload-section h2 {-->
+<!--      font-family: 'Playfair Display', serif;-->
+<!--      font-size: 1.5rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: 1.5rem;-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.75rem;-->
+<!--    }-->
+
+<!--    /* Upload Form */-->
+<!--    .upload-form {-->
+<!--      max-width: 600px;-->
+<!--    }-->
+
+<!--    .form-group {-->
+<!--      margin-bottom: 1.5rem;-->
+<!--    }-->
+
+<!--    .form-group label {-->
+<!--      display: block;-->
+<!--      font-weight: 500;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: 0.5rem;-->
+<!--      font-size: 0.9375rem;-->
+<!--    }-->
+
+<!--    .form-control {-->
+<!--      width: 100%;-->
+<!--      padding: 0.875rem 1rem;-->
+<!--      border: 1px solid var(&#45;&#45;border-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      font-size: 0.9375rem;-->
+<!--      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--    }-->
+
+<!--    .form-control:focus {-->
+<!--      outline: none;-->
+<!--      border-color: var(&#45;&#45;accent-primary);-->
+<!--      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);-->
+<!--    }-->
+
+<!--    .file-input-wrapper {-->
+<!--      position: relative;-->
+<!--      display: inline-block;-->
+<!--      width: 100%;-->
+<!--    }-->
+
+<!--    .file-input {-->
+<!--      position: absolute;-->
+<!--      opacity: 0;-->
+<!--      width: 100%;-->
+<!--      height: 100%;-->
+<!--      cursor: pointer;-->
+<!--    }-->
+
+<!--    .file-input-label {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--      gap: 0.75rem;-->
+<!--      padding: 2rem;-->
+<!--      border: 2px dashed var(&#45;&#45;border-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      cursor: pointer;-->
+<!--      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--      text-align: center;-->
+<!--    }-->
+
+<!--    .file-input-label:hover {-->
+<!--      border-color: var(&#45;&#45;accent-primary);-->
+<!--      background: rgba(99, 102, 241, 0.05);-->
+<!--      color: var(&#45;&#45;accent-primary);-->
+<!--    }-->
+
+<!--    .file-input-label.has-file {-->
+<!--      border-color: var(&#45;&#45;accent-primary);-->
+<!--      background: rgba(99, 102, 241, 0.1);-->
+<!--      color: var(&#45;&#45;accent-primary);-->
+<!--    }-->
+
+<!--    .btn-upload {-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      padding: 0.875rem 2rem;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      font-weight: 500;-->
+<!--      font-size: 0.9375rem;-->
+<!--      cursor: pointer;-->
+<!--      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.5rem;-->
+<!--    }-->
+
+<!--    .btn-upload:hover {-->
+<!--      transform: translateY(-1px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-md);-->
+<!--    }-->
+
+<!--    .btn-upload:disabled {-->
+<!--      opacity: 0.6;-->
+<!--      cursor: not-allowed;-->
+<!--      transform: none;-->
+<!--    }-->
+
+<!--    /* Upload Disabled */-->
+<!--    .upload-disabled {-->
+<!--      text-align: center;-->
+<!--      padding: 2rem;-->
+<!--      background: rgba(239, 68, 68, 0.05);-->
+<!--      border: 1px solid rgba(239, 68, 68, 0.2);-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      color: #dc2626;-->
+<!--    }-->
+
+<!--    .upload-disabled i {-->
+<!--      font-size: 2rem;-->
+<!--      margin-bottom: 1rem;-->
+<!--      opacity: 0.6;-->
+<!--    }-->
+
+<!--    /* Preview Section */-->
+<!--    .preview-section {-->
+<!--      padding: 2.5rem;-->
+<!--      border-bottom: 1px solid var(&#45;&#45;border-secondary);-->
+<!--    }-->
+
+<!--    .preview-container {-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      border: 1px solid var(&#45;&#45;border-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      padding: 1.5rem;-->
+<!--      text-align: center;-->
+<!--      min-height: 200px;-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--      flex-direction: column;-->
+<!--      gap: 1rem;-->
+<!--    }-->
+
+<!--    .preview-image {-->
+<!--      max-width: 100%;-->
+<!--      max-height: 300px;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--    }-->
+
+<!--    .preview-info {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 0.875rem;-->
+<!--    }-->
+
+<!--    /* Photos Gallery */-->
+<!--    .photos-gallery {-->
+<!--      padding: 2.5rem;-->
+<!--    }-->
+
+<!--    .gallery-header {-->
+<!--      display: flex;-->
+<!--      justify-content: space-between;-->
+<!--      align-items: center;-->
+<!--      margin-bottom: 2rem;-->
+<!--    }-->
+
+<!--    .gallery-title {-->
+<!--      font-family: 'Playfair Display', serif;-->
+<!--      font-size: 1.5rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin: 0;-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.75rem;-->
+<!--    }-->
+
+<!--    .photo-grid {-->
+<!--      display: grid;-->
+<!--      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));-->
+<!--      gap: 1.5rem;-->
+<!--    }-->
+
+<!--    .photo-card {-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      border: 1px solid var(&#45;&#45;border-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-lg);-->
+<!--      overflow: hidden;-->
+<!--      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--      position: relative;-->
+<!--    }-->
+
+<!--    .photo-card:hover {-->
+<!--      transform: translateY(-2px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--    }-->
+
+<!--    .photo-card-image {-->
+<!--      width: 100%;-->
+<!--      height: 200px;-->
+<!--      background: var(&#45;&#45;bg-primary);-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--      position: relative;-->
+<!--      overflow: hidden;-->
+<!--    }-->
+
+<!--    .photo-card-image img {-->
+<!--      width: 100%;-->
+<!--      height: 100%;-->
+<!--      object-fit: cover;-->
+<!--    }-->
+
+<!--    .photo-card-content {-->
+<!--      padding: 1.25rem;-->
+<!--    }-->
+
+<!--    .photo-title {-->
+<!--      font-weight: 500;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: 0.5rem;-->
+<!--      font-size: 0.9375rem;-->
+<!--    }-->
+
+<!--    .photo-description {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 0.875rem;-->
+<!--      margin-bottom: 1rem;-->
+<!--      line-height: 1.5;-->
+<!--    }-->
+
+<!--    .photo-meta {-->
+<!--      display: flex;-->
+<!--      justify-content: space-between;-->
+<!--      align-items: center;-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--      font-size: 0.8125rem;-->
+<!--    }-->
+
+<!--    .photo-actions {-->
+<!--      display: flex;-->
+<!--      gap: 0.5rem;-->
+<!--      margin-top: 1rem;-->
+<!--    }-->
+
+<!--    .btn-photo {-->
+<!--      padding: 0.5rem 1rem;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      font-size: 0.8125rem;-->
+<!--      font-weight: 500;-->
+<!--      cursor: pointer;-->
+<!--      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--      text-decoration: none;-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.375rem;-->
+<!--    }-->
+
+<!--    .btn-view {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      color: var(&#45;&#45;accent-primary);-->
+<!--      border: 1px solid var(&#45;&#45;accent-primary);-->
+<!--    }-->
+
+<!--    .btn-view:hover {-->
+<!--      background: var(&#45;&#45;accent-primary);-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    .btn-delete {-->
+<!--      background: rgba(239, 68, 68, 0.1);-->
+<!--      color: #dc2626;-->
+<!--      border: 1px solid rgba(239, 68, 68, 0.3);-->
+<!--    }-->
+
+<!--    .btn-delete:hover {-->
+<!--      background: #dc2626;-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    /* Messages */-->
+<!--    .message {-->
+<!--      padding: 1rem 1.5rem;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      margin-bottom: 1.5rem;-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.75rem;-->
+<!--    }-->
+
+<!--    .message.success {-->
+<!--      background: rgba(34, 197, 94, 0.1);-->
+<!--      color: #16a34a;-->
+<!--      border: 1px solid rgba(34, 197, 94, 0.3);-->
+<!--    }-->
+
+<!--    .message.error {-->
+<!--      background: rgba(239, 68, 68, 0.1);-->
+<!--      color: #dc2626;-->
+<!--      border: 1px solid rgba(239, 68, 68, 0.3);-->
+<!--    }-->
+
+<!--    /* Empty State */-->
+<!--    .empty-state {-->
+<!--      text-align: center;-->
+<!--      padding: 4rem 2rem;-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--    }-->
+
+<!--    .empty-state i {-->
+<!--      font-size: 4rem;-->
+<!--      margin-bottom: 1.5rem;-->
+<!--      opacity: 0.5;-->
+<!--    }-->
+
+<!--    .empty-state h3 {-->
+<!--      font-family: 'Playfair Display', serif;-->
+<!--      font-size: 1.5rem;-->
+<!--      font-weight: 600;-->
+<!--      margin-bottom: 1rem;-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--    }-->
+
+<!--    /* Loading State */-->
+<!--    .loading {-->
+<!--      text-align: center;-->
+<!--      padding: 2rem;-->
+<!--    }-->
+
+<!--    .loading-spinner {-->
+<!--      width: 2rem;-->
+<!--      height: 2rem;-->
+<!--      border: 2px solid var(&#45;&#45;border-secondary);-->
+<!--      border-top: 2px solid var(&#45;&#45;accent-primary);-->
+<!--      border-radius: 50%;-->
+<!--      animation: spin 1s linear infinite;-->
+<!--      margin: 0 auto 1rem;-->
+<!--    }-->
+
+<!--    @keyframes spin {-->
+<!--      0% { transform: rotate(0deg); }-->
+<!--      100% { transform: rotate(360deg); }-->
+<!--    }-->
+
+<!--    /* Responsive Design */-->
+<!--    @media (max-width: 1024px) {-->
+<!--      .main-content {-->
+<!--        margin-left: 80px;-->
+<!--      }-->
+<!--    }-->
+
+<!--    @media (max-width: 768px) {-->
+<!--      .main-content {-->
+<!--        margin-left: 0;-->
+<!--        margin-top: 60px;-->
+<!--        padding: 1rem;-->
+<!--      }-->
+
+<!--      .upload-section,-->
+<!--      .preview-section,-->
+<!--      .photos-gallery {-->
+<!--        padding: 1.5rem;-->
+<!--      }-->
+
+<!--      .photo-grid {-->
+<!--        grid-template-columns: 1fr;-->
+<!--      }-->
+
+<!--      .gallery-header {-->
+<!--        flex-direction: column;-->
+<!--        gap: 1rem;-->
+<!--        align-items: stretch;-->
+<!--      }-->
+<!--    }-->
+<!--  </style>-->
 <!--</head>-->
 <!--<body>-->
-<!--<div class="container">-->
-<!--  <header>-->
-<!--    <h1>Мои фотографии</h1>-->
-<!--    <nav>-->
-<!--      <a href="/">Главная</a>-->
-<!--      <a href="/profile">Профиль</a>-->
-<!--      <a href="/logout">Выйти</a>-->
-<!--    </nav>-->
-<!--  </header>-->
+<!--&lt;!&ndash; Mobile Header &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>-->
 
-<!--  <main>-->
-<!--    &lt;!&ndash; Сообщения об успехе/ошибке &ndash;&gt;-->
-<!--    <div th:if="${successMessage}" class="success-message">-->
-<!--      <p th:text="${successMessage}"></p>-->
-<!--    </div>-->
+<!--&lt;!&ndash; Sidebar с активной секцией &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar('photos')}"></th:block>-->
 
-<!--    <div th:if="${errorMessage}" class="error-message">-->
-<!--      <p th:text="${errorMessage}"></p>-->
-<!--    </div>-->
+<!--<div class="main-content">-->
+<!--  &lt;!&ndash; Page Header &ndash;&gt;-->
+<!--  <div class="page-header">-->
+<!--    <h1 class="page-title">-->
+<!--      <i class="fas fa-images me-3"></i>-->
+<!--      Мои фотографии-->
+<!--    </h1>-->
+<!--    <p class="page-subtitle">-->
+<!--      Управляйте своими фотографиями-->
+<!--    </p>-->
+<!--  </div>-->
 
-<!--    &lt;!&ndash; Форма загрузки фото &ndash;&gt;-->
-<!--    <section class="upload-section">-->
-<!--      <h2>Загрузить новое фото</h2>-->
+<!--  &lt;!&ndash; Messages &ndash;&gt;-->
+<!--  <div th:if="${successMessage}" class="message success">-->
+<!--    <i class="fas fa-check-circle"></i>-->
+<!--    <span th:text="${successMessage}"></span>-->
+<!--  </div>-->
+
+<!--  <div th:if="${errorMessage}" class="message error">-->
+<!--    <i class="fas fa-exclamation-circle"></i>-->
+<!--    <span th:text="${errorMessage}"></span>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Upload Section &ndash;&gt;-->
+<!--  <div class="photo-container">-->
+<!--    <div class="upload-section">-->
+<!--      <h2>-->
+<!--        <i class="fas fa-cloud-upload-alt"></i>-->
+<!--        Загрузить новое фото-->
+<!--      </h2>-->
 
 <!--      <div th:if="${canUpload}" class="upload-form">-->
 <!--        <form th:action="@{/photos/upload}"-->
 <!--              th:object="${photoCreateDto}"-->
 <!--              method="post"-->
-<!--              enctype="multipart/form-data">-->
+<!--              enctype="multipart/form-data"-->
+<!--              id="uploadForm">-->
 
 <!--          <div class="form-group">-->
-<!--            <label for="image">Выберите изображение:</label>-->
-<!--            <input type="file"-->
-<!--                   id="image"-->
-<!--                   th:field="*{image}"-->
-<!--                   accept="image/*"-->
-<!--                   required>-->
+<!--            <label for="image">Выберите изображение</label>-->
+<!--            <div class="file-input-wrapper">-->
+<!--              <input type="file"-->
+<!--                     id="image"-->
+<!--                     th:field="*{image}"-->
+<!--                     accept="image/*"-->
+<!--                     class="file-input"-->
+<!--                     required>-->
+<!--              <div class="file-input-label" id="fileLabel">-->
+<!--                <i class="fas fa-image"></i>-->
+<!--                <div>-->
+<!--                  <div>Нажмите или перетащите изображение</div>-->
+<!--                  <small>Поддерживаются: JPG, PNG, GIF (макс. 10MB)</small>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
 <!--          </div>-->
 
 <!--          <div class="form-group">-->
-<!--            <label for="description">Описание (необязательно):</label>-->
+<!--            <label for="description">Описание (необязательно)</label>-->
 <!--            <textarea id="description"-->
 <!--                      th:field="*{description}"-->
+<!--                      class="form-control"-->
 <!--                      rows="3"-->
 <!--                      maxlength="500"-->
-<!--                      placeholder="Описание фотографии..."></textarea>-->
+<!--                      placeholder="Расскажите о вашей фотографии..."></textarea>-->
 <!--          </div>-->
 
-<!--          <button type="submit">Загрузить фото</button>-->
+<!--          <button type="submit" class="btn-upload" id="uploadBtn">-->
+<!--            <i class="fas fa-upload"></i>-->
+<!--            Загрузить фото-->
+<!--          </button>-->
 <!--        </form>-->
 <!--      </div>-->
 
 <!--      <div th:unless="${canUpload}" class="upload-disabled">-->
-<!--        <p><strong>Достигнут лимит загрузки фотографий!</strong></p>-->
-<!--        <p>Удалите некоторые фото, чтобы загрузить новые.</p>-->
+<!--        <i class="fas fa-ban"></i>-->
+<!--        <h3>Достигнут лимит загрузки фотографий!</h3>-->
+<!--        <p>Удалите некоторые фото, чтобы загрузить новые, или обратитесь к администратору для увеличения лимита.</p>-->
 <!--      </div>-->
-<!--    </section>-->
+<!--    </div>-->
 
-<!--    &lt;!&ndash; AJAX форма загрузки (альтернативная) &ndash;&gt;-->
-<!--    <section class="ajax-upload-section">-->
-<!--      <h3>Быстрая загрузка (AJAX)</h3>-->
+<!--    &lt;!&ndash; Preview Section &ndash;&gt;-->
+<!--    <div class="preview-section">-->
+<!--      <h2>-->
+<!--        <i class="fas fa-eye"></i>-->
+<!--        Предпросмотр-->
+<!--      </h2>-->
+<!--      <div class="preview-container" id="imagePreview">-->
+<!--        <i class="fas fa-image" style="font-size: 3rem; opacity: 0.3;"></i>-->
+<!--        <p class="preview-info">Выберите изображение для предпросмотра</p>-->
+<!--      </div>-->
+<!--    </div>-->
 
-<!--      <form id="ajaxUploadForm" enctype="multipart/form-data">-->
-<!--        <div class="form-group">-->
-<!--          <input type="file" id="ajaxImage" accept="image/*" required>-->
-<!--        </div>-->
-
-<!--        <div class="form-group">-->
-<!--                        <textarea id="ajaxDescription"-->
-<!--                                  rows="2"-->
-<!--                                  maxlength="500"-->
-<!--                                  placeholder="Описание..."></textarea>-->
-<!--        </div>-->
-
-<!--        <button type="submit">Загрузить через AJAX</button>-->
-<!--      </form>-->
-
-<!--      <div id="ajaxResult" style="margin-top: 10px;"></div>-->
-<!--    </section>-->
-
-<!--    &lt;!&ndash; Список фотографий &ndash;&gt;-->
-<!--    <section class="photos-list">-->
-<!--      <h2>Мои фотографии</h2>-->
+<!--    &lt;!&ndash; Photos Gallery &ndash;&gt;-->
+<!--    <div class="photos-gallery">-->
+<!--      <div class="gallery-header">-->
+<!--        <h2 class="gallery-title">-->
+<!--          <i class="fas fa-photo-video"></i>-->
+<!--          Мои фотографии-->
+<!--        </h2>-->
+<!--      </div>-->
 
 <!--      <div id="photosList">-->
-<!--        <p>Загрузка списка фотографий...</p>-->
+<!--        <div class="loading">-->
+<!--          <div class="loading-spinner"></div>-->
+<!--          <p>Загрузка фотографий...</p>-->
+<!--        </div>-->
 <!--      </div>-->
-<!--    </section>-->
-
-<!--    &lt;!&ndash; Предпросмотр фото &ndash;&gt;-->
-<!--    <section class="photo-preview">-->
-<!--      <h3>Предпросмотр выбранного изображения</h3>-->
-<!--      <div id="imagePreview">-->
-<!--        <p>Выберите изображение для предпросмотра</p>-->
-<!--      </div>-->
-<!--    </section>-->
-<!--  </main>-->
+<!--    </div>-->
+<!--  </div>-->
 <!--</div>-->
+
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>-->
 
 <!--<script>-->
 <!--  // Предпросмотр изображения-->
 <!--  document.getElementById('image').addEventListener('change', function(e) {-->
 <!--    const file = e.target.files[0];-->
 <!--    const preview = document.getElementById('imagePreview');-->
+<!--    const fileLabel = document.getElementById('fileLabel');-->
 
 <!--    if (file) {-->
+<!--      // Проверка размера файла (10MB)-->
+<!--      if (file.size > 10 * 1024 * 1024) {-->
+<!--        alert('Файл слишком большой. Максимальный размер: 10MB');-->
+<!--        e.target.value = '';-->
+<!--        return;-->
+<!--      }-->
+
+<!--      // Проверка типа файла-->
+<!--      if (!file.type.startsWith('image/')) {-->
+<!--        alert('Пожалуйста, выберите изображение');-->
+<!--        e.target.value = '';-->
+<!--        return;-->
+<!--      }-->
+
 <!--      const reader = new FileReader();-->
 <!--      reader.onload = function(e) {-->
 <!--        preview.innerHTML = `-->
-<!--                        <img src="${e.target.result}"-->
-<!--                             alt="Предпросмотр"-->
-<!--                             style="max-width: 300px; max-height: 300px;">-->
-<!--                        <p>Файл: ${file.name}</p>-->
-<!--                        <p>Размер: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>-->
-<!--                    `;-->
+<!--                    <img src="${e.target.result}"-->
+<!--                         alt="Предпросмотр"-->
+<!--                         class="preview-image">-->
+<!--                    <div class="preview-info">-->
+<!--                        <div><strong>${file.name}</strong></div>-->
+<!--                        <div>Размер: ${(file.size / 1024 / 1024).toFixed(2)} MB</div>-->
+<!--                        <div>Тип: ${file.type}</div>-->
+<!--                    </div>-->
+<!--                `;-->
 <!--      };-->
 <!--      reader.readAsDataURL(file);-->
+
+<!--      // Обновляем лейбл-->
+<!--      fileLabel.classList.add('has-file');-->
+<!--      fileLabel.innerHTML = `-->
+<!--                <i class="fas fa-check-circle"></i>-->
+<!--                <div>-->
+<!--                    <div>Файл выбран: ${file.name}</div>-->
+<!--                    <small>${(file.size / 1024 / 1024).toFixed(2)} MB</small>-->
+<!--                </div>-->
+<!--            `;-->
 <!--    } else {-->
-<!--      preview.innerHTML = '<p>Выберите изображение для предпросмотра</p>';-->
+<!--      preview.innerHTML = `-->
+<!--                <i class="fas fa-image" style="font-size: 3rem; opacity: 0.3;"></i>-->
+<!--                <p class="preview-info">Выберите изображение для предпросмотра</p>-->
+<!--            `;-->
+<!--      fileLabel.classList.remove('has-file');-->
+<!--      fileLabel.innerHTML = `-->
+<!--                <i class="fas fa-image"></i>-->
+<!--                <div>-->
+<!--                    <div>Нажмите или перетащите изображение</div>-->
+<!--                    <small>Поддерживаются: JPG, PNG, GIF (макс. 10MB)</small>-->
+<!--                </div>-->
+<!--            `;-->
 <!--    }-->
 <!--  });-->
 
-<!--  // AJAX загрузка фото-->
-<!--  document.getElementById('ajaxUploadForm').addEventListener('submit', function(e) {-->
+<!--  // Drag & Drop-->
+<!--  const fileLabel = document.getElementById('fileLabel');-->
+<!--  const fileInput = document.getElementById('image');-->
+
+<!--  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {-->
+<!--    fileLabel.addEventListener(eventName, preventDefaults, false);-->
+<!--  });-->
+
+<!--  function preventDefaults(e) {-->
 <!--    e.preventDefault();-->
+<!--    e.stopPropagation();-->
+<!--  }-->
 
-<!--    const formData = new FormData();-->
-<!--    const imageFile = document.getElementById('ajaxImage').files[0];-->
-<!--    const description = document.getElementById('ajaxDescription').value;-->
+<!--  ['dragenter', 'dragover'].forEach(eventName => {-->
+<!--    fileLabel.addEventListener(eventName, highlight, false);-->
+<!--  });-->
 
-<!--    if (!imageFile) {-->
-<!--      alert('Выберите изображение');-->
+<!--  ['dragleave', 'drop'].forEach(eventName => {-->
+<!--    fileLabel.addEventListener(eventName, unhighlight, false);-->
+<!--  });-->
+
+<!--  function highlight(e) {-->
+<!--    fileLabel.style.borderColor = 'var(&#45;&#45;accent-primary)';-->
+<!--    fileLabel.style.background = 'rgba(99, 102, 241, 0.05)';-->
+<!--  }-->
+
+<!--  function unhighlight(e) {-->
+<!--    fileLabel.style.borderColor = 'var(&#45;&#45;border-secondary)';-->
+<!--    fileLabel.style.background = 'var(&#45;&#45;bg-accent)';-->
+<!--  }-->
+
+<!--  fileLabel.addEventListener('drop', handleDrop, false);-->
+
+<!--  function handleDrop(e) {-->
+<!--    const dt = e.dataTransfer;-->
+<!--    const files = dt.files;-->
+
+<!--    if (files.length > 0) {-->
+<!--      fileInput.files = files;-->
+<!--      fileInput.dispatchEvent(new Event('change'));-->
+<!--    }-->
+<!--  }-->
+
+<!--  // Обработка отправки формы-->
+<!--  document.getElementById('uploadForm').addEventListener('submit', function(e) {-->
+<!--    const uploadBtn = document.getElementById('uploadBtn');-->
+<!--    const fileInput = document.getElementById('image');-->
+
+<!--    if (!fileInput.files.length) {-->
+<!--      e.preventDefault();-->
+<!--      alert('Пожалуйста, выберите изображение');-->
 <!--      return;-->
 <!--    }-->
 
-<!--    formData.append('image', imageFile);-->
-<!--    formData.append('description', description);-->
+<!--    uploadBtn.disabled = true;-->
+<!--    uploadBtn.innerHTML = `-->
+<!--            <div class="loading-spinner" style="width: 1rem; height: 1rem; margin-right: 0.5rem;"></div>-->
+<!--            Загрузка...-->
+<!--        `;-->
 
-<!--    const resultDiv = document.getElementById('ajaxResult');-->
-<!--    resultDiv.innerHTML = '<p>Загрузка...</p>';-->
-
-<!--    fetch('/photos/api/upload', {-->
-<!--      method: 'POST',-->
-<!--      body: formData-->
-<!--    })-->
-<!--            .then(response => response.json())-->
-<!--            .then(data => {-->
-<!--              if (data.id) {-->
-<!--                resultDiv.innerHTML = `-->
-<!--                        <div class="success">-->
-<!--                            <p>✅ Фото успешно загружено!</p>-->
-<!--                            <p>ID: ${data.picId}</p>-->
-<!--                            <p>URL: <a href="${data.picUrl}" target="_blank">${data.picUrl}</a></p>-->
-<!--                        </div>-->
-<!--                    `;-->
-<!--                // Очищаем форму-->
-<!--                document.getElementById('ajaxUploadForm').reset();-->
-<!--                // Обновляем список фотографий-->
-<!--                loadPhotosList();-->
-<!--              } else {-->
-<!--                resultDiv.innerHTML = `<div class="error">❌ Ошибка: ${data}</div>`;-->
-<!--              }-->
-<!--            })-->
-<!--            .catch(error => {-->
-<!--              resultDiv.innerHTML = `<div class="error">❌ Ошибка: ${error.message}</div>`;-->
-<!--            });-->
+<!--    // После успешной отправки (если нет редиректа) обновляем список-->
+<!--    setTimeout(() => {-->
+<!--      loadPhotosList();-->
+<!--    }, 1000);-->
 <!--  });-->
 
-<!--  // Загрузка списка фотографий (заглушка)-->
+<!--  // Загрузка списка фотографий-->
 <!--  function loadPhotosList() {-->
 <!--    const photosList = document.getElementById('photosList');-->
-<!--    photosList.innerHTML = `-->
-<!--                <div class="photo-item">-->
-<!--                    <h4>Пример фото #1</h4>-->
-<!--                    <p>Описание: Красивый закат</p>-->
-<!--                    <p>Дата: 2025-06-15</p>-->
-<!--                    <div class="photo-actions">-->
-<!--                        <a href="/photos/1">Просмотр</a>-->
-<!--                        <button onclick="deletePhoto(1)">Удалить</button>-->
+
+<!--    fetch('/photos/api/list')-->
+<!--            .then(response => {-->
+<!--              if (!response.ok) {-->
+<!--                throw new Error('Network response was not ok');-->
+<!--              }-->
+<!--              return response.json();-->
+<!--            })-->
+<!--            .then(photos => {-->
+<!--              if (photos.length === 0) {-->
+<!--                photosList.innerHTML = `-->
+<!--                    <div class="empty-state">-->
+<!--                        <i class="fas fa-images"></i>-->
+<!--                        <h3>Пока нет фотографий</h3>-->
+<!--                        <p>Загрузите свою первую фотографию, используя форму выше</p>-->
+<!--                    </div>-->
+<!--                `;-->
+<!--                return;-->
+<!--              }-->
+
+<!--              const photosGrid = photos.map(photo => `-->
+<!--                <div class="photo-card">-->
+<!--                    <div class="photo-card-image">-->
+<!--                        <img src="${photo.picUrl}"-->
+<!--                             alt="${photo.description || 'Фото'}"-->
+<!--                             onerror="this.parentElement.innerHTML='<i class=\\'fas fa-image\\' style=\\'font-size: 2rem;\\'></i>'"-->
+<!--                             loading="lazy">-->
+<!--                    </div>-->
+<!--                    <div class="photo-card-content">-->
+<!--                        <div class="photo-title">Фото #${photo.id}</div>-->
+<!--                        <div class="photo-description">${photo.description || 'Без описания'}</div>-->
+<!--                        <div class="photo-meta">-->
+<!--                            <span>${formatDate(photo.uploadDate)}</span>-->
+<!--                            <span>ID: ${photo.picId}</span>-->
+<!--                        </div>-->
+<!--                        <div class="photo-actions">-->
+<!--                            <a href="/photos/${photo.id}" class="btn-photo btn-view">-->
+<!--                                <i class="fas fa-eye"></i>-->
+<!--                                Просмотр-->
+<!--                            </a>-->
+<!--                            <button onclick="deletePhoto(${photo.id})" class="btn-photo btn-delete">-->
+<!--                                <i class="fas fa-trash"></i>-->
+<!--                                Удалить-->
+<!--                            </button>-->
+<!--                        </div>-->
 <!--                    </div>-->
 <!--                </div>-->
-<!--                <div class="photo-item">-->
-<!--                    <h4>Пример фото #2</h4>-->
-<!--                    <p>Описание: Горный пейзаж</p>-->
-<!--                    <p>Дата: 2025-06-14</p>-->
-<!--                    <div class="photo-actions">-->
-<!--                        <a href="/photos/2">Просмотр</a>-->
-<!--                        <button onclick="deletePhoto(2)">Удалить</button>-->
-<!--                    </div>-->
+<!--            `).join('');-->
+
+<!--              photosList.innerHTML = `<div class="photo-grid">${photosGrid}</div>`;-->
+<!--            })-->
+<!--            .catch(error => {-->
+<!--              console.error('Error loading photos:', error);-->
+<!--              photosList.innerHTML = `-->
+<!--                <div class="empty-state">-->
+<!--                    <i class="fas fa-exclamation-triangle"></i>-->
+<!--                    <h3>Ошибка загрузки</h3>-->
+<!--                    <p>Не удалось загрузить список фотографий: ${error.message}</p>-->
+<!--                    <button onclick="loadPhotosList()" class="btn-photo btn-view">-->
+<!--                        <i class="fas fa-refresh"></i>-->
+<!--                        Попробовать снова-->
+<!--                    </button>-->
 <!--                </div>-->
-<!--                <p><em>Здесь будет реальный список ваших фотографий</em></p>-->
 <!--            `;-->
+<!--            });-->
 <!--  }-->
 
-<!--  // Удаление фото через AJAX-->
+<!--  // Форматирование даты-->
+<!--  function formatDate(dateString) {-->
+<!--    const date = new Date(dateString);-->
+<!--    return date.toLocaleDateString('ru-RU', {-->
+<!--      day: 'numeric',-->
+<!--      month: 'long',-->
+<!--      year: 'numeric',-->
+<!--      hour: '2-digit',-->
+<!--      minute: '2-digit'-->
+<!--    });-->
+<!--  }-->
+
+<!--  // Удаление фото-->
 <!--  function deletePhoto(photoId) {-->
 <!--    if (!confirm('Вы уверены, что хотите удалить это фото?')) {-->
 <!--      return;-->
@@ -211,8 +798,8 @@
 <!--    })-->
 <!--            .then(response => response.text())-->
 <!--            .then(data => {-->
-<!--              alert('Фото удалено: ' + data);-->
-<!--              loadPhotosList();-->
+<!--              alert('Фото удалено успешно');-->
+<!--              loadPhotosList(); // Перезагружаем список-->
 <!--            })-->
 <!--            .catch(error => {-->
 <!--              alert('Ошибка удаления: ' + error.message);-->
@@ -224,8 +811,12 @@
 <!--    loadPhotosList();-->
 <!--  });-->
 <!--</script>-->
+
+<!--<script th:src="@{/js/online-status.js}"></script>-->
+<!--<script th:src="@{/js/notifications.js}"></script>-->
 <!--</body>-->
 <!--</html>-->
+
 
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
@@ -285,7 +876,161 @@
       margin: 0;
     }
 
-    /* Photo Container */
+    /* Quota Container */
+    .quota-container {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .quota-section {
+      padding: 2rem 2.5rem;
+    }
+
+    .quota-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.375rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 1.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .quota-content {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 2rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Quota Circle */
+    .quota-visual {
+      display: flex;
+      justify-content: center;
+    }
+
+    .quota-circle {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+
+    .quota-circle-inner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .quota-percentage {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      line-height: 1;
+    }
+
+    .quota-label-small {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .quota-circle-progress {
+      transform: rotate(-90deg);
+    }
+
+    .quota-circle-progress circle:last-child {
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Quota Details */
+    .quota-details {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .quota-stat-item {
+      text-align: center;
+      background: var(--bg-accent);
+      padding: 1.25rem 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-secondary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .quota-stat-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .quota-stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .quota-stat-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Quota Status */
+    .quota-status {
+      background: var(--bg-accent);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.5rem;
+      border: 1px solid var(--border-secondary);
+    }
+
+    .quota-status-good {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #16a34a;
+    }
+
+    .quota-status-good i {
+      font-size: 1.125rem;
+    }
+
+    .quota-status-warning {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .quota-status-warning i {
+      font-size: 1.125rem;
+    }
+
+    .quota-status-exhausted {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #dc2626;
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .quota-status-exhausted i {
+      font-size: 1.125rem;
+    }
     .photo-container {
       background: var(--bg-secondary);
       border-radius: var(--radius-xl);
@@ -301,15 +1046,106 @@
       border-bottom: 1px solid var(--border-secondary);
     }
 
-    .upload-section h2 {
+    /* Upload Header */
+    .upload-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .upload-header h2 {
       font-family: 'Playfair Display', serif;
       font-size: 1.5rem;
       font-weight: 600;
       color: var(--text-primary);
-      margin-bottom: 1.5rem;
+      margin: 0;
       display: flex;
       align-items: center;
       gap: 0.75rem;
+    }
+
+    /* Quota Info */
+    .quota-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.5rem;
+      min-width: 200px;
+    }
+
+    .quota-stats {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .quota-used {
+      font-size: 1.25rem;
+      color: var(--accent-primary);
+    }
+
+    .quota-separator {
+      color: var(--text-muted);
+    }
+
+    .quota-total {
+      font-size: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .quota-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-left: 0.25rem;
+    }
+
+    .quota-bar {
+      width: 200px;
+      height: 6px;
+      background: var(--bg-primary);
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid var(--border-secondary);
+    }
+
+    .quota-progress {
+      height: 100%;
+      background: linear-gradient(90deg, #16a34a 0%, #eab308 70%, #dc2626 90%);
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 2px;
+    }
+
+    .quota-remaining {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .quota-remaining i {
+      color: #16a34a;
+    }
+
+    .quota-exhausted {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.8125rem;
+      color: #dc2626;
+      background: rgba(239, 68, 68, 0.1);
+      padding: 0.375rem 0.75rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .quota-exhausted i {
+      color: #dc2626;
     }
 
     /* Upload Form */
@@ -715,7 +1551,76 @@
     <span th:text="${errorMessage}"></span>
   </div>
 
-  <!-- Upload Section -->
+  <!-- Quota Info Section -->
+  <div class="quota-container">
+    <div class="quota-section">
+      <div class="quota-header">
+        <h3>
+          <i class="fas fa-chart-pie"></i>
+          Использование лимита фотографий
+        </h3>
+      </div>
+
+      <div class="quota-content">
+        <div class="quota-visual">
+          <div class="quota-circle">
+            <div class="quota-circle-inner">
+              <span class="quota-percentage" th:text="${usagePercentage} + '%'">50%</span>
+              <span class="quota-label-small">использовано</span>
+            </div>
+            <svg class="quota-circle-progress" width="120" height="120">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border-secondary)" stroke-width="8"/>
+              <circle cx="60" cy="60" r="50" fill="none"
+                      stroke="var(--accent-primary)"
+                      stroke-width="8"
+                      stroke-linecap="round"
+                      stroke-dasharray="314.16"
+                      th:attr="stroke-dashoffset=${strokeDashoffset}"
+                      transform="rotate(-90 60 60)"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="quota-details">
+          <div class="quota-stat-item">
+            <div class="quota-stat-value" th:text="${usedCount}">5</div>
+            <div class="quota-stat-label">Загружено фото</div>
+          </div>
+
+          <div class="quota-stat-item">
+            <div class="quota-stat-value" th:text="${remainingLimit}">5</div>
+            <div class="quota-stat-label">Доступно</div>
+          </div>
+
+          <div class="quota-stat-item">
+            <div class="quota-stat-value" th:text="${totalLimit}">10</div>
+            <div class="quota-stat-label">Общий лимит</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quota-status">
+        <div th:if="${remainingLimit > 0}" class="quota-status-good">
+          <i class="fas fa-check-circle"></i>
+          <span th:text="'У вас осталось ' + ${remainingLimit} + ' ' + (${remainingLimit} == 1 ? 'фото' : (${remainingLimit} < 5 ? 'фотографии' : 'фотографий'))">
+                        У вас осталось 5 фотографий
+                    </span>
+        </div>
+
+        <div th:if="${remainingLimit == 0}" class="quota-status-exhausted">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Лимит фотографий исчерпан! Удалите старые фото для загрузки новых.</span>
+        </div>
+
+        <div th:if="${remainingLimit <= 2 and remainingLimit > 0}" class="quota-status-warning">
+          <i class="fas fa-exclamation-circle"></i>
+          <span th:text="'Внимание! Осталось всего ' + ${remainingLimit} + ' ' + (${remainingLimit} == 1 ? 'фото' : 'фотографии')">
+                        Внимание! Осталось всего 2 фотографии
+                    </span>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="photo-container">
     <div class="upload-section">
       <h2>
@@ -769,6 +1674,9 @@
       <div th:unless="${canUpload}" class="upload-disabled">
         <i class="fas fa-ban"></i>
         <h3>Достигнут лимит загрузки фотографий!</h3>
+        <p>
+          Вы использовали <strong th:text="${usedCount}">10</strong> из <strong th:text="${totalLimit}">10</strong> доступных фото.
+        </p>
         <p>Удалите некоторые фото, чтобы загрузить новые, или обратитесь к администратору для увеличения лимита.</p>
       </div>
     </div>
