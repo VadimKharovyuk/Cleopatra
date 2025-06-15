@@ -1,5 +1,5 @@
 # Многоэтапная сборка для оптимизации размера образа
-FROM maven:3.9.5-openjdk-21-slim AS build
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 
 # Установка рабочей директории
 WORKDIR /app
@@ -12,8 +12,11 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Финальный этап - создание образа для запуска
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jre-alpine
 
+# Установка часового пояса (опционально)
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Moscow
 
 # Создание пользователя для безопасности
 RUN addgroup --system spring && adduser --system spring --ingroup spring
