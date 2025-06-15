@@ -14,8 +14,8 @@ COPY --from=build /app/target/cleopatra-0.0.1-SNAPSHOT.jar app.jar
 
 
 # Оптимизированные JVM настройки для Render
-ENV JAVA_OPTS="-Xmx400m -Xms200m -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -Djava.security.egd=file:/dev/./urandom"
-
+# Новые настройки для Render Free
+ENV JAVA_OPTS="-Xmx300m -Xms128m -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MaxGCPauseMillis=100"
 
 EXPOSE 10000
 
