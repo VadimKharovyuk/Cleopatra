@@ -23,7 +23,6 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        log.info("🔔 Notification WebSocket connection established: {}", session.getId());
 
         // Получаем userId из URL параметров
         Long userId = getUserIdFromSession(session);
@@ -31,7 +30,6 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
         if (userId != null) {
             notificationSessions.put(userId, session);
             session.getAttributes().put("userId", userId);
-            log.info("👤 User {} connected to notifications WebSocket", userId);
 
             // Отправляем подтверждение
             sendMessage(session, Map.of(
@@ -94,7 +92,6 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
                 );
 
                 sendMessage(session, message);
-                log.info("✅ Notification sent to user {}: {}", userId, notification.getTitle());
                 return true; // 🔧 Возвращаем true при успехе
 
             } catch (Exception e) {
