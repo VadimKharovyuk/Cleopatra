@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -123,6 +124,7 @@ public class PhotoServiceImpl implements PhotoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PhotoResponseDto getPhotoById(Long userId, Long photoId) {
         // Находим фото с проверкой владельца
         Photo photo = photoRepository.findByIdAndAuthorId(photoId, userId)
@@ -132,6 +134,7 @@ public class PhotoServiceImpl implements PhotoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PhotoResponseDto> getUserPhotos(Long userId) {
         List<Photo> photos = photoRepository.findByAuthorIdOrderByUploadDateDesc(userId);
         return photos.stream()
@@ -140,6 +143,7 @@ public class PhotoServiceImpl implements PhotoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PhotoResponseDto> getPublicPhotos(Long userId) {
         // Проверяем, что пользователь существует
         User user = userRepository.findById(userId).orElseThrow(

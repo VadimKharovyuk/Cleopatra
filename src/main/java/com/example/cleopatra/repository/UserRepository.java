@@ -60,7 +60,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             AND u.lastName IS NOT NULL
             ORDER BY 
         CASE 
-            WHEN u.id = 1 THEN 6                   
+            WHEN u.id = 4 THEN 6                   
             WHEN u.followersCount >= 10000 THEN 5
             WHEN u.followersCount >= 1000 THEN 4
             WHEN u.followersCount >= 100 THEN 3
