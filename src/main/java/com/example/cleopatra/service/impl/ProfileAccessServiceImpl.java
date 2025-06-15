@@ -22,14 +22,9 @@ public class ProfileAccessServiceImpl implements ProfileAccessService {
     private final SubscriptionService subscriptionService;
     @Override
     public boolean canViewProfile(Long viewerId, Long profileOwnerId) {
-        log.info("🔒 canViewProfile: viewerId={}, profileOwnerId={}", viewerId, profileOwnerId);
-
         ProfileAccessLevel accessLevel = getProfileAccessLevel(profileOwnerId);
-        log.info("🔒 Уровень доступа профиля: {}", accessLevel);
 
         boolean result = checkAccess(viewerId, profileOwnerId, accessLevel);
-        log.info("🔒 Результат проверки доступа: {}", result);
-
         return result;
     }
 
@@ -162,7 +157,6 @@ public class ProfileAccessServiceImpl implements ProfileAccessService {
 
         // Профиль всегда доступен самому владельцу
         if (viewerId != null && viewerId.equals(profileOwnerId)) {
-            log.info("🔍 Доступ разрешен: собственный профиль");
             return true;
         }
 
@@ -170,13 +164,12 @@ public class ProfileAccessServiceImpl implements ProfileAccessService {
         if (profileOwner.isBlocked()) {
             log.warn("🔍 Пользователь {} заблокирован системой", profileOwnerId);
             boolean isAdminAccess = viewerId != null && isAdmin(viewerId);
-            log.info("🔍 Доступ админа: {}", isAdminAccess);
             return isAdminAccess;
         }
 
         // Admin имеет доступ ко всем профилям
         if (viewerId != null && isAdmin(viewerId)) {
-            log.info("🔍 Доступ разрешен: администратор");
+
             return true;
         }
 
@@ -196,7 +189,7 @@ public class ProfileAccessServiceImpl implements ProfileAccessService {
             case SUBSCRIBERS_ONLY -> {
                 boolean isSubscribed = viewerId != null &&
                         subscriptionService.isSubscribed(viewerId, profileOwnerId);
-                log.info("🔍 SUBSCRIBERS_ONLY: подписка {}={}", viewerId, isSubscribed);
+
                 yield isSubscribed;
             }
 
