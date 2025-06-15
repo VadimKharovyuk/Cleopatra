@@ -302,6 +302,7 @@ public class PhotoController {
         }
     }
 
+
     private Long getCurrentUserId(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return null;
