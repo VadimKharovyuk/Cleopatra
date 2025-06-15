@@ -230,5 +230,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT COUNT(u) FROM User u WHERE (u.lastActivity BETWEEN :start AND :end) OR (u.lastSeen BETWEEN :start AND :end)")
     long countActiveUsersBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
+    @Modifying
+    @Query("UPDATE User u SET u.photoCount = u.photoCount - 1 WHERE u.id = :userId")
+    void decrementPhotoCount(@Param("userId") Long userId);
 }
 

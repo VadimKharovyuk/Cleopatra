@@ -118,6 +118,10 @@ public class User {
     private LocalDate birthDate;
 
 
+    @Column(name = "photo_count", nullable = false)
+    private Integer photoCount = 0;
+
+
     @OneToMany(mappedBy = "blockedUser", fetch = FetchType.LAZY)
     @OrderBy("blockedAt DESC")
     @Builder.Default
@@ -147,6 +151,9 @@ public class User {
     @OneToMany(mappedBy = "visitor", fetch = FetchType.LAZY)
     @OrderBy("visitedAt DESC")
     private List<Visit> myVisits = new ArrayList<>();
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Photo> photos = new ArrayList<>();
 
     @Column(name = "total_visits")
     @Builder.Default

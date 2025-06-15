@@ -11,6 +11,8 @@ public enum Role {
 
     USER("Пользователь", "Новичок/Стажер");
 
+
+
     private final String displayName;
     private final String description;
 

@@ -60,7 +60,7 @@ public class AdminReportController {
             model.addAttribute("totalPages", reports.getTotalPages());
             model.addAttribute("totalElements", reports.getTotalElements());
             model.addAttribute("pageSize", size);
-            model.addAttribute("currentAdmin", currentAdmin); // Добавляем админа в модель
+            model.addAttribute("currentAdmin", currentAdmin);
 
             // Статистика для дашборда
             model.addAttribute("pendingCount", getPendingCount());

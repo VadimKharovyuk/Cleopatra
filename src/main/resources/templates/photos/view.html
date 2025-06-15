@@ -1,0 +1,935 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Просмотр фото</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--  <header>-->
+<!--    <h1>Просмотр фотографии</h1>-->
+<!--    <nav>-->
+<!--      <a href="/photos">← Назад к фотографиям</a>-->
+<!--      <a href="/">Главная</a>-->
+<!--      <a href="/profile">Профиль</a>-->
+<!--    </nav>-->
+<!--  </header>-->
+
+<!--  <main>-->
+<!--    &lt;!&ndash; Ошибка &ndash;&gt;-->
+<!--    <div th:if="${errorMessage}" class="error-message">-->
+<!--      <p th:text="${errorMessage}"></p>-->
+<!--      <a href="/photos">Вернуться к списку фотографий</a>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Информация о фото &ndash;&gt;-->
+<!--    <div th:if="${photo}" class="photo-details">-->
+<!--      <div class="photo-header">-->
+<!--        <h2>Фотография #<span th:text="${photo.id}"></span></h2>-->
+<!--        <div class="photo-meta">-->
+<!--          <p><strong>ID:</strong> <span th:text="${photo.picId}"></span></p>-->
+<!--          <p><strong>Дата загрузки:</strong>-->
+<!--            <span th:text="${#temporals.format(photo.uploadDate, 'dd.MM.yyyy HH:mm')}"></span>-->
+<!--          </p>-->
+<!--          <p><strong>Автор:</strong> <span th:text="${photo.authorName}"></span></p>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Изображение &ndash;&gt;-->
+<!--      <div class="photo-display">-->
+<!--        <img th:src="${photo.picUrl}"-->
+<!--             th:alt="${photo.description}"-->
+<!--             style="max-width: 100%; height: auto; border: 1px solid #ddd;">-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Описание &ndash;&gt;-->
+<!--      <div class="photo-description">-->
+<!--        <h3>Описание:</h3>-->
+<!--        <p th:text="${photo.description ?: 'Описание отсутствует'}"-->
+<!--           th:class="${photo.description} ? '' : 'no-description'"></p>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Действия &ndash;&gt;-->
+<!--      <div class="photo-actions">-->
+<!--        <h3>Действия:</h3>-->
+
+<!--        &lt;!&ndash; Форма удаления &ndash;&gt;-->
+<!--        <form th:action="@{/photos/{id}/delete(id=${photo.id})}"-->
+<!--              method="post"-->
+<!--              style="display: inline;"-->
+<!--              onsubmit="return confirm('Вы уверены, что хотите удалить это фото?')">-->
+<!--          <button type="submit" class="delete-button">Удалить фото</button>-->
+<!--        </form>-->
+
+<!--        &lt;!&ndash; Ссылка на оригинал &ndash;&gt;-->
+<!--        <a th:href="${photo.picUrl}" target="_blank" class="view-original">-->
+<!--          Открыть в полном размере-->
+<!--        </a>-->
+
+<!--        &lt;!&ndash; Копирование ссылки &ndash;&gt;-->
+<!--        <button onclick="copyToClipboard()" class="copy-link">-->
+<!--          Скопировать ссылку-->
+<!--        </button>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Техническая информация &ndash;&gt;-->
+<!--      <div class="photo-technical">-->
+<!--        <h3>Техническая информация:</h3>-->
+<!--        <table>-->
+<!--          <tr>-->
+<!--            <td><strong>ID в базе:</strong></td>-->
+<!--            <td th:text="${photo.id}"></td>-->
+<!--          </tr>-->
+<!--          <tr>-->
+<!--            <td><strong>Уникальный ID:</strong></td>-->
+<!--            <td th:text="${photo.picId}"></td>-->
+<!--          </tr>-->
+<!--          <tr>-->
+<!--            <td><strong>URL:</strong></td>-->
+<!--            <td>-->
+<!--              <a th:href="${photo.picUrl}"-->
+<!--                 th:text="${photo.picUrl}"-->
+<!--                 target="_blank"></a>-->
+<!--            </td>-->
+<!--          </tr>-->
+<!--          <tr>-->
+<!--            <td><strong>ID автора:</strong></td>-->
+<!--            <td th:text="${photo.authorId}"></td>-->
+<!--          </tr>-->
+<!--          <tr>-->
+<!--            <td><strong>Дата создания:</strong></td>-->
+<!--            <td th:text="${#temporals.format(photo.uploadDate, 'dd.MM.yyyy HH:mm:ss')}"></td>-->
+<!--          </tr>-->
+<!--        </table>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Редактирование описания &ndash;&gt;-->
+<!--      <div class="edit-description">-->
+<!--        <h3>Редактировать описание:</h3>-->
+<!--        <form id="editDescriptionForm">-->
+<!--                        <textarea id="newDescription"-->
+<!--                                  rows="3"-->
+<!--                                  maxlength="500"-->
+<!--                                  th:text="${photo.description}"-->
+<!--                                  placeholder="Введите новое описание..."></textarea>-->
+<!--          <br>-->
+<!--          <button type="submit">Сохранить описание</button>-->
+<!--          <button type="button" onclick="cancelEdit()">Отмена</button>-->
+<!--        </form>-->
+<!--        <p><em>Функция редактирования описания пока не реализована</em></p>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </main>-->
+<!--</div>-->
+
+<!--<script th:if="${photo}">-->
+<!--  // Копирование ссылки в буфер обмена-->
+<!--  function copyToClipboard() {-->
+<!--    const url = /*[[${photo.picUrl}]]*/ '';-->
+
+<!--    if (navigator.clipboard) {-->
+<!--      navigator.clipboard.writeText(url).then(function() {-->
+<!--        alert('Ссылка скопирована в буфер обмена!');-->
+<!--      }).catch(function(err) {-->
+<!--        console.error('Ошибка копирования: ', err);-->
+<!--        fallbackCopyToClipboard(url);-->
+<!--      });-->
+<!--    } else {-->
+<!--      fallbackCopyToClipboard(url);-->
+<!--    }-->
+<!--  }-->
+
+<!--  // Резервный способ копирования для старых браузеров-->
+<!--  function fallbackCopyToClipboard(text) {-->
+<!--    const textArea = document.createElement("textarea");-->
+<!--    textArea.value = text;-->
+<!--    textArea.style.position = "fixed";-->
+<!--    textArea.style.top = "0";-->
+<!--    textArea.style.left = "0";-->
+<!--    textArea.style.width = "2em";-->
+<!--    textArea.style.height = "2em";-->
+<!--    textArea.style.padding = "0";-->
+<!--    textArea.style.border = "none";-->
+<!--    textArea.style.outline = "none";-->
+<!--    textArea.style.boxShadow = "none";-->
+<!--    textArea.style.background = "transparent";-->
+
+<!--    document.body.appendChild(textArea);-->
+<!--    textArea.focus();-->
+<!--    textArea.select();-->
+
+<!--    try {-->
+<!--      const successful = document.execCommand('copy');-->
+<!--      if (successful) {-->
+<!--        alert('Ссылка скопирована в буфер обмена!');-->
+<!--      } else {-->
+<!--        alert('Не удалось скопировать ссылку');-->
+<!--      }-->
+<!--    } catch (err) {-->
+<!--      alert('Ошибка копирования: ' + err);-->
+<!--    }-->
+
+<!--    document.body.removeChild(textArea);-->
+<!--  }-->
+
+<!--  // Редактирование описания (заглушка)-->
+<!--  document.getElementById('editDescriptionForm').addEventListener('submit', function(e) {-->
+<!--    e.preventDefault();-->
+
+<!--    const newDescription = document.getElementById('newDescription').value;-->
+<!--    const photoId = /*[[${photo.id}]]*/ 0;-->
+
+<!--    // Здесь будет AJAX запрос на обновление описания-->
+<!--    alert('Функция редактирования описания пока не реализована.\nНовое описание: ' + newDescription);-->
+<!--  });-->
+
+<!--  function cancelEdit() {-->
+<!--    const originalDescription = /*[[${photo.description}]]*/ '';-->
+<!--    document.getElementById('newDescription').value = originalDescription;-->
+<!--  }-->
+
+<!--  // Обработка ошибок загрузки изображения-->
+<!--  document.addEventListener('DOMContentLoaded', function() {-->
+<!--    const img = document.querySelector('.photo-display img');-->
+<!--    if (img) {-->
+<!--      img.addEventListener('error', function() {-->
+<!--        this.style.display = 'none';-->
+<!--        this.parentElement.innerHTML = `-->
+<!--                        <div class="image-error">-->
+<!--                            <p>❌ Ошибка загрузки изображения</p>-->
+<!--                            <p>URL: <a href="${this.src}" target="_blank">${this.src}</a></p>-->
+<!--                        </div>-->
+<!--                    `;-->
+<!--      });-->
+
+<!--      img.addEventListener('load', function() {-->
+<!--        console.log('Изображение успешно загружено');-->
+<!--      });-->
+<!--    }-->
+<!--  });-->
+<!--</script>-->
+
+<!--<style>-->
+<!--  .no-description {-->
+<!--    font-style: italic;-->
+<!--    color: #666;-->
+<!--  }-->
+
+<!--  .photo-actions {-->
+<!--    margin: 20px 0;-->
+<!--  }-->
+
+<!--  .photo-actions button,-->
+<!--  .photo-actions a {-->
+<!--    margin-right: 10px;-->
+<!--    padding: 8px 15px;-->
+<!--    text-decoration: none;-->
+<!--    border: 1px solid #ddd;-->
+<!--    background: #f5f5f5;-->
+<!--    cursor: pointer;-->
+<!--  }-->
+
+<!--  .delete-button {-->
+<!--    background-color: #ff4444;-->
+<!--    color: white;-->
+<!--    border-color: #cc0000;-->
+<!--  }-->
+
+<!--  .photo-technical table {-->
+<!--    border-collapse: collapse;-->
+<!--    width: 100%;-->
+<!--  }-->
+
+<!--  .photo-technical td {-->
+<!--    padding: 5px 10px;-->
+<!--    border: 1px solid #ddd;-->
+<!--  }-->
+
+<!--  .image-error {-->
+<!--    text-align: center;-->
+<!--    padding: 20px;-->
+<!--    border: 2px dashed #ccc;-->
+<!--    background-color: #f9f9f9;-->
+<!--  }-->
+
+<!--  .edit-description textarea {-->
+<!--    width: 100%;-->
+<!--    max-width: 500px;-->
+<!--  }-->
+<!--</style>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр фото</title>
+
+    <!-- External CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <!-- Стили sidebar -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+    <style>
+        /* Основные стили страницы */
+        body {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 400;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            margin: 0;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 1rem;
+        }
+
+        .back-button:hover {
+            background: rgba(99, 102, 241, 0.15);
+            transform: translateX(-2px);
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        /* Photo Container */
+        .photo-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
+            overflow: hidden;
+        }
+
+        /* Photo Display Section */
+        .photo-display-section {
+            padding: 2.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .photo-image-container {
+            background: var(--bg-accent);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .photo-image {
+            max-width: 100%;
+            max-height: 70vh;
+            width: auto;
+            height: auto;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            cursor: zoom-in;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .photo-image:hover {
+            transform: scale(1.02);
+        }
+
+        .image-error {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(239, 68, 68, 0.05);
+            border: 2px dashed rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius-md);
+            color: #dc2626;
+        }
+
+        .image-error i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+
+        /* Photo Info Section */
+        .photo-info-section {
+            padding: 2.5rem;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .photo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .photo-title-group {
+            flex: 1;
+        }
+
+        .photo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .photo-id {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .photo-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .meta-item {
+            background: var(--bg-accent);
+            padding: 1.25rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .meta-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .meta-value {
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+
+        .meta-value.author {
+            color: var(--accent-primary);
+            font-weight: 500;
+        }
+
+        /* Description Section */
+        .description-section {
+            background: var(--bg-accent);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .description-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .description-content {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .description-content.empty {
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        /* Actions Section */
+        .actions-section {
+            padding: 2.5rem;
+        }
+
+        .actions-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            border: none;
+            background: none;
+        }
+
+        .btn-view-original {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .btn-view-original:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-copy-link {
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            border: 1px solid var(--border-secondary);
+        }
+
+        .btn-copy-link:hover {
+            background: var(--bg-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Technical Info */
+        .technical-section {
+            background: var(--bg-accent);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-secondary);
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+
+        .technical-header {
+            background: var(--bg-primary);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-secondary);
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .technical-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .technical-table td {
+            padding: 0.875rem 1.5rem;
+            border-bottom: 1px solid var(--border-secondary);
+            vertical-align: top;
+        }
+
+        .technical-table td:first-child {
+            font-weight: 500;
+            color: var(--text-secondary);
+            width: 30%;
+            min-width: 120px;
+        }
+
+        .technical-table td:last-child {
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            word-break: break-all;
+        }
+
+        .technical-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Messages */
+        .message {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Modal for Fullscreen */
+        .photo-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            cursor: zoom-out;
+        }
+
+        .photo-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .photo-modal img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: var(--radius-md);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                margin-top: 60px;
+                padding: 1rem;
+            }
+
+            .photo-display-section,
+            .photo-info-section,
+            .actions-section {
+                padding: 1.5rem;
+            }
+
+            .photo-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .photo-meta-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .technical-table td:first-child {
+                width: auto;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Mobile Header -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+
+<!-- Sidebar с активной секцией -->
+<th:block th:replace="~{fragments/sidebar :: sidebar('photos')}"></th:block>
+
+<div class="main-content">
+    <!-- Back Button -->
+    <a href="/photos" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        Назад к фотографиям
+    </a>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-image me-3"></i>
+            Просмотр фотографии
+        </h1>
+        <p class="page-subtitle">
+            Детальная информация о вашей фотографии
+        </p>
+    </div>
+
+    <!-- Error Message -->
+    <div th:if="${errorMessage}" class="message error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Photo Container -->
+    <div th:if="${photo}" class="photo-container">
+        <!-- Photo Display -->
+        <div class="photo-display-section">
+            <div class="photo-image-container">
+                <img th:src="${photo.picUrl}"
+                     th:alt="${photo.description ?: 'Фотография'}"
+                     class="photo-image"
+                     id="mainPhoto"
+                     onclick="openFullscreen()">
+            </div>
+        </div>
+
+        <!-- Photo Info -->
+        <div class="photo-info-section">
+            <div class="photo-header">
+                <div class="photo-title-group">
+                    <h2 class="photo-title" th:text="'Фото #' + ${photo.id}">Фото #1</h2>
+                    <div class="photo-id" th:text="'ID: ' + ${photo.picId}">ID: abc123</div>
+                </div>
+            </div>
+
+            <!-- Meta Information -->
+            <div class="photo-meta-grid">
+                <div class="meta-item">
+                    <div class="meta-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        Дата загрузки
+                    </div>
+                    <div class="meta-value"
+                         th:text="${#temporals.format(photo.uploadDate, 'dd MMMM yyyy, HH:mm', #locale)}">
+                        15 июня 2025, 14:30
+                    </div>
+                </div>
+
+                <div class="meta-item">
+                    <div class="meta-label">
+                        <i class="fas fa-user"></i>
+                        Автор
+                    </div>
+                    <div class="meta-value author" th:text="${photo.authorName}">
+                        Иван Петров
+                    </div>
+                </div>
+
+                <div class="meta-item">
+                    <div class="meta-label">
+                        <i class="fas fa-link"></i>
+                        Статус
+                    </div>
+                    <div class="meta-value">
+                        <span style="color: #16a34a;">Активно</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="description-section">
+                <div class="description-title">
+                    <i class="fas fa-align-left"></i>
+                    Описание
+                </div>
+                <div th:if="${photo.description}"
+                     class="description-content"
+                     th:text="${photo.description}">
+                    Красивый закат на берегу моря
+                </div>
+                <div th:unless="${photo.description}"
+                     class="description-content empty">
+                    Описание не добавлено
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions-section">
+            <h3 class="actions-title">
+                <i class="fas fa-tools"></i>
+                Действия
+            </h3>
+
+            <div class="actions-grid">
+                <a th:href="${photo.picUrl}"
+                   target="_blank"
+                   class="action-button btn-view-original">
+                    <i class="fas fa-external-link-alt"></i>
+                    Открыть оригинал
+                </a>
+
+
+                <form th:action="@{/photos/{id}/delete(id=${photo.id})}"
+                      method="post"
+                      style="display: contents;"
+                      onsubmit="return confirm('Вы уверены, что хотите удалить это фото? Это действие нельзя отменить.')">
+                    <button type="submit" class="action-button btn-delete">
+                        <i class="fas fa-trash"></i>
+                        Удалить фото
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Modal -->
+<div class="photo-modal" id="photoModal" onclick="closeFullscreen()">
+    <img th:src="${photo?.picUrl}" alt="Фото в полном размере" id="modalImage">
+</div>
+
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<script th:if="${photo}">
+
+
+    // Полноэкранный просмотр
+    function openFullscreen() {
+        const modal = document.getElementById('photoModal');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeFullscreen() {
+        const modal = document.getElementById('photoModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Закрытие по Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeFullscreen();
+        }
+    });
+
+    // Обработка ошибок загрузки изображения
+    document.addEventListener('DOMContentLoaded', function () {
+        const mainImg = document.getElementById('mainPhoto');
+        const modalImg = document.getElementById('modalImage');
+
+        if (mainImg) {
+            mainImg.addEventListener('error', function () {
+                this.parentElement.innerHTML = `
+                    <div class="image-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Ошибка загрузки изображения</h3>
+                        <p>Не удалось загрузить изображение</p>
+                        <p><small>URL: <a href="${this.src}" target="_blank">${this.src}</a></small></p>
+                    </div>
+                `;
+            });
+
+            mainImg.addEventListener('load', function () {
+                console.log('Изображение успешно загружено');
+            });
+        }
+    });
+
+    // Простая система уведомлений
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#16a34a' : '#dc2626'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1001;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        `;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        // Анимация появления
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+
+        // Автоудаление
+        setTimeout(() => {
+            notification.style.transform = 'translateX(400px)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+</script>
+
+<script th:src="@{/js/online-status.js}"></script>
+<script th:src="@{/js/notifications.js}"></script>
+</body>
+</html>
