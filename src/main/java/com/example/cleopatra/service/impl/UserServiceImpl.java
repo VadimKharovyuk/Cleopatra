@@ -19,6 +19,8 @@ import com.example.cleopatra.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -68,6 +70,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "users", key = "#userId")
     public UserResponse uploadAvatar(Long userId, MultipartFile file) {
         log.info("Начинаем загрузку аватара для пользователя с ID: {}", userId);
 
@@ -111,6 +114,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = {"users", "users-by-email"}, key = "#userId")
     public UserResponse updateProfile(Long userId, UpdateProfileDto profileDto) {
         log.info("Начинаем обновление профиля для пользователя с ID: {}", userId);
 
@@ -133,7 +137,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "users", key = "#userId")
     public UserResponse getUserById(Long userId) {
+        log.info("Загрузка пользователя с ID: {} из базы данных", userId);
 
         User user = userRepository.findByIdWithOnlineStatus(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
@@ -176,6 +182,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "users", key = "#userId")
     public UserResponse deleteAvatar(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь с ID " + userId + " не найден"));
@@ -192,6 +199,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "users", key = "#userId")
     public UserResponse uploadBackgroundImage(Long userId, MultipartFile file) {
         log.info("Начинаем загрузку фонового изображения для пользователя с ID: {}", userId);
 
@@ -235,6 +243,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "users", key = "#userId")
     public UserResponse deleteBackgroundImage(Long userId) {
         log.info("Удаляем фоновое изображение для пользователя с ID: {}", userId);
 
@@ -265,6 +274,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "users-by-email", key = "#email")  // ✅ ПРАВИЛЬНО!
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
@@ -273,6 +283,7 @@ public class UserServiceImpl implements UserService {
 
 
 @Override
+
 public User getCurrentUserEntity() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String userEmail = authentication.getName();
@@ -297,6 +308,7 @@ public User getCurrentUserEntity(Authentication authentication) {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user-status", key = "#userId")
     public void updateOnlineStatus(Long userId, boolean isOnline) {
         try {
             LocalDateTime now = LocalDateTime.now();
@@ -331,6 +343,7 @@ public User getCurrentUserEntity(Authentication authentication) {
     /**
      * Получить онлайн статус пользователя
      */
+    @Cacheable(value = "user-status", key = "#userId")
     public boolean isUserOnline(Long userId) {
         return userRepository.findById(userId)
                 .map(User::getIsOnline)
@@ -350,6 +363,7 @@ public User getCurrentUserEntity(Authentication authentication) {
      * Обновить время последней активности
      */
     @Transactional
+    @CacheEvict(value = "user-status", key = "#userId")
     public void updateLastActivity(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -362,6 +376,7 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
 
     @Override
+    @CacheEvict(value = {"users", "user-entities"}, key = "#userId")
     public void updateNotificationSettings(Long userId, Boolean receiveVisitNotifications) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
@@ -374,6 +389,7 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
 
     @Override
+    @Cacheable(value = "user-entities", key = "#userId")
     public User findById(Long blockerId) {
         return  userRepository.findById(blockerId).orElseThrow(() -> new RuntimeException("User not found"));
     }
@@ -381,6 +397,7 @@ public User getCurrentUserEntity(Authentication authentication) {
 
 
     @Override
+    @CacheEvict(value = {"users", "user-entities"}, key = "#userId")
     public void changePassword(Long userId, ChangePasswordDto changePasswordDto) {
 
         // Проверка совпадения нового пароля с подтверждением
@@ -411,6 +428,7 @@ public User getCurrentUserEntity(Authentication authentication) {
      * Сбрасывает пароль пользователя по email
      */
     @Override
+    @CacheEvict(value = {"users", "users-by-email"}, allEntries = true)
     public void resetPasswordByEmail(String email, String newPassword) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь с email " + email + " не найден"));
@@ -422,6 +440,7 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
 
     @Override
+    @CacheEvict(value = {"users", "user-entities"}, key = "#user.id")
     public void addBalance(User user, BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Сумма должна быть положительной");
@@ -435,6 +454,7 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
 
     @Override
+    @CacheEvict(value = {"users", "user-entities"}, key = "#user.id")
     public void subtractBalance(User user, BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Сумма должна быть положительной");
@@ -462,6 +482,7 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
 
     @Override
+    @CacheEvict(value = {"users", "user-entities"}, key = "#user.id")
     public User save(User user) {
         return userRepository.save(user);
     }
@@ -490,11 +511,13 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
 
     @Override
+    @Cacheable(value = "user-analytics", key = "'total-users'")
     public long getTotalUsersCount() {
         return userRepository.count();
     }
 
     @Override
+    @Cacheable(value = "user-analytics", key = "'users-date-' + #date")
     public long getUsersCountByDate(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
@@ -502,12 +525,14 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
 
     @Override
+    @Cacheable(value = "user-analytics", key = "'users-from-' + #fromDate")
     public long getUsersCountFromDate(LocalDate fromDate) {
         LocalDateTime startDate = fromDate.atStartOfDay();
         return userRepository.countByCreatedAtGreaterThanEqual(startDate);
     }
 
     @Override
+    @Cacheable(value = "user-analytics", key = "'active-users-' + #date")
     public long getActiveUsersCountByDate(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
@@ -522,6 +547,7 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
 
     @Override
+    @Cacheable(value = "user-analytics", key = "'users-month-' + #year + '-' + #monthValue")
     public long getUsersCountByMonth(int year, int monthValue) {
         LocalDateTime startOfMonth = LocalDateTime.of(year, monthValue, 1, 0, 0);
         LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusSeconds(1);
@@ -529,11 +555,13 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
 
     @Override
+    @Cacheable(value = "user-analytics", key = "'online-count'")
     public long getOnlineUsersCount() {
         return userRepository.countByIsOnlineTrue();
     }
 
     @Override
+    @Cacheable(value = "user-analytics", key = "'active-users-from-' + #fromDate")
     public long getActiveUsersCountFromDate(LocalDate fromDate) {
         LocalDateTime startDate = fromDate.atStartOfDay();
         return userRepository.countActiveUsersFromDate(startDate);
@@ -543,6 +571,7 @@ public User getCurrentUserEntity(Authentication authentication) {
     /**
      * Получить пользователей онлайн
      */
+    @Cacheable(value = "user-analytics", key = "'online-users-list'")
     public List<UserResponse> getOnlineUsers() {
         List<User> onlineUsers = userRepository.findByIsOnlineTrue();
         return onlineUsers.stream()
@@ -599,8 +628,8 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
     @Override
     @Transactional
+    @CacheEvict(value = "user-status", key = "#userId")
     public void setUserOnline(Long userId, boolean isOnline) {
-        log.debug("Setting user {} online status to: {}", userId, isOnline);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));

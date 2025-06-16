@@ -45,6 +45,51 @@ public class CacheConfig {
                         .recordStats()
                         .build());
 
+
+
+
+        // Основные пользователи - долгоживущий кеш
+        cacheManager.registerCustomCache("users",
+                Caffeine.newBuilder()
+                        .maximumSize(1000)
+                        .expireAfterWrite(15, TimeUnit.MINUTES)
+                        .recordStats()
+                        .build());
+
+        cacheManager.registerCustomCache("users-by-email",
+                Caffeine.newBuilder()
+                        .maximumSize(1000)                    // 1000 email поисков
+                        .expireAfterWrite(30, TimeUnit.MINUTES)  // Email редко меняется
+                        .expireAfterAccess(10, TimeUnit.MINUTES)
+                        .recordStats()
+                        .build());
+
+
+        // Статус пользователей - короткоживущий кеш
+        cacheManager.registerCustomCache("user-status",
+                Caffeine.newBuilder()
+                        .maximumSize(2000)
+                        .expireAfterWrite(2, TimeUnit.MINUTES)
+                        .recordStats()
+                        .build());
+
+        // Аналитика - очень долгоживущий кеш
+        cacheManager.registerCustomCache("user-analytics",
+                Caffeine.newBuilder()
+                        .maximumSize(200)
+                        .expireAfterWrite(1, TimeUnit.HOURS)
+                        .recordStats()
+                        .build());
+
+        // Кеш для User entities (не DTO)
+        cacheManager.registerCustomCache("user-entities",
+                Caffeine.newBuilder()
+                        .maximumSize(2000)                    // Больше entities
+                        .expireAfterWrite(20, TimeUnit.MINUTES)  // Чуть меньше TTL
+                        .expireAfterAccess(8, TimeUnit.MINUTES)
+                        .recordStats()
+                        .build());
+
         return cacheManager;
     }
 }

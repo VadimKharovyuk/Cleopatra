@@ -22,6 +22,7 @@ public interface UserService {
     UserResponse uploadAvatar(Long userId, MultipartFile file);
 
 
+
     UserResponse updateProfile(Long userId, UpdateProfileDto profileDto);
 
 
