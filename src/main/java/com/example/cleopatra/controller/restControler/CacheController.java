@@ -91,6 +91,7 @@ public class CacheController {
             return ResponseEntity.status(500).body(errorResult);
         }
 
+
         long actualDuration = System.currentTimeMillis() - startTime;
 
         Map<String, Object> result = new HashMap<>();
