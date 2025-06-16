@@ -94,14 +94,10 @@ public class PostServiceImpl implements PostService {
             log.info("Saved Location Coordinates: ({}, {})",
                     savedPost.getLocation().getLatitude(), savedPost.getLocation().getLongitude());
         }
-
-        // ✅ ИСПРАВЛЕНИЕ: ЗАТЕМ обрабатываем упоминания (пост уже имеет ID)
         try {
             mentionService.createPostMentions(savedPost); // ✅ Используем savedPost
         } catch (Exception e) {
             log.error("Ошибка при создании упоминаний для поста {}: {}", savedPost.getId(), e.getMessage());
-            // Не бросаем исключение, чтобы не откатить создание поста
-            // Можно добавить в очередь для повторной обработки
         }
 
         // Получаем информацию о лайках
@@ -169,8 +165,6 @@ public class PostServiceImpl implements PostService {
     @Override
     @Cacheable(value = "posts", key = "#id")
     public PostResponseDto getPostById(Long id) {
-        log.info("Получение поста с ID: {}", id);
-
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Пост с ID " + id + " не найден"));
 
@@ -183,13 +177,14 @@ public class PostServiceImpl implements PostService {
 
         User currentUser = getCurrentUser();
 
-        // ✅ ОБНОВЛЕННЫЙ ВЫЗОВ с логикой лайков
         Boolean isLiked = postLikeService.isPostLikedByUser(post, currentUser.getId());
         List<PostResponseDto.LikeUserDto> recentLikes =
                 postLikeService.getRecentLikes(post, 5);
 
         return postMapper.toResponseDto(post, isLiked, recentLikes);
     }
+
+
 
 
     @Override

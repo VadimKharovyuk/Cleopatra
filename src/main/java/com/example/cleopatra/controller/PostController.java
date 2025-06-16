@@ -94,12 +94,9 @@ public class PostController {
                              Model model,
                              HttpServletRequest request) {
 
-        // ✅ ДОБАВЛЯЕМ детальные логи входящих данных
-        log.info("=== ПОЛУЧЕН ЗАПРОС НА СОЗДАНИЕ ПОСТА ===");
+
         log.info("PostCreateDto: {}", postCreateDto);
 
-        // Проверяем все параметры запроса
-        log.info("=== ВСЕ ПАРАМЕТРЫ ЗАПРОСА ===");
         request.getParameterMap().forEach((key, values) -> {
             log.info("Параметр {}: {}", key, Arrays.toString(values));
         });
@@ -113,7 +110,6 @@ public class PostController {
 
         try {
             PostResponseDto createdPost = postService.createPost(postCreateDto);
-            log.info("Пост успешно создан с ID: {}", createdPost.getId());
             redirectAttributes.addFlashAttribute("successMessage", "Пост успешно создан!");
             return "redirect:/posts/" + createdPost.getId();
 

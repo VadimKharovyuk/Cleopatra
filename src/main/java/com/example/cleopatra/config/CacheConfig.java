@@ -36,14 +36,6 @@ public class CacheConfig {
                         .recordStats()
                         .build());
 
-        // Кеш для рекомендуемых постов
-        cacheManager.registerCustomCache("recommended-posts",
-                Caffeine.newBuilder()
-                        .maximumSize(200)                     // Рекомендации обновляются чаще
-                        .expireAfterWrite(5, TimeUnit.MINUTES)
-                        .expireAfterAccess(2, TimeUnit.MINUTES)
-                        .recordStats()
-                        .build());
 
         // Кеш для статистики постов
         cacheManager.registerCustomCache("post-stats",
