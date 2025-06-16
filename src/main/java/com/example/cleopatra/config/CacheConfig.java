@@ -1,6 +1,7 @@
 package com.example.cleopatra.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -8,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.concurrent.TimeUnit;
-
+@Slf4j
 @Configuration
 @EnableCaching
 public class CacheConfig {
@@ -48,47 +49,75 @@ public class CacheConfig {
 
 
 
-        // Основные пользователи - долгоживущий кеш
+
+        // ✅ ОПТИМИЗИРОВАННАЯ КОНФИГУРАЦИЯ КЕША
+
+// Основные пользователи - долгоживущий кеш
         cacheManager.registerCustomCache("users",
                 Caffeine.newBuilder()
-                        .maximumSize(1000)
+                        .maximumSize(1500)                      // ⬆️ Увеличили с 1000
                         .expireAfterWrite(15, TimeUnit.MINUTES)
+                        .expireAfterAccess(5, TimeUnit.MINUTES) // ✅ ДОБАВИЛИ для неактивных
                         .recordStats()
+                        .removalListener((key, value, cause) ->
+                                log.debug("👤 Cache [users] evicted key: {}, cause: {}", key, cause))
                         .build());
 
+// Email поиск - средне долгоживущий
         cacheManager.registerCustomCache("users-by-email",
                 Caffeine.newBuilder()
-                        .maximumSize(1000)                    // 1000 email поисков
-                        .expireAfterWrite(30, TimeUnit.MINUTES)  // Email редко меняется
+                        .maximumSize(1000)
+                        .expireAfterWrite(30, TimeUnit.MINUTES)
                         .expireAfterAccess(10, TimeUnit.MINUTES)
                         .recordStats()
+                        .removalListener((key, value, cause) ->
+                                log.debug("📧 Cache [users-by-email] evicted key: {}, cause: {}", key, cause))
                         .build());
 
-
-        // Статус пользователей - короткоживущий кеш
-        cacheManager.registerCustomCache("user-status",
-                Caffeine.newBuilder()
-                        .maximumSize(2000)
-                        .expireAfterWrite(2, TimeUnit.MINUTES)
-                        .recordStats()
-                        .build());
-
-        // Аналитика - очень долгоживущий кеш
-        cacheManager.registerCustomCache("user-analytics",
-                Caffeine.newBuilder()
-                        .maximumSize(200)
-                        .expireAfterWrite(1, TimeUnit.HOURS)
-                        .recordStats()
-                        .build());
-
-        // Кеш для User entities (не DTO)
+// User entities - активно используемый кеш
         cacheManager.registerCustomCache("user-entities",
                 Caffeine.newBuilder()
-                        .maximumSize(2000)                    // Больше entities
-                        .expireAfterWrite(20, TimeUnit.MINUTES)  // Чуть меньше TTL
+                        .maximumSize(3000)                      // ⬆️ Увеличили с 2000 (много entity операций)
+                        .expireAfterWrite(20, TimeUnit.MINUTES)
                         .expireAfterAccess(8, TimeUnit.MINUTES)
                         .recordStats()
+                        .removalListener((key, value, cause) ->
+                                log.debug("🏗️ Cache [user-entities] evicted key: {}, cause: {}", key, cause))
                         .build());
+
+// Статус пользователей - короткоживущий кеш
+        cacheManager.registerCustomCache("user-status",
+                Caffeine.newBuilder()
+                        .maximumSize(5000)                      // ⬆️ Увеличили с 2000 (много онлайн проверок)
+                        .expireAfterWrite(90, TimeUnit.SECONDS) // ⬇️ Уменьшили с 2 минут (статус меняется быстро)
+                        .expireAfterAccess(30, TimeUnit.SECONDS) // ✅ ДОБАВИЛИ для более быстрой инвалидации
+                        .recordStats()
+                        .removalListener((key, value, cause) ->
+                                log.trace("⚡ Cache [user-status] evicted key: {}, cause: {}", key, cause))
+                        .build());
+
+// Аналитика - очень долгоживущий кеш
+        cacheManager.registerCustomCache("user-analytics",
+                Caffeine.newBuilder()
+                        .maximumSize(500)                       // ⬆️ Увеличили с 200 (больше аналитических запросов)
+                        .expireAfterWrite(2, TimeUnit.HOURS)    // ⬆️ Увеличили с 1 часа (аналитика обновляется редко)
+                        .expireAfterAccess(30, TimeUnit.MINUTES) // ✅ ДОБАВИЛИ для освобождения памяти
+                        .recordStats()
+                        .removalListener((key, value, cause) ->
+                                log.debug("📊 Cache [user-analytics] evicted key: {}, cause: {}", key, cause))
+                        .build());
+
+// ✅ ДОПОЛНИТЕЛЬНО: Кеш для часто запрашиваемых данных
+        cacheManager.registerCustomCache("user-brief",
+                Caffeine.newBuilder()
+                        .maximumSize(2000)                      // Для convertToUserBriefDto
+                        .expireAfterWrite(5, TimeUnit.MINUTES)  // Короткий TTL для чатов
+                        .expireAfterAccess(2, TimeUnit.MINUTES)
+                        .recordStats()
+                        .removalListener((key, value, cause) ->
+                                log.debug("💬 Cache [user-brief] evicted key: {}, cause: {}", key, cause))
+                        .build());
+
 
         return cacheManager;
     }
