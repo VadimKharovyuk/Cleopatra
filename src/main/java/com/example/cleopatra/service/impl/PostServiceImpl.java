@@ -14,6 +14,8 @@ import com.example.cleopatra.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +49,8 @@ public class PostServiceImpl implements PostService {
 
 
     @Override
-    @Transactional // ✅ Убедитесь, что метод транзакционный
+    @Transactional
+    @CacheEvict(value = {"user-posts", "post-stats", "recommended-posts"}, allEntries = true)
     public PostResponseDto createPost(PostCreateDto postCreateDto) {
 
         User currentUser = getCurrentUser();
@@ -78,10 +81,9 @@ public class PostServiceImpl implements PostService {
 
         // Логирование локации перед сохранением
         if (post.getLocation() != null) {
-            log.info("Location ID: {}", post.getLocation().getId());
             log.info("Location Coordinates: ({}, {})",
                     post.getLocation().getLatitude(), post.getLocation().getLongitude());
-            log.info("Location PlaceName: {}", post.getLocation().getPlaceName());
+
         }
 
         // ✅ ИСПРАВЛЕНИЕ: СНАЧАЛА сохраняем пост
@@ -96,7 +98,6 @@ public class PostServiceImpl implements PostService {
         // ✅ ИСПРАВЛЕНИЕ: ЗАТЕМ обрабатываем упоминания (пост уже имеет ID)
         try {
             mentionService.createPostMentions(savedPost); // ✅ Используем savedPost
-            log.info("Упоминания успешно обработаны для поста ID: {}", savedPost.getId());
         } catch (Exception e) {
             log.error("Ошибка при создании упоминаний для поста {}: {}", savedPost.getId(), e.getMessage());
             // Не бросаем исключение, чтобы не откатить создание поста
@@ -110,11 +111,7 @@ public class PostServiceImpl implements PostService {
 
         // Создаем DTO для ответа
         PostResponseDto responseDto = postMapper.toResponseDto(savedPost, isLiked, recentLikes);
-
-        // ✅ ЛОГИРУЕМ ФИНАЛЬНЫЙ DTO
-        log.info("Response DTO Location: {}", responseDto.getLocation());
         if (responseDto.getLocation() != null) {
-            log.info("Response Location ID: {}", responseDto.getLocation().getId());
             log.info("Response Location Coordinates: ({}, {})",
                     responseDto.getLocation().getLatitude(), responseDto.getLocation().getLongitude());
         }
@@ -165,10 +162,12 @@ public class PostServiceImpl implements PostService {
             log.warn("Локация установлена в null из-за ошибки");
         }
 
-        log.info("=== КОНЕЦ ОБРАБОТКИ ГЕОЛОКАЦИИ ===");
     }
 
+
+
     @Override
+    @Cacheable(value = "posts", key = "#id")
     public PostResponseDto getPostById(Long id) {
         log.info("Получение поста с ID: {}", id);
 
@@ -192,8 +191,12 @@ public class PostServiceImpl implements PostService {
         return postMapper.toResponseDto(post, isLiked, recentLikes);
     }
 
+
     @Override
+    @Cacheable(value = "user-posts", key = "#userId + '_' + #page + '_' + #size")
     public PostListDto getUserPosts(Long userId, int page, int size) {
+        log.info("Получение постов пользователя {}, страница: {}, размер: {}", userId, page, size);
+
         try {
             // Проверяем валидность параметров
             if (userId == null) {
@@ -220,13 +223,7 @@ public class PostServiceImpl implements PostService {
             Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
             // Получаем посты пользователя
-            Slice<Post> postSlice = null;
-            try {
-                postSlice = postRepository.findByAuthor_IdAndIsDeletedFalse(userId, pageable);
-            } catch (Exception e) {
-                log.error("Ошибка запроса к БД для постов пользователя {}: {}", userId, e.getMessage());
-                return createEmptyPostListDto(page, size);
-            }
+            Slice<Post> postSlice = postRepository.findByAuthor_IdAndIsDeletedFalse(userId, pageable);
 
             if (postSlice == null) {
                 log.warn("Получен null от postRepository для пользователя {}", userId);
@@ -236,11 +233,10 @@ public class PostServiceImpl implements PostService {
             log.info("Найдено {} постов пользователя {} на странице {}",
                     postSlice.getNumberOfElements(), userId, page);
 
-            // ✅ ОБНОВЛЕННАЯ ЧАСТЬ - конвертируем в DTO с обработкой упоминаний
+            // Конвертируем в DTO с обработкой упоминаний
             PostListDto result = convertPostSliceToListDtoWithMentions(postSlice, page, userId);
 
             if (result == null) {
-                log.warn("convertPostSliceToListDtoWithMentions вернул null для пользователя {}", userId);
                 result = createEmptyPostListDto(page, size);
             }
 
@@ -262,8 +258,6 @@ public class PostServiceImpl implements PostService {
             if (e.getMessage().contains("не найден")) {
                 throw e;
             }
-
-            // Для других ошибок возвращаем пустой результат
             return createEmptyPostListDto(page, size);
         }
     }
@@ -459,6 +453,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"posts", "user-posts", "post-stats"}, allEntries = true)
     public void deletePost(Long postId) {
         Post post = findById(postId);
         Long userId = post.getAuthor().getId();

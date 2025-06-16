@@ -39,7 +39,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void createProfileVisitNotification(Long visitedUserId, Long visitorId) {
-        log.info("🔔 START createProfileVisitNotification: visitor={}, visited={}", visitorId, visitedUserId);
 
         try {
             // Получаем пользователей
@@ -50,21 +49,16 @@ public class NotificationServiceImpl implements NotificationService {
             User visitor = userRepository.findById(visitorId)
                     .orElseThrow(() -> new RuntimeException("Visitor not found: " + visitorId));
 
-            log.info("✅ Users found: visited={}, visitor={}", visitedUser.getEmail(), visitor.getEmail());
-
             // Проверяем настройки приватности (null = разрешено)
             Boolean receiveNotifications = visitedUser.getReceiveVisitNotifications();
-            log.info("🔒 Privacy check: user {} receiveVisitNotifications = {}", visitedUserId, receiveNotifications);
 
             // 🔧 ТОЛЬКО если явно отключено
             if (Boolean.FALSE.equals(receiveNotifications)) {
-                log.info("🚫 User {} disabled visit notifications, skipping", visitedUserId);
                 return;
             }
 
 
             if (!Boolean.TRUE.equals(receiveNotifications)) {
-                log.info("🚫 User {} disabled visit notifications, skipping", visitedUserId);
                 return;
             }
 
@@ -73,9 +67,6 @@ public class NotificationServiceImpl implements NotificationService {
 
             boolean recentNotificationExists = notificationRepository.existsByRecipientIdAndActorIdAndTypeAndCreatedAtAfter(
                     visitedUserId, visitorId, NotificationType.PROFILE_VISIT, recentThreshold);
-
-            log.info("🔍 Recent notification exists: {}", recentNotificationExists);
-
             if (recentNotificationExists) {
                 return;
             }

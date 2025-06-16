@@ -40,7 +40,6 @@ public class CommentController {
                                    @RequestParam(defaultValue = "10") int size,
                                    Model model,
                                    @AuthenticationPrincipal UserDetails userDetails) {
-        log.debug("Отображение страницы комментариев для поста {}", postId);
 
         try {
             // Получаем пост

@@ -18,15 +18,40 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
 
-        // Разные настройки для разных типов кешей
-        cacheManager.registerCustomCache("users",
+        // Кеш для отдельных постов
+        cacheManager.registerCustomCache("posts",
                 Caffeine.newBuilder()
-                        .maximumSize(1000)
-                        .expireAfterWrite(1, TimeUnit.HOURS)
+                        .maximumSize(1000)                    // Максимум 1000 постов в кеше
+                        .expireAfterWrite(15, TimeUnit.MINUTES)  // Истекает через 15 минут после записи
+                        .expireAfterAccess(5, TimeUnit.MINUTES)  // Истекает через 5 минут после последнего доступа
+                        .recordStats()                           // Включаем статистику кеша
+                        .build());
+
+        // Кеш для списков постов пользователей
+        cacheManager.registerCustomCache("user-posts",
+                Caffeine.newBuilder()
+                        .maximumSize(500)                     // Меньше списков, но они больше по размеру
+                        .expireAfterWrite(10, TimeUnit.MINUTES)
+                        .expireAfterAccess(3, TimeUnit.MINUTES)
                         .recordStats()
                         .build());
 
+        // Кеш для рекомендуемых постов
+        cacheManager.registerCustomCache("recommended-posts",
+                Caffeine.newBuilder()
+                        .maximumSize(200)                     // Рекомендации обновляются чаще
+                        .expireAfterWrite(5, TimeUnit.MINUTES)
+                        .expireAfterAccess(2, TimeUnit.MINUTES)
+                        .recordStats()
+                        .build());
 
+        // Кеш для статистики постов
+        cacheManager.registerCustomCache("post-stats",
+                Caffeine.newBuilder()
+                        .maximumSize(100)                     // Мало статистических данных
+                        .expireAfterWrite(30, TimeUnit.MINUTES) // Статистика может жить дольше
+                        .recordStats()
+                        .build());
 
         return cacheManager;
     }
