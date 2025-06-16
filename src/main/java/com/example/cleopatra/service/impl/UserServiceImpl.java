@@ -747,7 +747,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = "users", key = "#userId")
+//    @CacheEvict(value = "users", key = "#userId")
     public UserResponse uploadAvatar(Long userId, MultipartFile file) {
         log.info("Начинаем загрузку аватара для пользователя с ID: {}", userId);
 
@@ -788,7 +788,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = "users", key = "#userId")
+//    @CacheEvict(value = "users", key = "#userId")
     public UserResponse updateProfile(Long userId, UpdateProfileDto profileDto) {
         log.info("Начинаем обновление профиля для пользователя с ID: {}", userId);
 
@@ -813,7 +813,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "users", key = "#userId")
+//    @Cacheable(value = "users", key = "#userId")
     public UserResponse getUserById(Long userId) {
         log.info("Загрузка пользователя с ID: {} из базы данных", userId);
 
@@ -871,7 +871,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = "users", key = "#userId")
+//    @CacheEvict(value = "users", key = "#userId")
     public UserResponse uploadBackgroundImage(Long userId, MultipartFile file) {
         log.info("Начинаем загрузку фонового изображения для пользователя с ID: {}", userId);
 
@@ -912,7 +912,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = "users", key = "#userId")
+//    @CacheEvict(value = "users", key = "#userId")
     public UserResponse deleteBackgroundImage(Long userId) {
         log.info("Удаляем фоновое изображение для пользователя с ID: {}", userId);
 
@@ -942,14 +942,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "users-by-email", key = "#email")
+//    @Cacheable(value = "users-by-email", key = "#email")
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
         return userMapper.toResponse(user);
     }
-
-    @Cacheable(value = "user-entities", key = "'email:' + #email")
+//
+//    @Cacheable(value = "user-entities", key = "'email:' + #email")
     public User getUserEntityByEmail(String email) {
         return userRepository.findByEmailWithOnlineStatus(email)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
@@ -974,7 +974,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "user-status", key = "#userId")
+//    @CacheEvict(value = "user-status", key = "#userId")
     public void updateOnlineStatus(Long userId, boolean isOnline) {
         try {
             LocalDateTime now = LocalDateTime.now();
@@ -1004,7 +1004,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Cacheable(value = "user-status", key = "#userId")
+//    @Cacheable(value = "user-status", key = "#userId")
     public boolean isUserOnline(Long userId) {
         return userRepository.findById(userId)
                 .map(User::getIsOnline)
@@ -1018,10 +1018,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "user-status", key = "#userId"),
-            @CacheEvict(value = "user-entities", key = "#userId")
-    })
+//    @Caching(evict = {
+//            @CacheEvict(value = "user-status", key = "#userId"),
+//            @CacheEvict(value = "user-entities", key = "#userId")
+//    })
     public void updateLastActivity(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -1034,7 +1034,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = "users", key = "#userId")
+//    @CacheEvict(value = "users", key = "#userId")
     public void updateNotificationSettings(Long userId, Boolean receiveVisitNotifications) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
@@ -1047,17 +1047,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "user-entities", key = "#userId")
+//    @Cacheable(value = "user-entities", key = "#userId")
     public User findById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "users", key = "#userId"),
-            @CacheEvict(value = "user-entities", key = "#userId")
-    })
+//    @Caching(evict = {
+//            @CacheEvict(value = "users", key = "#userId"),
+//            @CacheEvict(value = "user-entities", key = "#userId")
+//    })
     public void changePassword(Long userId, ChangePasswordDto changePasswordDto) {
         if (!changePasswordDto.getNewPassword().equals(changePasswordDto.getConfirmPassword())) {
             throw new PasswordMismatchException("Новый пароль и подтверждение не совпадают");
@@ -1081,10 +1081,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "users-by-email", allEntries = true),
-            @CacheEvict(value = "user-entities", allEntries = true)
-    })
+//    @Caching(evict = {
+//            @CacheEvict(value = "users-by-email", allEntries = true),
+//            @CacheEvict(value = "user-entities", allEntries = true)
+//    })
     public void resetPasswordByEmail(String email, String newPassword) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь с email " + email + " не найден"));
@@ -1096,7 +1096,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = "user-entities", key = "#user.id")
+//    @CacheEvict(value = "user-entities", key = "#user.id")
     public void addBalance(User user, BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Сумма должна быть положительной");
@@ -1110,7 +1110,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = "user-entities", key = "#user.id")
+//    @CacheEvict(value = "user-entities", key = "#user.id")
     public void subtractBalance(User user, BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Сумма должна быть положительной");
@@ -1138,7 +1138,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = "user-entities", key = "#user.id")
+//    @CacheEvict(value = "user-entities", key = "#user.id")
     public User save(User user) {
         return userRepository.save(user);
     }
@@ -1269,10 +1269,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "user-status", key = "#userId"),
-            @CacheEvict(value = "user-entities", key = "#userId")
-    })
+//    @Caching(evict = {
+//            @CacheEvict(value = "user-status", key = "#userId"),
+//            @CacheEvict(value = "user-entities", key = "#userId")
+//    })
     public void setUserOnline(Long userId, boolean isOnline) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
