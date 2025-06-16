@@ -389,9 +389,10 @@ public User getCurrentUserEntity(Authentication authentication) {
     }
 
     @Override
-    @Cacheable(value = "user-entities", key = "#userId")
+    @Cacheable(value = "user-entities", key = "#blockerId")
     public User findById(Long blockerId) {
-        return  userRepository.findById(blockerId).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findById(blockerId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
 
