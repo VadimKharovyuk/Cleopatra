@@ -18,8 +18,6 @@ public class AsyncConfig {
 
 
 
-
-
     @Primary
     @Bean(name = "emailExecutor")
     public Executor emailExecutor() {
