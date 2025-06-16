@@ -47,8 +47,9 @@ ENV JAVA_OPTS="-server \
     -XX:+UseCompressedClassPointers \
     -XX:+TieredCompilation \
     -XX:TieredStopAtLevel=1 \
-    -XX:+UnlockExperimentalVMOptions \
-    -XX:+UseCGroupMemoryLimitForHeap \
+    -XX:+UseContainerSupport \
+    -XX:InitialRAMPercentage=25.0 \
+    -XX:MaxRAMPercentage=70.0 \
     -Djava.awt.headless=true \
     -Djava.security.egd=file:/dev/./urandom \
     -Dfile.encoding=UTF-8 \
