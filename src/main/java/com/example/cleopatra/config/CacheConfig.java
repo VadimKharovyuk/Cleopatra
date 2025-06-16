@@ -118,7 +118,6 @@ public class CacheConfig {
                                 log.debug("💬 Cache [user-brief] evicted key: {}, cause: {}", key, cause))
                         .build());
 
-
         return cacheManager;
     }
 }
