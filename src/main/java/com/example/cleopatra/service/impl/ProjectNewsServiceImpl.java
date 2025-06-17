@@ -163,24 +163,14 @@ public class ProjectNewsServiceImpl implements ProjectNewsService {
         return projectNewsServiceMapper.toResponse(savedNews);
     }
 
-    /**
-     * Увеличение счетчика просмотров
-     */
     @Transactional
     public void incrementViewCount(Long newsId) {
-        log.debug("Увеличение счетчика просмотров: newsId={}", newsId);
-
-        // Используем модифицирующий запрос для оптимизации
         projectNewsRepository.incrementViewCount(newsId);
-
-        log.debug("Счетчик просмотров увеличен для новости: newsId={}", newsId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ProjectNewsResponse getPublishedNewsById(Long id) {
-        log.info("Получение опубликованной новости по ID: {}", id);
-
         ProjectNews news = projectNewsRepository.findByIdAndIsPublishedTrue(id)
                 .orElseThrow(() -> {
                     log.error("Опубликованная новость не найдена: id={}", id);
@@ -332,6 +322,7 @@ public class ProjectNewsServiceImpl implements ProjectNewsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ProjectNewsPageResponse getPublishedNews(int page, int size, NewsType newsType) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "publishedAt"));
 
