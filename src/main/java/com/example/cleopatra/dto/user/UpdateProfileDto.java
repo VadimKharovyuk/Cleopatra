@@ -28,4 +28,8 @@ public class UpdateProfileDto {
     private Boolean showBirthday;
 
 
+    @Size(max = 200, message = "Статус не может быть длиннее 200 символов")
+    private String statusPage;
+
+
 }

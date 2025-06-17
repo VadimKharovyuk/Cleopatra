@@ -5,6 +5,7 @@ import com.example.cleopatra.enums.ProfileAccessLevel;
 import com.example.cleopatra.enums.Role;
 import com.example.cleopatra.model.User;
 import jakarta.persistence.Column;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -60,5 +61,9 @@ public class UserResponse {
     private ProfileAccessLevel profileAccessLevel;
     private ProfileAccessLevel photosAccessLevel;
     private ProfileAccessLevel postsAccessLevel;
+
+
+    @Size(max = 200, message = "Статус не может быть длиннее 200 символов")
+    private String statusPage;
 
 }

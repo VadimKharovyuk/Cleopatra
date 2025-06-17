@@ -190,7 +190,6 @@ public class PostServiceImpl implements PostService {
     @Override
     @Cacheable(value = "user-posts", key = "#userId + '_' + #page + '_' + #size")
     public PostListDto getUserPosts(Long userId, int page, int size) {
-        log.info("Получение постов пользователя {}, страница: {}, размер: {}", userId, page, size);
 
         try {
             // Проверяем валидность параметров
@@ -335,7 +334,6 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostListDto getMyPosts(int page, int size) {
-        log.info("Получение собственных постов, страница: {}, размер: {}", page, size);
         User currentUser = getCurrentUser();
         return getUserPosts(currentUser.getId(), page, size);
     }

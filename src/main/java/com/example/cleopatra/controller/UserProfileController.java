@@ -59,7 +59,6 @@ public class UserProfileController {
 
             if (authentication != null) {
                 UserResponse currentUser = userService.getUserByEmail(authentication.getName());
-                log.info("🔍 Текущий пользователь: ID={}, Email={}", currentUser.getId(), currentUser.getEmail());
 
                 model.addAttribute("currentUserId", currentUser.getId());
                 model.addAttribute("debugCurrentUserId", currentUser.getId());
@@ -134,7 +133,6 @@ public class UserProfileController {
                 // === НЕАВТОРИЗОВАННЫЙ ПОЛЬЗОВАТЕЛЬ ===
                 // Проверяем доступ для неавторизованного пользователя
                 boolean canView = profileAccessService.canViewProfile(null, userId);
-                log.info("🔒 Доступ для неавторизованного пользователя: {}", canView);
 
                 if (!canView) {
                     log.warn("🚫 Доступ запрещен для неавторизованного пользователя");
@@ -143,7 +141,6 @@ public class UserProfileController {
                     String accessDeniedMessage = profileAccessService.getAccessDeniedMessage(null, userId);
                     ProfileAccessLevel userAccessLevel = profileAccessService.getProfileAccessLevel(userId);
 
-                    log.info("📊 Уровень доступа профиля: {}", userAccessLevel);
 
                     model.addAttribute("blockedUser", blockedUser);
                     model.addAttribute("accessDeniedMessage", accessDeniedMessage);
@@ -155,8 +152,6 @@ public class UserProfileController {
                     return "profile/CanViev-profile";
                 }
             }
-
-            log.info("📄 === ЗАГРУЗКА ДАННЫХ ПРОФИЛЯ ===");
 
             // === ЗАГРУЗКА ДАННЫХ ПРОФИЛЯ (только если доступ разрешен) ===
             UserResponse user = userService.getUserById(userId);
@@ -196,7 +191,7 @@ public class UserProfileController {
                 try {
                     List<UserRecommendationDto> recommendations = recommendationService.getTopRecommendations(currentUser.getId());
                     model.addAttribute("recommendations", recommendations);
-                    log.info("📊 Загружено {} рекомендаций", recommendations.size());
+
                 } catch (Exception e) {
                     log.warn("⚠️ Ошибка загрузки рекомендаций: {}", e.getMessage());
                 }
@@ -208,7 +203,6 @@ public class UserProfileController {
                 model.addAttribute("debugIsSubscribed", "not_authenticated");
             }
 
-            log.info("✅ Успешно загружен профиль. Возвращаем: profile/profile");
             return "profile/profile";
 
         } catch (Exception e) {
@@ -229,8 +223,6 @@ public class UserProfileController {
                                              @RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "6") int size,
                                              Authentication authentication) {
-        log.info("API запрос постов пользователя {}: page={}, size={}", userId, page, size);
-
         try {
             // Проверяем существование пользователя
             if (!userService.userExists(userId)) {
@@ -296,10 +288,6 @@ public class UserProfileController {
 
 
 
-
-    /**
-     * AJAX загрузка постов для бесконечного скролла
-     */
     /**
      * Устаревший метод - оставляем для совместимости
      * @deprecated Используйте getUserPostsApi
@@ -329,6 +317,9 @@ public class UserProfileController {
             dto.setFirstName(user.getFirstName());
             dto.setLastName(user.getLastName());
             dto.setCity(user.getCity());
+
+            //статус
+            dto.setStatusPage(user.getStatusPage());
 
             dto.setBirthDate(user.getBirthDate());
             dto.setShowBirthday(user.getShowBirthday());

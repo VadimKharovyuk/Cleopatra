@@ -78,6 +78,10 @@ public class User {
 
     private String imgBackgroundID;
 
+    @Column(name = "status_page", length = 200)
+    private String statusPage;
+
+
     @Column(nullable = false, precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal balance = BigDecimal.ZERO;

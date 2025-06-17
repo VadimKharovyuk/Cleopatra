@@ -514,6 +514,9 @@
                     </div>
                 </div>
 
+
+
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -530,6 +533,26 @@
                             </div>
                         </div>
                     </div>
+
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="statusPage" class="form-label">Статус</label>
+                                <input type="text"
+                                       id="statusPage"
+                                       th:field="*{statusPage}"
+                                       class="form-control-luxury"
+                                       maxlength="200"
+                                       placeholder="Расскажите о себе...">
+                                <div th:if="${#fields.hasErrors('statusPage')}" class="error-message">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span th:errors="*{statusPage}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="birthDate" class="form-label">Дата рождения</label>
@@ -545,6 +568,9 @@
                         </div>
                     </div>
                 </div>
+
+
+
 
                 <div class="row">
                     <div class="col-md-12">
@@ -619,24 +645,6 @@
                         </p>
                     </div>
 
-<!--                    <form id="avatarUploadForm" enctype="multipart/form-data">-->
-<!--                        <input-->
-<!--                                type="file"-->
-<!--                                id="avatarFile"-->
-<!--                                name="avatar"-->
-<!--                                accept="image/*"-->
-<!--                                onchange="uploadAvatarAjax()"-->
-<!--                        required-->
-<!--                        >-->
-<!--                        <label for="avatarFile" class="upload-btn" id="avatarUploadBtn">-->
-<!--                            <i class="fas fa-upload"></i>-->
-<!--                            <span>Загрузить фото</span>-->
-<!--                        </label>-->
-<!--                    </form>-->
-
-
-
-
 
                     <form th:action="@{/profile/{userId}/avatar(userId=${user.id})}"
                           method="post"
@@ -700,20 +708,6 @@
                     </p>
                 </div>
 
-<!--                <form id="backgroundUploadForm" enctype="multipart/form-data">-->
-<!--                    <input type="file"-->
-<!--                           id="backgroundFile"-->
-<!--                           name="background"-->
-<!--                           accept="image/*"-->
-<!--                           onchange="uploadBackgroundAjax()"-->
-<!--                    required>-->
-<!--                    <label for="backgroundFile" class="upload-btn" id="backgroundUploadBtn">-->
-<!--                        <i class="fas fa-upload"></i>-->
-<!--                        <span>Загрузить фон</span>-->
-<!--                    </label>-->
-<!--                </form>-->
-
-
                 <form th:action="@{/profile/{userId}/background/upload(userId=${user.id})}"
                       method="post"
                       enctype="multipart/form-data"
@@ -753,8 +747,6 @@
 <!-- JS в конце страницы -->
 <th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
 
-<!--<script th:src="@{/js/profile/AjaxAvatarUploader.js}"></script>-->
-<!--<script th:src="@{/js/profile/AjaxBackgroundUploader.js}"></script>-->
 <script>
     // ========================================
     // КОНФИГУРАЦИЯ ВАЛИДАЦИИ ИЗ BACKEND
@@ -1305,18 +1297,6 @@
             }
         });
 
-        // ========================================
-        // ЗАВЕРШЕНИЕ ИНИЦИАЛИЗАЦИИ
-        // ========================================
-
-        console.log('✅ Страница редактирования профиля готова!');
-        console.log('🎯 Доступные функции:');
-        console.log('  - Загрузка аватара с превью и валидацией');
-        console.log('  - Загрузка фона с превью и валидацией');
-        console.log(`  - Валидация файлов (макс. ${VALIDATION_CONFIG.maxFileSize} MB)`);
-        console.log('  - Красивые алерты для ошибок');
-        console.log('  - Счетчики символов');
-        console.log('  - Горячие клавиши (Ctrl+S, Escape)');
     });
 
     // ========================================

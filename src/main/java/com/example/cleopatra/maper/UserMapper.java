@@ -20,6 +20,7 @@ public class UserMapper {
     }
 
 
+
     public UserResponse toResponse(User user) {
         UserResponse response = new UserResponse();
         response.setId(user.getId());
@@ -66,6 +67,9 @@ public class UserMapper {
         response.setBirthDate(user.getBirthDate());
         response.setShowBirthday(user.getShowBirthday());
 
+        //статус
+        response.setStatusPage(user.getStatusPage() != null ? user.getStatusPage() : "");
+
         return response;
     }
 
@@ -93,6 +97,14 @@ public class UserMapper {
 
         if (dto.getShowBirthday() != null) {
             user.setShowBirthday(dto.getShowBirthday());
+        }
+
+        // СТАТУС
+        if (dto.getStatusPage() != null && !dto.getStatusPage().trim().isEmpty()) {
+            user.setStatusPage(dto.getStatusPage().trim());
+        } else if (dto.getStatusPage() != null && dto.getStatusPage().trim().isEmpty()) {
+            // Если передали пустую строку, очищаем статус
+            user.setStatusPage(null);
         }
     }
 

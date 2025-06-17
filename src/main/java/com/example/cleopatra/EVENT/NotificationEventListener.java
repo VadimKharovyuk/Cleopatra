@@ -48,7 +48,6 @@ public class NotificationEventListener {
                 return;
             }
 
-            log.info("📋 Found notification: title={}", notification.getTitle());
 
             // Преобразуем в DTO
             NotificationDto dto = notificationMapper.toWebSocketDto(notification);
@@ -72,23 +71,16 @@ public class NotificationEventListener {
                 log.info("📤 Notification sent via WebSocket to user: {}", event.getRecipientId());
                 updateNotificationAsSent(event.getNotificationId());
             } else {
-                // 🔕 Пользователь оффлайн - проверяем его статус в БД
-                log.info("🔕 User {} not connected to WebSocket, checking online status", event.getRecipientId());
 
                 User recipient = notification.getRecipient();
                 if (Boolean.TRUE.equals(recipient.getIsOnline())) {
-                    // Пользователь онлайн в БД, но не подключен к WebSocket
-                    log.info("👤 User {} is online but not connected to WebSocket, will retry later", event.getRecipientId());
 
                     // Планируем повторную отправку через 30 секунд
                     scheduleRetryNotification(event.getNotificationId(), event.getRecipientId(), dto);
                 } else {
-                    log.info("💤 User {} is offline, notification will be delivered when online", event.getRecipientId());
 
                 }
             }
-
-            log.info("✅ Notification processing completed for user: {}", event.getRecipientId());
 
         } catch (Exception e) {
             log.error("❌ Error in event listener for notification: {}", event.getNotificationId(), e);

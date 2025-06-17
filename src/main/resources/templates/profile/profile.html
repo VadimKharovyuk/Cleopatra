@@ -812,7 +812,15 @@
                     Добро пожаловать
                 </th:block>
             </h1>
+
+            <!-- Статус пользователя -->
+            <div class="profile-status" th:if="${!#strings.isEmpty(user.statusPage)}">
+                <i class="fas fa-quote-left"></i>
+                <span class="status-text" th:text="${user.statusPage}"></span>
+                <i class="fas fa-quote-right"></i>
+            </div>
             <p class="profile-username" th:text="'@' + ${user.email.split('@')[0]}"></p>
+
 
 
             <div class="profile-actions">

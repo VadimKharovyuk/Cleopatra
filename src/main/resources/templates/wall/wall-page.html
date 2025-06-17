@@ -806,16 +806,7 @@
                     ` : ''}
                 </div>
 
-                <div class="post-stats">
-                    <div class="stat-item like-btn" onclick="toggleLike(${post.id})" data-post-id="${post.id}">
-                        <span class="stat-icon like-icon">❤️</span>
-                        <span class="like-count">${post.likesCount}</span>
-                    </div>
-                    <div class="stat-item comment-btn" onclick="showComments(${post.id})">
-                        <span class="stat-icon">💬</span>
-                        <span>${post.commentsCount}</span>
-                    </div>
-                </div>
+
             `;
 
     return postDiv;
@@ -1063,10 +1054,5 @@
   }
 </script>
 
-<!--<script th:src="@{/js/wall/wall-utils.js}"></script>-->
-<!--<script th:src="@{/js/wall/wall-posts.js}"></script>-->
-<!--<script th:src="@{/js/wall/wall-interactions.js}"></script>-->
-<!--<script th:src="@{/js/wall/wall-form.js}"></script>-->
-<!--<script th:src="@{/js/wall/wall-main.js}"></script>-->
 </body>
 </html>

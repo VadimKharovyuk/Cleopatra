@@ -216,7 +216,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             log.debug("Получение подписок для пользователя: {}, страница: {}",
                     userId, pageable.getPageNumber());
 
-            // ИСПРАВЛЕНО: Используем JOIN FETCH метод
             Slice<Subscription> subscriptionsSlice = subscriptionRepository
                     .findBySubscriberIdWithSubscribedTo(userId, pageable);
 

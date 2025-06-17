@@ -182,7 +182,6 @@ public class ProfileAccessServiceImpl implements ProfileAccessService {
         // Проверяем уровень доступа
         boolean result = switch (accessLevel) {
             case PUBLIC -> {
-                log.info("🔍 PUBLIC профиль - доступ разрешен");
                 yield true;
             }
 

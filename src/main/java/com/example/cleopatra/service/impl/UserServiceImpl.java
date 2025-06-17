@@ -790,20 +790,16 @@ public class UserServiceImpl implements UserService {
     @Override
 //    @CacheEvict(value = "users", key = "#userId")
     public UserResponse updateProfile(Long userId, UpdateProfileDto profileDto) {
-        log.info("Начинаем обновление профиля для пользователя с ID: {}", userId);
-
         try {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Пользователь с ID " + userId + " не найден"));
 
-            // Сохраняем старый email для очистки кеша
+
             String oldEmail = user.getEmail();
 
             userMapper.updateUserFromDto(user, profileDto);
             User savedUser = userRepository.save(user);
 
-
-            log.info("Профиль успешно обновлен для пользователя с ID: {}", userId);
             return userMapper.toResponse(savedUser);
 
         } catch (RuntimeException e) {
@@ -815,7 +811,6 @@ public class UserServiceImpl implements UserService {
     @Override
 //    @Cacheable(value = "users", key = "#userId")
     public UserResponse getUserById(Long userId) {
-        log.info("Загрузка пользователя с ID: {} из базы данных", userId);
 
         User user = userRepository.findByIdWithOnlineStatus(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
@@ -873,7 +868,6 @@ public class UserServiceImpl implements UserService {
     @Override
 //    @CacheEvict(value = "users", key = "#userId")
     public UserResponse uploadBackgroundImage(Long userId, MultipartFile file) {
-        log.info("Начинаем загрузку фонового изображения для пользователя с ID: {}", userId);
 
         try {
             User user = userRepository.findById(userId)

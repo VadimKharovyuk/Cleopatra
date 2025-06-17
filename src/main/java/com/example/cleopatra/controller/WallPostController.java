@@ -28,12 +28,6 @@ public class WallPostController {
 
     private final WallPostService wallPostService;
     private final UserService userService;
-    private final SubscriptionService subscriptionService;
-    private final UserRepository userRepository;
-
-
-//    @PostMapping("/wall/api/posts/{postId}/like")
-//    @GetMapping("/wall/api/posts/{postId}/comments")
 
 
     /**
