@@ -32,15 +32,13 @@ WORKDIR /app
 # Копируем JAR файл из стадии сборки
 COPY --from=build --chown=spring:spring /app/target/cleopatra-0.0.1-SNAPSHOT.jar app.jar
 
-# ЭКСТРЕМАЛЬНО МИНИМАЛЬНЫЕ настройки для выживания
+# ИСПРАВЛЕННЫЕ настройки - убираем проблемные параметры
 ENV JAVA_OPTS="-server \
     -Xmx100m \
     -Xms8m \
     -XX:+UseSerialGC \
     -XX:MaxMetaspaceSize=24m \
     -XX:MetaspaceSize=8m \
-    -XX:CompressedClassSpaceSize=2m \
-    -XX:ReservedCodeCacheSize=2m \
     -XX:+UseCompressedOops \
     -XX:+UseCompressedClassPointers \
     -XX:-TieredCompilation \
@@ -53,9 +51,7 @@ ENV JAVA_OPTS="-server \
     -Duser.timezone=UTC \
     -Djava.net.preferIPv4Stack=true \
     -XX:+ExitOnOutOfMemoryError \
-    -Xss256k \
-    -XX:GCTimeRatio=4 \
-    -XX:AdaptiveSizePolicyWeight=90"
+    -Xss256k"
 
 # Переменные среды для Spring Boot
 ENV SPRING_PROFILES_ACTIVE=prod
