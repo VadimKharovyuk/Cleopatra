@@ -65,6 +65,5 @@ EXPOSE 10000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:10000/actuator/health || exit 1
 
-
 # Запуск приложения с оптимизированными настройками
 CMD ["sh", "-c", "exec java $JAVA_OPTS -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -Dserver.port=10000 -jar app.jar"]
