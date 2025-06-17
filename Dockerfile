@@ -32,33 +32,34 @@ WORKDIR /app
 # Копируем JAR файл из стадии сборки
 COPY --from=build --chown=spring:spring /app/target/cleopatra-0.0.1-SNAPSHOT.jar app.jar
 
-# ИСПРАВЛЕННЫЕ настройки для Java 21 на Render Free
+# ЭКСТРЕМАЛЬНО МИНИМАЛЬНЫЕ настройки для выживания
 ENV JAVA_OPTS="-server \
-    -Xmx150m \
-    -Xms16m \
+    -Xmx100m \
+    -Xms8m \
     -XX:+UseSerialGC \
-    -XX:MaxMetaspaceSize=30m \
-    -XX:MetaspaceSize=16m \
-    -XX:CompressedClassSpaceSize=4m \
-    -XX:ReservedCodeCacheSize=4m \
+    -XX:MaxMetaspaceSize=24m \
+    -XX:MetaspaceSize=8m \
+    -XX:CompressedClassSpaceSize=2m \
+    -XX:ReservedCodeCacheSize=2m \
     -XX:+UseCompressedOops \
     -XX:+UseCompressedClassPointers \
     -XX:-TieredCompilation \
     -XX:+UseContainerSupport \
-    -XX:InitialRAMPercentage=5.0 \
-    -XX:MaxRAMPercentage=30.0 \
+    -XX:InitialRAMPercentage=3.0 \
+    -XX:MaxRAMPercentage=20.0 \
     -Djava.awt.headless=true \
     -Djava.security.egd=file:/dev/./urandom \
     -Dfile.encoding=UTF-8 \
     -Duser.timezone=UTC \
     -Djava.net.preferIPv4Stack=true \
     -XX:+ExitOnOutOfMemoryError \
-    -Xss256k"
+    -Xss256k \
+    -XX:GCTimeRatio=4 \
+    -XX:AdaptiveSizePolicyWeight=90"
 
 # Переменные среды для Spring Boot
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV SERVER_PORT=10000
-
 
 EXPOSE 10000
 
