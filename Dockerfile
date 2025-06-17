@@ -53,7 +53,7 @@ ENV JAVA_OPTS="-server \
     -Duser.timezone=UTC \
     -Djava.net.preferIPv4Stack=true \
     -XX:+ExitOnOutOfMemoryError \
-    -Xss128k"
+    -Xss256k"
 
 # Переменные среды для Spring Boot
 ENV SPRING_PROFILES_ACTIVE=prod
