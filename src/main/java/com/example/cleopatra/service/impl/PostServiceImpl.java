@@ -71,7 +71,6 @@ public class PostServiceImpl implements PostService {
                 post.setImageUrl(storageResult.getUrl());
                 post.setImgId(storageResult.getImageId());
 
-                log.info("Изображение успешно загружено: {}", storageResult.getImageId());
 
             } catch (Exception e) {
                 log.error("Ошибка при загрузке изображения: {}", e.getMessage());
@@ -117,12 +116,11 @@ public class PostServiceImpl implements PostService {
 
     // ✅ ДОБАВЛЯЕМ приватный метод для обработки локации с подробными логами
     private void handleLocationForPost(Post post, PostCreateDto postCreateDto) {
-        log.info("=== ОБРАБОТКА ГЕОЛОКАЦИИ ===");
+//        log.info("=== ОБРАБОТКА ГЕОЛОКАЦИИ ===");
 
         try {
             // Вариант 1: Используем существующую локацию по ID
             if (postCreateDto.getLocationId() != null) {
-                log.info("Используем существующую локацию с ID: {}", postCreateDto.getLocationId());
                 Location location = locationService.findById(postCreateDto.getLocationId());
                 post.setLocation(location);
                 log.info("К посту добавлена существующая локация с ID: {} (координаты: {}, {})",
@@ -139,7 +137,6 @@ public class PostServiceImpl implements PostService {
                         postCreateDto.getPlaceName()
                 );
 
-                log.info("Локация создана с ID: {}", location.getId());
                 post.setLocation(location);
                 log.info("К посту добавлена новая локация: {} (ID: {}, координаты: {}, {})",
                         location.getPlaceName(), location.getId(), location.getLatitude(), location.getLongitude());
@@ -147,10 +144,7 @@ public class PostServiceImpl implements PostService {
             // Вариант 3: Без локации (по умолчанию)
             else {
                 post.setLocation(null);
-                log.info("Пост создается без геолокации - все поля локации пустые");
             }
-
-            log.info("Финальное состояние локации в посте: {}", post.getLocation());
 
         } catch (Exception e) {
             log.error("Ошибка при обработке геолокации для поста: {}", e.getMessage(), e);
@@ -450,8 +444,6 @@ public class PostServiceImpl implements PostService {
     public void deletePost(Long postId) {
         Post post = findById(postId);
         Long userId = post.getAuthor().getId();
-
-        log.info("🗑️ Удаляем пост {} пользователя {}", postId, userId);
 
         postRepository.deleteById(postId);
 
