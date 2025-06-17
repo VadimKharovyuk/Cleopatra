@@ -32,27 +32,31 @@ WORKDIR /app
 # Копируем JAR файл из стадии сборки
 COPY --from=build --chown=spring:spring /app/target/cleopatra-0.0.1-SNAPSHOT.jar app.jar
 
-# ЭКСТРЕМАЛЬНО КОНСЕРВАТИВНЫЕ JVM настройки для Render Free (512MB лимит)
+# КРИТИЧЕСКИЕ настройки для выживания на Render Free
 ENV JAVA_OPTS="-server \
-    -Xmx200m \
-    -Xms32m \
+    -Xmx150m \
+    -Xms16m \
     -XX:+UseSerialGC \
-    -XX:MaxMetaspaceSize=40m \
-    -XX:CompressedClassSpaceSize=8m \
-    -XX:ReservedCodeCacheSize=8m \
+    -XX:MaxMetaspaceSize=30m \
+    -XX:MetaspaceSize=16m \
+    -XX:CompressedClassSpaceSize=4m \
+    -XX:ReservedCodeCacheSize=4m \
     -XX:+UseCompressedOops \
     -XX:+UseCompressedClassPointers \
     -XX:-TieredCompilation \
+    -XX:+UseStringDeduplication \
     -XX:+UseContainerSupport \
-    -XX:InitialRAMPercentage=8.0 \
-    -XX:MaxRAMPercentage=40.0 \
+    -XX:InitialRAMPercentage=5.0 \
+    -XX:MaxRAMPercentage=30.0 \
     -Djava.awt.headless=true \
     -Djava.security.egd=file:/dev/./urandom \
     -Dfile.encoding=UTF-8 \
     -Duser.timezone=UTC \
     -Djava.net.preferIPv4Stack=true \
     -XX:+ExitOnOutOfMemoryError \
-    -Xss256k"
+    -Xss128k \
+    -XX:+UnlockExperimentalVMOptions \
+    -XX:+UseCGroupMemoryLimitForHeap"
 
 # Переменные среды для Spring Boot
 ENV SPRING_PROFILES_ACTIVE=prod
