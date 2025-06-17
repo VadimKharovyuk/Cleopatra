@@ -32,26 +32,26 @@ WORKDIR /app
 # Копируем JAR файл из стадии сборки
 COPY --from=build --chown=spring:spring /app/target/cleopatra-0.0.1-SNAPSHOT.jar app.jar
 
-# ИСПРАВЛЕННЫЕ настройки - убираем проблемные параметры
+# МАКСИМАЛЬНО УВЕЛИЧЕННЫЙ Metaspace для Starter плана
 ENV JAVA_OPTS="-server \
-    -Xmx100m \
-    -Xms8m \
+    -Xmx200m \
+    -Xms32m \
     -XX:+UseSerialGC \
-    -XX:MaxMetaspaceSize=24m \
-    -XX:MetaspaceSize=8m \
+    -XX:MaxMetaspaceSize=128m \
+    -XX:MetaspaceSize=64m \
     -XX:+UseCompressedOops \
     -XX:+UseCompressedClassPointers \
     -XX:-TieredCompilation \
     -XX:+UseContainerSupport \
-    -XX:InitialRAMPercentage=3.0 \
-    -XX:MaxRAMPercentage=20.0 \
+    -XX:InitialRAMPercentage=10.0 \
+    -XX:MaxRAMPercentage=40.0 \
     -Djava.awt.headless=true \
     -Djava.security.egd=file:/dev/./urandom \
     -Dfile.encoding=UTF-8 \
     -Duser.timezone=UTC \
     -Djava.net.preferIPv4Stack=true \
     -XX:+ExitOnOutOfMemoryError \
-    -Xss256k"
+    -Xss512k"
 
 # Переменные среды для Spring Boot
 ENV SPRING_PROFILES_ACTIVE=prod
