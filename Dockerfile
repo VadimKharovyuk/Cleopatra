@@ -59,6 +59,7 @@ ENV JAVA_OPTS="-server \
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV SERVER_PORT=10000
 
+
 EXPOSE 10000
 
 # Healthcheck для контейнера (исправлен на curl)
