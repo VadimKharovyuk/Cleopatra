@@ -17,7 +17,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        log.info("🔌 Registering WebSocket handlers");
 
         // Основные endpoints с SockJS
         registry.addHandler(chatWebSocketHandler, "/ws/chat")
@@ -43,6 +42,5 @@ public class WebSocketConfig implements WebSocketConfigurer {
         registry.addHandler(notificationWebSocketHandler, "/ws/notifications/websocket")
                 .setAllowedOriginPatterns("*");
 
-        log.info("✅ WebSocket handlers registered successfully");
     }
 }

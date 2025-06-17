@@ -53,7 +53,7 @@ public class WallPostController {
         model.addAttribute("currentUserId", currentUserId);
         model.addAttribute("canWriteOnWall", wallPostService.canAccessWall(wallOwnerId, currentUserId));
 
-        return "wall/wall-page"; // Thymeleaf шаблон
+        return "wall/wall-page";
     }
 
     /**

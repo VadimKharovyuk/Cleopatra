@@ -56,8 +56,6 @@ public class UserActivityScheduler {
             return;
         }
 
-        log.info("📊 Found {} inactive users out of {} online users", totalInactive, totalOnline);
-
         // Батчевая обработка
         int totalUpdated = 0;
         int batchNumber = 1;
@@ -74,7 +72,6 @@ public class UserActivityScheduler {
 
         } while (batchUpdated == MAX_BATCH_SIZE);
 
-        log.info("📴 Total marked offline: {} users in {} batches", totalUpdated, batchNumber - 1);
     }
 
 
@@ -99,7 +96,6 @@ public class UserActivityScheduler {
                     batch = notificationRepository.findPendingNotificationsForOnlineUsersWithLimit(BATCH_SIZE);
 
                     if (!batch.isEmpty()) {
-                        log.info("📦 Processing batch {} with {} notifications", batchNumber, batch.size());
 
                         int processedInBatch = processBatch(batch);
                         processedTotal += processedInBatch;
