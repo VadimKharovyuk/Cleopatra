@@ -130,4 +130,10 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
 
     Long countBySubscribedTo_IdAndCreatedAtAfter(Long userId, LocalDateTime weekAgo);
+
+    @Query("SELECT s FROM Subscription s JOIN FETCH s.subscriber WHERE s.subscribedTo.id = :userId")
+    Slice<Subscription> findBySubscribedToIdWithSubscriber(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT s FROM Subscription s JOIN FETCH s.subscribedTo WHERE s.subscriber.id = :userId")
+    Slice<Subscription> findBySubscriberIdWithSubscribedTo(@Param("userId") Long userId, Pageable pageable);
 }

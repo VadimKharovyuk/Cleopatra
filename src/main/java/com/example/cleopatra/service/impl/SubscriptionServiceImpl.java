@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class SubscriptionServiceImpl implements SubscriptionService {
 
 
@@ -148,20 +149,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return subscriptionRepository.existsBySubscriberIdAndSubscribedToId(subscriberId, subscribedToId);
     }
 
-
     @Override
+    @Transactional(readOnly = true)  // Добавляем readOnly для производительности
     public UserSubscriptionListDto getSubscribers(Long userId, Pageable pageable) {
         try {
             log.debug("Получение подписчиков для пользователя: {}, страница: {}",
                     userId, pageable.getPageNumber());
 
-            Slice<Subscription> subscriptionsSlice = subscriptionRepository.findBySubscribedToId(userId, pageable);
-
+            // ИСПРАВЛЕНО: Используем JOIN FETCH
+            Slice<Subscription> subscriptionsSlice = subscriptionRepository
+                    .findBySubscribedToIdWithSubscriber(userId, pageable);
 
             List<UserSubscriptionCard> cards = subscriptionsSlice.getContent()
                     .stream()
                     .map(subscription -> subscriptionMapper.mapToSubscriptionCard(
-                            subscription.getSubscriber(), // Тот кто подписался
+                            subscription.getSubscriber(), // Теперь загружен через JOIN FETCH
                             subscription
                     ))
                     .collect(Collectors.toList());
@@ -169,16 +171,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             log.debug("Найдено {} подписчиков на странице {} для пользователя {}",
                     cards.size(), pageable.getPageNumber(), userId);
 
-            // Строим итоговый DTO с пагинацией через Slice
             return UserSubscriptionListDto.builder()
                     .subscriptions(cards)
                     .currentPage(pageable.getPageNumber())
                     .itemsPerPage(pageable.getPageSize())
-
                     .totalPages(null)
                     .totalItems(null)
-
-                    // Slice данные
                     .hasNext(subscriptionsSlice.hasNext())
                     .hasPrevious(subscriptionsSlice.hasPrevious())
                     .nextPage(subscriptionsSlice.hasNext() ? pageable.getPageNumber() + 1 : null)
@@ -191,6 +189,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             return createEmptySubscriptionsSlice(pageable.getPageNumber(), pageable.getPageSize());
         }
     }
+
 
     /**
      * Создает пустой DTO для Slice в случае ошибки
@@ -211,20 +210,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
 
     @Override
+    @Transactional(readOnly = true)  // ДОБАВИТЬ ЭТУ АННОТАЦИЮ!
     public UserSubscriptionListDto getSubscriptions(Long userId, Pageable pageable) {
         try {
             log.debug("Получение подписок для пользователя: {}, страница: {}",
                     userId, pageable.getPageNumber());
 
-            // Используем Slice для подписок пользователя (на кого он подписан)
-            Slice<Subscription> subscriptionsSlice = subscriptionRepository.findBySubscriberId(userId, pageable);
-
+            // ИСПРАВЛЕНО: Используем JOIN FETCH метод
+            Slice<Subscription> subscriptionsSlice = subscriptionRepository
+                    .findBySubscriberIdWithSubscribedTo(userId, pageable);
 
             // Маппим содержимое страницы в карточки
             List<UserSubscriptionCard> cards = subscriptionsSlice.getContent()
                     .stream()
                     .map(subscription -> subscriptionMapper.mapToSubscriptionCard(
-                            subscription.getSubscribedTo(), // На кого подписан
+                            subscription.getSubscribedTo(), // Теперь загружен через JOIN FETCH
                             subscription
                     ))
                     .collect(Collectors.toList());
@@ -232,18 +232,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             log.debug("Найдено {} подписок на странице {} для пользователя {}",
                     cards.size(), pageable.getPageNumber(), userId);
 
-
             // Строим итоговый DTO с пагинацией через Slice
             return UserSubscriptionListDto.builder()
                     .subscriptions(cards)
                     .currentPage(pageable.getPageNumber())
                     .itemsPerPage(pageable.getPageSize())
-
-                    // Для Slice НЕТ totalPages и totalItems (избегаем COUNT запрос)
                     .totalPages(null)
                     .totalItems(null)
-
-                    // Slice данные
                     .hasNext(subscriptionsSlice.hasNext())
                     .hasPrevious(subscriptionsSlice.hasPrevious())
                     .nextPage(subscriptionsSlice.hasNext() ? pageable.getPageNumber() + 1 : null)
