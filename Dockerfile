@@ -32,7 +32,7 @@ WORKDIR /app
 # Копируем JAR файл из стадии сборки
 COPY --from=build --chown=spring:spring /app/target/cleopatra-0.0.1-SNAPSHOT.jar app.jar
 
-# КРИТИЧЕСКИЕ настройки для выживания на Render Free
+# ИСПРАВЛЕННЫЕ настройки для Java 21 на Render Free
 ENV JAVA_OPTS="-server \
     -Xmx150m \
     -Xms16m \
@@ -44,7 +44,6 @@ ENV JAVA_OPTS="-server \
     -XX:+UseCompressedOops \
     -XX:+UseCompressedClassPointers \
     -XX:-TieredCompilation \
-    -XX:+UseStringDeduplication \
     -XX:+UseContainerSupport \
     -XX:InitialRAMPercentage=5.0 \
     -XX:MaxRAMPercentage=30.0 \
@@ -54,9 +53,7 @@ ENV JAVA_OPTS="-server \
     -Duser.timezone=UTC \
     -Djava.net.preferIPv4Stack=true \
     -XX:+ExitOnOutOfMemoryError \
-    -Xss128k \
-    -XX:+UnlockExperimentalVMOptions \
-    -XX:+UseCGroupMemoryLimitForHeap"
+    -Xss128k"
 
 # Переменные среды для Spring Boot
 ENV SPRING_PROFILES_ACTIVE=prod
