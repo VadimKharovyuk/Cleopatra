@@ -32,19 +32,19 @@ WORKDIR /app
 # Копируем JAR файл из стадии сборки
 COPY --from=build --chown=spring:spring /app/target/cleopatra-0.0.1-SNAPSHOT.jar app.jar
 
-# МАКСИМАЛЬНО УВЕЛИЧЕННЫЙ Metaspace для Starter плана
+# ОПТИМИЗИРОВАННЫЕ настройки для Starter плана (1GB+ RAM)
 ENV JAVA_OPTS="-server \
-    -Xmx200m \
-    -Xms32m \
+    -Xmx400m \
+    -Xms64m \
     -XX:+UseSerialGC \
-    -XX:MaxMetaspaceSize=128m \
+    -XX:MaxMetaspaceSize=200m \
     -XX:MetaspaceSize=64m \
     -XX:+UseCompressedOops \
     -XX:+UseCompressedClassPointers \
     -XX:-TieredCompilation \
     -XX:+UseContainerSupport \
-    -XX:InitialRAMPercentage=10.0 \
-    -XX:MaxRAMPercentage=40.0 \
+    -XX:InitialRAMPercentage=15.0 \
+    -XX:MaxRAMPercentage=60.0 \
     -Djava.awt.headless=true \
     -Djava.security.egd=file:/dev/./urandom \
     -Dfile.encoding=UTF-8 \
