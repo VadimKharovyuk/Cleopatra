@@ -13,11 +13,11 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @EnableCaching
 public class CacheConfig {
-
-
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+
+        // =================== СУЩЕСТВУЮЩИЕ КЭШИ ДЛЯ ПОСТОВ ===================
 
         // Кеш для отдельных постов
         cacheManager.registerCustomCache("posts",
@@ -37,7 +37,6 @@ public class CacheConfig {
                         .recordStats()
                         .build());
 
-
         // Кеш для статистики постов
         cacheManager.registerCustomCache("post-stats",
                 Caffeine.newBuilder()
@@ -46,11 +45,29 @@ public class CacheConfig {
                         .recordStats()
                         .build());
 
+        // =================== НОВЫЕ КЭШИ ДЛЯ НОВОСТЕЙ ===================
+
+        // Кеш для отдельных новостей по ID
+        cacheManager.registerCustomCache("newsById",
+                Caffeine.newBuilder()
+                        .maximumSize(2000)                    // Больше новостей, чем постов
+                        .expireAfterWrite(30, TimeUnit.MINUTES)  // Новости живут дольше
+                        .expireAfterAccess(10, TimeUnit.MINUTES) // Популярные новости остаются в кеше
+                        .recordStats()
+                        .build());
+
+        // Кеш для страниц опубликованных новостей
+        cacheManager.registerCustomCache("publishedNews",
+                Caffeine.newBuilder()
+                        .maximumSize(1000)                    // Много страниц с разными фильтрами
+                        .expireAfterWrite(20, TimeUnit.MINUTES)  // Списки новостей обновляются чаще
+                        .expireAfterAccess(5, TimeUnit.MINUTES)  // Быстро устаревают без обращений
+                        .recordStats()
+                        .build());
 
 
         return cacheManager;
     }
 
 
-    ///я ебу блять
 }

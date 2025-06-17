@@ -28,11 +28,7 @@ public class NewsController {
             Model model
     ) {
         try {
-            log.info("Getting news page: page={}, size={}, newsType={}", page, size, newsType);
-
             ProjectNewsPageResponse newsPage = projectNewsService.getPublishedNews(page, size, newsType);
-            log.info("Successfully retrieved {} news items", newsPage.getContent().size());
-
             model.addAttribute("newsPage", newsPage);
             model.addAttribute("newsTypes", NewsType.values());
             model.addAttribute("currentPage", page);
@@ -45,18 +41,6 @@ public class NewsController {
             return "error";
         }
     }
-
-    @ExceptionHandler(Exception.class)
-    public String handleError(Exception e, Model model) {
-        log.error("Unexpected error", e);
-        model.addAttribute("error", "Произошла ошибка: " + e.getMessage());
-        return "error";
-    }
-    @PostConstruct
-    public void init() {
-        log.info("NewsController initialized with service: {}", projectNewsService);
-    }
-
 
     @GetMapping("/{id}")
     public String viewNews(@PathVariable Long id, Model model) {
@@ -83,7 +67,6 @@ public class NewsController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) NewsType newsType
     ) {
-        log.debug("API запрос новостей: page={}, size={}, newsType={}", page, size, newsType);
         return projectNewsService.getPublishedNews(page, size, newsType);
     }
 }
