@@ -13,8 +13,8 @@ RUN mvn clean package -DskipTests -Dmaven.javadoc.skip=true -Dmaven.test.skip=tr
 # Продакшн стадия - минимальный образ
 FROM eclipse-temurin:21-jre-alpine
 
-# Устанавливаем только необходимые пакеты
-RUN apk add --no-cache --update tzdata && \
+# Устанавливаем только необходимые пакеты (добавлен curl для healthcheck)
+RUN apk add --no-cache --update tzdata curl && \
     apk cache clean && \
     rm -rf /var/cache/apk/*
 
@@ -32,29 +32,27 @@ WORKDIR /app
 # Копируем JAR файл из стадии сборки
 COPY --from=build --chown=spring:spring /app/target/cleopatra-0.0.1-SNAPSHOT.jar app.jar
 
-# Оптимизированные JVM настройки для Render Free (512MB лимит)
+# КРИТИЧЕСКИ ВАЖНЫЕ JVM настройки для Render Free (512MB лимит)
 ENV JAVA_OPTS="-server \
-    -Xmx350m \
-    -Xms128m \
-    -XX:+UseG1GC \
-    -XX:MaxGCPauseMillis=200 \
-    -XX:+UseStringDeduplication \
-    -XX:G1HeapRegionSize=8m \
-    -XX:MaxMetaspaceSize=120m \
-    -XX:CompressedClassSpaceSize=32m \
-    -XX:ReservedCodeCacheSize=32m \
+    -Xmx280m \
+    -Xms64m \
+    -XX:+UseSerialGC \
+    -XX:MaxMetaspaceSize=80m \
+    -XX:CompressedClassSpaceSize=16m \
+    -XX:ReservedCodeCacheSize=16m \
     -XX:+UseCompressedOops \
     -XX:+UseCompressedClassPointers \
     -XX:+TieredCompilation \
     -XX:TieredStopAtLevel=1 \
     -XX:+UseContainerSupport \
-    -XX:InitialRAMPercentage=25.0 \
-    -XX:MaxRAMPercentage=70.0 \
+    -XX:InitialRAMPercentage=12.0 \
+    -XX:MaxRAMPercentage=55.0 \
     -Djava.awt.headless=true \
     -Djava.security.egd=file:/dev/./urandom \
     -Dfile.encoding=UTF-8 \
     -Duser.timezone=UTC \
-    -Djava.net.preferIPv4Stack=true"
+    -Djava.net.preferIPv4Stack=true \
+    -XX:+ExitOnOutOfMemoryError"
 
 # Переменные среды для Spring Boot
 ENV SPRING_PROFILES_ACTIVE=prod
@@ -62,9 +60,9 @@ ENV SERVER_PORT=10000
 
 EXPOSE 10000
 
-# Healthcheck для контейнера
+# Healthcheck для контейнера (исправлен на curl)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:10000/actuator/health || exit 1
+    CMD curl -f http://localhost:10000/actuator/health || exit 1
 
 # Запуск приложения с оптимизированными настройками
 CMD ["sh", "-c", "exec java $JAVA_OPTS -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -Dserver.port=$SERVER_PORT -jar app.jar"]
