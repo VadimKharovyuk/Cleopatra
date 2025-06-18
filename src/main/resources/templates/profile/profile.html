@@ -822,7 +822,6 @@
             <p class="profile-username" th:text="'@' + ${user.email.split('@')[0]}"></p>
 
 
-
             <div class="profile-actions">
                 <!-- Кнопки для ЧУЖОГО профиля -->
                 <th:block th:if="${currentUserId != null and currentUserId != user.id}">
@@ -844,7 +843,6 @@
                         <i th:class="${isSubscribed} ? 'fas fa-user-check' : 'fas fa-user-plus'" id="follow-icon"></i>
                         <span id="follow-text" th:text="${isSubscribed} ? 'Подписан' : 'Подписаться'">Подписаться</span>
                     </button>
-
 
 
                     <!-- Показывается только для чужих профилей -->
@@ -1017,43 +1015,88 @@
                     <span th:if="${user.city == null or #strings.isEmpty(user.city)}">Местоположение не указано</span>
                 </div>
 
-                <!-- ✅ РАСШИРЕННЫЙ БЛОК: Детальный онлайн статус -->
-                <div class="meta-item">
-                    <!-- Онлайн с анимацией -->
-                    <div th:if="${user.isOnline}" class="status-container online">
-                        <div class="status-indicator">
-                            <span class="status-dot online-dot"></span>
-                            <i class="fas fa-wifi meta-icon"></i>
-                        </div>
-                        <div class="status-info">
-                            <span class="status-main">Сейчас в сети</span>
-                            <small class="status-sub">Активен</small>
-                        </div>
-                    </div>
 
-                    <!-- Оффлайн с временем -->
-                    <div th:unless="${user.isOnline}" class="status-container offline">
-                        <div class="status-indicator">
-                            <span class="status-dot offline-dot"></span>
-                            <i class="fas fa-clock meta-icon"></i>
-                        </div>
-                        <div class="status-info">
-                <span class="status-main" th:if="${user.lastSeen != null}">
-                    Был в сети
-                </span>
-                            <span class="status-main" th:if="${user.lastSeen == null}">
-                    Неактивен
-                </span>
-                            <small class="status-sub" th:if="${user.lastSeen != null}">
-                                <span th:text="${#temporals.format(user.lastSeen, 'dd MMM yyyy, HH:mm', new java.util.Locale('ru'))}"></span>
-                            </small>
-                            <small class="status-sub" th:if="${user.lastSeen == null}">
-                                Давно не заходил
-                            </small>
-                        </div>
+
+
+
+                <!-- Онлайн (из Thymeleaf) -->
+                <div th:if="${user.isOnline}" class="status-container online" id="server-status-online">
+                    <div class="status-indicator">
+                        <span class="status-dot online-dot"></span>
+                        <i class="fas fa-wifi meta-icon"></i>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-main">В сети</span>
+                        <small class="status-sub" th:text="${user.deviceType}">WEB</small>
                     </div>
                 </div>
+
+                <!-- Недавно был онлайн (из Thymeleaf) -->
+                <div th:if="${user.wasOnlineRecently && !user.isOnline}" class="status-container recently" id="server-status-recently">
+                    <div class="status-indicator">
+                        <span class="status-dot recently-dot"></span>
+                        <i class="fas fa-clock meta-icon"></i>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-main">Недавно</span>
+                        <small class="status-sub" th:if="${user.lastSeen}"
+                               th:text="${#temporals.format(user.lastSeen, 'HH:mm')}">12:34</small>
+                    </div>
+                </div>
+
+                <!-- Офлайн (из Thymeleaf) -->
+                <div th:if="${!user.isOnline && !user.wasOnlineRecently}" class="status-container offline" id="server-status-offline">
+                    <div class="status-indicator">
+                        <span class="status-dot offline-dot"></span>
+                        <i class="fas fa-moon meta-icon"></i>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-main">Офлайн</span>
+                        <small class="status-sub" th:text="${user.onlineStatusText}">статус неизвестен</small>
+                    </div>
+                </div>
+
+                <!-- Динамические статусы (скрыты по умолчанию, управляются JavaScript) -->
+                <!-- Онлайн (динамический) -->
+                <div class="status-container online" id="dynamic-status-online" style="display: none;">
+                    <div class="status-indicator">
+                        <span class="status-dot online-dot"></span>
+                        <i class="fas fa-wifi meta-icon"></i>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-main">В сети</span>
+                        <small class="status-sub">сейчас активен</small>
+                    </div>
+                </div>
+
+                <!-- Недавно онлайн (динамический) -->
+                <div class="status-container recently" id="dynamic-status-recently" style="display: none;">
+                    <div class="status-indicator">
+                        <span class="status-dot recently-dot"></span>
+                        <i class="fas fa-clock meta-icon"></i>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-main">Недавно</span>
+                        <small class="status-sub">был в 12:34</small>
+                    </div>
+                </div>
+
+                <!-- Офлайн (динамический) -->
+                <div class="status-container offline" id="dynamic-status-offline" style="display: none;">
+                    <div class="status-indicator">
+                        <span class="status-dot offline-dot"></span>
+                        <i class="fas fa-moon meta-icon"></i>
+                    </div>
+                    <div class="status-info">
+                        <span class="status-main">Офлайн</span>
+                        <small class="status-sub">давно не был в сети</small>
+                    </div>
+                </div>
+
+
             </div>
+
+
             <style>
                 .status-container {
                     display: flex;
@@ -3196,6 +3239,10 @@
             document.dispatchEvent(event);
         }, 100);
     };
+    // Каждые 2 минуты отправляем сигнал активности
+    setInterval(() => {
+        fetch('/api/user/activity', { method: 'POST' });
+    }, 2 * 60 * 1000);
 </script>
 
 
