@@ -41,7 +41,6 @@ public class UserOnlineStatusService {
      */
     @Transactional
     public void updateOnlineStatusFinal(Long userId, boolean isOnline) {
-        log.info("🔄 ФИНАЛЬНОЕ обновление: userId={}, isOnline={}", userId, isOnline);
 
         LocalDateTime now = LocalDateTime.now(); // Объявляем здесь для доступности везде
 
@@ -51,7 +50,6 @@ public class UserOnlineStatusService {
             log.debug("📊 SQL UPDATE: обновлено {} строк", updated);
 
             if (updated > 0) {
-                log.info("✅ УСПЕШНО обновлен через SQL: userId={}, isOnline={}", userId, isOnline);
                 return;
             }
 
@@ -171,9 +169,6 @@ public class UserOnlineStatusService {
                 // Если не обновилось, создаем новую запись
                 onlineStatusRepository.insertNewStatus(userId, true, now, "WEB", now, now);
             }
-
-            log.info("✅ Пользователь {} установлен как онлайн", userId);
-
         } catch (Exception e) {
             log.error("❌ Ошибка установки онлайн статуса: {}", e.getMessage());
         }
@@ -194,8 +189,6 @@ public class UserOnlineStatusService {
                 // Если не обновилось, создаем новую запись
                 onlineStatusRepository.insertNewStatus(userId, false, now, "WEB", now, now);
             }
-
-            log.info("✅ Пользователь {} установлен как офлайн", userId);
 
         } catch (Exception e) {
             log.error("❌ Ошибка установки офлайн статуса: {}", e.getMessage());
