@@ -218,9 +218,6 @@ public class PostServiceImpl implements PostService {
                 postSlice = new SliceImpl<>(new ArrayList<>(), pageable, false);
             }
 
-            log.info("Найдено {} постов пользователя {} на странице {}",
-                    postSlice.getNumberOfElements(), userId, page);
-
             // Конвертируем в DTO с обработкой упоминаний
             PostListDto result = convertPostSliceToListDtoWithMentions(postSlice, page, userId);
 
@@ -353,7 +350,6 @@ public class PostServiceImpl implements PostService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Slice<Post> postSlice = postRepository.findByIsDeletedFalseOrderByLikesCountDescCreatedAtDesc(pageable);
 
-        // ✅ ОБНОВЛЕННЫЙ МЕТОД с логикой лайков
         return convertPostSliceToListDto(postSlice, page);
     }
 

@@ -483,10 +483,6 @@
           </div>
 
           <div class="photo-card-content">
-            <div class="photo-title" th:text="'Фото #' + ${photo.id}">
-              Фото #1
-            </div>
-
             <div class="photo-description"
                  th:text="${photo.description ?: 'Без описания'}">
               Описание фотографии
@@ -495,9 +491,6 @@
             <div class="photo-meta">
                             <span th:text="${#temporals.format(photo.uploadDate, 'd MMM yyyy', #locale)}">
                                 15 июн 2025
-                            </span>
-              <span th:text="'ID: ' + ${photo.picId}">
-                                ID: abc123
                             </span>
             </div>
 

@@ -257,9 +257,8 @@ public class AdvertisementServiceImpl implements AdvertisementService {
                         }
                         return active;
                     })
-                    .collect(Collectors.toList());
+                    .toList();
 
-            log.info("После фильтрации по времени: {}", activeNow.size());
 
             if (activeNow.isEmpty()) {
                 log.warn("❌ Нет объявлений, активных в данный момент");
@@ -440,8 +439,6 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
     @Override
     public void approveAdvertisement(Long advertisementId, User admin) {
-        log.info("Одобрение рекламы {} администратором {}", advertisementId, admin.getEmail());
-
         Advertisement advertisement = advertisementRepository.findById(advertisementId)
                 .orElseThrow(() -> new RuntimeException("Реклама не найдена"));
 
@@ -455,8 +452,6 @@ public class AdvertisementServiceImpl implements AdvertisementService {
         advertisement.setUpdatedAt(LocalDateTime.now());
 
         advertisementRepository.save(advertisement);
-
-        log.info("Реклама {} успешно одобрена", advertisementId);
 
         // Можно добавить отправку уведомления создателю рекламы
         // notificationService.sendApprovalNotification(advertisement.getCreatedBy(), advertisement);
@@ -492,8 +487,6 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
     @Override
     public void pauseAdvertisement(Long advertisementId, User admin) {
-        log.info("Приостановка рекламы {} администратором {}", advertisementId, admin.getEmail());
-
         Advertisement advertisement = advertisementRepository.findById(advertisementId)
                 .orElseThrow(() -> new RuntimeException("Реклама не найдена"));
 
@@ -506,13 +499,10 @@ public class AdvertisementServiceImpl implements AdvertisementService {
 
         advertisementRepository.save(advertisement);
 
-        log.info("Реклама {} приостановлена", advertisementId);
     }
 
     @Override
     public void blockAdvertisement(Long advertisementId, String reason, String comment, User admin) {
-        log.info("Блокировка рекламы {} администратором {}, причина: {}",
-                advertisementId, admin.getEmail(), reason);
 
         Advertisement advertisement = advertisementRepository.findById(advertisementId)
                 .orElseThrow(() -> new RuntimeException("Реклама не найдена"));
@@ -597,10 +587,6 @@ public class AdvertisementServiceImpl implements AdvertisementService {
             }
 
             advertisementRepository.save(advertisement);
-
-            log.info("Списано {} с бюджета рекламы ID {}. Остаток бюджета: {}",
-                    costPerView, advertisementId, newRemainingBudget);
-
             // Записываем статистику с HttpServletRequest
             recordViewStatistics(advertisementId, viewer, request);
 

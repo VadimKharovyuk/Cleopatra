@@ -35,9 +35,6 @@ public class NotificationEventListener {
     @Async
     @Transactional(readOnly = true)
     public void handleNotificationCreated(NotificationCreatedEvent event) {
-        log.info("🎉 EVENT RECEIVED: NotificationCreatedEvent for ID: {} to recipient: {}",
-                event.getNotificationId(), event.getRecipientId());
-
         try {
             // Загружаем уведомление с eager loading
             Notification notification = notificationRepository.findByIdWithUsers(event.getNotificationId())
@@ -68,7 +65,6 @@ public class NotificationEventListener {
 
             if (sentViaWebSocket) {
                 // ✅ Отправлено через WebSocket
-                log.info("📤 Notification sent via WebSocket to user: {}", event.getRecipientId());
                 updateNotificationAsSent(event.getNotificationId());
             } else {
 
@@ -92,8 +88,6 @@ public class NotificationEventListener {
     @EventListener
     @Async
     public void handleSubscriptionCreated(SubscriptionCreatedEvent event) {
-        log.info("🎉 EVENT RECEIVED: SubscriptionCreatedEvent - {} subscribed to {}",
-                event.getSubscriberId(), event.getSubscribedToId());
 
         try {
             // Используем ваш существующий метод
@@ -115,9 +109,6 @@ public class NotificationEventListener {
     @EventListener
     @Async
     public void handleUnsubscribe(UnsubscribeEvent event) {
-        log.info("🔔 EVENT RECEIVED: UnsubscribeEvent - {} unsubscribed from {}",
-                event.getSubscriberId(), event.getSubscribedToId());
-
         try {
             // Создаем уведомление об отписке
             notificationService.createUnsubscribeNotification(
@@ -138,9 +129,6 @@ public class NotificationEventListener {
     @EventListener
     @Async
     public void handlePostLiked(PostLikedEvent event) {
-        log.info("🎉 EVENT RECEIVED: PostLikedEvent for post: {} by user: {}",
-                event.getPostId(), event.getLikerUserId());
-
         try {
             notificationService.createLikeNotification(
                     event.getPostAuthorId(), // кому
@@ -149,7 +137,6 @@ public class NotificationEventListener {
                     event.getPostTitle()      // название поста
             );
 
-            log.info("✅ Like notification created successfully for post: {}", event.getPostId());
         } catch (Exception e) {
             log.error("❌ Error creating like notification for post: {}", event.getPostId(), e);
         }
@@ -168,9 +155,6 @@ public class NotificationEventListener {
                         event.getPostId(),
                         event.getCommentText()
                 );
-
-                log.info("Уведомление о комментарии отправлено: пост {}, от пользователя {} к пользователю {}",
-                        event.getPostId(), event.getCommenterUserId(), event.getPostAuthorId());
             } else {
                 log.debug("Пользователь прокомментировал свой собственный пост, уведомление не отправляется");
             }
@@ -186,9 +170,6 @@ public class NotificationEventListener {
     @EventListener
     @Async
     public void handleWallPostCreated(WallPostCreatedEvent event) {
-        log.info("🎉 EVENT RECEIVED: WallPostCreatedEvent for post: {} by user: {} on wall: {}",
-                event.getPostId(), event.getAuthorId(), event.getWallOwnerId());
-
         try {
             // Проверяем, что автор поста не является владельцем стены
             // (не отправляем уведомление самому себе)
@@ -220,13 +201,9 @@ public class NotificationEventListener {
      */
 
     private void scheduleRetryNotification(Long notificationId, Long recipientId, NotificationDto dto) {
-        log.info("⏰ Scheduling retry for notification {} to user {} in 30 seconds", notificationId, recipientId);
-
         // Используем CompletableFuture для отложенной отправки
         CompletableFuture.delayedExecutor(30, TimeUnit.SECONDS).execute(() -> {
             try {
-                log.info("🔄 Retrying notification delivery for user: {}", recipientId);
-
                 boolean sentViaWebSocket = notificationWebSocketHandler.sendNotificationToUser(recipientId, dto);
 
                 if (sentViaWebSocket) {

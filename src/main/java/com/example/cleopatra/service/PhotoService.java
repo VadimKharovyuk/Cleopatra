@@ -21,13 +21,14 @@ public interface PhotoService {
 
     List<PhotoResponseDto> getUserPhotos(Long userId);
 
+
     List<PhotoResponseDto> getPublicPhotos(Long userId);
     PhotoResponseDto getPublicPhotoById(Long photoId);
 
     int getRemainingPhotoLimit(Long userId);
     int getPhotoLimitForUserId(Long userId);
 
-
+    List<PhotoResponseDto> getUserPhotos(Long userId, Long viewerId);
 
 
 

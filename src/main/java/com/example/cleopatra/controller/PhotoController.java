@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +30,6 @@ public class PhotoController {
     private final PhotoService photoService;
     private final UserService userService;
     private final ProfileAccessService profileAccessService;
-
 
     @GetMapping
     public String photosPage(Model model, Authentication authentication) {
@@ -65,7 +66,7 @@ public class PhotoController {
     // Загрузка нового фото
     @PostMapping("/upload")
     public String uploadPhoto(@ModelAttribute PhotoCreateDto photoCreateDto,
-                            Authentication authentication,
+                              Authentication authentication,
                               RedirectAttributes redirectAttributes) {
         if (authentication == null) {
             return "redirect:/login";
@@ -87,11 +88,11 @@ public class PhotoController {
         return "redirect:/photos";
     }
 
-    // Просмотр конкретного фото
+    // Просмотр конкретного фото (своего)
     @GetMapping("/{photoId}")
     public String viewPhoto(@PathVariable Long photoId,
                             Model model,
-                           Authentication authentication) {
+                            Authentication authentication) {
         if (authentication == null) {
             return "redirect:/login";
         }
@@ -162,7 +163,7 @@ public class PhotoController {
 
     @DeleteMapping("/api/{photoId}")
     @ResponseBody
-    public ResponseEntity<?> deletePhotoApi(@PathVariable Long photoId, Authentication  authentication) {
+    public ResponseEntity<?> deletePhotoApi(@PathVariable Long photoId, Authentication authentication) {
         if (authentication == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
         }
@@ -196,7 +197,6 @@ public class PhotoController {
         }
     }
 
-
     @GetMapping("/api/list")
     @ResponseBody
     public ResponseEntity<List<PhotoResponseDto>> getUserPhotos(Authentication authentication) {
@@ -214,9 +214,7 @@ public class PhotoController {
         }
     }
 
-
-
-    // Просмотр фотографий другого пользователя
+    // Просмотр фотографий другого пользователя (обновлено с проверкой доступа)
     @GetMapping("/user/{userId}")
     public String viewUserPhotos(@PathVariable Long userId,
                                  Model model,
@@ -226,6 +224,8 @@ public class PhotoController {
         }
 
         try {
+            Long viewerId = getCurrentUserId(authentication);
+
             // Получаем информацию о пользователе
             User user = userService.findById(userId);
             if (user == null) {
@@ -233,21 +233,20 @@ public class PhotoController {
                 return "error/404";
             }
 
-
-//            if (!profileAccessService.canViewProfileSection(viewerId, userId, "photos")) {
-//                return ResponseEntity.status(403)
-//                        .body(profileAccessService.getAccessDeniedMessage(viewerId, userId));
-//            }
-
-            // Получаем фото пользователя
-            List<PhotoResponseDto> photos = photoService.getPublicPhotos(userId);
+            // Получаем фото с проверкой доступа
+            List<PhotoResponseDto> photos = photoService.getUserPhotos(userId, viewerId);
 
             model.addAttribute("user", user);
             model.addAttribute("photos", photos);
-            model.addAttribute("isOwner", userId.equals(getCurrentUserId(authentication)));
+            model.addAttribute("isOwner", userId.equals(viewerId));
 
             return "photos/user-gallery";
 
+        } catch (UsernameNotFoundException e) {
+            return "error/404";
+        } catch (AccessDeniedException e) {
+            model.addAttribute("errorMessage", "У вас нет доступа к фотографиям этого пользователя");
+            return "error/403";
         } catch (Exception e) {
             log.error("Error viewing user photos {}: {}", userId, e.getMessage(), e);
             model.addAttribute("errorMessage", "Ошибка загрузки фотографий: " + e.getMessage());
@@ -255,7 +254,7 @@ public class PhotoController {
         }
     }
 
-    // API для получения фотографий пользователя
+    // API для получения фотографий пользователя (обновлено с проверкой доступа)
     @GetMapping("/api/user/{userId}")
     @ResponseBody
     public ResponseEntity<List<PhotoResponseDto>> getUserPhotosApi(@PathVariable Long userId,
@@ -265,11 +264,17 @@ public class PhotoController {
         }
 
         try {
-            List<PhotoResponseDto> photos = photoService.getPublicPhotos(userId);
+            Long viewerId = getCurrentUserId(authentication);
+            List<PhotoResponseDto> photos = photoService.getUserPhotos(userId, viewerId);
             return ResponseEntity.ok(photos);
+
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (Exception e) {
             log.error("API Error getting user photos {}: {}", userId, e.getMessage(), e);
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -284,6 +289,15 @@ public class PhotoController {
         }
 
         try {
+            Long viewerId = getCurrentUserId(authentication);
+
+            // Проверяем доступ к фотографиям пользователя
+            if (!userId.equals(viewerId) &&
+                    !profileAccessService.canViewProfileSection(viewerId, userId, "photos")) {
+                model.addAttribute("errorMessage", "У вас нет доступа к фотографиям этого пользователя");
+                return "error/403";
+            }
+
             PhotoResponseDto photo = photoService.getPublicPhotoById(photoId);
 
             // Проверяем, что фото принадлежит указанному пользователю
@@ -296,7 +310,7 @@ public class PhotoController {
 
             model.addAttribute("photo", photo);
             model.addAttribute("user", user);
-            model.addAttribute("isOwner", userId.equals(getCurrentUserId(authentication)));
+            model.addAttribute("isOwner", userId.equals(viewerId));
 
             return "photos/user-photo-view";
 
@@ -307,6 +321,39 @@ public class PhotoController {
         }
     }
 
+    // API для получения конкретного фото пользователя
+    @GetMapping("/api/user/{userId}/photo/{photoId}")
+    @ResponseBody
+    public ResponseEntity<?> getUserPhotoApi(@PathVariable Long userId,
+                                             @PathVariable Long photoId,
+                                             Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            Long viewerId = getCurrentUserId(authentication);
+
+            // Проверяем доступ к фотографиям пользователя
+            if (!userId.equals(viewerId) &&
+                    !profileAccessService.canViewProfileSection(viewerId, userId, "photos")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            PhotoResponseDto photo = photoService.getPublicPhotoById(photoId);
+
+            // Проверяем, что фото принадлежит указанному пользователю
+            if (!photo.getAuthorId().equals(userId)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(photo);
+
+        } catch (Exception e) {
+            log.error("API Error getting user photo {}/{}: {}", userId, photoId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     private Long getCurrentUserId(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {

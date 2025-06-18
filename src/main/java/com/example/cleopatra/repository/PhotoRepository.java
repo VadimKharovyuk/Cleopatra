@@ -12,4 +12,5 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
 
 
     List<Photo> findByAuthorIdOrderByUploadDateDesc(Long userId);
+
 }

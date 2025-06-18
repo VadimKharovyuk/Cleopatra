@@ -480,9 +480,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         try {
             Notification saved = notificationRepository.save(notification);
-            log.info("✅ Notification saved successfully with ID: {}", saved.getId());
 
-            log.info("📢 Publishing NotificationCreatedEvent for ID: {}", saved.getId());
             eventPublisher.publishEvent(new NotificationCreatedEvent(
                     saved.getId(),
                     saved.getRecipient().getId()

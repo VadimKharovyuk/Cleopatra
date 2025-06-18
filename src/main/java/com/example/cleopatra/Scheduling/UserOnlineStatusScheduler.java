@@ -112,8 +112,6 @@ public class UserOnlineStatusScheduler {
             Long onlineCount = userOnlineStatusService.getOnlineUsersCount();
             Long recentlyActiveCount = userOnlineStatusService.getRecentlyActiveUsersCount(60);
 
-            log.info("📊 Онлайн статистика: {} онлайн, {} активны за час", onlineCount, recentlyActiveCount);
-
             // Дополнительная проверка эффективности JS
             Long veryRecentlyActive = userOnlineStatusService.getRecentlyActiveUsersCount(2); // за 2 минуты
             if (onlineCount > 0 && veryRecentlyActive != null) {

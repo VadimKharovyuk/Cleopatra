@@ -1,4 +1,5 @@
 package com.example.cleopatra.service.impl;
+
 import com.example.cleopatra.ExistsException.ImageDeleteException;
 import com.example.cleopatra.ExistsException.ImageUploadException;
 import com.example.cleopatra.ExistsException.PhotoLimitExceededException;
@@ -12,6 +13,7 @@ import com.example.cleopatra.repository.PhotoRepository;
 import com.example.cleopatra.repository.UserRepository;
 import com.example.cleopatra.service.ImageValidator;
 import com.example.cleopatra.service.PhotoService;
+import com.example.cleopatra.service.ProfileAccessService;
 import com.example.cleopatra.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,12 +38,13 @@ public class PhotoServiceImpl implements PhotoService {
 
     private final UserRepository userRepository;
     private final StorageService storageService;
-    private final ImageValidator imageValidator ;
-    private final PhotoServiceMapper photoServiceMapper ;
+    private final ImageValidator imageValidator;
+    private final PhotoServiceMapper photoServiceMapper;
     private final PhotoRepository photoRepository;
-
+    private final ProfileAccessService profileAccessService;
 
     @Override
+    @Transactional(readOnly = true)
     public boolean canUploadPhoto(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UsernameNotFoundException("User not found: " + userId)
@@ -59,6 +62,7 @@ public class PhotoServiceImpl implements PhotoService {
     }
 
     @Override
+    @Transactional
     public PhotoResponseDto createPhoto(Long userId, PhotoCreateDto photoCreateDto) {
         // Проверяем лимит
         if (!canUploadPhoto(userId)) {
@@ -105,22 +109,28 @@ public class PhotoServiceImpl implements PhotoService {
     }
 
     @Override
+    @Transactional
     public void deletePhoto(Long userId, Long photoId) {
         Photo photo = photoRepository.findByIdAndAuthorId(photoId, userId)
                 .orElseThrow(() -> new PhotoNotFoundException("Photo not found or access denied"));
 
-        // Пытаемся удалить файл из хранилища
-        boolean fileDeleted = storageService.deleteImage(photo.getPicId());
-        if (!fileDeleted) {
-            log.warn("Failed to delete image file with ID: {} - continuing with database cleanup", photo.getPicId());
+        try {
+            // Пытаемся удалить файл из хранилища
+            boolean fileDeleted = storageService.deleteImage(photo.getPicId());
+            if (!fileDeleted) {
+                log.warn("Failed to delete image file with ID: {} - continuing with database cleanup", photo.getPicId());
+            }
+
+            // Удаляем запись из БД
+            photoRepository.delete(photo);
+            userRepository.decrementPhotoCount(userId);
+
+            log.info("Photo deleted: userId={}, photoId={}, fileDeleted={}", userId, photoId, fileDeleted);
+
+        } catch (Exception e) {
+            log.error("Error deleting photo: userId={}, photoId={}", userId, photoId, e);
+            throw new ImageDeleteException("Ошибка удаления фотографии: " + e.getMessage(), e);
         }
-
-        // Всегда удаляем запись из БД
-        photoRepository.delete(photo);
-        userRepository.decrementPhotoCount(userId);
-
-        log.info("Photo deleted from database: userId={}, photoId={}, fileDeleted={}",
-                userId, photoId, fileDeleted);
     }
 
     @Override
@@ -136,6 +146,7 @@ public class PhotoServiceImpl implements PhotoService {
     @Override
     @Transactional(readOnly = true)
     public List<PhotoResponseDto> getUserPhotos(Long userId) {
+        // Этот метод возвращает ВСЕ фото пользователя (для владельца)
         List<Photo> photos = photoRepository.findByAuthorIdOrderByUploadDateDesc(userId);
         return photos.stream()
                 .map(photoServiceMapper::toResponseDto)
@@ -145,13 +156,27 @@ public class PhotoServiceImpl implements PhotoService {
     @Override
     @Transactional(readOnly = true)
     public List<PhotoResponseDto> getPublicPhotos(Long userId) {
-        // Проверяем, что пользователь существует
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UsernameNotFoundException("User not found: " + userId)
-        );
-
-        // Получаем публичные фото (все фото пользователя видны другим)
+        // Пока что возвращаем все фото (логику приватности добавим позже)
         List<Photo> photos = photoRepository.findByAuthorIdOrderByUploadDateDesc(userId);
+        return photos.stream()
+                .map(photoServiceMapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PhotoResponseDto> getUserPhotos(Long userId, Long viewerId) {
+        // Проверяем, что пользователь существует
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userId));
+
+        // Проверяем доступ к фотографиям
+        if (!canViewUserPhotos(viewerId, userId)) {
+            throw new AccessDeniedException("Access denied to user's photos");
+        }
+
+        // Получаем фото в зависимости от прав доступа
+        List<Photo> photos = getPhotosBasedOnPrivacy(userId, viewerId);
 
         return photos.stream()
                 .map(photoServiceMapper::toResponseDto)
@@ -159,19 +184,16 @@ public class PhotoServiceImpl implements PhotoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PhotoResponseDto getPublicPhotoById(Long photoId) {
-        Photo photo = photoRepository.findById(photoId).orElseThrow(
-                () -> new PhotoNotFoundException("Photo not found: " + photoId)
-        );
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new PhotoNotFoundException("Photo not found: " + photoId));
 
         return photoServiceMapper.toResponseDto(photo);
     }
 
-    private String generateUniqueId() {
-        return UUID.randomUUID().toString();
-    }
-
     @Override
+    @Transactional(readOnly = true)
     public int getRemainingPhotoLimit(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UsernameNotFoundException("User not found: " + userId)
@@ -184,6 +206,7 @@ public class PhotoServiceImpl implements PhotoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int getPhotoLimitForUserId(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UsernameNotFoundException("User not found: " + userId)
@@ -192,5 +215,24 @@ public class PhotoServiceImpl implements PhotoService {
         return getPhotoLimitForUser(user);
     }
 
+    // Приватные методы
 
+    private boolean canViewUserPhotos(Long viewerId, Long userId) {
+        // Владелец может всегда просматривать свои фото
+        if (viewerId.equals(userId)) {
+            return true;
+        }
+
+        // Проверяем настройки приватности через ProfileAccessService
+        return profileAccessService.canViewProfileSection(viewerId, userId, "photos");
+    }
+
+    private List<Photo> getPhotosBasedOnPrivacy(Long userId, Long viewerId) {
+        // Пока возвращаем все фото, позже добавим логику приватности
+        return photoRepository.findByAuthorIdOrderByUploadDateDesc(userId);
+    }
+
+    private String generateUniqueId() {
+        return UUID.randomUUID().toString();
+    }
 }

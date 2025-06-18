@@ -143,8 +143,6 @@ public class ProfileAccessServiceImpl implements ProfileAccessService {
     }
 
     private boolean checkAccess(Long viewerId, Long profileOwnerId, ProfileAccessLevel accessLevel) {
-        log.info("🔍 checkAccess: viewerId={}, profileOwnerId={}, accessLevel={}",
-                viewerId, profileOwnerId, accessLevel);
 
         // Получаем владельца профиля
         Optional<User> profileOwnerOpt = userRepository.findById(profileOwnerId);

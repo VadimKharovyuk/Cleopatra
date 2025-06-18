@@ -45,8 +45,6 @@ public class UserActivityController {
             } else {
                 response.put("success", false);
                 response.put("message", "User not authenticated");
-
-                log.warn("Попытка обновления активности неаутентифицированного пользователя");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
 

@@ -350,9 +350,6 @@ public class AdvertisementController {
                                                HttpServletRequest request) {
         try {
             User user = userService.getCurrentUserEntity(authentication);
-            log.info("Регистрация просмотра рекламы {} пользователем {}",
-                    id, user != null ? user.getEmail() : "анонимный");
-
             // Передаем request в сервис
             advertisementService.registerView(id, user, request);
             return ResponseEntity.ok("OK");
