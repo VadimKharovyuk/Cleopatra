@@ -8,8 +8,25 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+
+
 @Entity
-@Table(name = "user_online_status")
+@Table(
+        name = "user_online_status",
+        indexes = {
+                // Основные индексы для быстрого поиска
+                @Index(name = "idx_user_online_status_user_id", columnList = "user_id"),
+                @Index(name = "idx_user_online_status_is_online", columnList = "is_online"),
+                @Index(name = "idx_user_online_status_last_seen", columnList = "last_seen"),
+
+                // Композитный индекс для сложных запросов (порядок ВАЖЕН!)
+                @Index(name = "idx_user_online_status_online_last_seen", columnList = "is_online, last_seen"),
+
+                // Дополнительные полезные индексы
+                @Index(name = "idx_user_online_status_device_type", columnList = "device_type"),
+                @Index(name = "idx_user_online_status_updated_at", columnList = "updated_at")
+        }
+)
 @Getter
 @Setter
 @Builder
@@ -61,10 +78,6 @@ public class UserOnlineStatus {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // =================== УБИРАЕМ @Version ЕСЛИ ЕСТЬ ===================
-    // ВАЖНО: Если у вас есть поле @Version - УДАЛИТЕ его или закомментируйте!
-    // @Version
-    // private Long version;
 
     // Методы для удобства
     public boolean wasOnlineRecently() {
