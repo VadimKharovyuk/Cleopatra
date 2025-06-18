@@ -64,25 +64,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:10000/actuator/health || exit 1
 #
 ## Запуск приложения с оптимизированными настройками
-#CMD ["sh", "-c", "exec java $JAVA_OPTS -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -Dserver.port=10000 -jar app.jar"]
+CMD ["sh", "-c", "exec java $JAVA_OPTS -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -Dserver.port=10000 -jar app.jar"]
 
 # Замените CMD в Dockerfile на:
 
-CMD ["java", \
-     "-Xmx420m", \
-     "-Xms140m", \
-     "-XX:+UseG1GC", \
-     "-XX:MaxGCPauseMillis=300", \
-     "-XX:G1HeapRegionSize=8m", \
-     "-XX:MaxMetaspaceSize=128m", \
-     "-XX:+UseCompressedOops", \
-     "-XX:+UseContainerSupport", \
-     "-Djava.awt.headless=true", \
-     "-Djava.security.egd=file:/dev/./urandom", \
-     "-Dfile.encoding=UTF-8", \
-     "-Duser.timezone=UTC", \
-     "-XX:+ExitOnOutOfMemoryError", \
-     "-Xss256k", \
-     "-Dspring.profiles.active=prod", \
-     "-Dserver.port=10000", \
-     "-jar", "app.jar"]
