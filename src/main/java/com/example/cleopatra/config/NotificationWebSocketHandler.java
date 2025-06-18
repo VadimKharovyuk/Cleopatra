@@ -73,11 +73,6 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
     /**
      * 🚀 ГЛАВНЫЙ МЕТОД - отправка уведомления
      */
-
-    /**
-     * Отправить уведомление пользователю
-     * @return true если отправлено успешно, false если пользователь не подключен
-     */
     public boolean sendNotificationToUser(Long userId, NotificationDto notification) {
         log.debug("📤 Attempting to send notification to user {}: {}", userId, notification.getTitle());
 
