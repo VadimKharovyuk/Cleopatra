@@ -28,8 +28,6 @@ public class UserResponse {
     private String imageUrl;
     private String imgId;
 
-
-
     private String imgBackground ;
     private String imgBackgroundID;
 
@@ -42,9 +40,6 @@ public class UserResponse {
 
     private LocalDateTime createdAt;
 
-
-    private Boolean isOnline;
-    private LocalDateTime lastSeen;
 
     private Boolean receiveVisitNotifications;
 
@@ -65,5 +60,12 @@ public class UserResponse {
 
     @Size(max = 200, message = "Статус не может быть длиннее 200 символов")
     private String statusPage;
+
+
+    private Boolean isOnline;
+    private Boolean wasOnlineRecently;
+    private LocalDateTime lastSeen;
+    private String deviceType;
+    private String onlineStatusText;
 
 }

@@ -37,14 +37,6 @@ public class CacheConfig {
                         .recordStats()
                         .build());
 
-        // Кеш для статистики постов
-        cacheManager.registerCustomCache("post-stats",
-                Caffeine.newBuilder()
-                        .maximumSize(100)                     // Мало статистических данных
-                        .expireAfterWrite(30, TimeUnit.MINUTES) // Статистика может жить дольше
-                        .recordStats()
-                        .build());
-
         // =================== НОВЫЕ КЭШИ ДЛЯ НОВОСТЕЙ ===================
 
         // Кеш для отдельных новостей по ID

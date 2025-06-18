@@ -1,0 +1,244 @@
+
+<!-- fragments/user-status.html -->
+<div th:fragment="userStatus(user)" class="status-wrapper">
+    <!-- Онлайн -->
+    <div th:if="${user.isOnline}" class="status-container online">
+        <div class="status-indicator">
+            <span class="status-dot online-dot"></span>
+            <i class="fas fa-wifi meta-icon"></i>
+        </div>
+        <div class="status-info">
+            <span class="status-main">В сети</span>
+            <small class="status-sub" th:text="${user.deviceType ?: 'WEB'}">WEB</small>
+        </div>
+    </div>
+
+    <!-- Недавно был онлайн -->
+    <div th:if="${user.wasOnlineRecently && !user.isOnline}" class="status-container recently">
+        <div class="status-indicator">
+            <span class="status-dot recently-dot"></span>
+            <i class="fas fa-clock meta-icon"></i>
+        </div>
+        <div class="status-info">
+            <span class="status-main">Недавно</span>
+            <small class="status-sub" th:if="${user.lastSeen}"
+                   th:text="${#temporals.format(user.lastSeen, 'HH:mm')}">12:34</small>
+        </div>
+    </div>
+
+    <!-- Офлайн -->
+    <div th:if="${!user.isOnline && !user.wasOnlineRecently}" class="status-container offline">
+        <div class="status-indicator">
+            <span class="status-dot offline-dot"></span>
+            <i class="fas fa-moon meta-icon"></i>
+        </div>
+        <div class="status-info">
+            <span class="status-main">Офлайн</span>
+            <small class="status-sub" th:if="${user.lastSeen}"
+                   th:text="${#temporals.format(user.lastSeen, 'dd.MM.yyyy')}">01.01.2024</small>
+        </div>
+    </div>
+</div>
+
+<!-- ====================== ВАРИАНТ 3: Список онлайн пользователей ====================== -->
+
+<!-- users/online.html -->
+<div class="online-users-page">
+    <div class="page-header">
+        <h1>Пользователи онлайн</h1>
+        <span class="online-count" th:text="${onlineCount + ' пользователей'}">5 пользователей</span>
+    </div>
+
+    <div class="users-grid">
+        <div th:each="user : ${onlineUsers}" class="user-card">
+            <div class="user-avatar">
+                <img th:src="${user.avatarUrl}" th:alt="${user.username}">
+                <span class="online-indicator"></span>
+            </div>
+            <div class="user-details">
+                <h3 th:text="${user.username}">Username</h3>
+                <p th:text="${user.fullName}">Full Name</p>
+
+                <!-- Используем фрагмент -->
+                <div th:replace="~{fragments/user-status :: userStatus(${user})}"></div>
+            </div>
+            <a th:href="@{/profile/{id}(id=${user.id})}" class="view-profile">
+                Перейти к профилю
+            </a>
+        </div>
+    </div>
+
+    <!-- Если никого нет онлайн -->
+    <div th:if="${onlineUsers.empty}" class="empty-state">
+        <i class="fas fa-user-slash"></i>
+        <h3>Никого нет онлайн</h3>
+        <p>Все пользователи сейчас офлайн</p>
+    </div>
+</div>
+
+<!-- ====================== ВАРИАНТ 4: Компактный статус для карточек ====================== -->
+
+<!-- fragments/user-status-compact.html -->
+<span th:fragment="compactStatus(user)" class="compact-status">
+    <span th:if="${user.isOnline}" class="status-badge online" title="В сети">
+        <i class="fas fa-circle"></i> Онлайн
+    </span>
+    <span th:if="${user.wasOnlineRecently && !user.isOnline}" class="status-badge recent" title="Недавно был в сети">
+        <i class="fas fa-circle"></i> Недавно
+    </span>
+    <span th:if="${!user.isOnline && !user.wasOnlineRecently}" class="status-badge offline" title="Офлайн">
+        <i class="fas fa-circle"></i> Офлайн
+    </span>
+</span>
+
+<!-- ====================== ВАРИАНТ 5: JavaScript для динамического обновления ====================== -->
+
+<script th:inline="javascript">
+    // Динамическое обновление статуса пользователя
+    function updateUserStatus(userId) {
+        fetch(`/api/user/${userId}/status`)
+            .then(response => response.json())
+            .then(data => {
+                const statusContainer = document.querySelector(`[data-user-id="${userId}"] .status-container`);
+                if (statusContainer) {
+                    // Удаляем все классы статуса
+                    statusContainer.classList.remove('online', 'recently', 'offline');
+
+                    // Добавляем актуальный класс
+                    if (data.isOnline) {
+                        statusContainer.classList.add('online');
+                        statusContainer.querySelector('.status-main').textContent = 'В сети';
+                    } else {
+                        statusContainer.classList.add('offline');
+                        statusContainer.querySelector('.status-main').textContent = 'Офлайн';
+                    }
+                }
+            })
+            .catch(error => console.error('Ошибка обновления статуса:', error));
+    }
+
+    // Обновляем статусы каждые 30 секунд
+    setInterval(() => {
+        document.querySelectorAll('[data-user-id]').forEach(element => {
+            const userId = element.getAttribute('data-user-id');
+            updateUserStatus(userId);
+        });
+    }, 30000);
+</script>
+
+<!-- ====================== CSS стили ====================== -->
+
+<style>
+    .status-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .status-container.online {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .status-container.recently {
+        background: rgba(251, 191, 36, 0.1);
+        border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+
+    .status-container.offline {
+        background: rgba(107, 114, 128, 0.1);
+        border: 1px solid rgba(107, 114, 128, 0.2);
+    }
+
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    .online-dot {
+        background: #22c55e;
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+
+    .recently-dot {
+        background: #fbbf24;
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7);
+    }
+
+    .offline-dot {
+        background: #6b7280;
+        animation: none;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0);
+        }
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+        }
+    }
+
+    .status-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .status-main {
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .status-sub {
+        font-size: 12px;
+        opacity: 0.7;
+    }
+
+    .meta-icon {
+        font-size: 12px;
+        opacity: 0.6;
+    }
+
+    /* Компактные статусы */
+    .compact-status .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .status-badge.online {
+        background: rgba(34, 197, 94, 0.1);
+        color: #16a34a;
+    }
+
+    .status-badge.recent {
+        background: rgba(251, 191, 36, 0.1);
+        color: #d97706;
+    }
+
+    .status-badge.offline {
+        background: rgba(107, 114, 128, 0.1);
+        color: #6b7280;
+    }
+</style>

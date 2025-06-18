@@ -70,6 +70,13 @@ public class UserMapper {
         //статус
         response.setStatusPage(user.getStatusPage() != null ? user.getStatusPage() : "");
 
+        ///онлайн // оффлайн статус
+        response.setIsOnline(user.isOnline());
+        response.setWasOnlineRecently(user.wasOnlineRecently());
+        response.setLastSeen(user.getLastSeen());
+        response.setDeviceType(user.getDeviceType());
+        response.setOnlineStatusText(user.getOnlineStatusText());
+
         return response;
     }
 

@@ -1,260 +1,264 @@
-// **
-// * Универсальный скрипт для управления онлайн статусом
-// * Версия БЕЗ CSRF токенов
-// */
+// ===== УЛУЧШЕННАЯ ЛОГИКА ОБНОВЛЕНИЯ СТАТУСА =====
 
-(function() {
-    'use strict';
+let statusCheckInterval = null;
+let isCurrentUser = true; // Флаг: смотрим ли мы на свой профиль
+let currentUserId = null; // ID текущего пользователя
+let viewedUserId = null;  // ID пользователя, на которого смотрим
 
-    // Конфигурация
-    const CONFIG = {
-        PING_INTERVAL: 5 * 60 * 1000,  // 5 минут
-        ENDPOINTS: {
-            ONLINE: '/api/users/me/online',
-            OFFLINE: '/api/users/me/offline',
-            PING: '/api/users/me/ping'
-        }
-    };
+/**
+ * Инициализация - определяем контекст
+ */
+function initializeStatusContext() {
+    // Получаем ID из атрибутов body (ваша структура)
+    const bodyElement = document.body;
 
-    let pingInterval = null;
-    let isUserAuthenticated = false;
-
-    // ===================== ПРОВЕРКА АУТЕНТИФИКАЦИИ =====================
-
-    function checkAuthentication() {
-        console.log('🔍 Checking authentication...');
-
-        // Ищем признаки аутентификации без CSRF
-        const userElement = document.querySelector('[data-user-id]');
-        const userMenuElement = document.querySelector('.user-menu, .navbar-user, [data-user], .username');
-        const logoutButton = document.querySelector('a[href*="logout"], button[onclick*="logout"]');
-
-        // Проверяем cookies на наличие сессии
-        const hasSessionCookie = document.cookie.includes('JSESSIONID') ||
-            document.cookie.includes('SESSION') ||
-            document.cookie.includes('session');
-
-        // Проверяем URL - если есть /login или /auth, то скорее всего не авторизован
-        const isOnLoginPage = window.location.pathname.includes('/login') ||
-            window.location.pathname.includes('/auth');
-
-        console.log('User element:', userElement);
-        console.log('User menu element:', userMenuElement);
-        console.log('Logout button:', logoutButton);
-        console.log('Has session cookie:', hasSessionCookie);
-        console.log('Is on login page:', isOnLoginPage);
-
-        isUserAuthenticated = !isOnLoginPage && !!(userElement || userMenuElement || logoutButton || hasSessionCookie);
-        console.log('✅ User authenticated:', isUserAuthenticated);
-
-        return isUserAuthenticated;
+    if (bodyElement) {
+        currentUserId = parseInt(bodyElement.dataset.currentUserId);
+        viewedUserId = parseInt(bodyElement.dataset.profileUserId);
     }
 
-    // ===================== HTTP ЗАПРОСЫ =====================
+    // Определяем, смотрим ли мы на свой профиль
+    isCurrentUser = viewedUserId === currentUserId;
 
-    function makeRequest(url, method = 'POST') {
-        console.log(`🌐 Making ${method} request to: ${url}`);
+    console.log('🔍 Контекст статуса:', {
+        currentUserId,
+        viewedUserId,
+        isCurrentUser: isCurrentUser ? 'да (свой профиль)' : 'нет (чужой профиль)'
+    });
+}
 
-        const options = {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            credentials: 'same-origin' // Важно! Передает cookies с сессией
-        };
+/**
+ * Проверить и обновить статус (УЛУЧШЕННАЯ ВЕРСИЯ)
+ */
+async function checkAndUpdateStatus() {
+    try {
+        let response;
 
-        console.log('📤 Request options:', JSON.stringify(options, null, 2));
-
-        return fetch(url, options)
-            .then(response => {
-                console.log(`📥 Response status: ${response.status} ${response.statusText}`);
-
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        console.error(`❌ HTTP error! status: ${response.status}, body: ${text}`);
-                        throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
-                    });
-                }
-                return response.text();
-            })
-            .then(data => {
-                console.log('✅ Request successful, response:', data);
-                return data;
-            })
-            .catch(error => {
-                console.error('❌ Request failed:', error);
-                // Не выбрасываем ошибку дальше, чтобы не ломать весь скрипт
-                return null;
-            });
-    }
-
-    // ===================== ОСНОВНЫЕ ФУНКЦИИ =====================
-
-    function setOnline() {
-        console.log('🟢 Setting user ONLINE...');
-        if (!isUserAuthenticated) {
-            console.warn('⚠️ User not authenticated, skipping setOnline');
-            return;
-        }
-
-        makeRequest(CONFIG.ENDPOINTS.ONLINE)
-            .then((result) => {
-                if (result !== null) {
-                    console.log('✅ User set to ONLINE');
-                    startPingInterval();
-                } else {
-                    console.error('❌ Failed to set user ONLINE');
-                }
-            });
-    }
-
-    function setOffline() {
-        console.log('🔴 Setting user OFFLINE...');
-        if (!isUserAuthenticated) {
-            console.warn('⚠️ User not authenticated, skipping setOffline');
-            return;
-        }
-
-        // Для надежности при закрытии страницы используем обычный fetch
-        makeRequest(CONFIG.ENDPOINTS.OFFLINE)
-            .then((result) => {
-                if (result !== null) {
-                    console.log('📴 User set to OFFLINE');
-                } else {
-                    console.error('❌ Failed to set user OFFLINE');
-                }
-            });
-
-        stopPingInterval();
-    }
-
-    function ping() {
-        console.log('🏓 Sending ping...');
-        if (!isUserAuthenticated) {
-            console.warn('⚠️ User not authenticated, skipping ping');
-            return;
-        }
-
-        makeRequest(CONFIG.ENDPOINTS.PING)
-            .then((result) => {
-                if (result !== null) {
-                    console.log('🏓 Ping sent successfully');
-                } else {
-                    console.error('❌ Ping failed');
-                }
-            });
-    }
-
-    function startPingInterval() {
-        if (pingInterval) {
-            console.log('⏰ Ping interval already running');
-            return;
-        }
-
-        pingInterval = setInterval(() => {
-            ping();
-        }, CONFIG.PING_INTERVAL);
-
-        console.log(`⏰ Ping interval started (every ${CONFIG.PING_INTERVAL / 1000} seconds)`);
-    }
-
-    function stopPingInterval() {
-        if (pingInterval) {
-            clearInterval(pingInterval);
-            pingInterval = null;
-            console.log('⏹️ Ping interval stopped');
-        }
-    }
-
-    // ===================== ОБРАБОТЧИКИ СОБЫТИЙ =====================
-
-    function onPageLoad() {
-        console.log('📄 Page loaded');
-        if (checkAuthentication()) {
-            setOnline();
+        if (isCurrentUser) {
+            // Если это наш профиль - получаем свой статус
+            response = await fetch('/api/users/me/status');
         } else {
-            console.log('❌ User not authenticated, not setting online');
+            // Если это чужой профиль - получаем статус конкретного пользователя
+            response = await fetch(`/api/users/${viewedUserId}/status`);
         }
-    }
 
-    function onPageUnload() {
-        console.log('📄 Page unloading');
-        setOffline();
-    }
+        if (response.ok) {
+            const data = await response.json();
+            console.log('📊 Статус получен:', data);
 
-    function onVisibilityChange() {
-        console.log('👁️ Visibility changed, hidden:', document.hidden);
-        if (!isUserAuthenticated) return;
-
-        if (document.hidden) {
-            console.log('👁️ Page hidden');
+            // Обновляем отображение
+            updateStatusDisplay(data.isOnline, data.lastSeen);
         } else {
-            console.log('👁️ Page visible');
-            ping();
-            startPingInterval();
+            console.warn('⚠️ Не удалось получить статус:', response.status);
         }
+    } catch (error) {
+        console.error('❌ Ошибка при проверке статуса:', error);
     }
+}
 
-    function onWindowFocus() {
-        console.log('🎯 Window focused');
-        if (isUserAuthenticated) {
-            ping();
-        }
-    }
+/**
+ * Обновить отображение статуса с учетом времени
+ */
+function updateStatusDisplay(isOnline, lastSeen) {
+    // Скрываем серверные статусы
+    hideElement('server-status-online');
+    hideElement('server-status-recently');
+    hideElement('server-status-offline');
 
-    function onWindowBlur() {
-        console.log('🌫️ Window blurred');
-    }
+    // Скрываем динамические статусы
+    hideElement('dynamic-status-online');
+    hideElement('dynamic-status-offline');
+    hideElement('dynamic-status-recently');
 
-    // ===================== ИНИЦИАЛИЗАЦИЯ =====================
+    if (isOnline) {
+        showElement('dynamic-status-online');
+        console.log('✅ Отображен статус: ОНЛАЙН');
+    } else {
+        // Проверяем, когда был последний раз онлайн
+        if (lastSeen) {
+            const lastSeenDate = new Date(lastSeen);
+            const now = new Date();
+            const minutesAgo = (now - lastSeenDate) / (1000 * 60);
 
-    function init() {
-        console.log('🚀 Initializing Online Status Manager (NO CSRF)...');
-
-        if (document.readyState === 'loading') {
-            console.log('⏳ DOM still loading, waiting for DOMContentLoaded');
-            document.addEventListener('DOMContentLoaded', onPageLoad);
-        } else {
-            console.log('✅ DOM ready, calling onPageLoad immediately');
-            onPageLoad();
-        }
-
-        // Обработчики событий
-        window.addEventListener('beforeunload', onPageUnload);
-        window.addEventListener('pagehide', onPageUnload);
-        document.addEventListener('visibilitychange', onVisibilityChange);
-        window.addEventListener('focus', onWindowFocus);
-        window.addEventListener('blur', onWindowBlur);
-        window.addEventListener('popstate', onPageLoad);
-
-        console.log('🚀 Online status manager initialized');
-    }
-
-    // Запускаем инициализацию
-    init();
-
-    // ===================== ГЛОБАЛЬНЫЙ API =====================
-
-    window.OnlineStatus = {
-        setOnline: setOnline,
-        setOffline: setOffline,
-        ping: ping,
-        isActive: () => !!pingInterval,
-        // Отладочные функции
-        debug: {
-            checkAuth: checkAuthentication,
-            testPing: () => {
-                console.log('🧪 Testing ping manually...');
-                ping();
-            },
-            getConfig: () => CONFIG,
-            getAuthStatus: () => isUserAuthenticated,
-            forceSetOnline: () => {
-                isUserAuthenticated = true;
-                setOnline();
+            if (minutesAgo < 15) {
+                // Недавно был онлайн
+                showElement('dynamic-status-recently');
+                updateRecentlySeenTime(lastSeenDate);
+                console.log('🕐 Отображен статус: НЕДАВНО ОНЛАЙН');
+            } else {
+                // Давно не был онлайн
+                showElement('dynamic-status-offline');
+                updateOfflineTime(lastSeenDate);
+                console.log('📴 Отображен статус: ОФЛАЙН');
             }
+        } else {
+            showElement('dynamic-status-offline');
+            console.log('📴 Отображен статус: ОФЛАЙН (нет данных)');
         }
-    };
+    }
+}
 
-})();
+/**
+ * Установить пользователя онлайн и обновить статус (ТОЛЬКО ДЛЯ СЕБЯ)
+ */
+async function setUserOnlineAndUpdate() {
+    // ВАЖНО: Устанавливаем онлайн ТОЛЬКО для себя!
+    if (!isCurrentUser) {
+        console.log('⚠️ Пропуск установки онлайн - это не наш профиль');
+        return;
+    }
+
+    try {
+        // Устанавливаем онлайн
+        const response = await fetch('/api/users/me/online', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+
+        if (response.ok) {
+            console.log('✅ Пользователь установлен онлайн');
+
+            // СРАЗУ обновляем отображение без задержки
+            updateStatusDisplay(true, new Date().toISOString());
+
+            // Дополнительная проверка через небольшую задержку
+            setTimeout(() => {
+                checkAndUpdateStatus();
+            }, 200);
+        }
+    } catch (error) {
+        console.error('❌ Ошибка установки онлайн:', error);
+    }
+}
+
+/**
+ * Запустить мониторинг статуса (УМНЫЙ)
+ */
+function startStatusMonitoring() {
+    // Инициализируем контекст
+    initializeStatusContext();
+
+    if (isCurrentUser) {
+        // Если это наш профиль - устанавливаем себя онлайн
+        setUserOnlineAndUpdate();
+
+        // Частая проверка для собственного профиля (каждые 15 секунд)
+        statusCheckInterval = setInterval(checkAndUpdateStatus, 15000);
+        console.log('⏰ Мониторинг собственного статуса запущен');
+    } else {
+        // Если это чужой профиль - просто проверяем статус
+        checkAndUpdateStatus();
+
+        // Редкая проверка для чужих профилей (каждые 60 секунд)
+        statusCheckInterval = setInterval(checkAndUpdateStatus, 60000);
+        console.log('⏰ Мониторинг чужого статуса запущен');
+    }
+}
+
+/**
+ * Показать элемент
+ */
+function showElement(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.style.display = 'flex';
+    }
+}
+
+/**
+ * Скрыть элемент
+ */
+function hideElement(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.style.display = 'none';
+    }
+}
+
+/**
+ * Обновить время для "недавно онлайн"
+ */
+function updateRecentlySeenTime(lastSeenDate) {
+    const timeElement = document.querySelector('#dynamic-status-recently .status-sub');
+    if (timeElement) {
+        const time = lastSeenDate.toLocaleTimeString('ru-RU', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        timeElement.textContent = `был в ${time}`;
+    }
+}
+
+/**
+ * Обновить время для "давно офлайн"
+ */
+function updateOfflineTime(lastSeenDate) {
+    const timeElement = document.querySelector('#dynamic-status-offline .status-sub');
+    if (timeElement) {
+        const now = new Date();
+        const diffInDays = Math.floor((now - lastSeenDate) / (1000 * 60 * 60 * 24));
+
+        if (diffInDays === 0) {
+            const time = lastSeenDate.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            timeElement.textContent = `был сегодня в ${time}`;
+        } else if (diffInDays === 1) {
+            timeElement.textContent = 'был вчера';
+        } else if (diffInDays < 7) {
+            timeElement.textContent = `был ${diffInDays} дн. назад`;
+        } else {
+            timeElement.textContent = 'давно не был в сети';
+        }
+    }
+}
+
+/**
+ * Остановить мониторинг
+ */
+function stopStatusMonitoring() {
+    if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+        statusCheckInterval = null;
+        console.log('⏹️ Мониторинг статуса остановлен');
+    }
+}
+
+// ===== СОБЫТИЯ =====
+
+// Запуск при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Страница загружена, запускаем умный мониторинг статуса...');
+
+    // Небольшая задержка для завершения загрузки
+    setTimeout(startStatusMonitoring, 500);
+});
+
+// Установка офлайн при закрытии (ТОЛЬКО для себя)
+window.addEventListener('beforeunload', function() {
+    if (isCurrentUser) {
+        navigator.sendBeacon('/api/users/me/offline');
+    }
+});
+
+// Обновление при возвращении на вкладку (ТОЛЬКО для себя)
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden && isCurrentUser) {
+        console.log('👁️ Вкладка активна, обновляем свой статус...');
+        setUserOnlineAndUpdate();
+    } else if (!document.hidden && !isCurrentUser) {
+        console.log('👁️ Вкладка активна, проверяем чужой статус...');
+        checkAndUpdateStatus();
+    }
+});
+
+// Дополнительный ping каждые 60 секунд (ТОЛЬКО для себя)
+setInterval(function() {
+    if (isCurrentUser) {
+        fetch('/api/users/me/ping', {method: 'POST'})
+            .catch(error => console.warn('⚠️ Ping failed:', error));
+    }
+}, 60000);
+
+console.log('📱 Умный скрипт управления статусом подключен');

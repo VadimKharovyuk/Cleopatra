@@ -2,6 +2,7 @@ package com.example.cleopatra.controller.restControler;
 
 import com.example.cleopatra.dto.user.UserResponse;
 import com.example.cleopatra.service.UserService;
+import com.example.cleopatra.service.UserOnlineStatusService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class UserStatusController {
 
     private final UserService userService;
+    private final UserOnlineStatusService userOnlineStatusService;
 
     /**
      * Установить пользователя онлайн
@@ -39,7 +41,9 @@ public class UserStatusController {
             }
 
             Long userId = userService.getUserIdByEmail(email);
-            userService.setUserOnline(userId, true);
+
+            // ИСПОЛЬЗУЕМ УЛУЧШЕННЫЙ МЕТОД
+            userOnlineStatusService.setUserOnline(userId);
 
             log.debug("✅ User {} set to ONLINE", userId);
             return ResponseEntity.ok("ONLINE");
@@ -49,7 +53,6 @@ public class UserStatusController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error");
         }
     }
-
 
     /**
      * Установить пользователя оффлайн
@@ -68,7 +71,9 @@ public class UserStatusController {
             }
 
             Long userId = userService.getUserIdByEmail(email);
-            userService.setUserOnline(userId, false);
+
+            // ИСПОЛЬЗУЕМ УЛУЧШЕННЫЙ МЕТОД
+            userOnlineStatusService.setUserOffline(userId);
 
             log.debug("📴 User {} set to OFFLINE", userId);
             return ResponseEntity.ok("OFFLINE");
@@ -85,13 +90,6 @@ public class UserStatusController {
      */
     @PostMapping("/me/ping")
     public ResponseEntity<String> ping(Authentication authentication, HttpServletRequest request) {
-//        log.info("=== PING ENDPOINT CALLED ===");
-//        log.info("Authentication: {}", authentication);
-//        log.info("Is authenticated: {}", authentication != null && authentication.isAuthenticated());
-//        log.info("Session ID: {}", request.getSession().getId());
-//        log.info("User-Agent: {}", request.getHeader("User-Agent"));
-//        log.info("Remote IP: {}", request.getRemoteAddr());
-
         if (authentication == null || !authentication.isAuthenticated()) {
             log.warn("❌ Not authenticated");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
@@ -99,7 +97,6 @@ public class UserStatusController {
 
         try {
             String email = authentication.getName();
-//            log.info("✅ User email: {}", email);
 
             if ("anonymousUser".equals(email)) {
                 log.warn("❌ Anonymous user");
@@ -107,10 +104,10 @@ public class UserStatusController {
             }
 
             Long userId = userService.getUserIdByEmail(email);
-//            log.info("✅ User ID: {}", userId);
 
-            userService.setUserOnline(userId, true);
-//            log.info("🏓 Ping successful for user {}", userId);
+            // ИСПОЛЬЗУЕМ УЛУЧШЕННЫЙ МЕТОД + ОБНОВЛЯЕМ ВРЕМЯ АКТИВНОСТИ
+            userOnlineStatusService.setUserOnline(userId);
+            userOnlineStatusService.updateLastSeen(userId);
 
             return ResponseEntity.ok("PING");
 
@@ -136,13 +133,18 @@ public class UserStatusController {
             }
 
             Long userId = userService.getUserIdByEmail(email);
+
+            // ИСПОЛЬЗУЕМ МЕТОДЫ ИЗ UserOnlineStatusService
+            boolean isOnline = userOnlineStatusService.isUserOnline(userId);
+            java.time.LocalDateTime lastSeen = userOnlineStatusService.getLastSeen(userId);
+
             UserResponse user = userService.getUserById(userId);
 
             Map<String, Object> response = Map.of(
                     "userId", userId,
                     "email", email,
-                    "isOnline", user.getIsOnline(),
-                    "lastSeen", user.getLastSeen(),
+                    "isOnline", isOnline,
+                    "lastSeen", lastSeen != null ? lastSeen : "unknown",
                     "timestamp", System.currentTimeMillis()
             );
 
@@ -175,13 +177,14 @@ public class UserStatusController {
     @GetMapping("/{userId}/status")
     public ResponseEntity<Map<String, Object>> getUserStatus(@PathVariable Long userId) {
         try {
-            boolean isOnline = userService.isUserOnline(userId);
-            UserResponse user = userService.getUserById(userId);
+            // ИСПОЛЬЗУЕМ МЕТОДЫ ИЗ UserOnlineStatusService
+            boolean isOnline = userOnlineStatusService.isUserOnline(userId);
+            java.time.LocalDateTime lastSeen = userOnlineStatusService.getLastSeen(userId);
 
             Map<String, Object> response = Map.of(
                     "userId", userId,
                     "isOnline", isOnline,
-                    "lastSeen", user.getLastSeen() != null ? user.getLastSeen() : "unknown"
+                    "lastSeen", lastSeen != null ? lastSeen : "unknown"
             );
 
             return ResponseEntity.ok(response);
@@ -190,6 +193,198 @@ public class UserStatusController {
             log.error("❌ Error getting user status for userId: {}", userId, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "User not found"));
+        }
+    }
+
+    // ====================== ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ ДЛЯ ДИАГНОСТИКИ ======================
+
+    /**
+     * Диагностика статуса текущего пользователя
+     */
+    @GetMapping("/me/diagnose")
+    public ResponseEntity<String> diagnoseMyStatus(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
+
+        try {
+            String email = authentication.getName();
+            if ("anonymousUser".equals(email)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Anonymous user");
+            }
+
+            Long userId = userService.getUserIdByEmail(email);
+
+            // ВЫЗЫВАЕМ ДИАГНОСТИКУ
+            userOnlineStatusService.diagnoseUserStatus(userId);
+
+            return ResponseEntity.ok("✅ Диагностика выполнена для пользователя " + userId + ". Проверьте логи.");
+
+        } catch (Exception e) {
+            log.error("❌ Error diagnosing user status", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Ошибка: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Принудительная пересинхронизация статуса текущего пользователя
+     */
+    @PostMapping("/me/force-resync")
+    public ResponseEntity<String> forceResyncMyStatus(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
+
+        try {
+            String email = authentication.getName();
+            if ("anonymousUser".equals(email)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Anonymous user");
+            }
+
+            Long userId = userService.getUserIdByEmail(email);
+
+            // ПРИНУДИТЕЛЬНАЯ ПЕРЕСИНХРОНИЗАЦИЯ
+            userOnlineStatusService.forceResyncUserStatus(userId, true);
+
+            return ResponseEntity.ok("✅ Принудительная пересинхронизация выполнена для пользователя " + userId);
+
+        } catch (Exception e) {
+            log.error("❌ Error force resyncing user status", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Ошибка: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Пересоздание статуса текущего пользователя
+     */
+    @PostMapping("/me/recreate")
+    public ResponseEntity<String> recreateMyStatus(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
+
+        try {
+            String email = authentication.getName();
+            if ("anonymousUser".equals(email)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Anonymous user");
+            }
+
+            Long userId = userService.getUserIdByEmail(email);
+
+            // ПОЛНОЕ ПЕРЕСОЗДАНИЕ СТАТУСА
+            userOnlineStatusService.recreateUserStatus(userId, true);
+
+            return ResponseEntity.ok("✅ Статус пересоздан для пользователя " + userId);
+
+        } catch (Exception e) {
+            log.error("❌ Error recreating user status", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Ошибка: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Ультра-простое обновление статуса текущего пользователя
+     */
+    @PostMapping("/me/ultra-simple")
+    public ResponseEntity<String> ultraSimpleUpdate(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
+
+        try {
+            String email = authentication.getName();
+            if ("anonymousUser".equals(email)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Anonymous user");
+            }
+
+            Long userId = userService.getUserIdByEmail(email);
+
+            // УЛЬТРА-ПРОСТОЕ ОБНОВЛЕНИЕ
+            userOnlineStatusService.updateOnlineStatusUltraSimple(userId, true);
+
+            return ResponseEntity.ok("✅ Ультра-простое обновление выполнено для пользователя " + userId);
+
+        } catch (Exception e) {
+            log.error("❌ Error ultra simple update", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Ошибка: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Финальное обновление статуса текущего пользователя
+     */
+    @PostMapping("/me/final-update")
+    public ResponseEntity<String> finalUpdate(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
+
+        try {
+            String email = authentication.getName();
+            if ("anonymousUser".equals(email)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Anonymous user");
+            }
+
+            Long userId = userService.getUserIdByEmail(email);
+
+            // ФИНАЛЬНОЕ ОБНОВЛЕНИЕ
+            userOnlineStatusService.updateOnlineStatusFinal(userId, true);
+
+            return ResponseEntity.ok("✅ Финальное обновление выполнено для пользователя " + userId);
+
+        } catch (Exception e) {
+            log.error("❌ Error final update", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Ошибка: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Обновление через новую транзакцию
+     */
+    @PostMapping("/me/new-transaction")
+    public ResponseEntity<String> newTransactionUpdate(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
+        }
+
+        try {
+            String email = authentication.getName();
+            if ("anonymousUser".equals(email)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Anonymous user");
+            }
+
+            Long userId = userService.getUserIdByEmail(email);
+
+            // ОБНОВЛЕНИЕ В НОВОЙ ТРАНЗАКЦИИ
+            userOnlineStatusService.updateOnlineStatusNewTransaction(userId, true);
+
+            return ResponseEntity.ok("✅ Обновление в новой транзакции выполнено для пользователя " + userId);
+
+        } catch (Exception e) {
+            log.error("❌ Error new transaction update", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Ошибка: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Получить количество онлайн пользователей
+     */
+    @GetMapping("/online/count")
+    public ResponseEntity<Map<String, Object>> getOnlineCount() {
+        try {
+            Long onlineCount = userOnlineStatusService.getOnlineUsersCount();
+
+            Map<String, Object> response = Map.of(
+                    "onlineCount", onlineCount,
+                    "timestamp", System.currentTimeMillis()
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("❌ Error getting online count", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error getting online count"));
         }
     }
 }

@@ -8,11 +8,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,46 +21,319 @@ import java.util.List;
 @Transactional
 public class UserOnlineStatusService {
 
-
     private final UserOnlineStatusRepository onlineStatusRepository;
     private final UserRepository userRepository;
 
-    /**
-     * Обновить онлайн статус пользователя
-     */
+    // ====================== ДОБАВИТЬ ЭТИ МЕТОДЫ ======================
 
+    /**
+     * Простое обновление онлайн статуса БЕЗ clientInfo
+     */
     @Transactional
     public void updateOnlineStatus(Long userId, boolean isOnline) {
+        updateOnlineStatus(userId, isOnline, null); // Вызываем существующий метод
+    }
+
+
+
+    /**
+     * ИСПРАВЛЕННОЕ ОКОНЧАТЕЛЬНОЕ РЕШЕНИЕ - только SQL запросы
+     */
+    @Transactional
+    public void updateOnlineStatusFinal(Long userId, boolean isOnline) {
+        log.info("🔄 ФИНАЛЬНОЕ обновление: userId={}, isOnline={}", userId, isOnline);
+
+        LocalDateTime now = LocalDateTime.now(); // Объявляем здесь для доступности везде
+
         try {
-            LocalDateTime now = LocalDateTime.now();
+            // 1. Попытка обновления через SQL
+            int updated = onlineStatusRepository.updateOnlineStatus(userId, isOnline, now);
+            log.debug("📊 SQL UPDATE: обновлено {} строк", updated);
 
-            // Пытаемся обновить существующую запись
-            int updatedRows = onlineStatusRepository.updateOnlineStatus(userId, isOnline, now);
+            if (updated > 0) {
+                log.info("✅ УСПЕШНО обновлен через SQL: userId={}, isOnline={}", userId, isOnline);
+                return;
+            }
 
-            if (updatedRows == 0) {
-                // Если записи нет, создаем новую
-                User user = userRepository.findById(userId)
-                        .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + userId));
+            // 2. Если не обновилось, используем UPSERT через native SQL
+            log.debug("➕ Попытка UPSERT через native SQL...");
 
-                UserOnlineStatus status = UserOnlineStatus.builder()
-                        .userId(userId)
-                        .user(user)
-                        .isOnline(isOnline)
-                        .lastSeen(now)
-                        .deviceType("WEB") // Можно передавать как параметр
-                        .build();
+            int result = onlineStatusRepository.upsertOnlineStatus(
+                    userId, isOnline, now, "WEB", now, now
+            );
 
-                onlineStatusRepository.save(status);
-                log.info("Создан новый онлайн статус для пользователя {}: {}", userId, isOnline);
+            if (result > 0) {
+                log.info("✅ УСПЕШНО создан/обновлен через UPSERT: userId={}", userId);
             } else {
-                log.debug("Обновлен онлайн статус для пользователя {}: {}", userId, isOnline);
+                log.error("❌ UPSERT не сработал для userId={}", userId);
             }
 
         } catch (Exception e) {
-            log.error("Ошибка при обновлении онлайн статуса для пользователя {}: {}", userId, e.getMessage());
-            // Не пробрасываем исключение, чтобы не сломать основную логику
+            log.error("❌ КРИТИЧЕСКАЯ ошибка финального обновления для userId={}: {}", userId, e.getMessage());
+            log.error("📊 Стек-трейс финального метода:", e);
+
+            // Последняя попытка - прямой SQL
+            try {
+                log.debug("🆘 ПОСЛЕДНЯЯ ПОПЫТКА - прямое создание...");
+                onlineStatusRepository.createOrIgnoreStatus(userId, isOnline, now, "WEB", now, now);
+                log.info("🆘 Последняя попытка завершена для userId={}", userId);
+            } catch (Exception e2) {
+                log.error("💀 ВСЕ ПОПЫТКИ НЕУДАЧНЫ для userId={}: {}", userId, e2.getMessage());
+            }
         }
     }
+
+    /**
+     * Упрощенная версия - только основные операции
+     */
+    @Transactional
+    public void updateOnlineStatusUltraSimple(Long userId, boolean isOnline) {
+        log.info("🔄 УЛЬТРА-ПРОСТОЕ обновление: userId={}, isOnline={}", userId, isOnline);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        try {
+            // Попытка 1: Обычный UPDATE
+            int updated = onlineStatusRepository.updateOnlineStatus(userId, isOnline, now);
+
+            if (updated > 0) {
+                log.info("✅ Обновлен: userId={}", userId);
+                return;
+            }
+
+            // Попытка 2: Прямой INSERT
+            onlineStatusRepository.insertNewStatus(userId, isOnline, now, "WEB", now, now);
+            log.info("✅ Создан: userId={}", userId);
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка: {}", e.getMessage());
+
+            // Последняя попытка: DELETE + INSERT
+            try {
+                onlineStatusRepository.deleteAllByUserId(userId);
+                onlineStatusRepository.insertNewStatus(userId, isOnline, now, "WEB", now, now);
+                log.info("✅ Пересоздан: userId={}", userId);
+            } catch (Exception e2) {
+                log.error("💀 Финальная ошибка: {}", e2.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Метод для полной очистки и пересоздания статуса
+     */
+    @Transactional
+    public void recreateUserStatus(Long userId, boolean isOnline) {
+        log.info("🔄 ПОЛНОЕ ПЕРЕСОЗДАНИЕ статуса: userId={}, isOnline={}", userId, isOnline);
+
+        LocalDateTime now = LocalDateTime.now(); // Объявляем здесь
+
+        try {
+            // 1. Полная очистка всех записей для пользователя
+            log.debug("🗑️ Удаление ВСЕХ записей статуса для userId={}", userId);
+            onlineStatusRepository.deleteAllByUserId(userId);
+            onlineStatusRepository.flush();
+
+            // 2. Небольшая пауза
+            Thread.sleep(100);
+
+            // 3. Создание через чистый SQL INSERT
+            log.debug("➕ Создание новой записи через чистый SQL...");
+
+            int created = onlineStatusRepository.insertNewStatus(userId, isOnline, now, "WEB", now, now);
+
+            if (created > 0) {
+                log.info("✅ УСПЕШНО пересоздан статус: userId={}, isOnline={}", userId, isOnline);
+            } else {
+                log.error("❌ Не удалось создать новый статус для userId={}", userId);
+            }
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("⚠️ Прервана пауза при пересоздании статуса");
+        } catch (Exception e) {
+            log.error("❌ Критическая ошибка пересоздания для userId={}: {}", userId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Простейший метод - только самое необходимое
+     */
+    @Transactional
+    public void setUserOnline(Long userId) {
+        LocalDateTime now = LocalDateTime.now();
+
+        try {
+            // Просто устанавливаем пользователя онлайн
+            int result = onlineStatusRepository.updateOnlineStatus(userId, true, now);
+
+            if (result == 0) {
+                // Если не обновилось, создаем новую запись
+                onlineStatusRepository.insertNewStatus(userId, true, now, "WEB", now, now);
+            }
+
+            log.info("✅ Пользователь {} установлен как онлайн", userId);
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка установки онлайн статуса: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Простейший метод для офлайн
+     */
+    @Transactional
+    public void setUserOffline(Long userId) {
+        LocalDateTime now = LocalDateTime.now();
+
+        try {
+            // Просто устанавливаем пользователя офлайн
+            int result = onlineStatusRepository.updateOnlineStatus(userId, false, now);
+
+            if (result == 0) {
+                // Если не обновилось, создаем новую запись
+                onlineStatusRepository.insertNewStatus(userId, false, now, "WEB", now, now);
+            }
+
+            log.info("✅ Пользователь {} установлен как офлайн", userId);
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка установки офлайн статуса: {}", e.getMessage());
+        }
+    }
+
+
+
+    /**
+     * Метод для проверки и диагностики состояния
+     */
+    @Transactional(readOnly = true)
+    public void diagnoseUserStatus(Long userId) {
+        log.info("🔍 ДИАГНОСТИКА статуса пользователя: userId={}", userId);
+
+        try {
+            // Проверяем существование пользователя
+            boolean userExists = userRepository.existsById(userId);
+            log.info("👤 Пользователь существует: {}", userExists);
+
+            // Проверяем существование статуса
+            boolean statusExists = onlineStatusRepository.existsByUserId(userId);
+            log.info("📊 Статус существует: {}", statusExists);
+
+            if (statusExists) {
+                // Получаем текущее состояние
+                Optional<UserOnlineStatus> current = onlineStatusRepository.findByUserId(userId);
+                if (current.isPresent()) {
+                    UserOnlineStatus status = current.get();
+                    log.info("📋 ТЕКУЩЕЕ СОСТОЯНИЕ:");
+                    log.info("  - userId: {}", status.getUserId());
+                    log.info("  - isOnline: {}", status.getIsOnline());
+                    log.info("  - lastSeen: {}", status.getLastSeen());
+                    log.info("  - deviceType: {}", status.getDeviceType());
+                    log.info("  - createdAt: {}", status.getCreatedAt());
+                    log.info("  - updatedAt: {}", status.getUpdatedAt());
+                }
+            }
+
+            // Проверяем количество записей для этого пользователя
+            int count = onlineStatusRepository.countByUserId(userId);
+            log.info("🔢 Количество записей статуса для userId={}: {}", userId, count);
+
+            if (count > 1) {
+                log.error("⚠️ НАЙДЕНО ДУБЛИРОВАНИЕ! У пользователя {} есть {} записей статуса", userId, count);
+            }
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка диагностики для userId={}: {}", userId, e.getMessage(), e);
+        }
+    }
+
+
+
+    /**
+     * Метод с принудительной пересинхронизацией
+     */
+    @Transactional
+    public void forceResyncUserStatus(Long userId, boolean isOnline) {
+        log.info("🔄 ПРИНУДИТЕЛЬНАЯ пересинхронизация: userId={}, isOnline={}", userId, isOnline);
+
+        try {
+            // 1. Удаляем существующую запись
+            log.debug("🗑️ Удаление существующей записи...");
+            onlineStatusRepository.deleteByUserId(userId);
+            onlineStatusRepository.flush(); // Принудительно выполняем DELETE
+
+            // 2. Создаем новую
+            log.debug("➕ Создание новой записи...");
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + userId));
+
+            UserOnlineStatus newStatus = UserOnlineStatus.builder()
+                    .userId(userId)
+                    .user(user)
+                    .isOnline(isOnline)
+                    .lastSeen(LocalDateTime.now())
+                    .deviceType("WEB")
+                    .build();
+
+            UserOnlineStatus saved = onlineStatusRepository.saveAndFlush(newStatus);
+            log.info("✅ ПРИНУДИТЕЛЬНО создан статус: userId={}, isOnline={}", saved.getUserId(), saved.getIsOnline());
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка принудительной пересинхронизации для userId={}: {}", userId, e.getMessage());
+            log.error("📊 Стек-трейс:", e);
+        }
+    }
+
+    /**
+     * Метод обновления без транзакционных конфликтов
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateOnlineStatusNewTransaction(Long userId, boolean isOnline) {
+        log.info("🔄 НОВАЯ ТРАНЗАКЦИЯ обновление: userId={}, isOnline={}", userId, isOnline);
+
+        try {
+            LocalDateTime now = LocalDateTime.now();
+
+            // Попытка прямого SQL обновления
+            int updated = onlineStatusRepository.forceUpdateOnlineStatus(userId, isOnline, now);
+
+            if (updated > 0) {
+                log.info("✅ Обновлен в новой транзакции: userId={}", userId);
+            } else {
+                log.debug("❌ SQL не обновил, создаем новую запись...");
+
+                // Проверяем, есть ли запись
+                boolean exists = onlineStatusRepository.existsByUserId(userId);
+                if (!exists) {
+                    // Создаем новую
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + userId));
+
+                    UserOnlineStatus newStatus = UserOnlineStatus.builder()
+                            .userId(userId)
+                            .user(user)
+                            .isOnline(isOnline)
+                            .lastSeen(now)
+                            .deviceType("WEB")
+                            .build();
+
+                    onlineStatusRepository.save(newStatus);
+                    log.info("✅ Создан в новой транзакции: userId={}", userId);
+                } else {
+                    log.warn("⚠️ Запись существует, но не обновляется. Возможна блокировка.");
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка в новой транзакции для userId={}: {}", userId, e.getMessage());
+            log.error("📊 Стек-трейс:", e);
+        }
+    }
+
+
+
+    // ====================== ВАШ СУЩЕСТВУЮЩИЙ КОД ======================
 
     /**
      * Обновить онлайн статус с информацией о клиенте
@@ -103,7 +377,7 @@ public class UserOnlineStatusService {
             }
 
         } catch (Exception e) {
-            log.error("Ошибка при обновлении онлайн статуса для пользователя {}: {}", userId, e.getMessage());
+            log.error("Ошибка при обновлении онлайн статуса для пользователя {}: {}", userId, e.getMessage(), e);
         }
     }
 
@@ -146,23 +420,6 @@ public class UserOnlineStatusService {
     }
 
     /**
-     * Проверить, был ли пользователь онлайн недавно
-     */
-    @Transactional(readOnly = true)
-    public boolean wasRecentlyOnline(Long userId, int minutesAgo) {
-        LocalDateTime recentTime = LocalDateTime.now().minusMinutes(minutesAgo);
-        return onlineStatusRepository.wasRecentlyOnline(userId, recentTime);
-    }
-
-    /**
-     * Получить список онлайн пользователей
-     */
-    @Transactional(readOnly = true)
-    public List<UserOnlineStatus> getOnlineUsers() {
-        return onlineStatusRepository.findAllOnlineUsers();
-    }
-
-    /**
      * Получить количество онлайн пользователей
      */
     @Transactional(readOnly = true)
@@ -193,7 +450,90 @@ public class UserOnlineStatusService {
         return onlineStatusRepository.findByUserIds(userIds);
     }
 
-    // Вспомогательные методы для парсинга clientInfo
+    /**
+     * Получить количество недавно активных пользователей
+     */
+    @Transactional(readOnly = true)
+    public Long getRecentlyActiveUsersCount(int minutesAgo) {
+        LocalDateTime cutoffTime = LocalDateTime.now().minusMinutes(minutesAgo);
+        return onlineStatusRepository.countRecentlyActiveUsers(cutoffTime);
+    }
+
+    /**
+     * Очистить старые записи статуса
+     */
+    @Transactional
+    public int cleanupOldStatusRecords(int daysOld) {
+        LocalDateTime cutoffTime = LocalDateTime.now().minusDays(daysOld);
+        int deletedCount = onlineStatusRepository.deleteOldStatusRecords(cutoffTime);
+
+        if (deletedCount > 0) {
+            log.info("Удалено {} старых записей статуса (старше {} дней)", deletedCount, daysOld);
+        }
+
+        return deletedCount;
+    }
+
+    /**
+     * Исправить некорректные записи статуса
+     */
+    @Transactional
+    public int fixInconsistentStatuses() {
+        int fixedCount = 0;
+
+        try {
+            LocalDateTime inconsistencyThreshold = LocalDateTime.now().minusHours(1);
+            int inconsistentCount = onlineStatusRepository.fixInconsistentOnlineStatuses(inconsistencyThreshold);
+            fixedCount += inconsistentCount;
+
+            if (inconsistentCount > 0) {
+                log.warn("Исправлено {} записей с некорректным онлайн статусом", inconsistentCount);
+            }
+
+            int nullFixCount = onlineStatusRepository.fixNullStatuses();
+            fixedCount += nullFixCount;
+
+            if (nullFixCount > 0) {
+                log.warn("Исправлено {} записей с null значениями", nullFixCount);
+            }
+
+        } catch (Exception e) {
+            log.error("Ошибка при исправлении некорректных статусов: {}", e.getMessage(), e);
+        }
+
+        return fixedCount;
+    }
+
+    /**
+     * Принудительно отметить всех пользователей как офлайн
+     */
+    @Transactional
+    public int forceAllUsersOffline() {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            int updatedCount = onlineStatusRepository.forceAllUsersOffline(now);
+
+            if (updatedCount > 0) {
+                log.info("Все пользователи ({}) отмечены как офлайн при перезапуске", updatedCount);
+            }
+
+            return updatedCount;
+
+        } catch (Exception e) {
+            log.error("Ошибка при переводе всех пользователей в офлайн: {}", e.getMessage(), e);
+            return 0;
+        }
+    }
+
+    /**
+     * Получить статистику по устройствам
+     */
+    @Transactional(readOnly = true)
+    public List<Object[]> getDeviceTypeStatistics() {
+        return onlineStatusRepository.getDeviceTypeStatistics();
+    }
+
+    // ====================== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ======================
 
     private String parseDeviceType(String clientInfo) {
         if (clientInfo == null) return "WEB";
@@ -210,7 +550,6 @@ public class UserOnlineStatusService {
     private String parseIpFromClientInfo(String clientInfo) {
         if (clientInfo == null) return null;
 
-        // Ищем IP в формате "IP: xxx.xxx.xxx.xxx"
         if (clientInfo.contains("IP: ")) {
             String ip = clientInfo.substring(clientInfo.indexOf("IP: ") + 4);
             if (ip.contains(",")) {
@@ -224,7 +563,6 @@ public class UserOnlineStatusService {
     private String parseUserAgentFromClientInfo(String clientInfo) {
         if (clientInfo == null) return null;
 
-        // Ищем User-Agent в формате "UserAgent: ..."
         if (clientInfo.contains("UserAgent: ")) {
             String userAgent = clientInfo.substring(clientInfo.indexOf("UserAgent: ") + 11);
             if (userAgent.contains(",")) {

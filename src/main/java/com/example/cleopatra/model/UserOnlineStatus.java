@@ -8,7 +8,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "user_online_status")
 @Getter
@@ -61,6 +60,11 @@ public class UserOnlineStatus {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // =================== УБИРАЕМ @Version ЕСЛИ ЕСТЬ ===================
+    // ВАЖНО: Если у вас есть поле @Version - УДАЛИТЕ его или закомментируйте!
+    // @Version
+    // private Long version;
 
     // Методы для удобства
     public boolean wasOnlineRecently() {

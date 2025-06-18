@@ -39,6 +39,7 @@ public class UserProfileController {
     private final IpAddressService ipAddressService;
     private final PostService postService;
     private final UserBlockService userBlockService;
+    private final UserOnlineStatusService userOnlineStatusService;
     private final ProfileAccessService profileAccessService;
 
 
@@ -65,6 +66,12 @@ public class UserProfileController {
 
 
                 boolean canView = profileAccessService.canViewProfile(currentUser.getId(), userId);
+
+                // 1. Если это текущий пользователь - обновляем его онлайн статус
+                if (currentUser != null && currentUser.equals(userId)) {
+                    userOnlineStatusService.setUserOnline(currentUser.getId());
+                    log.debug("Обновлен онлайн статус для текущего пользователя: {}", currentUser);
+                }
 
 
                 if (!canView) {
@@ -157,6 +164,8 @@ public class UserProfileController {
             UserResponse user = userService.getUserById(userId);
             model.addAttribute("user", user);
 
+
+
             // Получаем посты пользователя
             PostListDto userPosts = postService.getUserPosts(userId, page, size);
 
@@ -202,6 +211,7 @@ public class UserProfileController {
                 model.addAttribute("isOwnProfile", false);
                 model.addAttribute("debugIsSubscribed", "not_authenticated");
             }
+
 
             return "profile/profile";
 
@@ -503,6 +513,9 @@ public class UserProfileController {
             return "redirect:/profile/" + userId + "/edit";
         }
     }
+
+
+
 
 
 

@@ -40,24 +40,6 @@ public class User {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "profile_access_level", nullable = false)
-    @Builder.Default
-    private ProfileAccessLevel profileAccessLevel = ProfileAccessLevel.PUBLIC;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "photos_access_level", nullable = false)
-    @Builder.Default
-    private ProfileAccessLevel photosAccessLevel = ProfileAccessLevel.PUBLIC;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "posts_access_level", nullable = false)
-    @Builder.Default
-    private ProfileAccessLevel postsAccessLevel = ProfileAccessLevel.PUBLIC;
-
-
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Gender gender ;
@@ -97,8 +79,6 @@ public class User {
     private LocalDateTime lastSeen;
 
 
-
-
     @Column(name = "city")
     private String city;
 
@@ -127,7 +107,6 @@ public class User {
     private LocalDate birthDate;
 
 
-
     @Column(name = "followers_count", nullable = false)
     @Builder.Default  // ← Добавить эту аннотацию
     private Long followersCount = 0L;
@@ -149,12 +128,25 @@ public class User {
     private Boolean welcomeBonusClaimed = false;
 
 
-
-
     @Column(name = "total_visits")
     @Builder.Default
     private Long totalVisits = 0L;
 
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "profile_access_level", nullable = false)
+    @Builder.Default
+    private ProfileAccessLevel profileAccessLevel = ProfileAccessLevel.PUBLIC;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "photos_access_level", nullable = false)
+    @Builder.Default
+    private ProfileAccessLevel photosAccessLevel = ProfileAccessLevel.PUBLIC;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "posts_access_level", nullable = false)
+    @Builder.Default
+    private ProfileAccessLevel postsAccessLevel = ProfileAccessLevel.PUBLIC;
 
     @OneToMany(mappedBy = "blockedUser", fetch = FetchType.LAZY)
     @OrderBy("blockedAt DESC")
@@ -215,15 +207,43 @@ public class User {
 
 
 
+
+
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderBy("createdAt DESC")
     @Builder.Default
     private List<ProjectNews> createdNews = new ArrayList<>();
 
 
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    // Связь с онлайн статусом
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private UserOnlineStatus onlineStatus;
+
+    // Безопасные методы для получения онлайн статуса
+    @Transient
+    public boolean isOnline() {
+        return onlineStatus != null && Boolean.TRUE.equals(onlineStatus.getIsOnline());
+    }
+
+    @Transient
+    public LocalDateTime getLastSeen() {
+        return onlineStatus != null ? onlineStatus.getLastSeen() : null;
+    }
+
+    @Transient
+    public String getDeviceType() {
+        return onlineStatus != null ? onlineStatus.getDeviceType() : "WEB";
+    }
+
+    @Transient
+    public boolean wasOnlineRecently() {
+        return onlineStatus != null && onlineStatus.wasOnlineRecently();
+    }
+
+    @Transient
+    public String getOnlineStatusText() {
+        return onlineStatus != null ? onlineStatus.getOnlineStatusText() : "статус неизвестен";
+    }
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
