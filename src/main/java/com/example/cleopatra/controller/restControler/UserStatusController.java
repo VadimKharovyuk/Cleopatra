@@ -218,6 +218,7 @@ public class UserStatusController {
             // ВЫЗЫВАЕМ ДИАГНОСТИКУ
             userOnlineStatusService.diagnoseUserStatus(userId);
 
+
             return ResponseEntity.ok("✅ Диагностика выполнена для пользователя " + userId + ". Проверьте логи.");
 
         } catch (Exception e) {

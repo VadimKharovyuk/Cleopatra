@@ -739,9 +739,10 @@
 
 </head>
 
-<body th:data-current-user-id="${currentUserId}"
-      th:data-profile-user-id="${user.id}"
-      th:data-is-subscribed="${isSubscribed ?: false}">
+
+<body th:data-current-user-id="${currentUserId != null ? currentUserId : ''}"
+      th:data-profile-user-id="${user != null and user.id != null ? user.id : ''}"
+      th:data-is-subscribed="${isSubscribed != null ? isSubscribed : false}">
 
 <!-- ПОДКЛЮЧЕНИЕ МОБИЛЬНОГО ХЕДЕРА ИЗ ФРАГМЕНТА -->
 <th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>

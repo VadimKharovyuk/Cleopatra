@@ -42,9 +42,6 @@ public class UserProfileController {
     private final UserOnlineStatusService userOnlineStatusService;
     private final ProfileAccessService profileAccessService;
 
-
-
-
     @GetMapping("/{userId}")
     public String showProfile(@PathVariable Long userId,
                               @RequestParam(defaultValue = "0") int page,
@@ -53,175 +50,389 @@ public class UserProfileController {
                               HttpServletRequest request,
                               Authentication authentication) {
         try {
+            // ====== ИНИЦИАЛИЗАЦИЯ БАЗОВЫХ ПЕРЕМЕННЫХ ======
+            Long currentUserId = null;
+            UserResponse currentUser = null;
+            boolean isAuthenticated = false;
 
-            // Добавляем debug информацию
+            // Debug информация
             model.addAttribute("debugUserId", userId);
-            model.addAttribute("debugAuthenticated", authentication != null);
+            model.addAttribute("debugAuthenticated", authentication != null && authentication.isAuthenticated());
 
-            if (authentication != null) {
-                UserResponse currentUser = userService.getUserByEmail(authentication.getName());
+            // ====== ПОЛУЧЕНИЕ ДАННЫХ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ ======
+            if (authentication != null && authentication.isAuthenticated()) {
+                try {
+                    currentUser = userService.getUserByEmail(authentication.getName());
+                    if (currentUser != null) {
+                        currentUserId = currentUser.getId();
+                        isAuthenticated = true;
 
-                model.addAttribute("currentUserId", currentUser.getId());
-                model.addAttribute("debugCurrentUserId", currentUser.getId());
-
-
-                boolean canView = profileAccessService.canViewProfile(currentUser.getId(), userId);
-
-                // 1. Если это текущий пользователь - обновляем его онлайн статус
-                if (currentUser != null && currentUser.equals(userId)) {
-                    userOnlineStatusService.setUserOnline(currentUser.getId());
-                    log.debug("Обновлен онлайн статус для текущего пользователя: {}", currentUser);
+                        // Обновляем онлайн статус только для собственного профиля
+                        if (currentUserId.equals(userId)) {
+                            userOnlineStatusService.setUserOnline(currentUserId);
+                            log.debug("Обновлен онлайн статус для текущего пользователя: {}", currentUserId);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Ошибка получения данных текущего пользователя: {}", e.getMessage());
                 }
+            }
 
+            // ====== УСТАНОВКА БАЗОВЫХ ПЕРЕМЕННЫХ ======
+            model.addAttribute("currentUserId", currentUserId);
+            model.addAttribute("currentUser", currentUser);
+            model.addAttribute("debugCurrentUserId", currentUserId != null ? currentUserId : "null");
 
-                if (!canView) {
-                    log.warn("🚫 ДОСТУП ЗАПРЕЩЕН! Перенаправляем на страницу блокировки");
+            // ====== ПРОВЕРКА ДОСТУПА К ПРОФИЛЮ ======
+            boolean canView = profileAccessService.canViewProfile(currentUserId, userId);
 
-                    // Дополнительная диагностика
-                    ProfileAccessLevel userAccessLevel = profileAccessService.getProfileAccessLevel(userId);
-                    boolean isSubscribed = subscriptionService.isSubscribed(currentUser.getId(), userId);
-                    boolean isMutualSubscription = subscriptionService.isSubscribed(userId, currentUser.getId());
+            if (!canView) {
+                log.warn("🚫 ДОСТУП ЗАПРЕЩЕН! userId={}, currentUserId={}", userId, currentUserId);
 
-                    // Профиль недоступен - показываем страницу блокировки
-                    UserResponse blockedUser = userService.getUserById(userId);
-                    String accessDeniedMessage = profileAccessService.getAccessDeniedMessage(currentUser.getId(), userId);
+                // Получаем данные заблокированного пользователя
+                UserResponse blockedUser = userService.getUserById(userId);
+                String accessDeniedMessage = profileAccessService.getAccessDeniedMessage(currentUserId, userId);
+                ProfileAccessLevel userAccessLevel = profileAccessService.getProfileAccessLevel(userId);
 
-                    // Основные данные для страницы блокировки
-                    model.addAttribute("blockedUser", blockedUser);
-                    model.addAttribute("accessDeniedMessage", accessDeniedMessage);
-                    model.addAttribute("currentUser", currentUser);
+                // Основные данные для страницы блокировки
+                model.addAttribute("blockedUser", blockedUser);
+                model.addAttribute("user", blockedUser); // ДЛЯ СОВМЕСТИМОСТИ с HTML
+                model.addAttribute("accessDeniedMessage", accessDeniedMessage);
+                model.addAttribute("userAccessLevel", userAccessLevel);
 
-                    // Дополнительная информация для лучшего UX
-                    model.addAttribute("userAccessLevel", userAccessLevel);
-                    model.addAttribute("isSubscribed", isSubscribed);
-                    model.addAttribute("canSubscribe", !isSubscribed);
-
-                    // Информация о том, что нужно для доступа
-                    boolean needsSubscription = (userAccessLevel == ProfileAccessLevel.SUBSCRIBERS_ONLY);
-                    boolean needsMutualSubscription = (userAccessLevel == ProfileAccessLevel.MUTUAL_SUBSCRIPTIONS);
-                    boolean isPrivateProfile = (userAccessLevel == ProfileAccessLevel.PRIVATE);
-
-                    model.addAttribute("needsSubscription", needsSubscription);
-                    model.addAttribute("needsMutualSubscription", needsMutualSubscription);
-                    model.addAttribute("isPrivateProfile", isPrivateProfile);
-
-                    // Debug информация для страницы блокировки
-                    model.addAttribute("debugAccessLevel", userAccessLevel.name());
-                    model.addAttribute("debugCanView", false);
-                    model.addAttribute("debugIsSubscribed", isSubscribed);
-                    model.addAttribute("debugIsMutualSubscription", isMutualSubscription);
-
-
-                    return "profile/CanViev-profile";
+                // Информация о подписке (только для авторизованных)
+                boolean isSubscribed = false;
+                boolean isMutualSubscription = false;
+                if (isAuthenticated) {
+                    isSubscribed = subscriptionService.isSubscribed(currentUserId, userId);
+                    isMutualSubscription = subscriptionService.isSubscribed(userId, currentUserId);
                 }
+                model.addAttribute("isSubscribed", isSubscribed);
+                model.addAttribute("canSubscribe", !isSubscribed && isAuthenticated);
 
-                // Проверяем заблокировал ли текущий пользователь просматриваемого
-                boolean iBlockedUser = userBlockService.isBlocked(currentUser.getId(), userId);
-                // Проверяем заблокировал ли просматриваемый пользователь текущего
-                boolean userBlockedMe = userBlockService.isBlocked(userId, currentUser.getId());
+                // Информация о требованиях доступа
+                boolean needsSubscription = (userAccessLevel == ProfileAccessLevel.SUBSCRIBERS_ONLY);
+                boolean needsMutualSubscription = (userAccessLevel == ProfileAccessLevel.MUTUAL_SUBSCRIPTIONS);
+                boolean isPrivateProfile = (userAccessLevel == ProfileAccessLevel.PRIVATE);
 
-                model.addAttribute("iBlockedUser", iBlockedUser);
-                model.addAttribute("userBlockedMe", userBlockedMe);
-                model.addAttribute("canInteract", !iBlockedUser && !userBlockedMe);
+                model.addAttribute("needsSubscription", needsSubscription);
+                model.addAttribute("needsMutualSubscription", needsMutualSubscription);
+                model.addAttribute("isPrivateProfile", isPrivateProfile);
+
+                // Debug информация
+                model.addAttribute("debugAccessLevel", userAccessLevel.name());
+                model.addAttribute("debugCanView", false);
+                model.addAttribute("debugIsSubscribed", isSubscribed);
+                model.addAttribute("debugIsMutualSubscription", isMutualSubscription);
+
+                return "profile/CanViev-profile";
+            }
+
+            // ====== ПРОВЕРКА БЛОКИРОВОК (только для авторизованных) ======
+            boolean iBlockedUser = false;
+            boolean userBlockedMe = false;
+            boolean canInteract = isAuthenticated;
+
+            if (isAuthenticated && !currentUserId.equals(userId)) {
+                iBlockedUser = userBlockService.isBlocked(currentUserId, userId);
+                userBlockedMe = userBlockService.isBlocked(userId, currentUserId);
+                canInteract = !iBlockedUser && !userBlockedMe;
 
                 // Если просматриваемый пользователь заблокировал текущего
                 if (userBlockedMe) {
-                    log.warn("🚫 Пользователь {} заблокировал текущего пользователя. Показываем profile-blocked", userId);
+                    log.warn("🚫 Пользователь {} заблокировал текущего пользователя {}", userId, currentUserId);
+
+                    // Получаем минимальные данные для страницы блокировки
+                    UserResponse blockedByUser = userService.getUserById(userId);
+                    model.addAttribute("user", blockedByUser); // ДЛЯ СОВМЕСТИМОСТИ с HTML
+                    model.addAttribute("isSubscribed", false);
+                    model.addAttribute("iBlockedUser", iBlockedUser);
+                    model.addAttribute("userBlockedMe", userBlockedMe);
+                    model.addAttribute("canInteract", false);
+
                     return "profile/profile-blocked";
-                }
-
-                // Debug информация для успешного доступа
-                model.addAttribute("debugCanView", true);
-                model.addAttribute("debugAccessLevel", profileAccessService.getProfileAccessLevel(userId).name());
-
-            } else {
-                log.info("🔍 Неавторизованный пользователь пытается просмотреть профиль {}", userId);
-
-                // === НЕАВТОРИЗОВАННЫЙ ПОЛЬЗОВАТЕЛЬ ===
-                // Проверяем доступ для неавторизованного пользователя
-                boolean canView = profileAccessService.canViewProfile(null, userId);
-
-                if (!canView) {
-                    log.warn("🚫 Доступ запрещен для неавторизованного пользователя");
-
-                    UserResponse blockedUser = userService.getUserById(userId);
-                    String accessDeniedMessage = profileAccessService.getAccessDeniedMessage(null, userId);
-                    ProfileAccessLevel userAccessLevel = profileAccessService.getProfileAccessLevel(userId);
-
-
-                    model.addAttribute("blockedUser", blockedUser);
-                    model.addAttribute("accessDeniedMessage", accessDeniedMessage);
-                    model.addAttribute("currentUser", null);
-                    model.addAttribute("debugCanView", false);
-                    model.addAttribute("debugCurrentUserId", "anonymous");
-                    model.addAttribute("debugAccessLevel", userAccessLevel.name());
-
-                    return "profile/CanViev-profile";
                 }
             }
 
-            // === ЗАГРУЗКА ДАННЫХ ПРОФИЛЯ (только если доступ разрешен) ===
+            model.addAttribute("iBlockedUser", iBlockedUser);
+            model.addAttribute("userBlockedMe", userBlockedMe);
+            model.addAttribute("canInteract", canInteract);
+
+            // ====== ЗАГРУЗКА ДАННЫХ ПРОФИЛЯ ======
             UserResponse user = userService.getUserById(userId);
+            if (user == null) {
+                log.error("Пользователь с ID {} не найден", userId);
+                model.addAttribute("user", null);
+                model.addAttribute("isSubscribed", false);
+                model.addAttribute("errorMessage", "Пользователь не найден");
+                return "error/404";
+            }
             model.addAttribute("user", user);
 
+            // ====== ОПРЕДЕЛЕНИЕ ТИПА ПРОФИЛЯ ======
+            boolean isOwnProfile = isAuthenticated && currentUserId.equals(userId);
+            model.addAttribute("isOwnProfile", isOwnProfile);
 
+            // ====== ИНФОРМАЦИЯ О ПОДПИСКЕ ======
+            boolean isSubscribed = false;
+            if (isAuthenticated && !isOwnProfile) {
+                isSubscribed = subscriptionService.isSubscribed(currentUserId, userId);
+            }
+            model.addAttribute("isSubscribed", isSubscribed);
 
-            // Получаем посты пользователя
-            PostListDto userPosts = postService.getUserPosts(userId, page, size);
+            // ====== ЗАГРУЗКА ПОСТОВ ======
+            try {
+                PostListDto userPosts = postService.getUserPosts(userId, page, size);
+                model.addAttribute("posts", userPosts);
+            } catch (Exception e) {
+                log.warn("⚠️ Ошибка загрузки постов: {}", e.getMessage());
+                model.addAttribute("posts", new PostListDto()); // Пустой объект
+            }
 
-            model.addAttribute("posts", userPosts);
             model.addAttribute("currentPage", page);
             model.addAttribute("pageSize", size);
 
-            // Обрабатываем данные текущего пользователя
-            if (authentication != null && authentication.isAuthenticated()) {
-                UserResponse currentUser = userService.getUserByEmail(authentication.getName());
-                model.addAttribute("currentUserId", currentUser.getId());
-                model.addAttribute("isOwnProfile", currentUser.getId().equals(userId));
-
-
-                // Записываем визит
-                try {
-                    ipAddressService.recordUserVisit(userId, currentUser.getId(), request);
-                } catch (Exception e) {
-                    log.warn("⚠️ Ошибка записи визита: {}", e.getMessage());
+            // ====== ДОПОЛНИТЕЛЬНЫЕ ДАННЫЕ (только для авторизованных) ======
+            if (isAuthenticated) {
+                // Записываем визит (только для чужих профилей)
+                if (!isOwnProfile) {
+                    try {
+                        ipAddressService.recordUserVisit(userId, currentUserId, request);
+                    } catch (Exception e) {
+                        log.warn("⚠️ Ошибка записи визита: {}", e.getMessage());
+                    }
                 }
 
-                // Проверяем подписку только для чужих профилей
-                if (!currentUser.getId().equals(userId)) {
-                    boolean isSubscribed = subscriptionService.isSubscribed(currentUser.getId(), userId);
-                    model.addAttribute("isSubscribed", isSubscribed);
-                    model.addAttribute("debugIsSubscribed", isSubscribed);
-                } else {
-                    model.addAttribute("isSubscribed", false);
-                    model.addAttribute("debugIsSubscribed", "own_profile");
-                }
-
+                // Рекомендации
                 try {
-                    List<UserRecommendationDto> recommendations = recommendationService.getTopRecommendations(currentUser.getId());
-                    model.addAttribute("recommendations", recommendations);
-
+                    List<UserRecommendationDto> recommendations = recommendationService.getTopRecommendations(currentUserId);
+                    model.addAttribute("recommendations", recommendations != null ? recommendations : Collections.emptyList());
                 } catch (Exception e) {
                     log.warn("⚠️ Ошибка загрузки рекомендаций: {}", e.getMessage());
+                    model.addAttribute("recommendations", Collections.emptyList());
                 }
-
             } else {
-                model.addAttribute("currentUserId", null);
-                model.addAttribute("isSubscribed", false);
-                model.addAttribute("isOwnProfile", false);
-                model.addAttribute("debugIsSubscribed", "not_authenticated");
+                model.addAttribute("recommendations", Collections.emptyList());
             }
 
+            // ====== DEBUG ИНФОРМАЦИЯ ======
+            model.addAttribute("debugCanView", true);
+            model.addAttribute("debugAccessLevel", profileAccessService.getProfileAccessLevel(userId).name());
+
+            String debugSubscriptionStatus;
+            if (!isAuthenticated) {
+                debugSubscriptionStatus = "not_authenticated";
+            } else if (isOwnProfile) {
+                debugSubscriptionStatus = "own_profile";
+            } else {
+                debugSubscriptionStatus = String.valueOf(isSubscribed);
+            }
+            model.addAttribute("debugIsSubscribed", debugSubscriptionStatus);
 
             return "profile/profile";
 
         } catch (Exception e) {
             log.error("❌ КРИТИЧЕСКАЯ ОШИБКА при показе профиля {}: {}", userId, e.getMessage(), e);
+
+            // ====== УСТАНОВКА ПЕРЕМЕННЫХ ДЛЯ СТРАНИЦЫ ОШИБКИ ======
+            model.addAttribute("currentUserId", null);
+            model.addAttribute("currentUser", null);
+            model.addAttribute("user", null);
+            model.addAttribute("isSubscribed", false);
+            model.addAttribute("isOwnProfile", false);
+            model.addAttribute("iBlockedUser", false);
+            model.addAttribute("userBlockedMe", false);
+            model.addAttribute("canInteract", false);
+            model.addAttribute("recommendations", Collections.emptyList());
+            model.addAttribute("posts", new PostListDto());
+
             model.addAttribute("errorMessage", "Не удалось загрузить профиль пользователя");
             model.addAttribute("debugError", e.getMessage());
+
             return "error";
         }
     }
+
+//
+//
+//
+//    @GetMapping("/{userId}")
+//    public String showProfile(@PathVariable Long userId,
+//                              @RequestParam(defaultValue = "0") int page,
+//                              @RequestParam(defaultValue = "6") int size,
+//                              Model model,
+//                              HttpServletRequest request,
+//                              Authentication authentication) {
+//        try {
+//
+//            // Добавляем debug информацию
+//            model.addAttribute("debugUserId", userId);
+//            model.addAttribute("debugAuthenticated", authentication != null);
+//
+//            if (authentication != null) {
+//                UserResponse currentUser = userService.getUserByEmail(authentication.getName());
+//
+//                model.addAttribute("currentUserId", currentUser.getId());
+//                model.addAttribute("debugCurrentUserId", currentUser.getId());
+//
+//
+//                boolean canView = profileAccessService.canViewProfile(currentUser.getId(), userId);
+//
+//                // 1. Если это текущий пользователь - обновляем его онлайн статус
+//                if (currentUser != null && currentUser.equals(userId)) {
+//                    userOnlineStatusService.setUserOnline(currentUser.getId());
+//                    log.debug("Обновлен онлайн статус для текущего пользователя: {}", currentUser);
+//                }
+//
+//
+//                if (!canView) {
+//                    log.warn("🚫 ДОСТУП ЗАПРЕЩЕН! Перенаправляем на страницу блокировки");
+//
+//                    // Дополнительная диагностика
+//                    ProfileAccessLevel userAccessLevel = profileAccessService.getProfileAccessLevel(userId);
+//                    boolean isSubscribed = subscriptionService.isSubscribed(currentUser.getId(), userId);
+//                    boolean isMutualSubscription = subscriptionService.isSubscribed(userId, currentUser.getId());
+//
+//                    // Профиль недоступен - показываем страницу блокировки
+//                    UserResponse blockedUser = userService.getUserById(userId);
+//                    String accessDeniedMessage = profileAccessService.getAccessDeniedMessage(currentUser.getId(), userId);
+//
+//                    // Основные данные для страницы блокировки
+//                    model.addAttribute("blockedUser", blockedUser);
+//                    model.addAttribute("accessDeniedMessage", accessDeniedMessage);
+//                    model.addAttribute("currentUser", currentUser);
+//
+//                    // Дополнительная информация для лучшего UX
+//                    model.addAttribute("userAccessLevel", userAccessLevel);
+//                    model.addAttribute("isSubscribed", isSubscribed);
+//                    model.addAttribute("canSubscribe", !isSubscribed);
+//
+//                    // Информация о том, что нужно для доступа
+//                    boolean needsSubscription = (userAccessLevel == ProfileAccessLevel.SUBSCRIBERS_ONLY);
+//                    boolean needsMutualSubscription = (userAccessLevel == ProfileAccessLevel.MUTUAL_SUBSCRIPTIONS);
+//                    boolean isPrivateProfile = (userAccessLevel == ProfileAccessLevel.PRIVATE);
+//
+//                    model.addAttribute("needsSubscription", needsSubscription);
+//                    model.addAttribute("needsMutualSubscription", needsMutualSubscription);
+//                    model.addAttribute("isPrivateProfile", isPrivateProfile);
+//
+//                    // Debug информация для страницы блокировки
+//                    model.addAttribute("debugAccessLevel", userAccessLevel.name());
+//                    model.addAttribute("debugCanView", false);
+//                    model.addAttribute("debugIsSubscribed", isSubscribed);
+//                    model.addAttribute("debugIsMutualSubscription", isMutualSubscription);
+//
+//
+//                    return "profile/CanViev-profile";
+//                }
+//
+//                // Проверяем заблокировал ли текущий пользователь просматриваемого
+//                boolean iBlockedUser = userBlockService.isBlocked(currentUser.getId(), userId);
+//                // Проверяем заблокировал ли просматриваемый пользователь текущего
+//                boolean userBlockedMe = userBlockService.isBlocked(userId, currentUser.getId());
+//
+//                model.addAttribute("iBlockedUser", iBlockedUser);
+//                model.addAttribute("userBlockedMe", userBlockedMe);
+//                model.addAttribute("canInteract", !iBlockedUser && !userBlockedMe);
+//
+//                // Если просматриваемый пользователь заблокировал текущего
+//                if (userBlockedMe) {
+//                    log.warn("🚫 Пользователь {} заблокировал текущего пользователя. Показываем profile-blocked", userId);
+//                    return "profile/profile-blocked";
+//                }
+//
+//                // Debug информация для успешного доступа
+//                model.addAttribute("debugCanView", true);
+//                model.addAttribute("debugAccessLevel", profileAccessService.getProfileAccessLevel(userId).name());
+//
+//            } else {
+//                log.info("🔍 Неавторизованный пользователь пытается просмотреть профиль {}", userId);
+//
+//                // === НЕАВТОРИЗОВАННЫЙ ПОЛЬЗОВАТЕЛЬ ===
+//                // Проверяем доступ для неавторизованного пользователя
+//                boolean canView = profileAccessService.canViewProfile(null, userId);
+//
+//                if (!canView) {
+//                    log.warn("🚫 Доступ запрещен для неавторизованного пользователя");
+//
+//                    UserResponse blockedUser = userService.getUserById(userId);
+//                    String accessDeniedMessage = profileAccessService.getAccessDeniedMessage(null, userId);
+//                    ProfileAccessLevel userAccessLevel = profileAccessService.getProfileAccessLevel(userId);
+//
+//
+//                    model.addAttribute("blockedUser", blockedUser);
+//                    model.addAttribute("accessDeniedMessage", accessDeniedMessage);
+//                    model.addAttribute("currentUser", null);
+//                    model.addAttribute("debugCanView", false);
+//                    model.addAttribute("debugCurrentUserId", "anonymous");
+//                    model.addAttribute("debugAccessLevel", userAccessLevel.name());
+//
+//                    return "profile/CanViev-profile";
+//                }
+//            }
+//
+//            // === ЗАГРУЗКА ДАННЫХ ПРОФИЛЯ (только если доступ разрешен) ===
+//            UserResponse user = userService.getUserById(userId);
+//            model.addAttribute("user", user);
+//
+//
+//
+//            // Получаем посты пользователя
+//            PostListDto userPosts = postService.getUserPosts(userId, page, size);
+//
+//            model.addAttribute("posts", userPosts);
+//            model.addAttribute("currentPage", page);
+//            model.addAttribute("pageSize", size);
+//
+//            // Обрабатываем данные текущего пользователя
+//            if (authentication != null && authentication.isAuthenticated()) {
+//                UserResponse currentUser = userService.getUserByEmail(authentication.getName());
+//                model.addAttribute("currentUserId", currentUser.getId());
+//                model.addAttribute("isOwnProfile", currentUser.getId().equals(userId));
+//
+//
+//                // Записываем визит
+//                try {
+//                    ipAddressService.recordUserVisit(userId, currentUser.getId(), request);
+//                } catch (Exception e) {
+//                    log.warn("⚠️ Ошибка записи визита: {}", e.getMessage());
+//                }
+//
+//                // Проверяем подписку только для чужих профилей
+//                if (!currentUser.getId().equals(userId)) {
+//                    boolean isSubscribed = subscriptionService.isSubscribed(currentUser.getId(), userId);
+//                    model.addAttribute("isSubscribed", isSubscribed);
+//                    model.addAttribute("debugIsSubscribed", isSubscribed);
+//                } else {
+//                    model.addAttribute("isSubscribed", false);
+//                    model.addAttribute("debugIsSubscribed", "own_profile");
+//                }
+//
+//                try {
+//                    List<UserRecommendationDto> recommendations = recommendationService.getTopRecommendations(currentUser.getId());
+//                    model.addAttribute("recommendations", recommendations);
+//
+//                } catch (Exception e) {
+//                    log.warn("⚠️ Ошибка загрузки рекомендаций: {}", e.getMessage());
+//                }
+//
+//            } else {
+//                model.addAttribute("currentUserId", null);
+//                model.addAttribute("isSubscribed", false);
+//                model.addAttribute("isOwnProfile", false);
+//                model.addAttribute("debugIsSubscribed", "not_authenticated");
+//            }
+//
+//
+//            return "profile/profile";
+//
+//        } catch (Exception e) {
+//            log.error("❌ КРИТИЧЕСКАЯ ОШИБКА при показе профиля {}: {}", userId, e.getMessage(), e);
+//            model.addAttribute("errorMessage", "Не удалось загрузить профиль пользователя");
+//            model.addAttribute("debugError", e.getMessage());
+//            return "error";
+//        }
+//    }
 
 
     /**
