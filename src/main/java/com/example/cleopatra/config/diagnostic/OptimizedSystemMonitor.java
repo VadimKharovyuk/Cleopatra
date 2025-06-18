@@ -56,7 +56,7 @@ public class OptimizedSystemMonitor {
      * Основной мониторинг - каждые 2 минуты
      * Объединяет память + DB pool + производительность
      */
-    @Scheduled(fixedRate = 120000) // 2 минуты
+    @Scheduled(fixedRate = 120000) // Каждые 2 минуты
     public void performComprehensiveMonitoring() {
         try {
             long cycle = monitoringCycles.incrementAndGet();
@@ -67,27 +67,40 @@ public class OptimizedSystemMonitor {
             // Database Pool
             PoolStats pool = getDatabasePoolStats();
 
-            // Основной лог - компактный формат
-            log.info("Monitor #{} - Memory: {}/{} MB ({}%), Pool: {}/{}, Uptime: {} min",
+            // Основной лог - компактный формат на русском
+            log.info("Мониторинг #{} - Память: {}/{} МБ ({}%), БД пул: {}/{}, Время работы: {} мин",
                     cycle,
                     memory.usedMB, memory.totalMB, memory.usagePercent,
                     pool.active, pool.total,
                     (System.currentTimeMillis() - startTime) / 60000);
 
             // Детальное логирование только при проблемах
-            if (memory.usagePercent > 80 || pool.active >= pool.total) {
-                log.warn("HIGH USAGE DETECTED - Heap: {} MB, Non-Heap: {} MB, Pool waiting: {}",
+            if (memory.usagePercent > 85 || pool.active >= pool.total) {
+                log.warn("🚨 ВЫСОКАЯ НАГРУЗКА - Heap: {} МБ, Non-Heap: {} МБ, БД ожидает: {}",
                         memory.heapUsedMB, memory.nonHeapUsedMB, pool.waiting);
 
-                // Принудительная сборка мусора при высоком использовании
-                if (memory.usagePercent > 85) {
+                // Принудительная сборка мусора при критическом использовании
+                if (memory.usagePercent > 90) {
                     System.gc();
-                    log.info("Forced GC triggered due to high memory usage");
+                    log.info("🗑️ Принудительная сборка мусора запущена из-за критичного использования памяти");
                 }
+            } else if (memory.usagePercent > 75) {
+                log.info("⚠️ Повышенное использование памяти: {}% от выделенной", memory.usagePercent);
+            }
+
+            // Дополнительные предупреждения
+            if (pool.waiting > 0) {
+                log.warn("⏳ База данных: {} потоков ожидают соединение", pool.waiting);
+            }
+
+            // Позитивная статистика при хороших показателях
+            if (memory.usagePercent < 60 && pool.active == 0) {
+                log.debug("✅ Система работает стабильно - память: {}%, БД пул свободен",
+                        memory.usagePercent);
             }
 
         } catch (Exception e) {
-            log.error("Monitoring error: {}", e.getMessage());
+            log.error("❌ Ошибка мониторинга системы: {}", e.getMessage());
         }
     }
 
@@ -111,7 +124,7 @@ public class OptimizedSystemMonitor {
         }
     }
 
-    // Публичные методы для использования в REST контроллерах
+
     public Map<String, Object> getMemoryInfo() {
         Map<String, Object> result = new HashMap<>(8);
 
@@ -121,25 +134,72 @@ public class OptimizedSystemMonitor {
             long freeMB = runtime.freeMemory() / 1024 / 1024;
             long usedMB = totalMB - freeMB;
 
-            result.put("maxMemory", maxMB + " MB");
-            result.put("totalMemory", totalMB + " MB");
-            result.put("usedMemory", usedMB + " MB");
-            result.put("freeMemory", freeMB + " MB");
-            result.put("usagePercent", String.format("%.1f%%", (double) usedMB / totalMB * 100));
+            // Основные метрики памяти
+            result.put("максимальнаяПамять", maxMB + " МБ");
+            result.put("выделеннаяПамять", totalMB + " МБ");
+            result.put("используемаяПамять", usedMB + " МБ");
+            result.put("свободнаяПамять", freeMB + " МБ");
+            result.put("процентИспользования", String.format("%.1f%%", (double) usedMB / totalMB * 100));
 
+            // Детальная информация JVM
             MemoryUsage heap = memoryBean.getHeapMemoryUsage();
             MemoryUsage nonHeap = memoryBean.getNonHeapMemoryUsage();
-            result.put("heapUsed", heap.getUsed() / 1024 / 1024 + " MB");
-            result.put("nonHeapUsed", nonHeap.getUsed() / 1024 / 1024 + " MB");
+            result.put("heapПамять", heap.getUsed() / 1024 / 1024 + " МБ");
+            result.put("nonHeapПамять", nonHeap.getUsed() / 1024 / 1024 + " МБ");
 
-            result.put("uptimeMinutes", (System.currentTimeMillis() - startTime) / 60000);
+            // Системная информация
+            result.put("времяРаботыМинуты", (System.currentTimeMillis() - startTime) / 60000);
+
+            // Добавим статус системы
+            double usagePercent = (double) usedMB / totalMB * 100;
+            String status;
+            if (usagePercent > 90) {
+                status = "🔥 Критично";
+            } else if (usagePercent > 80) {
+                status = "⚠️ Высокая нагрузка";
+            } else if (usagePercent > 60) {
+                status = "📈 Нормальная нагрузка";
+            } else {
+                status = "✅ Стабильно";
+            }
+            result.put("статусСистемы", status);
 
         } catch (Exception e) {
-            result.put("error", "Cannot retrieve memory info: " + e.getMessage());
+            result.put("ошибка", "Не удалось получить информацию о памяти: " + e.getMessage());
         }
 
         return result;
     }
+
+//    // Публичные методы для использования в REST контроллерах
+//    public Map<String, Object> getMemoryInfo() {
+//        Map<String, Object> result = new HashMap<>(8);
+//
+//        try {
+//            long maxMB = runtime.maxMemory() / 1024 / 1024;
+//            long totalMB = runtime.totalMemory() / 1024 / 1024;
+//            long freeMB = runtime.freeMemory() / 1024 / 1024;
+//            long usedMB = totalMB - freeMB;
+//
+//            result.put("maxMemory", maxMB + " MB");
+//            result.put("totalMemory", totalMB + " MB");
+//            result.put("usedMemory", usedMB + " MB");
+//            result.put("freeMemory", freeMB + " MB");
+//            result.put("usagePercent", String.format("%.1f%%", (double) usedMB / totalMB * 100));
+//
+//            MemoryUsage heap = memoryBean.getHeapMemoryUsage();
+//            MemoryUsage nonHeap = memoryBean.getNonHeapMemoryUsage();
+//            result.put("heapUsed", heap.getUsed() / 1024 / 1024 + " MB");
+//            result.put("nonHeapUsed", nonHeap.getUsed() / 1024 / 1024 + " MB");
+//
+//            result.put("uptimeMinutes", (System.currentTimeMillis() - startTime) / 60000);
+//
+//        } catch (Exception e) {
+//            result.put("error", "Cannot retrieve memory info: " + e.getMessage());
+//        }
+//
+//        return result;
+//    }
 
     public Map<String, Object> getSystemInfo() {
         Map<String, Object> result = new HashMap<>();

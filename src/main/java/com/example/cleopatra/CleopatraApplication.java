@@ -17,6 +17,10 @@ public class CleopatraApplication {
 
 
 
+//        curl https://cleopatra-brcc.onrender.com/health
+//        curl https://cleopatra-brcc.onrender.com/diagnostic/memory
+
+
 
 
     }
