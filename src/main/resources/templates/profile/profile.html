@@ -742,7 +742,7 @@
 
 <body th:data-current-user-id="${currentUserId != null ? currentUserId : ''}"
       th:data-profile-user-id="${user != null and user.id != null ? user.id : ''}"
-      th:data-is-subscribed="${isSubscribed != null ? isSubscribed : false}">
+      th:data-is-subscribed="${isSubscribed ?: false}">
 
 <!-- ПОДКЛЮЧЕНИЕ МОБИЛЬНОГО ХЕДЕРА ИЗ ФРАГМЕНТА -->
 <th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
@@ -753,17 +753,6 @@
 <!-- Main Content -->
 <main class="main-content">
 
-    <div style="display: none;"
-         th:text="'Debug: user.id=' + ${user.id} + ', currentUserId=' + ${currentUserId} + ', isSubscribed=' + ${isSubscribed}">
-    </div>
-    <div style="display: none;" th:if="${blockedUser != null}">
-        Debug:
-        - User ID: <span th:text="${blockedUser.id}">N/A</span>
-        - Profile Access: <span th:text="${blockedUser.profileAccessLevel}">N/A</span>
-        - Photos Access: <span th:text="${blockedUser.photosAccessLevel}">N/A</span>
-        - Posts Access: <span th:text="${blockedUser.postsAccessLevel}">N/A</span>
-        - Is Blocked: <span th:text="${blockedUser.isBlocked}">N/A</span>
-    </div>
     <!-- Success/Error Messages -->
     <div th:if="${successMessage}" class="alert-luxury alert-success-luxury">
         <i class="fas fa-check-circle me-2"></i>

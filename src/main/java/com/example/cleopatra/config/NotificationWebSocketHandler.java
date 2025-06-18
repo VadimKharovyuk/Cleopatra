@@ -60,7 +60,6 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
         Long userId = (Long) session.getAttributes().get("userId");
         if (userId != null) {
             notificationSessions.remove(userId);
-            log.info("🔔 User {} disconnected from notifications WebSocket", userId);
         }
     }
 

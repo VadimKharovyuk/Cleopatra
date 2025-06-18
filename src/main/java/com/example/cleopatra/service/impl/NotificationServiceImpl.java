@@ -81,8 +81,6 @@ public class NotificationServiceImpl implements NotificationService {
             String data = String.format("{\"visitorImageUrl\":\"%s\",\"profileUrl\":\"/profile/%d\"}",
                     visitor.getImageUrl() != null ? visitor.getImageUrl() : "", visitorId);
 
-            // Создаем уведомление
-            log.info("💾 Saving notification to database...");
             Notification notification = createNotification(
                     visitedUser, visitor, NotificationType.PROFILE_VISIT,
                     title, message, data, visitorId, "USER"
@@ -460,8 +458,6 @@ public class NotificationServiceImpl implements NotificationService {
                                             String title, String message, String data,
                                             Long relatedEntityId, String relatedEntityType) {
 
-        log.info("🏗️ Building notification object...");
-
         Notification notification = Notification.builder()
                 .recipient(recipient)
                 .actor(actor)
@@ -475,9 +471,6 @@ public class NotificationServiceImpl implements NotificationService {
                 .isSent(false)     // 🔧 Явно устанавливаем
                 .createdAt(LocalDateTime.now()) // 🔧 Явно устанавливаем
                 .build();
-
-        log.info("💾 Saving notification to repository...");
-
         try {
             Notification saved = notificationRepository.save(notification);
 
