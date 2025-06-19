@@ -28,7 +28,7 @@ public class Story {
     private User user;
 
 
-    // Убери @Lob!
+
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "image_data", columnDefinition = "bytea")
     private byte[] imageData;

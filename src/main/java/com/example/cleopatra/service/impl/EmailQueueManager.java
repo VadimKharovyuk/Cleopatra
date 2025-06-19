@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+
 public class EmailQueueManager implements EmailService {
 
     private final JavaMailSender mailSender;

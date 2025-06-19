@@ -22,6 +22,9 @@ public class CleopatraApplication {
 
 
 
+//        Could not autowire. No beans of 'JavaMailSender' type foun
+//        EmailQueueManager
+
 
     }
 

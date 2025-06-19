@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${pageTitle}">Мониторинг системы - Cleopatra</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(45deg, #27ae60, #219a52);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    .nav-links {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      margin: 0 5px;
+      border-radius: 5px;
+      background: rgba(255,255,255,0.2);
+      transition: background 0.3s;
+    }
+
+    .nav-links a:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .monitor-section {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border-left: 5px solid #27ae60;
+    }
+
+    .monitor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .monitor-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-left: 4px solid #27ae60;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .monitor-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(45deg, rgba(39,174,96,0.1), rgba(39,174,96,0.05));
+      border-radius: 0 10px 0 50px;
+    }
+
+    .monitor-card h3 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-size: 1.2em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    .metric:last-child {
+      border-bottom: none;
+    }
+
+    .metric-label {
+      color: #7f8c8d;
+      font-weight: 500;
+    }
+
+    .metric-value {
+      color: #2c3e50;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-value.normal {
+      color: #27ae60;
+    }
+
+    .metric-value.warning {
+      color: #f39c12;
+    }
+
+    .metric-value.critical {
+      color: #e74c3c;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #ecf0f1;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #27ae60, #2ecc71);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .progress-fill.warning {
+      background: linear-gradient(90deg, #f39c12, #e67e22);
+    }
+
+    .progress-fill.critical {
+      background: linear-gradient(90deg, #e74c3c, #c0392b);
+    }
+
+    .btn {
+      background: linear-gradient(45deg, #27ae60, #219a52);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+    }
+
+    .btn-warning {
+      background: linear-gradient(45deg, #f39c12, #e67e22);
+    }
+
+    .btn-danger {
+      background: linear-gradient(45deg, #e74c3c, #c0392b);
+    }
+
+    .controls {
+      text-align: center;
+      margin: 20px 0;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .status-normal {
+      background: #27ae60;
+    }
+
+    .status-warning {
+      background: #f39c12;
+      animation: pulse 2s infinite;
+    }
+
+    .status-critical {
+      background: #e74c3c;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .real-time-log {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 20px;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+
+    .log-entry {
+      margin-bottom: 5px;
+      padding: 2px 0;
+    }
+
+    .log-entry.info {
+      color: #3498db;
+    }
+
+    .log-entry.warning {
+      color: #f39c12;
+    }
+
+    .log-entry.error {
+      color: #e74c3c;
+    }
+
+    .log-entry.success {
+      color: #27ae60;
+    }
+
+    .charts-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .chart-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .chart-card h3 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #27ae60;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>💻 Мониторинг системы</h1>
+    <p>Реальный мониторинг производительности и ресурсов системы</p>
+
+    <div class="nav-links">
+      <a href="/diagnostic/load-test">🧪 Тестирование</a>
+      <a href="/diagnostic/load-test/results">📊 Результаты</a>
+      <a href="/diagnostic/system-monitor">💻 Мониторинг</a>
+      <a href="/diagnostic/memory">🧠 Память</a>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Управление мониторингом -->
+    <div class="controls">
+      <h3>🎛️ Управление мониторингом</h3>
+      <button class="btn" onclick="startMonitoring()">▶️ Запустить мониторинг</button>
+      <button class="btn btn-warning" onclick="stopMonitoring()">⏸️ Остановить мониторинг</button>
+      <button class="btn btn-primary" onclick="refreshData()">🔄 Обновить данные</button>
+      <button class="btn btn-danger" onclick="clearLogs()">🗑️ Очистить логи</button>
+      <div style="margin-top: 15px;">
+        <label for="refreshInterval">Интервал обновления:</label>
+        <select id="refreshInterval" onchange="updateRefreshInterval()">
+          <option value="1000">1 секунда</option>
+          <option value="3000">3 секунды</option>
+          <option value="5000" selected>5 секунд</option>
+          <option value="10000">10 секунд</option>
+          <option value="30000">30 секунд</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Загрузка -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Загружаем данные мониторинга...</p>
+    </div>
+
+    <!-- Основные метрики системы -->
+    <div class="monitor-section">
+      <h2>📊 Основные метрики системы</h2>
+      <div class="monitor-grid">
+        <!-- Память JVM -->
+        <div class="monitor-card">
+          <h3>🧠 Память JVM</h3>
+          <div class="metric">
+            <span class="metric-label">Используется:</span>
+            <span class="metric-value" id="memoryUsed">-- МБ</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Выделено:</span>
+            <span class="metric-value" id="memoryAllocated">-- МБ</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Максимум:</span>
+            <span class="metric-value" id="memoryMax">-- МБ</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Использование:</span>
+            <span class="metric-value" id="memoryPercent">--%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="memoryProgress" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- База данных -->
+        <div class="monitor-card">
+          <h3>🗄️ Пул соединений БД</h3>
+          <div class="metric">
+            <span class="metric-label">Активные:</span>
+            <span class="metric-value" id="dbActive">--</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Ожидающие:</span>
+            <span class="metric-value" id="dbIdle">--</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Всего:</span>
+            <span class="metric-value" id="dbTotal">--</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Ожидают подключения:</span>
+            <span class="metric-value" id="dbWaiting">--</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="dbProgress" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Система -->
+        <div class="monitor-card">
+          <h3>⚙️ Система</h3>
+          <div class="metric">
+            <span class="metric-label">Процессоры:</span>
+            <span class="metric-value" id="processors">--</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Время работы:</span>
+            <span class="metric-value" id="uptime">-- мин</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Циклы мониторинга:</span>
+            <span class="metric-value" id="monitoringCycles">--</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Статус системы:</span>
+            <span class="metric-value" id="systemStatus">
+                                <span class="status-indicator status-normal"></span>Загрузка...
+                            </span>
+          </div>
+        </div>
+
+        <!-- Heap память -->
+        <div class="monitor-card">
+          <h3>📦 Детальная память</h3>
+          <div class="metric">
+            <span class="metric-label">Heap память:</span>
+            <span class="metric-value" id="heapMemory">-- МБ</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Non-Heap память:</span>
+            <span class="metric-value" id="nonHeapMemory">-- МБ</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Свободная память:</span>
+            <span class="metric-value" id="freeMemory">-- МБ</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Статус памяти:</span>
+            <span class="metric-value" id="memoryStatus">Анализируется...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Алерты и уведомления -->
+    <div class="monitor-section">
+      <h2>🚨 Алерты и уведомления</h2>
+      <div id="alertsContainer">
+        <div style="text-align: center; padding: 20px; color: #7f8c8d;">
+          Мониторинг алертов активен. Критические события будут отображены здесь.
+        </div>
+      </div>
+    </div>
+
+    <!-- Реальные логи -->
+    <div class="monitor-section">
+      <h2>📝 Реальные логи системы</h2>
+      <div class="real-time-log" id="systemLogs">
+        <div class="log-entry info">[ИНИЦИАЛИЗАЦИЯ] Система мониторинга запущена...</div>
+        <div class="log-entry success">[ГОТОВ] Ожидание данных от сервера...</div>
+      </div>
+    </div>
+
+    <!-- Графики производительности -->
+    <div class="charts-container">
+      <div class="chart-card">
+        <h3>📈 График использования памяти</h3>
+        <canvas id="memoryChart" width="350" height="200"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <h3>📊 График соединений БД</h3>
+        <canvas id="dbChart" width="350" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  let monitoringInterval = null;
+  let refreshInterval = /*[[${refreshInterval}]]*/ 5000;
+  let memoryHistory = [];
+  let dbHistory = [];
+  let isMonitoringActive = false;
+
+  // Инициализация
+  document.addEventListener('DOMContentLoaded', function() {
+    addLog('info', 'Страница мониторинга загружена');
+    refreshData();
+    startMonitoring();
+  });
+
+  function showLoading() {
+    document.getElementById('loading').style.display = 'block';
+  }
+
+  function hideLoading() {
+    document.getElementById('loading').style.display = 'none';
+  }
+
+  function addLog(type, message) {
+    const logsContainer = document.getElementById('systemLogs');
+    const timestamp = new Date().toLocaleTimeString('ru-RU');
+    const logEntry = document.createElement('div');
+    logEntry.className = `log-entry ${type}`;
+    logEntry.textContent = `[${timestamp}] ${message}`;
+
+    logsContainer.appendChild(logEntry);
+    logsContainer.scrollTop = logsContainer.scrollHeight;
+
+    // Ограничиваем количество логов
+    if (logsContainer.children.length > 100) {
+      logsContainer.removeChild(logsContainer.firstChild);
+    }
+  }
+
+  async function refreshData() {
+    try {
+      showLoading();
+
+      const [memoryResponse, systemResponse] = await Promise.all([
+        fetch('/diagnostic/memory'),
+        fetch('/diagnostic/full-system')
+      ]);
+
+      const memoryData = await memoryResponse.json();
+      const systemData = await systemResponse.json();
+
+      updateMemoryMetrics(memoryData);
+      updateSystemMetrics(systemData);
+      updateDatabaseMetrics(systemData.databasePool);
+
+      addLog('success', 'Данные успешно обновлены');
+      hideLoading();
+
+    } catch (error) {
+      addLog('error', `Ошибка обновления данных: ${error.message}`);
+      hideLoading();
+    }
+  }
+
+  function updateMemoryMetrics(data) {
+    if (!data) return;
+
+    const usedMB = data.используемаяПамять ? parseInt(data.используемаяПамять) : 0;
+    const totalMB = data.выделеннаяПамять ? parseInt(data.выделеннаяПамять) : 0;
+    const maxMB = data.максимальнаяПамять ? parseInt(data.максимальнаяПамять) : 0;
+    const percent = data.процентИспользования ? parseFloat(data.процентИспользования) : 0;
+
+    document.getElementById('memoryUsed').textContent = usedMB + ' МБ';
+    document.getElementById('memoryAllocated').textContent = totalMB + ' МБ';
+    document.getElementById('memoryMax').textContent = maxMB + ' МБ';
+    document.getElementById('memoryPercent').textContent = percent.toFixed(1) + '%';
+
+    // Обновляем прогресс-бар
+    const progressBar = document.getElementById('memoryProgress');
+    progressBar.style.width = percent + '%';
+
+    // Устанавливаем цвет в зависимости от использования
+    if (percent > 90) {
+      progressBar.className = 'progress-fill critical';
+      document.getElementById('memoryPercent').className = 'metric-value critical';
+      addLog('warning', `Критическое использование памяти: ${percent.toFixed(1)}%`);
+    } else if (percent > 75) {
+      progressBar.className = 'progress-fill warning';
+      document.getElementById('memoryPercent').className = 'metric-value warning';
+    } else {
+      progressBar.className = 'progress-fill';
+      document.getElementById('memoryPercent').className = 'metric-value normal';
+    }
+
+    // Heap память
+    if (data.heapПамять) {
+      document.getElementById('heapMemory').textContent = data.heapПамять;
+    }
+    if (data.nonHeapПамять) {
+      document.getElementById('nonHeapMemory').textContent = data.nonHeapПамять;
+    }
+    if (data.свободнаяПамять) {
+      document.getElementById('freeMemory').textContent = data.свободнаяПамять;
+    }
+
+    // Статус системы
+    if (data.статусСистемы) {
+      const statusElement = document.getElementById('memoryStatus');
+      statusElement.textContent = data.статусСистемы;
+
+      if (data.статусСистемы.includes('Критично')) {
+        statusElement.className = 'metric-value critical';
+      } else if (data.статусСистемы.includes('Высокая нагрузка')) {
+        statusElement.className = 'metric-value warning';
+      } else {
+        statusElement.className = 'metric-value normal';
+      }
+    }
+
+    // Сохраняем для графика
+    memoryHistory.push({
+      time: new Date().toLocaleTimeString(),
+      value: percent
+    });
+    if (memoryHistory.length > 20) {
+      memoryHistory.shift();
+    }
+  }
+
+  function updateSystemMetrics(data) {
+    if (!data.system) return;
+
+    const system = data.system;
+
+    if (system.processors) {
+      document.getElementById('processors').textContent = system.processors;
+    }
+    if (system.uptimeMinutes) {
+      document.getElementById('uptime').textContent = system.uptimeMinutes + ' мин';
+    }
+    if (system.monitoringCycles) {
+      document.getElementById('monitoringCycles').textContent = system.monitoringCycles;
+    }
+
+    // Обновляем общий статус системы
+    const statusElement = document.getElementById('systemStatus');
+    const memoryPercent = data.memory && data.memory.процентИспользования ?
+            parseFloat(data.memory.процентИспользования) : 0;
+
+    if (memoryPercent > 90) {
+      statusElement.innerHTML = '<span class="status-indicator status-critical"></span>Критическая нагрузка';
+      addAlert('critical', 'Система под критической нагрузкой!');
+    } else if (memoryPercent > 75) {
+      statusElement.innerHTML = '<span class="status-indicator status-warning"></span>Повышенная нагрузка';
+    } else {
+      statusElement.innerHTML = '<span class="status-indicator status-normal"></span>Система стабильна';
+    }
+  }
+
+  function updateDatabaseMetrics(dbData) {
+    if (!dbData) return;
+
+    document.getElementById('dbActive').textContent = dbData.active || 0;
+    document.getElementById('dbIdle').textContent = dbData.idle || 0;
+    document.getElementById('dbTotal').textContent = dbData.total || 0;
+    document.getElementById('dbWaiting').textContent = dbData.waiting || 0;
+
+    // Прогресс-бар для БД
+    const dbProgress = document.getElementById('dbProgress');
+    const activePercent = dbData.total > 0 ? (dbData.active / dbData.total) * 100 : 0;
+    dbProgress.style.width = activePercent + '%';
+
+    if (dbData.waiting > 0) {
+      dbProgress.className = 'progress-fill warning';
+      addLog('warning', `База данных: ${dbData.waiting} соединений ожидают`);
+    } else if (activePercent > 80) {
+      dbProgress.className = 'progress-fill warning';
+    } else {
+      dbProgress.className = 'progress-fill';
+    }
+
+    // Сохраняем для графика
+    dbHistory.push({
+      time: new Date().toLocaleTimeString(),
+      active: dbData.active,
+      total: dbData.total
+    });
+    if (dbHistory.length > 20) {
+      dbHistory.shift();
+    }
+  }
+
+  function addAlert(type, message) {
+    const alertsContainer = document.getElementById('alertsContainer');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.style.cssText = `
+                padding: 15px;
+                margin: 10px 0;
+                border-radius: 8px;
+                background: ${type === 'critical' ? '#f8d7da' : '#fff3cd'};
+                border-left: 4px solid ${type === 'critical' ? '#dc3545' : '#ffc107'};
+                color: ${type === 'critical' ? '#721c24' : '#856404'};
+            `;
+    alert.innerHTML = `
+                <strong>${type === 'critical' ? '🚨 КРИТИЧНО:' : '⚠️ ПРЕДУПРЕЖДЕНИЕ:'}</strong>
+                ${message}
+                <button style="float: right; background: none; border: none; font-size: 18px; cursor: pointer;" onclick="this.parentElement.remove()">×</button>
+            `;
+
+    alertsContainer.appendChild(alert);
+
+    // Автоудаление через 30 секунд
+    setTimeout(() => {
+      if (alert.parentElement) {
+        alert.remove();
+      }
+    }, 30000);
+  }
+
+  function startMonitoring() {
+    if (isMonitoringActive) return;
+
+    isMonitoringActive = true;
+    monitoringInterval = setInterval(refreshData, refreshInterval);
+    addLog('info', `Мониторинг запущен с интервалом ${refreshInterval/1000} сек`);
+  }
+
+  function stopMonitoring() {
+    if (!isMonitoringActive) return;
+
+    isMonitoringActive = false;
+    if (monitoringInterval) {
+      clearInterval(monitoringInterval);
+      monitoringInterval = null;
+    }
+    addLog('warning', 'Мониторинг остановлен');
+  }
+
+  function updateRefreshInterval() {
+    const newInterval = parseInt(document.getElementById('refreshInterval').value);
+    refreshInterval = newInterval;
+
+    if (isMonitoringActive) {
+      stopMonitoring();
+      startMonitoring();
+    }
+
+    addLog('info', `Интервал обновления изменен на ${newInterval/1000} сек`);
+  }
+
+  function clearLogs() {
+    const logsContainer = document.getElementById('systemLogs');
+    logsContainer.innerHTML = '';
+    addLog('info', 'Логи очищены');
+  }
+
+  // Очистка при выходе со страницы
+  window.addEventListener('beforeunload', () => {
+    if (monitoringInterval) {
+      clearInterval(monitoringInterval);
+    }
+  });
+
+  /*]]>*/
+</script>
+</body>
+</html>

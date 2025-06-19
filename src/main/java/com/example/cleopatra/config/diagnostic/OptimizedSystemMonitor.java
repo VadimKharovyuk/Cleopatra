@@ -171,36 +171,6 @@ public class OptimizedSystemMonitor {
         return result;
     }
 
-//    // Публичные методы для использования в REST контроллерах
-//    public Map<String, Object> getMemoryInfo() {
-//        Map<String, Object> result = new HashMap<>(8);
-//
-//        try {
-//            long maxMB = runtime.maxMemory() / 1024 / 1024;
-//            long totalMB = runtime.totalMemory() / 1024 / 1024;
-//            long freeMB = runtime.freeMemory() / 1024 / 1024;
-//            long usedMB = totalMB - freeMB;
-//
-//            result.put("maxMemory", maxMB + " MB");
-//            result.put("totalMemory", totalMB + " MB");
-//            result.put("usedMemory", usedMB + " MB");
-//            result.put("freeMemory", freeMB + " MB");
-//            result.put("usagePercent", String.format("%.1f%%", (double) usedMB / totalMB * 100));
-//
-//            MemoryUsage heap = memoryBean.getHeapMemoryUsage();
-//            MemoryUsage nonHeap = memoryBean.getNonHeapMemoryUsage();
-//            result.put("heapUsed", heap.getUsed() / 1024 / 1024 + " MB");
-//            result.put("nonHeapUsed", nonHeap.getUsed() / 1024 / 1024 + " MB");
-//
-//            result.put("uptimeMinutes", (System.currentTimeMillis() - startTime) / 60000);
-//
-//        } catch (Exception e) {
-//            result.put("error", "Cannot retrieve memory info: " + e.getMessage());
-//        }
-//
-//        return result;
-//    }
-
     public Map<String, Object> getSystemInfo() {
         Map<String, Object> result = new HashMap<>();
 
