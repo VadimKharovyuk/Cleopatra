@@ -15,12 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Slf4j
 public class LoadTestPageController {
 
-    /**
-     * Главная страница нагрузочного тестирования
-     */
+
     @GetMapping("/load-test")
     public String loadTestPage(Model model) {
-        log.info("🔧 Открыта страница нагрузочного тестирования");
 
         // Добавляем базовые данные для страницы
         model.addAttribute("pageTitle", "Нагрузочное тестирование - Cleopatra");
