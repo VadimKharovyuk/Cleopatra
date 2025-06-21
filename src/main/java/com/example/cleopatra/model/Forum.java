@@ -47,11 +47,14 @@ public class Forum {
     private LocalDateTime updatedAt;
 
 
+    // ✅ ИСПРАВЛЕНО: устанавливаем и createdAt, и updatedAt
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
+        updatedAt = now;
     }
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

@@ -1,5 +1,4 @@
 
-// === templates/forum/list.html ===
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -55,7 +54,7 @@
     <article th:each="forum : ${forums.content}">
       <header>
         <h2>
-          <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.title}"></a>
+          <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.getTitle()}"></a>
         </h2>
         <div>
           <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}"></span>

@@ -24,7 +24,9 @@ import org.springframework.cache.annotation.Caching;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -36,6 +38,7 @@ public class ForumServiceImpl implements ForumService {
     private final ForumRepository forumRepository;
     private final ForumMapper forumMapper;
     private final ForumReadService forumReadService;
+
 
     @Override
     @CacheEvict(value = {"forum-pages", "forum-count"}, allEntries = true)
@@ -68,14 +71,27 @@ public class ForumServiceImpl implements ForumService {
         log.info("Тема '{}' (ID: {}) удалена пользователем: {}", forum.getTitle(), forumId, userEmail);
     }
 
+
     @Override
     public ForumDetailDTO viewForum(Long forumId, String userEmail) {
+        ForumDetailDTO result = forumReadService.getForumById(forumId);
         incrementViewCount(forumId);
-        return forumReadService.getForumById(forumId);
+        return result;
     }
+
 
     @Async
     public void incrementViewCount(Long forumId) {
-        forumRepository.incrementViewCount(forumId);
+        try {
+            Optional<Forum> forumOpt = forumRepository.findById(forumId);
+            if (forumOpt.isPresent()) {
+                Forum forum = forumOpt.get();
+                forum.setViewCount(forum.getViewCount() + 1);
+                forumRepository.save(forum);
+                log.debug("Увеличен счетчик просмотров для темы: {}", forumId);
+            }
+        } catch (Exception e) {
+            log.error("Ошибка при увеличении счетчика просмотров: {}", e.getMessage());
+        }
     }
 }

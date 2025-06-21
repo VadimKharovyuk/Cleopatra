@@ -31,11 +31,20 @@ public class ForumReadService {
 
     @Cacheable(value = "forums-detailed", key = "#forumId")
     public ForumDetailDTO getForumById(Long forumId) {
-        Forum forum = forumRepository.findByIdWithUser(forumId)
-                .orElseThrow(() -> new ForumNotFoundException("Тема не найдена"));
+        log.info("🔍 ForumReadService.getForumById: {}", forumId);
 
-        log.debug("Загружена тема форума: {}", forum.getTitle());
-        return forumMapper.toDetailDTO(forum);
+        Forum forum = forumRepository.findByIdWithUser(forumId)
+                .orElseThrow(() -> {
+                    log.warn("⚠️ Тема с ID {} не найдена в БД", forumId);
+                    return new ForumNotFoundException("Тема не найдена");
+                });
+
+        log.info("📋 Найдена тема в БД: {}", forum.getTitle());
+
+        ForumDetailDTO result = forumMapper.toDetailDTO(forum);
+        log.info("📋 Результат маппинга: {}", result != null ? result.getTitle() : "NULL");
+
+        return result;
     }
 
     @Cacheable(value = "forum-pages", key = "#page + '-' + #size + '-' + #sortBy + '-' + #sortDirection + '-' + (#forumType != null ? #forumType.name() : 'ALL')")

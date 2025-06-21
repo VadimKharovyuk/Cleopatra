@@ -1,9 +1,8 @@
-// === templates/forum/detail.html ===
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${forum.title} + ' | Форум артистов'"></title>
+    <title>Форум</title>
 </head>
 <body>
 <header>
@@ -14,49 +13,68 @@
 </header>
 
 <main>
-    <article>
-        <header>
-            <h1 th:text="${forum.title}"></h1>
-            <div>
-                <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}"></span>
-            </div>
+    <!-- ✅ ДОБАВЛЕНА ЗАЩИТА ОТ NULL -->
+    <div th:if="${forum != null}">
+        <article>
+            <header>
+                <h1 th:text="${forum.title}">Заголовок темы</h1>
+                <div>
+                    <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}">Категория</span>
+                </div>
 
-            <div>
-                <span>👤 <span th:text="${forum.authorName}"></span></span>
-                <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}"></span></span>
-                <span>👁️ <span th:text="${forum.viewCount}"></span></span>
-                <span>💬 <span th:text="${forum.commentCount}"></span></span>
-            </div>
+                <div>
+                    <span>👤 <span th:text="${forum.authorName}">Автор</span></span>
+                    <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span></span>
+                    <span>👁️ <span th:text="${forum.viewCount}">0</span></span>
+                    <span>💬 <span th:text="${forum.commentCount}">0</span></span>
+                </div>
 
-            <!-- Кнопка удаления для владельца или админа -->
-            <div th:if="${isOwner or isAdmin}">
-                <form th:action="@{/forums/{id}/delete(id=${forum.id})}" method="post"
-                      onsubmit="return confirm('Вы уверены, что хотите удалить эту тему?')">
-                    <button type="submit">🗑️ Удалить тему</button>
-                </form>
-            </div>
-        </header>
+                <!-- Кнопка удаления для владельца или админа -->
+                <div th:if="${isOwner or isAdmin}">
+                    <form th:action="@{/forums/{id}/delete(id=${forum.id})}" method="post"
+                          onsubmit="return confirm('Вы уверены, что хотите удалить эту тему?')">
+                        <button type="submit">🗑️ Удалить тему</button>
+                    </form>
+                </div>
+            </header>
 
+            <section>
+                <p th:text="${forum.description}" style="white-space: pre-line;">Описание темы</p>
+            </section>
+
+            <footer>
+                <p th:if="${forum.updatedAt != null and !forum.updatedAt.equals(forum.createdAt)}">
+                    ✏️ Обновлено: <span th:text="${#temporals.format(forum.updatedAt, 'dd.MM.yyyy HH:mm')}">Дата обновления</span>
+                </p>
+            </footer>
+        </article>
+
+        <!-- Здесь будут комментарии в будущем -->
         <section>
-            <p th:text="${forum.description}" style="white-space: pre-line;"></p>
+            <h3>💬 Комментарии</h3>
+            <p>Комментарии скоро появятся...</p>
         </section>
+    </div>
 
-        <footer>
-            <p th:if="${forum.updatedAt != null and !forum.updatedAt.equals(forum.createdAt)}">
-                ✏️ Обновлено: <span th:text="${#temporals.format(forum.updatedAt, 'dd.MM.yyyy HH:mm')}"></span>
-            </p>
-        </footer>
-    </article>
-
-    <!-- Здесь будут комментарии в будущем -->
-    <section>
-        <h3>💬 Комментарии</h3>
-        <p>Комментарии скоро появятся...</p>
-    </section>
+    <!-- ✅ СООБЩЕНИЕ ЕСЛИ FORUM NULL -->
+    <div th:if="${forum == null}">
+        <h1>❌ Тема не найдена</h1>
+        <p>Запрашиваемая тема не существует или была удалена.</p>
+        <a th:href="@{/forums}">🔙 Вернуться к списку тем</a>
+    </div>
 </main>
 
-<!-- Сообщения -->
-<div th:if="${successMessage}" th:text="${successMessage}"></div>
-<div th:if="${errorMessage}" th:text="${errorMessage}"></div>
+<!-- Сообщения об ошибках -->
+<div th:if="${successMessage}" th:text="${successMessage}" style="color: green; padding: 10px;"></div>
+<div th:if="${errorMessage}" th:text="${errorMessage}" style="color: red; padding: 10px;"></div>
+
+<!-- ✅ ОТЛАДОЧНАЯ ИНФОРМАЦИЯ (удалить в продакшене) -->
+<div style="background: #f0f0f0; padding: 10px; margin: 10px 0;">
+    <h4>🔍 Debug Info:</h4>
+    <p>Forum object: <span th:text="${forum}">null</span></p>
+    <p>Forum != null: <span th:text="${forum != null}">false</span></p>
+    <p>Error message: <span th:text="${errorMessage}">none</span></p>
+</div>
+
 </body>
 </html>

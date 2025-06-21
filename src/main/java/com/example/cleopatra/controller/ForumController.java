@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 
+
 @Slf4j
 @Controller
 @RequestMapping("/forums")
@@ -101,10 +102,10 @@ public class ForumController {
 
             model.addAttribute("forum", forum);
 
-            // ❌ ИСПРАВЛЕНО: сравниваем с email, а не с name
             model.addAttribute("isOwner", forum.getAuthorName() != null &&
                     forum.getAuthorName().equals(authentication.getName()));
 
+            model.addAttribute("forumTypes", ForumType.values());
             model.addAttribute("isAdmin", authentication.getAuthorities()
                     .contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
 

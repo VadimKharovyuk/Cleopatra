@@ -20,6 +20,7 @@ public class ForumDetailDTO {
 
     // Информация об авторе
     private String authorName;
+    private String authorEmail;
 
     // В будущем для комментариев
     // private List<CommentDTO> comments;

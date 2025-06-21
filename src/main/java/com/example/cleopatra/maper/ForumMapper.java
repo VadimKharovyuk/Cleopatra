@@ -26,7 +26,7 @@ public class ForumMapper {
 
     public ForumCreateResponseDTO toCreateResponseDTO(Forum savedForum, String message) {
         if (savedForum == null) {
-            return null ;
+            return null;
         }
 
         return ForumCreateResponseDTO.builder()
@@ -34,14 +34,31 @@ public class ForumMapper {
                 .title(savedForum.getTitle())
                 .forumType(savedForum.getForumType())
                 .createdAt(savedForum.getCreatedAt())
-                .message(message)
+                .message(message != null ? message : "Операция выполнена")
                 .build();
     }
-
 
     public ForumDetailDTO toDetailDTO(Forum forum) {
         if (forum == null) {
             return null;
+        }
+
+        // ✅ ИСПРАВЛЕНО: правильная обработка User
+        String authorName = "Неизвестный автор";
+        String authorEmail = null;
+
+        if (forum.getUser() != null) {
+            User user = forum.getUser();
+            // Проверяем есть ли firstName, иначе используем email
+            if (user.getFirstName() != null && !user.getFirstName().trim().isEmpty()) {
+                authorName = user.getFirstName();
+                if (user.getLastName() != null && !user.getLastName().trim().isEmpty()) {
+                    authorName += " " + user.getLastName();
+                }
+            } else {
+                authorName = user.getEmail();
+            }
+            authorEmail = user.getEmail();
         }
 
         return ForumDetailDTO.builder()
@@ -53,7 +70,8 @@ public class ForumMapper {
                 .commentCount(forum.getCommentCount())
                 .createdAt(forum.getCreatedAt())
                 .updatedAt(forum.getUpdatedAt())
-                .authorName(forum.getUser() != null ? forum.getUser().getEmail() : "Неизвестный автор")
+                .authorName(authorName)
+                .authorEmail(authorEmail) // ✅ ДОБАВЛЕНО!
                 .build();
     }
 
@@ -62,11 +80,18 @@ public class ForumMapper {
             return null;
         }
 
+        // ✅ ИСПРАВЛЕНО: правильная логика имени
         String authorName = "Неизвестный автор";
         if (forum.getUser() != null) {
-            authorName = forum.getUser().getFirstName() != null
-                    ? forum.getUser().getLastName()
-                    : forum.getUser().getEmail();
+            User user = forum.getUser();
+            if (user.getFirstName() != null && !user.getFirstName().trim().isEmpty()) {
+                authorName = user.getFirstName(); // ✅ ИСПРАВЛЕНО: было getLastName()
+                if (user.getLastName() != null && !user.getLastName().trim().isEmpty()) {
+                    authorName += " " + user.getLastName();
+                }
+            } else {
+                authorName = user.getEmail();
+            }
         }
 
         return ForumPageCardDTO.builder()
@@ -80,7 +105,6 @@ public class ForumMapper {
                 .build();
     }
 
-    // Преобразование Page<Forum> -> ForumPageResponseDTO
     public ForumPageResponseDTO toPageResponseDTO(Page<Forum> page) {
         if (page == null) {
             return ForumPageResponseDTO.builder()
@@ -93,6 +117,8 @@ public class ForumMapper {
                     .last(true)
                     .hasNext(false)
                     .hasPrevious(false)
+                    .sortBy("createdAt")
+                    .sortDirection("DESC")
                     .build();
         }
 
