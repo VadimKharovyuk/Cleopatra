@@ -1,55 +1,584 @@
-// === templates/forum/create.html ===
+<!--// === templates/forum/create.html ===-->
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <title>Создать тему | Форум артистов</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<header>-->
+<!--  <nav>-->
+<!--    <a th:href="@{/forums}">⬅️ Назад к форуму</a>-->
+<!--  </nav>-->
+<!--  <h1>📝 Создать новую тему</h1>-->
+<!--</header>-->
+
+<!--<main>-->
+<!--  <form th:action="@{/forums/create}" th:object="${forumCreateDTO}" method="post">-->
+
+<!--    <div>-->
+<!--      <label for="title">Заголовок темы:</label>-->
+<!--      <input type="text" id="title" th:field="*{title}" required maxlength="255"-->
+<!--             placeholder="Например: Ищу костюм для спектакля">-->
+<!--      <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>-->
+<!--    </div>-->
+
+<!--    <div>-->
+<!--      <label for="forumType">Категория:</label>-->
+<!--      <select id="forumType" th:field="*{forumType}" required>-->
+<!--        <option value="">Выберите категорию</option>-->
+<!--        <option th:each="type : ${forumTypes}"-->
+<!--                th:value="${type}"-->
+<!--                th:text="${type.emoji + ' ' + type.displayName + ' - ' + type.description}">-->
+<!--        </option>-->
+<!--      </select>-->
+<!--      <div th:if="${#fields.hasErrors('forumType')}" th:errors="*{forumType}"></div>-->
+<!--    </div>-->
+
+<!--    <div>-->
+<!--      <label for="description">Описание:</label>-->
+<!--      <textarea id="description" th:field="*{description}" rows="8" maxlength="1000"-->
+<!--                placeholder="Подробно опишите вашу тему..."></textarea>-->
+<!--      <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>-->
+<!--    </div>-->
+
+<!--    <div>-->
+<!--      <button type="submit">✅ Создать тему</button>-->
+<!--      <a th:href="@{/forums}">❌ Отмена</a>-->
+<!--    </div>-->
+<!--  </form>-->
+<!--</main>-->
+
+<!--&lt;!&ndash; Сообщения об ошибках &ndash;&gt;-->
+<!--<div th:if="${errorMessage}" th:text="${errorMessage}"></div>-->
+<!--</body>-->
+<!--</html>-->
+
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Создать тему | Форум артистов</title>
+
+  <!-- Подключаем стили сайдбара -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-content h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .header-subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-accent);
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--border-secondary);
+      font-weight: 500;
+    }
+
+    .back-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+      text-decoration: none;
+    }
+
+    /* Form Container */
+    .form-container {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 3rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Form Groups */
+    .form-group {
+      margin-bottom: 2rem;
+    }
+
+    .form-group:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+    }
+
+    .form-label.required::after {
+      content: " *";
+      color: var(--accent-warning);
+    }
+
+    /* Input Styles */
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      border: 2px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      resize: none;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: var(--bg-secondary);
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* Select Specific */
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 1rem center;
+      background-repeat: no-repeat;
+      background-size: 1rem;
+      padding-right: 3rem;
+    }
+
+    /* Textarea Specific */
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+      font-family: inherit;
+      line-height: 1.6;
+    }
+
+    /* Character Counter */
+    .char-counter {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      text-align: right;
+    }
+
+    .char-counter.warning {
+      color: var(--accent-warning);
+    }
+
+    .char-counter.danger {
+      color: #ef4444;
+    }
+
+    /* Error Messages */
+    .form-error {
+      color: #ef4444;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+
+    /* Action Buttons */
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-secondary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      min-width: 150px;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: var(--bg-accent);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-primary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    /* Category Preview */
+    .category-preview {
+      margin-top: 0.75rem;
+      padding: 1rem;
+      background: var(--bg-accent);
+      border-radius: var(--radius-sm);
+      border-left: 4px solid var(--accent-primary);
+      display: none;
+    }
+
+    .category-preview.visible {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .category-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .category-description {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Success/Error Messages */
+    .alert {
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 2rem;
+      font-weight: 500;
+      border-left: 4px solid;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border-color: #ef4444;
+    }
+
+    .alert-success {
+      background: rgba(5, 150, 105, 0.1);
+      color: #059669;
+      border-color: var(--accent-success);
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+        padding-top: 80px;
+      }
+
+      .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        padding: 1.5rem;
+      }
+
+      .form-container {
+        padding: 2rem 1.5rem;
+      }
+
+      .form-actions {
+        flex-direction: column-reverse;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 80px;
+      }
+    }
+  </style>
 </head>
 <body>
-<header>
-  <nav>
-    <a th:href="@{/forums}">⬅️ Назад к форуму</a>
-  </nav>
-  <h1>📝 Создать новую тему</h1>
-</header>
+<!-- Подключаем мобильный хедер и сайдбар -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+<th:block th:replace="~{fragments/sidebar :: sidebar('forums')}"></th:block>
 
-<main>
-  <form th:action="@{/forums/create}" th:object="${forumCreateDTO}" method="post">
-
-    <div>
-      <label for="title">Заголовок темы:</label>
-      <input type="text" id="title" th:field="*{title}" required maxlength="255"
-             placeholder="Например: Ищу костюм для спектакля">
-      <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+<main class="main-content">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1><i class="fas fa-plus-circle"></i> Создать новую тему</h1>
+      <p class="header-subtitle">Поделитесь своим вопросом или предложением с сообществом</p>
     </div>
+    <a th:href="@{/forums}" class="back-btn">
+      <i class="fas fa-arrow-left"></i>
+      <span>Назад к форуму</span>
+    </a>
+  </header>
 
-    <div>
-      <label for="forumType">Категория:</label>
-      <select id="forumType" th:field="*{forumType}" required>
-        <option value="">Выберите категорию</option>
-        <option th:each="type : ${forumTypes}"
-                th:value="${type}"
-                th:text="${type.emoji + ' ' + type.displayName + ' - ' + type.description}">
-        </option>
-      </select>
-      <div th:if="${#fields.hasErrors('forumType')}" th:errors="*{forumType}"></div>
-    </div>
+  <!-- Alert Messages -->
+  <div th:if="${errorMessage}" class="alert alert-error">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span th:text="${errorMessage}"></span>
+  </div>
 
-    <div>
-      <label for="description">Описание:</label>
-      <textarea id="description" th:field="*{description}" rows="8" maxlength="1000"
-                placeholder="Подробно опишите вашу тему..."></textarea>
-      <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
-    </div>
+  <div th:if="${successMessage}" class="alert alert-success">
+    <i class="fas fa-check-circle"></i>
+    <span th:text="${successMessage}"></span>
+  </div>
 
-    <div>
-      <button type="submit">✅ Создать тему</button>
-      <a th:href="@{/forums}">❌ Отмена</a>
-    </div>
-  </form>
+  <!-- Form Container -->
+  <div class="form-container">
+    <form th:action="@{/forums/create}" th:object="${forumCreateDTO}" method="post" id="forumForm">
+
+      <!-- Title Field -->
+      <div class="form-group">
+        <label for="title" class="form-label required">Заголовок темы</label>
+        <input type="text"
+               id="title"
+               th:field="*{title}"
+               class="form-input"
+               required
+               maxlength="255"
+               placeholder="Например: Ищу костюм для спектакля">
+        <div class="char-counter" id="titleCounter">0 / 255</div>
+        <div th:if="${#fields.hasErrors('title')}" class="form-error" th:errors="*{title}"></div>
+      </div>
+
+      <!-- Category Field -->
+      <div class="form-group">
+        <label for="forumType" class="form-label required">Категория</label>
+        <select id="forumType" th:field="*{forumType}" class="form-select" required>
+          <option value="">Выберите категорию</option>
+          <option th:each="type : ${forumTypes}"
+                  th:value="${type}"
+                  th:text="${type.emoji + ' ' + type.displayName}"
+                  th:attr="data-description=${type.description}">
+          </option>
+        </select>
+        <div th:if="${#fields.hasErrors('forumType')}" class="form-error" th:errors="*{forumType}"></div>
+
+        <!-- Category Preview -->
+        <div class="category-preview" id="categoryPreview">
+          <div class="category-title" id="categoryTitle"></div>
+          <div class="category-description" id="categoryDescription"></div>
+        </div>
+      </div>
+
+      <!-- Description Field -->
+      <div class="form-group">
+        <label for="description" class="form-label">Описание</label>
+        <textarea id="description"
+                  th:field="*{description}"
+                  class="form-textarea"
+                  rows="8"
+                  maxlength="1000"
+                  placeholder="Подробно опишите вашу тему, вопрос или предложение..."></textarea>
+        <div class="char-counter" id="descriptionCounter">0 / 1000</div>
+        <div th:if="${#fields.hasErrors('description')}" class="form-error" th:errors="*{description}"></div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <a th:href="@{/forums}" class="btn btn-secondary">
+          <i class="fas fa-times"></i>
+          <span>Отмена</span>
+        </a>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <i class="fas fa-paper-plane"></i>
+          <span>Создать тему</span>
+        </button>
+      </div>
+    </form>
+  </div>
 </main>
 
-<!-- Сообщения об ошибках -->
-<div th:if="${errorMessage}" th:text="${errorMessage}"></div>
+<!-- Подключаем скрипты сайдбара -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Character counters
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const titleCounter = document.getElementById('titleCounter');
+    const descriptionCounter = document.getElementById('descriptionCounter');
+    const categorySelect = document.getElementById('forumType');
+    const categoryPreview = document.getElementById('categoryPreview');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Title character counter
+    function updateTitleCounter() {
+      const length = titleInput.value.length;
+      titleCounter.textContent = `${length} / 255`;
+
+      if (length > 200) titleCounter.className = 'char-counter warning';
+      else if (length > 240) titleCounter.className = 'char-counter danger';
+      else titleCounter.className = 'char-counter';
+    }
+
+    // Description character counter
+    function updateDescriptionCounter() {
+      const length = descriptionInput.value.length;
+      descriptionCounter.textContent = `${length} / 1000`;
+
+      if (length > 800) descriptionCounter.className = 'char-counter warning';
+      else if (length > 950) descriptionCounter.className = 'char-counter danger';
+      else descriptionCounter.className = 'char-counter';
+    }
+
+    // Category preview
+    function updateCategoryPreview() {
+      const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+
+      if (selectedOption.value) {
+        const title = selectedOption.textContent;
+        const description = selectedOption.getAttribute('data-description');
+
+        document.getElementById('categoryTitle').textContent = title;
+        document.getElementById('categoryDescription').textContent = description;
+        categoryPreview.classList.add('visible');
+      } else {
+        categoryPreview.classList.remove('visible');
+      }
+    }
+
+    // Form submission
+    function handleSubmit(e) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Создание...</span>';
+
+      // Если форма валидна, позволяем отправку
+      if (!titleInput.value.trim()) {
+        e.preventDefault();
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>Создать тему</span>';
+        titleInput.focus();
+      }
+    }
+
+    // Event listeners
+    titleInput.addEventListener('input', updateTitleCounter);
+    descriptionInput.addEventListener('input', updateDescriptionCounter);
+    categorySelect.addEventListener('change', updateCategoryPreview);
+    document.getElementById('forumForm').addEventListener('submit', handleSubmit);
+
+    // Initialize counters
+    updateTitleCounter();
+    updateDescriptionCounter();
+    updateCategoryPreview();
+
+    // Auto-focus title field
+    titleInput.focus();
+
+    // Enhanced form validation
+    function validateForm() {
+      const isValid = titleInput.value.trim() && categorySelect.value;
+      submitBtn.disabled = !isValid;
+      return isValid;
+    }
+
+    titleInput.addEventListener('input', validateForm);
+    categorySelect.addEventListener('change', validateForm);
+
+    // Initial validation
+    validateForm();
+  });
+</script>
 </body>
 </html>

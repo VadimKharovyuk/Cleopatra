@@ -1,95 +1,838 @@
 
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Форум артистов</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<header>-->
+<!--  <h1>🎭 Форум артистов</h1>-->
+<!--  <nav>-->
+<!--    <a th:href="@{/forums/create}">📝 Создать тему</a>-->
+<!--    <a th:href="@{/profile}">👤 Профиль</a>-->
+<!--    <a th:href="@{/logout}">🚪 Выход</a>-->
+<!--  </nav>-->
+<!--</header>-->
+
+<!--<main>-->
+<!--  &lt;!&ndash; Поиск &ndash;&gt;-->
+<!--  <section>-->
+<!--    <form th:action="@{/forums/search}" method="get">-->
+<!--      <input type="text" name="query" placeholder="Поиск по темам..." required>-->
+<!--      <button type="submit">🔍 Найти</button>-->
+<!--    </form>-->
+<!--  </section>-->
+
+<!--  &lt;!&ndash; Фильтры &ndash;&gt;-->
+<!--  <section>-->
+<!--    <h3>Категории:</h3>-->
+<!--    <a th:href="@{/forums}">Все</a>-->
+<!--    <a th:each="type : ${forumTypes}"-->
+<!--       th:href="@{/forums(forumType=${type})}"-->
+<!--       th:text="${type.emoji + ' ' + type.displayName}"-->
+<!--       th:classappend="${type == currentType} ? 'active' : ''">-->
+<!--    </a>-->
+<!--  </section>-->
+
+<!--  &lt;!&ndash; Сортировка &ndash;&gt;-->
+<!--  <section>-->
+<!--    <span>Сортировка:</span>-->
+<!--    <a th:href="@{/forums(sortBy='createdAt', sortDirection='DESC')}">🕒 По дате (новые)</a>-->
+<!--    <a th:href="@{/forums(sortBy='createdAt', sortDirection='ASC')}">🕒 По дате (старые)</a>-->
+<!--    <a th:href="@{/forums(sortBy='viewCount', sortDirection='DESC')}">👁️ По просмотрам</a>-->
+<!--    <a th:href="@{/forums(sortBy='commentCount', sortDirection='DESC')}">💬 По комментариям</a>-->
+<!--  </section>-->
+
+<!--  &lt;!&ndash; Список тем &ndash;&gt;-->
+<!--  <section>-->
+<!--    <div th:if="${forums.content.empty}">-->
+<!--      <p>Тем пока нет. <a th:href="@{/forums/create}">Создайте первую!</a></p>-->
+<!--    </div>-->
+
+<!--    <article th:each="forum : ${forums.content}">-->
+<!--      <header>-->
+<!--        <h2>-->
+<!--          <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.getTitle()}"></a>-->
+<!--        </h2>-->
+<!--        <div>-->
+<!--          <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}"></span>-->
+<!--        </div>-->
+<!--      </header>-->
+
+<!--      <footer>-->
+<!--        <div>-->
+<!--          <span>👤 <span th:text="${forum.authorName}"></span></span>-->
+<!--          <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}"></span></span>-->
+<!--          <span>👁️ <span th:text="${forum.viewCount}"></span></span>-->
+<!--          <span>💬 <span th:text="${forum.commentCount}"></span></span>-->
+<!--        </div>-->
+<!--      </footer>-->
+<!--    </article>-->
+<!--  </section>-->
+
+<!--  &lt;!&ndash; Пагинация &ndash;&gt;-->
+<!--  <nav th:if="${forums.totalPages > 1}">-->
+<!--    <a th:if="${forums.hasPrevious}"-->
+<!--       th:href="@{/forums(page=${forums.page - 1}, size=${forums.size}, forumType=${currentType})}">-->
+<!--      ⬅️ Предыдущая-->
+<!--    </a>-->
+
+<!--    <span th:text="'Страница ' + ${forums.page + 1} + ' из ' + ${forums.totalPages}"></span>-->
+
+<!--    <a th:if="${forums.hasNext}"-->
+<!--       th:href="@{/forums(page=${forums.page + 1}, size=${forums.size}, forumType=${currentType})}">-->
+<!--      Следующая ➡️-->
+<!--    </a>-->
+<!--  </nav>-->
+<!--</main>-->
+
+<!--&lt;!&ndash; Сообщения &ndash;&gt;-->
+<!--<div th:if="${successMessage}" th:text="${successMessage}"></div>-->
+<!--<div th:if="${errorMessage}" th:text="${errorMessage}"></div>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Форум артистов</title>
+  <title>Форум артистов | Cleopatra</title>
+
+  <!-- Подключаем стили сайдбара -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      margin-top: 0.5rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid;
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border-color: transparent;
+      box-shadow: var(--shadow-md);
+    }
+
+    .action-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      text-decoration: none;
+    }
+
+    .action-btn.secondary {
+      background: var(--bg-accent);
+      color: var(--text-secondary);
+      border-color: var(--border-primary);
+    }
+
+    .action-btn.secondary:hover {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    /* Search Section */
+    .search-section {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+    }
+
+    .search-form {
+      display: flex;
+      gap: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      border: 2px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: var(--bg-secondary);
+    }
+
+    .search-btn {
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Filters & Controls */
+    .controls-section {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+    }
+
+    .control-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      font-size: 1.125rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .filter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      background: var(--bg-accent);
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-secondary);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .filter-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+      text-decoration: none;
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Topics List */
+    .topics-section {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-secondary);
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .empty-message {
+      font-size: 1.125rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Topic Cards */
+    .topic-card {
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-primary);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .topic-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .topic-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .topic-header {
+      margin-bottom: 1rem;
+    }
+
+    .topic-title {
+      font-size: 1.375rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .topic-title a {
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .topic-title a:hover {
+      color: var(--accent-primary);
+    }
+
+    .topic-category {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));
+      color: var(--accent-primary);
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.875rem;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+
+    .topic-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .meta-icon {
+      width: 16px;
+      text-align: center;
+      color: var(--accent-primary);
+    }
+
+    .meta-value {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Pagination */
+    .pagination {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .pagination-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      background: var(--bg-accent);
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-primary);
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pagination-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+      text-decoration: none;
+    }
+
+    .pagination-info {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 1.125rem;
+    }
+
+    /* Alert Messages */
+    .alert {
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 2rem;
+      font-weight: 500;
+      border-left: 4px solid;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border-color: #ef4444;
+    }
+
+    .alert-success {
+      background: rgba(5, 150, 105, 0.1);
+      color: #059669;
+      border-color: var(--accent-success);
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+        padding-top: 80px;
+      }
+
+      .header-content {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .header-title {
+        font-size: 2rem;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .search-form {
+        flex-direction: column;
+      }
+
+      .filter-buttons {
+        justify-content: center;
+      }
+
+      .topic-meta {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .pagination {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 80px;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .topic-card {
+      animation: fadeIn 0.6s ease;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <h1>🎭 Форум артистов</h1>
-  <nav>
-    <a th:href="@{/forums/create}">📝 Создать тему</a>
-    <a th:href="@{/profile}">👤 Профиль</a>
-    <a th:href="@{/logout}">🚪 Выход</a>
-  </nav>
-</header>
+<!-- Подключаем мобильный хедер и сайдбар -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+<th:block th:replace="~{fragments/sidebar :: sidebar('forums')}"></th:block>
 
-<main>
-  <!-- Поиск -->
-  <section>
-    <form th:action="@{/forums/search}" method="get">
-      <input type="text" name="query" placeholder="Поиск по темам..." required>
-      <button type="submit">🔍 Найти</button>
+<main class="main-content">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div>
+        <h1 class="header-title">
+          <i class="fas fa-theater-masks"></i>
+          Форум артистов
+        </h1>
+        <p class="header-subtitle">Место для общения и обмена опытом между артистами</p>
+      </div>
+      <div class="header-actions">
+        <a th:href="@{/forums/create}" class="action-btn primary">
+          <i class="fas fa-plus"></i>
+          <span>Создать тему</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Alert Messages -->
+  <div th:if="${successMessage}" class="alert alert-success">
+    <i class="fas fa-check-circle"></i>
+    <span th:text="${successMessage}"></span>
+  </div>
+
+  <div th:if="${errorMessage}" class="alert alert-error">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span th:text="${errorMessage}"></span>
+  </div>
+
+  <!-- Search Section -->
+  <section class="search-section">
+    <form th:action="@{/forums/search}" method="get" class="search-form">
+      <input type="text"
+             name="query"
+             class="search-input"
+             placeholder="Поиск по темам форума..."
+             required>
+      <button type="submit" class="search-btn">
+        <i class="fas fa-search"></i>
+        <span>Найти</span>
+      </button>
     </form>
   </section>
 
-  <!-- Фильтры -->
-  <section>
-    <h3>Категории:</h3>
-    <a th:href="@{/forums}">Все</a>
-    <a th:each="type : ${forumTypes}"
-       th:href="@{/forums(forumType=${type})}"
-       th:text="${type.emoji + ' ' + type.displayName}"
-       th:classappend="${type == currentType} ? 'active' : ''">
-    </a>
-  </section>
-
-  <!-- Сортировка -->
-  <section>
-    <span>Сортировка:</span>
-    <a th:href="@{/forums(sortBy='createdAt', sortDirection='DESC')}">🕒 По дате (новые)</a>
-    <a th:href="@{/forums(sortBy='createdAt', sortDirection='ASC')}">🕒 По дате (старые)</a>
-    <a th:href="@{/forums(sortBy='viewCount', sortDirection='DESC')}">👁️ По просмотрам</a>
-    <a th:href="@{/forums(sortBy='commentCount', sortDirection='DESC')}">💬 По комментариям</a>
-  </section>
-
-  <!-- Список тем -->
-  <section>
-    <div th:if="${forums.content.empty}">
-      <p>Тем пока нет. <a th:href="@{/forums/create}">Создайте первую!</a></p>
+  <!-- Filters & Controls -->
+  <section class="controls-section">
+    <!-- Categories Filter -->
+    <div class="control-group">
+      <h3 class="control-title">
+        <i class="fas fa-filter"></i>
+        Категории
+      </h3>
+      <div class="filter-buttons">
+        <a th:href="@{/forums}"
+           class="filter-btn"
+           th:classappend="${currentType == null} ? 'active' : ''">
+          <i class="fas fa-list"></i>
+          <span>Все</span>
+        </a>
+        <a th:each="type : ${forumTypes}"
+           th:href="@{/forums(forumType=${type})}"
+           class="filter-btn"
+           th:classappend="${type == currentType} ? 'active' : ''">
+          <span th:text="${type.emoji}">📋</span>
+          <span th:text="${type.displayName}">Категория</span>
+        </a>
+      </div>
     </div>
 
-    <article th:each="forum : ${forums.content}">
-      <header>
-        <h2>
-          <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.getTitle()}"></a>
-        </h2>
-        <div>
-          <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}"></span>
-        </div>
-      </header>
-
-      <footer>
-        <div>
-          <span>👤 <span th:text="${forum.authorName}"></span></span>
-          <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}"></span></span>
-          <span>👁️ <span th:text="${forum.viewCount}"></span></span>
-          <span>💬 <span th:text="${forum.commentCount}"></span></span>
-        </div>
-      </footer>
-    </article>
+    <!-- Sorting Options -->
+    <div class="control-group">
+      <h3 class="control-title">
+        <i class="fas fa-sort"></i>
+        Сортировка
+      </h3>
+      <div class="filter-buttons">
+        <a th:href="@{/forums(sortBy='createdAt', sortDirection='DESC', forumType=${currentType})}"
+           class="filter-btn"
+           th:classappend="${sortBy == 'createdAt' && sortDirection == 'DESC'} ? 'active' : ''">
+          <i class="fas fa-clock"></i>
+          <span>Новые</span>
+        </a>
+        <a th:href="@{/forums(sortBy='createdAt', sortDirection='ASC', forumType=${currentType})}"
+           class="filter-btn"
+           th:classappend="${sortBy == 'createdAt' && sortDirection == 'ASC'} ? 'active' : ''">
+          <i class="fas fa-history"></i>
+          <span>Старые</span>
+        </a>
+        <a th:href="@{/forums(sortBy='viewCount', sortDirection='DESC', forumType=${currentType})}"
+           class="filter-btn"
+           th:classappend="${sortBy == 'viewCount'} ? 'active' : ''">
+          <i class="fas fa-eye"></i>
+          <span>По просмотрам</span>
+        </a>
+        <a th:href="@{/forums(sortBy='commentCount', sortDirection='DESC', forumType=${currentType})}"
+           class="filter-btn"
+           th:classappend="${sortBy == 'commentCount'} ? 'active' : ''">
+          <i class="fas fa-comments"></i>
+          <span>По комментариям</span>
+        </a>
+      </div>
+    </div>
   </section>
 
-  <!-- Пагинация -->
-  <nav th:if="${forums.totalPages > 1}">
+  <!-- Topics List -->
+  <section class="topics-section">
+    <!-- Empty State -->
+    <div th:if="${forums.content.empty}" class="empty-state">
+      <div class="empty-icon">
+        <i class="fas fa-comments"></i>
+      </div>
+      <h2 class="empty-title">Пока нет тем для обсуждения</h2>
+      <p class="empty-message">Станьте первым, кто начнет обсуждение в сообществе артистов!</p>
+      <a th:href="@{/forums/create}" class="action-btn primary">
+        <i class="fas fa-plus"></i>
+        <span>Создать первую тему</span>
+      </a>
+    </div>
+
+    <!-- Topics List -->
+    <div th:if="${!forums.content.empty}">
+      <article th:each="forum : ${forums.content}" class="topic-card">
+        <header class="topic-header">
+          <h2 class="topic-title">
+            <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.title}">Заголовок темы</a>
+          </h2>
+          <div class="topic-category">
+            <span th:text="${forum.forumType.emoji}">📋</span>
+            <span th:text="${forum.forumType.displayName}">Категория</span>
+          </div>
+        </header>
+
+        <footer class="topic-meta">
+          <div class="meta-item">
+            <i class="fas fa-user meta-icon"></i>
+            <span th:text="${forum.authorName}">Автор</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-clock meta-icon"></i>
+            <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-eye meta-icon"></i>
+            <span class="meta-value" th:text="${forum.viewCount}">0</span>
+            <span>просмотров</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-comments meta-icon"></i>
+            <span class="meta-value" th:text="${forum.commentCount}">0</span>
+            <span>комментариев</span>
+          </div>
+        </footer>
+      </article>
+    </div>
+  </section>
+
+  <!-- Pagination -->
+  <nav th:if="${forums.totalPages > 1}" class="pagination">
     <a th:if="${forums.hasPrevious}"
-       th:href="@{/forums(page=${forums.page - 1}, size=${forums.size}, forumType=${currentType})}">
-      ⬅️ Предыдущая
+       th:href="@{/forums(page=${forums.page - 1}, size=${forums.size}, forumType=${currentType}, sortBy=${sortBy}, sortDirection=${sortDirection})}"
+       class="pagination-btn">
+      <i class="fas fa-chevron-left"></i>
+      <span>Предыдущая</span>
     </a>
 
-    <span th:text="'Страница ' + ${forums.page + 1} + ' из ' + ${forums.totalPages}"></span>
+    <span class="pagination-info" th:text="'Страница ' + ${forums.page + 1} + ' из ' + ${forums.totalPages}">Страница 1 из 1</span>
 
     <a th:if="${forums.hasNext}"
-       th:href="@{/forums(page=${forums.page + 1}, size=${forums.size}, forumType=${currentType})}">
-      Следующая ➡️
+       th:href="@{/forums(page=${forums.page + 1}, size=${forums.size}, forumType=${currentType}, sortBy=${sortBy}, sortDirection=${sortDirection})}"
+       class="pagination-btn">
+      <span>Следующая</span>
+      <i class="fas fa-chevron-right"></i>
     </a>
   </nav>
 </main>
 
-<!-- Сообщения -->
-<div th:if="${successMessage}" th:text="${successMessage}"></div>
-<div th:if="${errorMessage}" th:text="${errorMessage}"></div>
+<!-- Подключаем скрипты сайдбара -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Highlight active filter buttons based on URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSort = urlParams.get('sortBy');
+    const currentDirection = urlParams.get('sortDirection');
+
+    // Enhanced search functionality
+    const searchForm = document.querySelector('.search-form');
+    const searchInput = document.querySelector('.search-input');
+
+    if (searchForm && searchInput) {
+      // Auto-focus search on Ctrl+K or Cmd+K
+      document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      });
+
+      // Submit form on Enter
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+          searchForm.submit();
+        }
+      });
+    }
+
+    // Smooth hover animations for topic cards
+    const topicCards = document.querySelectorAll('.topic-card');
+    topicCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-4px)';
+      });
+
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(-2px)';
+      });
+    });
+
+    // Enhanced filter button interactions
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        // Add loading state
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Загрузка...</span>';
+
+        // Reset after a short delay if navigation fails
+        setTimeout(() => {
+          this.innerHTML = originalText;
+        }, 3000);
+      });
+    });
+
+    // Auto-refresh page data every 5 minutes (optional)
+    setInterval(() => {
+      // Check if there are new topics available
+      const currentCount = document.querySelectorAll('.topic-card').length;
+      // Could implement AJAX check here
+    }, 300000); // 5 minutes
+
+    console.log('🎭 Forum list page initialized');
+    console.log(`📊 Loaded ${document.querySelectorAll('.topic-card').length} topics`);
+  });
+</script>
 </body>
 </html>

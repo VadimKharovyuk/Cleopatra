@@ -1,80 +1,695 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Форум</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<header>-->
+<!--    <nav>-->
+<!--        <a th:href="@{/forums}">⬅️ Назад к списку</a>-->
+<!--        <a th:href="@{/forums/create}">📝 Создать тему</a>-->
+<!--    </nav>-->
+<!--</header>-->
+
+<!--<main>-->
+<!--    &lt;!&ndash; ✅ ДОБАВЛЕНА ЗАЩИТА ОТ NULL &ndash;&gt;-->
+<!--    <div th:if="${forum != null}">-->
+<!--        <article>-->
+<!--            <header>-->
+<!--                <h1 th:text="${forum.title}">Заголовок темы</h1>-->
+<!--                <div>-->
+<!--                    <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}">Категория</span>-->
+<!--                </div>-->
+
+<!--                <div>-->
+<!--                    <span>👤 <span th:text="${forum.authorName}">Автор</span></span>-->
+<!--                    <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span></span>-->
+<!--                    <span>👁️ <span th:text="${forum.viewCount}">0</span></span>-->
+<!--                    <span>💬 <span th:text="${forum.commentCount}">0</span></span>-->
+<!--                </div>-->
+
+<!--                &lt;!&ndash; Кнопка удаления для владельца или админа &ndash;&gt;-->
+<!--                <div th:if="${isOwner or isAdmin}">-->
+<!--                    <form th:action="@{/forums/{id}/delete(id=${forum.id})}" method="post"-->
+<!--                          onsubmit="return confirm('Вы уверены, что хотите удалить эту тему?')">-->
+<!--                        <button type="submit">🗑️ Удалить тему</button>-->
+<!--                    </form>-->
+<!--                </div>-->
+<!--            </header>-->
+
+<!--            <section>-->
+<!--                <p th:text="${forum.description}" style="white-space: pre-line;">Описание темы</p>-->
+<!--            </section>-->
+
+<!--            <footer>-->
+<!--                <p th:if="${forum.updatedAt != null and !forum.updatedAt.equals(forum.createdAt)}">-->
+<!--                    ✏️ Обновлено: <span th:text="${#temporals.format(forum.updatedAt, 'dd.MM.yyyy HH:mm')}">Дата обновления</span>-->
+<!--                </p>-->
+<!--            </footer>-->
+<!--        </article>-->
+
+<!--        &lt;!&ndash; Здесь будут комментарии в будущем &ndash;&gt;-->
+<!--        <section>-->
+<!--            <h3>💬 Комментарии</h3>-->
+<!--            <p>Комментарии скоро появятся...</p>-->
+<!--        </section>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; ✅ СООБЩЕНИЕ ЕСЛИ FORUM NULL &ndash;&gt;-->
+<!--    <div th:if="${forum == null}">-->
+<!--        <h1>❌ Тема не найдена</h1>-->
+<!--        <p>Запрашиваемая тема не существует или была удалена.</p>-->
+<!--        <a th:href="@{/forums}">🔙 Вернуться к списку тем</a>-->
+<!--    </div>-->
+<!--</main>-->
+
+<!--&lt;!&ndash; Сообщения об ошибках &ndash;&gt;-->
+<!--<div th:if="${successMessage}" th:text="${successMessage}" style="color: green; padding: 10px;"></div>-->
+<!--<div th:if="${errorMessage}" th:text="${errorMessage}" style="color: red; padding: 10px;"></div>-->
+
+<!--&lt;!&ndash; ✅ ОТЛАДОЧНАЯ ИНФОРМАЦИЯ (удалить в продакшене) &ndash;&gt;-->
+<!--<div style="background: #f0f0f0; padding: 10px; margin: 10px 0;">-->
+<!--    <h4>🔍 Debug Info:</h4>-->
+<!--    <p>Forum object: <span th:text="${forum}">null</span></p>-->
+<!--    <p>Forum != null: <span th:text="${forum != null}">false</span></p>-->
+<!--    <p>Error message: <span th:text="${errorMessage}">none</span></p>-->
+<!--</div>-->
+
+<!--</body>-->
+<!--</html>-->
+
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Форум</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${forum != null ? forum.title + ' | Форум артистов' : 'Тема не найдена | Форум артистов'}">Форум артистов</title>
+
+    <!-- Подключаем стили сайдбара -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 400;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        /* Navigation */
+        .topic-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--border-primary);
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            text-decoration: none;
+        }
+
+        .nav-btn.primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .nav-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Topic Header */
+        .topic-header {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .topic-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .topic-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            line-height: 1.3;
+        }
+
+        .topic-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));
+            color: var(--accent-primary);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        .topic-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem 0;
+            border-top: 1px solid var(--border-secondary);
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .meta-icon {
+            width: 20px;
+            text-align: center;
+            color: var(--accent-primary);
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Action Buttons */
+        .topic-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .action-btn.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .action-btn.danger:hover {
+            background: #dc2626;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Topic Content */
+        .topic-content {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
+        }
+
+        .topic-description {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            white-space: pre-line;
+            margin: 0;
+        }
+
+        .topic-footer {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-secondary);
+        }
+
+        .update-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
+        }
+
+        .comments-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .comments-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .comments-placeholder {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .placeholder-icon {
+            font-size: 3rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        /* Error/Success Messages */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 2rem;
+            font-weight: 500;
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border-color: #ef4444;
+        }
+
+        .alert-success {
+            background: rgba(5, 150, 105, 0.1);
+            color: #059669;
+            border-color: var(--accent-success);
+        }
+
+        /* Not Found State */
+        .not-found {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-primary);
+        }
+
+        .not-found-icon {
+            font-size: 4rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .not-found-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .not-found-message {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Debug Panel (remove in production) */
+        .debug-panel {
+            background: var(--bg-accent);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-top: 2rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+
+        .debug-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .debug-item {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .debug-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+                padding-top: 80px;
+            }
+
+            .topic-nav {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .nav-btn {
+                justify-content: center;
+            }
+
+            .topic-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .topic-title {
+                font-size: 1.75rem;
+            }
+
+            .topic-meta {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .topic-actions {
+                justify-content: stretch;
+                flex-direction: column;
+            }
+
+            .topic-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .comments-section {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .topic-header,
+        .topic-content,
+        .comments-section {
+            animation: fadeIn 0.6s ease;
+        }
+    </style>
 </head>
 <body>
-<header>
-    <nav>
-        <a th:href="@{/forums}">⬅️ Назад к списку</a>
-        <a th:href="@{/forums/create}">📝 Создать тему</a>
+<!-- Подключаем мобильный хедер и сайдбар -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+<th:block th:replace="~{fragments/sidebar :: sidebar('forums')}"></th:block>
+
+<main class="main-content">
+    <!-- Navigation -->
+    <nav class="topic-nav">
+        <a th:href="@{/forums}" class="nav-btn">
+            <i class="fas fa-arrow-left"></i>
+            <span>Назад к списку</span>
+        </a>
+        <a th:href="@{/forums/create}" class="nav-btn primary">
+            <i class="fas fa-plus"></i>
+            <span>Создать тему</span>
+        </a>
     </nav>
-</header>
 
-<main>
-    <!-- ✅ ДОБАВЛЕНА ЗАЩИТА ОТ NULL -->
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Topic Content -->
     <div th:if="${forum != null}">
-        <article>
-            <header>
-                <h1 th:text="${forum.title}">Заголовок темы</h1>
-                <div>
-                    <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}">Категория</span>
+        <!-- Topic Header -->
+        <header class="topic-header">
+            <h1 class="topic-title" th:text="${forum.title}">Заголовок темы</h1>
+
+            <div class="topic-category">
+                <span th:text="${forum.forumType.emoji}">📋</span>
+                <span th:text="${forum.forumType.displayName}">Категория</span>
+            </div>
+
+            <div class="topic-meta">
+                <div class="meta-item">
+                    <i class="fas fa-user meta-icon"></i>
+                    <span>Автор:</span>
+                    <span class="meta-value" th:text="${forum.authorName}">Автор</span>
                 </div>
-
-                <div>
-                    <span>👤 <span th:text="${forum.authorName}">Автор</span></span>
-                    <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span></span>
-                    <span>👁️ <span th:text="${forum.viewCount}">0</span></span>
-                    <span>💬 <span th:text="${forum.commentCount}">0</span></span>
+                <div class="meta-item">
+                    <i class="fas fa-clock meta-icon"></i>
+                    <span>Создано:</span>
+                    <span class="meta-value" th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span>
                 </div>
-
-                <!-- Кнопка удаления для владельца или админа -->
-                <div th:if="${isOwner or isAdmin}">
-                    <form th:action="@{/forums/{id}/delete(id=${forum.id})}" method="post"
-                          onsubmit="return confirm('Вы уверены, что хотите удалить эту тему?')">
-                        <button type="submit">🗑️ Удалить тему</button>
-                    </form>
+                <div class="meta-item">
+                    <i class="fas fa-eye meta-icon"></i>
+                    <span>Просмотры:</span>
+                    <span class="meta-value" th:text="${forum.viewCount}">0</span>
                 </div>
-            </header>
+                <div class="meta-item">
+                    <i class="fas fa-comments meta-icon"></i>
+                    <span>Комментарии:</span>
+                    <span class="meta-value" th:text="${forum.commentCount}">0</span>
+                </div>
+            </div>
 
-            <section>
-                <p th:text="${forum.description}" style="white-space: pre-line;">Описание темы</p>
-            </section>
+            <!-- Action Buttons -->
+            <div class="topic-actions" th:if="${isOwner or isAdmin}">
+                <form th:action="@{/forums/{id}/delete(id=${forum.id})}" method="post" style="display: inline;">
+                    <button type="submit"
+                            class="action-btn danger"
+                            onclick="return confirm('Вы уверены, что хотите удалить эту тему? Это действие нельзя отменить.')">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Удалить тему</span>
+                    </button>
+                </form>
+            </div>
+        </header>
 
-            <footer>
-                <p th:if="${forum.updatedAt != null and !forum.updatedAt.equals(forum.createdAt)}">
-                    ✏️ Обновлено: <span th:text="${#temporals.format(forum.updatedAt, 'dd.MM.yyyy HH:mm')}">Дата обновления</span>
-                </p>
+        <!-- Topic Content -->
+        <article class="topic-content">
+            <p class="topic-description" th:text="${forum.description}">Описание темы</p>
+
+            <footer class="topic-footer" th:if="${forum.updatedAt != null and !forum.updatedAt.equals(forum.createdAt)}">
+                <div class="update-info">
+                    <i class="fas fa-edit"></i>
+                    <span>Обновлено:</span>
+                    <span th:text="${#temporals.format(forum.updatedAt, 'dd.MM.yyyy HH:mm')}">Дата обновления</span>
+                </div>
             </footer>
         </article>
 
-        <!-- Здесь будут комментарии в будущем -->
-        <section>
-            <h3>💬 Комментарии</h3>
-            <p>Комментарии скоро появятся...</p>
+        <!-- Comments Section -->
+        <section class="comments-section">
+            <header class="comments-header">
+                <i class="fas fa-comments"></i>
+                <h3 class="comments-title">Комментарии</h3>
+            </header>
+
+            <div class="comments-placeholder">
+                <div class="placeholder-icon">
+                    <i class="fas fa-comment-slash"></i>
+                </div>
+                <p>Комментарии скоро появятся...</p>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">
+                    Здесь будет система комментариев для обсуждения темы
+                </p>
+            </div>
         </section>
     </div>
 
-    <!-- ✅ СООБЩЕНИЕ ЕСЛИ FORUM NULL -->
-    <div th:if="${forum == null}">
-        <h1>❌ Тема не найдена</h1>
-        <p>Запрашиваемая тема не существует или была удалена.</p>
-        <a th:href="@{/forums}">🔙 Вернуться к списку тем</a>
+    <!-- Not Found State -->
+    <div th:if="${forum == null}" class="not-found">
+        <div class="not-found-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        <h1 class="not-found-title">Тема не найдена</h1>
+        <p class="not-found-message">
+            Запрашиваемая тема не существует или была удалена.
+        </p>
+        <a th:href="@{/forums}" class="nav-btn primary">
+            <i class="fas fa-arrow-left"></i>
+            <span>Вернуться к списку тем</span>
+        </a>
+    </div>
+
+    <!-- Debug Panel (remove in production) -->
+    <div class="debug-panel" th:remove="tag">
+        <div class="debug-title">🔍 Debug Information</div>
+        <div class="debug-item">
+            Forum object:
+            <span class="debug-value" th:text="${forum != null ? 'Found' : 'NULL'}">null</span>
+        </div>
+        <div class="debug-item">
+            Forum != null:
+            <span class="debug-value" th:text="${forum != null}">false</span>
+        </div>
+        <div class="debug-item">
+            Error message:
+            <span class="debug-value" th:text="${errorMessage ?: 'none'}">none</span>
+        </div>
+        <div class="debug-item" th:if="${forum != null}">
+            Forum title:
+            <span class="debug-value" th:text="${forum.title}">-</span>
+        </div>
     </div>
 </main>
 
-<!-- Сообщения об ошибках -->
-<div th:if="${successMessage}" th:text="${successMessage}" style="color: green; padding: 10px;"></div>
-<div th:if="${errorMessage}" th:text="${errorMessage}" style="color: red; padding: 10px;"></div>
+<!-- Подключаем скрипты сайдбара -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
 
-<!-- ✅ ОТЛАДОЧНАЯ ИНФОРМАЦИЯ (удалить в продакшене) -->
-<div style="background: #f0f0f0; padding: 10px; margin: 10px 0;">
-    <h4>🔍 Debug Info:</h4>
-    <p>Forum object: <span th:text="${forum}">null</span></p>
-    <p>Forum != null: <span th:text="${forum != null}">false</span></p>
-    <p>Error message: <span th:text="${errorMessage}">none</span></p>
-</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enhanced delete confirmation
+        const deleteForm = document.querySelector('form[action*="/delete"]');
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', function(e) {
+                const confirmed = confirm(
+                    'Вы уверены, что хотите удалить эту тему?\n\n' +
+                    'Это действие нельзя отменить. Тема и все связанные с ней данные будут удалены навсегда.'
+                );
 
+                if (!confirmed) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Disable button to prevent double submission
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Удаление...</span>';
+                }
+            });
+        }
+
+        // View count animation (subtle effect)
+        const viewCountElement = document.querySelector('[th\\:text="${forum.viewCount}"]');
+        if (viewCountElement) {
+            setTimeout(() => {
+                viewCountElement.style.transition = 'color 0.3s ease';
+                viewCountElement.style.color = 'var(--accent-success)';
+                setTimeout(() => {
+                    viewCountElement.style.color = '';
+                }, 1000);
+            }, 500);
+        }
+
+        // Smooth scroll for in-page navigation
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        console.log('🏛️ Forum detail page initialized');
+    });
+</script>
 </body>
 </html>

@@ -92,6 +92,7 @@ public class ForumReadService {
         return forumMapper.toPageResponseDTO(searchResults);
     }
 
+
     @Cacheable(value = "forum-exists", key = "#forumId")
     public boolean existsById(Long forumId) {
         return forumRepository.existsById(forumId);

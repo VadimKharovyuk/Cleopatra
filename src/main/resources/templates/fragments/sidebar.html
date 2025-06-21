@@ -606,6 +606,15 @@
                 <span class="nav-text">Birthday</span>
             </a>
 
+
+
+            <a href="/forums"
+               class="nav-item"
+               th:classappend="${activeSection == 'forum'} ? 'active' : ''">
+                <i class="fas fa-comments nav-icon"></i>
+                <span class="nav-text">Forum</span>
+            </a>
+
         </div>
 
         <div class="nav-section">
@@ -629,10 +638,6 @@
                 <span class="nav-text">Выйти</span>
             </a>
 
-<!--            <a href="/devices" class="nav-item">-->
-<!--                <i class="fas fa-microchip nav-icon"></i> &lt;!&ndash; или fa-plug, fa-laptop &ndash;&gt;-->
-<!--                <span class="nav-text">Устройства</span>-->
-<!--            </a>-->
 
         </div>
 
@@ -852,7 +857,6 @@
     <!-- Scripts -->
     <th:block th:replace="~{:: sidebar-scripts}"></th:block>
 
-    <script th:src="@{/js/online-status.js}"></script>
 
     <script th:src="@{/js/notifications.js}"></script>
 </th:block>

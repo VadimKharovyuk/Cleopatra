@@ -1,68 +1,758 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <title th:text="'Поиск: ' + ${searchQuery} + ' | Форум артистов'"></title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<header>-->
+<!--  <nav>-->
+<!--    <a th:href="@{/forums}">⬅️ Назад к форуму</a>-->
+<!--  </nav>-->
+<!--  <h1>🔍 Результаты поиска</h1>-->
+<!--  <p>Запрос: "<span th:text="${searchQuery}"></span>"</p>-->
+<!--  <p>Найдено: <span th:text="${forums.totalElements}"></span> результатов</p>-->
+<!--</header>-->
+
+<!--<main>-->
+<!--  &lt;!&ndash; Повторная форма поиска &ndash;&gt;-->
+<!--  <form th:action="@{/forums/search}" method="get">-->
+<!--    <input type="text" name="query" th:value="${searchQuery}" placeholder="Поиск по темам..." required>-->
+<!--    <button type="submit">🔍 Найти</button>-->
+<!--  </form>-->
+
+<!--  &lt;!&ndash; Результаты поиска (переиспользуем логику из list.html) &ndash;&gt;-->
+<!--  <section>-->
+<!--    <div th:if="${forums.content.empty}">-->
+<!--      <p>По вашему запросу ничего не найдено.</p>-->
+<!--      <a th:href="@{/forums}">Вернуться к списку всех тем</a>-->
+<!--    </div>-->
+
+<!--    <article th:each="forum : ${forums.content}">-->
+<!--      <header>-->
+<!--        <h2>-->
+<!--          <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.title}"></a>-->
+<!--        </h2>-->
+<!--        <div>-->
+<!--          <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}"></span>-->
+<!--        </div>-->
+<!--      </header>-->
+
+<!--      <footer>-->
+<!--        <div>-->
+<!--          <span>👤 <span th:text="${forum.authorName}"></span></span>-->
+<!--          <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}"></span></span>-->
+<!--          <span>👁️ <span th:text="${forum.viewCount}"></span></span>-->
+<!--          <span>💬 <span th:text="${forum.commentCount}"></span></span>-->
+<!--        </div>-->
+<!--      </footer>-->
+<!--    </article>-->
+<!--  </section>-->
+
+<!--  &lt;!&ndash; Пагинация для поиска &ndash;&gt;-->
+<!--  <nav th:if="${forums.totalPages > 1}">-->
+<!--    <a th:if="${forums.hasPrevious}"-->
+<!--       th:href="@{/forums/search(query=${searchQuery}, page=${forums.page - 1})}">-->
+<!--      ⬅️ Предыдущая-->
+<!--    </a>-->
+
+<!--    <span th:text="'Страница ' + ${forums.page + 1} + ' из ' + ${forums.totalPages}"></span>-->
+
+<!--    <a th:if="${forums.hasNext}"-->
+<!--       th:href="@{/forums/search(query=${searchQuery}, page=${forums.page + 1})}">-->
+<!--      Следующая ➡️-->
+<!--    </a>-->
+<!--  </nav>-->
+<!--</main>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title th:text="'Поиск: ' + ${searchQuery} + ' | Форум артистов'"></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'Поиск: ' + ${searchQuery} + ' | Форум артистов'">Поиск в форуме | Cleopatra</title>
+
+  <!-- Подключаем стили сайдбара -->
+  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-accent) 100%);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* Navigation */
+    .search-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--border-primary);
+      font-weight: 500;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+      text-decoration: none;
+    }
+
+    /* Search Header */
+    .search-header {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .search-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    .search-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .search-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-query {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+    }
+
+    .search-query-text {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));
+      color: var(--accent-primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+
+    .search-stats {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    .stat-icon {
+      color: var(--accent-primary);
+      width: 20px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 1.125rem;
+    }
+
+    /* Search Form */
+    .search-section {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+    }
+
+    .search-form {
+      display: flex;
+      gap: 1rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      border: 2px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: var(--bg-secondary);
+    }
+
+    .search-btn {
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .search-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Results Section */
+    .results-section {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+    }
+
+    /* Empty Results State */
+    .empty-results {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-secondary);
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-title {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+
+    .empty-message {
+      font-size: 1.125rem;
+      margin-bottom: 1.5rem;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .empty-suggestions {
+      background: var(--bg-accent);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin: 2rem auto;
+      max-width: 600px;
+      border: 1px solid var(--border-secondary);
+    }
+
+    .suggestions-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      text-align: left;
+    }
+
+    .suggestions-list {
+      list-style: none;
+      text-align: left;
+    }
+
+    .suggestions-list li {
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    .suggestions-list li::before {
+      content: '💡';
+      margin-right: 0.5rem;
+    }
+
+    /* Topic Cards */
+    .topic-card {
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-primary);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .topic-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .topic-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .topic-header {
+      margin-bottom: 1rem;
+    }
+
+    .topic-title {
+      font-size: 1.375rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .topic-title a {
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .topic-title a:hover {
+      color: var(--accent-primary);
+    }
+
+    .topic-category {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));
+      color: var(--accent-primary);
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.875rem;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+
+    .topic-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .meta-icon {
+      width: 16px;
+      text-align: center;
+      color: var(--accent-primary);
+    }
+
+    .meta-value {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Search Result Highlighting */
+    .highlight {
+      background: linear-gradient(135deg, rgba(255, 235, 59, 0.3), rgba(255, 193, 7, 0.2));
+      padding: 0.125rem 0.25rem;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    /* Pagination */
+    .pagination {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .pagination-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 1.75rem;
+      background: var(--bg-accent);
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-primary);
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pagination-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+      text-decoration: none;
+    }
+
+    .pagination-info {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 1.125rem;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+        padding-top: 80px;
+      }
+
+      .search-title {
+        font-size: 1.75rem;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .search-stats {
+        justify-content: center;
+      }
+
+      .search-form {
+        flex-direction: column;
+      }
+
+      .topic-meta {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .pagination {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 80px;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .topic-card {
+      animation: fadeIn 0.6s ease;
+    }
+
+    .search-header,
+    .search-section,
+    .results-section {
+      animation: fadeIn 0.6s ease;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <nav>
-    <a th:href="@{/forums}">⬅️ Назад к форуму</a>
+<!-- Подключаем мобильный хедер и сайдбар -->
+<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
+<th:block th:replace="~{fragments/sidebar :: sidebar('forums')}"></th:block>
+
+<main class="main-content">
+  <!-- Navigation -->
+  <nav class="search-nav">
+    <a th:href="@{/forums}" class="nav-btn">
+      <i class="fas fa-arrow-left"></i>
+      <span>Назад к форуму</span>
+    </a>
   </nav>
-  <h1>🔍 Результаты поиска</h1>
-  <p>Запрос: "<span th:text="${searchQuery}"></span>"</p>
-  <p>Найдено: <span th:text="${forums.totalElements}"></span> результатов</p>
-</header>
 
-<main>
-  <!-- Повторная форма поиска -->
-  <form th:action="@{/forums/search}" method="get">
-    <input type="text" name="query" th:value="${searchQuery}" placeholder="Поиск по темам..." required>
-    <button type="submit">🔍 Найти</button>
-  </form>
+  <!-- Search Header -->
+  <header class="search-header">
+    <h1 class="search-title">
+      <i class="fas fa-search"></i>
+      Результаты поиска
+    </h1>
 
-  <!-- Результаты поиска (переиспользуем логику из list.html) -->
-  <section>
-    <div th:if="${forums.content.empty}">
-      <p>По вашему запросу ничего не найдено.</p>
-      <a th:href="@{/forums}">Вернуться к списку всех тем</a>
+    <div class="search-info">
+      <div class="search-query">
+        Запрос: <span class="search-query-text" th:text="${searchQuery}">поисковый запрос</span>
+      </div>
+
+      <div class="search-stats">
+        <div class="stat-item">
+          <i class="fas fa-list-ul stat-icon"></i>
+          <span>Найдено:</span>
+          <span class="stat-value" th:text="${forums.totalElements}">0</span>
+          <span>результатов</span>
+        </div>
+        <div class="stat-item" th:if="${forums.totalPages > 1}">
+          <i class="fas fa-file-alt stat-icon"></i>
+          <span>Страниц:</span>
+          <span class="stat-value" th:text="${forums.totalPages}">1</span>
+        </div>
+        <div class="stat-item" th:if="${!forums.content.empty}">
+          <i class="fas fa-clock stat-icon"></i>
+          <span>Показано:</span>
+          <span class="stat-value" th:text="${forums.content.size()}">0</span>
+          <span>из</span>
+          <span class="stat-value" th:text="${forums.totalElements}">0</span>
+        </div>
+      </div>
     </div>
+  </header>
 
-    <article th:each="forum : ${forums.content}">
-      <header>
-        <h2>
-          <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.title}"></a>
-        </h2>
-        <div>
-          <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}"></span>
-        </div>
-      </header>
-
-      <footer>
-        <div>
-          <span>👤 <span th:text="${forum.authorName}"></span></span>
-          <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}"></span></span>
-          <span>👁️ <span th:text="${forum.viewCount}"></span></span>
-          <span>💬 <span th:text="${forum.commentCount}"></span></span>
-        </div>
-      </footer>
-    </article>
+  <!-- Search Form -->
+  <section class="search-section">
+    <form th:action="@{/forums/search}" method="get" class="search-form">
+      <input type="text"
+             name="query"
+             class="search-input"
+             th:value="${searchQuery}"
+             placeholder="Поиск по темам форума..."
+             required>
+      <button type="submit" class="search-btn">
+        <i class="fas fa-search"></i>
+        <span>Найти</span>
+      </button>
+    </form>
   </section>
 
-  <!-- Пагинация для поиска -->
-  <nav th:if="${forums.totalPages > 1}">
+  <!-- Results Section -->
+  <section class="results-section">
+    <!-- Empty Results -->
+    <div th:if="${forums.content.empty}" class="empty-results">
+      <div class="empty-icon">
+        <i class="fas fa-search-minus"></i>
+      </div>
+      <h2 class="empty-title">Ничего не найдено</h2>
+      <p class="empty-message">
+        По вашему запросу "<span th:text="${searchQuery}">запрос</span>" не найдено ни одной темы.
+      </p>
+
+      <div class="empty-suggestions">
+        <h3 class="suggestions-title">Попробуйте:</h3>
+        <ul class="suggestions-list">
+          <li>Проверить правильность написания</li>
+          <li>Использовать более общие термины</li>
+          <li>Попробовать синонимы</li>
+          <li>Уменьшить количество слов в запросе</li>
+        </ul>
+      </div>
+
+      <a th:href="@{/forums}" class="nav-btn">
+        <i class="fas fa-list"></i>
+        <span>Вернуться к списку всех тем</span>
+      </a>
+    </div>
+
+    <!-- Search Results -->
+    <div th:if="${!forums.content.empty}">
+      <article th:each="forum : ${forums.content}" class="topic-card">
+        <header class="topic-header">
+          <h2 class="topic-title">
+            <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.title}">Заголовок темы</a>
+          </h2>
+          <div class="topic-category">
+            <span th:text="${forum.forumType.emoji}">📋</span>
+            <span th:text="${forum.forumType.displayName}">Категория</span>
+          </div>
+        </header>
+
+        <footer class="topic-meta">
+          <div class="meta-item">
+            <i class="fas fa-user meta-icon"></i>
+            <span th:text="${forum.authorName}">Автор</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-clock meta-icon"></i>
+            <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-eye meta-icon"></i>
+            <span class="meta-value" th:text="${forum.viewCount}">0</span>
+            <span>просмотров</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-comments meta-icon"></i>
+            <span class="meta-value" th:text="${forum.commentCount}">0</span>
+            <span>комментариев</span>
+          </div>
+        </footer>
+      </article>
+    </div>
+  </section>
+
+  <!-- Pagination -->
+  <nav th:if="${forums.totalPages > 1}" class="pagination">
     <a th:if="${forums.hasPrevious}"
-       th:href="@{/forums/search(query=${searchQuery}, page=${forums.page - 1})}">
-      ⬅️ Предыдущая
+       th:href="@{/forums/search(query=${searchQuery}, page=${forums.page - 1})}"
+       class="pagination-btn">
+      <i class="fas fa-chevron-left"></i>
+      <span>Предыдущая</span>
     </a>
 
-    <span th:text="'Страница ' + ${forums.page + 1} + ' из ' + ${forums.totalPages}"></span>
+    <span class="pagination-info" th:text="'Страница ' + ${forums.page + 1} + ' из ' + ${forums.totalPages}">Страница 1 из 1</span>
 
     <a th:if="${forums.hasNext}"
-       th:href="@{/forums/search(query=${searchQuery}, page=${forums.page + 1})}">
-      Следующая ➡️
+       th:href="@{/forums/search(query=${searchQuery}, page=${forums.page + 1})}"
+       class="pagination-btn">
+      <span>Следующая</span>
+      <i class="fas fa-chevron-right"></i>
     </a>
   </nav>
 </main>
+
+<!-- Подключаем скрипты сайдбара -->
+<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus search input
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+      searchInput.focus();
+      // Position cursor at the end
+      searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+    }
+
+    // Enhanced search functionality
+    const searchForm = document.querySelector('.search-form');
+
+    if (searchForm && searchInput) {
+      // Submit form on Enter
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+          searchForm.submit();
+        }
+      });
+
+      // Prevent empty searches
+      searchForm.addEventListener('submit', function(e) {
+        if (!searchInput.value.trim()) {
+          e.preventDefault();
+          searchInput.focus();
+          return false;
+        }
+      });
+    }
+
+    // Highlight search terms in results (basic implementation)
+    const searchQuery = /*[[${searchQuery}]]*/ '';
+    if (searchQuery && searchQuery.length > 2) {
+      highlightSearchTerms(searchQuery);
+    }
+
+    // Smooth hover animations for topic cards
+    const topicCards = document.querySelectorAll('.topic-card');
+    topicCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-4px)';
+      });
+
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(-2px)';
+      });
+    });
+
+    console.log('🔍 Search results page initialized');
+    console.log(`📊 Found ${document.querySelectorAll('.topic-card').length} results`);
+  });
+
+  // Simple search term highlighting
+  function highlightSearchTerms(query) {
+    const terms = query.toLowerCase().split(' ').filter(term => term.length > 2);
+    const titleElements = document.querySelectorAll('.topic-title a');
+
+    titleElements.forEach(element => {
+      let html = element.innerHTML;
+      terms.forEach(term => {
+        const regex = new RegExp(`(${term})`, 'gi');
+        html = html.replace(regex, '<span class="highlight">$1</span>');
+      });
+      element.innerHTML = html;
+    });
+  }
+</script>
 </body>
 </html>
