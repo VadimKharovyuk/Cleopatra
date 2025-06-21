@@ -1,98 +1,1843 @@
+<!--&lt;!&ndash;<!DOCTYPE html>&ndash;&gt;-->
+<!--&lt;!&ndash;<html lang="ru" xmlns:th="http://www.thymeleaf.org">&ndash;&gt;-->
+<!--&lt;!&ndash;<head>&ndash;&gt;-->
+<!--&lt;!&ndash;  <meta charset="UTF-8">&ndash;&gt;-->
+<!--&lt;!&ndash;  <meta name="viewport" content="width=device-width, initial-scale=1.0">&ndash;&gt;-->
+<!--&lt;!&ndash;  <title>Форум артистов | Cleopatra</title>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  &lt;!&ndash; Подключаем стили сайдбара &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  &lt;!&ndash; Font Awesome &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">&ndash;&gt;-->
+
+<!--&lt;!&ndash;  &lt;!&ndash; Google Fonts &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">&ndash;&gt;-->
+
+<!--&lt;!&ndash;  <style>&ndash;&gt;-->
+<!--&lt;!&ndash;    /* Base Styles */&ndash;&gt;-->
+<!--&lt;!&ndash;    * {&ndash;&gt;-->
+<!--&lt;!&ndash;      margin: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      box-sizing: border-box;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    body {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: linear-gradient(135deg, var(&#45;&#45;bg-primary) 0%, var(&#45;&#45;bg-accent) 100%);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 400;&ndash;&gt;-->
+<!--&lt;!&ndash;      line-height: 1.6;&ndash;&gt;-->
+<!--&lt;!&ndash;      min-height: 100vh;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Main Content */&ndash;&gt;-->
+<!--&lt;!&ndash;    .main-content {&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-left: 280px;&ndash;&gt;-->
+<!--&lt;!&ndash;      min-height: 100vh;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Page Header */&ndash;&gt;-->
+<!--&lt;!&ndash;    .page-header {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-xl);&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 2.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-lg);&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 1px solid var(&#45;&#45;border-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      position: relative;&ndash;&gt;-->
+<!--&lt;!&ndash;      overflow: hidden;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .page-header::before {&ndash;&gt;-->
+<!--&lt;!&ndash;      content: '';&ndash;&gt;-->
+<!--&lt;!&ndash;      position: absolute;&ndash;&gt;-->
+<!--&lt;!&ndash;      top: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      left: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      right: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;      height: 4px;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: linear-gradient(90deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .header-content {&ndash;&gt;-->
+<!--&lt;!&ndash;      display: flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      justify-content: space-between;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      flex-wrap: wrap;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 1.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .header-title {&ndash;&gt;-->
+<!--&lt;!&ndash;      font-family: 'Playfair Display', serif;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 2.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      letter-spacing: -0.02em;&ndash;&gt;-->
+<!--&lt;!&ndash;      display: flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 0.75rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .header-subtitle {&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 1.125rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-top: 0.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .header-actions {&ndash;&gt;-->
+<!--&lt;!&ndash;      display: flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .action-btn {&ndash;&gt;-->
+<!--&lt;!&ndash;      display: inline-flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 0.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 0.875rem 1.75rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-md);&ndash;&gt;-->
+<!--&lt;!&ndash;      text-decoration: none;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 1px solid;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .action-btn.primary {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));&ndash;&gt;-->
+<!--&lt;!&ndash;      color: white;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-color: transparent;&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-md);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .action-btn.primary:hover {&ndash;&gt;-->
+<!--&lt;!&ndash;      transform: translateY(-2px);&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-lg);&ndash;&gt;-->
+<!--&lt;!&ndash;      text-decoration: none;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .action-btn.secondary {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-accent);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-color: var(&#45;&#45;border-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .action-btn.secondary:hover {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      text-decoration: none;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Search Section */&ndash;&gt;-->
+<!--&lt;!&ndash;    .search-section {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-xl);&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-lg);&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 1px solid var(&#45;&#45;border-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .search-form {&ndash;&gt;-->
+<!--&lt;!&ndash;      display: flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      max-width: 600px;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin: 0 auto;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .search-input {&ndash;&gt;-->
+<!--&lt;!&ndash;      flex: 1;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 1rem 1.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 2px solid var(&#45;&#45;border-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-md);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .search-input:focus {&ndash;&gt;-->
+<!--&lt;!&ndash;      outline: none;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-color: var(&#45;&#45;accent-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .search-btn {&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 1rem 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));&ndash;&gt;-->
+<!--&lt;!&ndash;      color: white;&ndash;&gt;-->
+<!--&lt;!&ndash;      border: none;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-md);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      cursor: pointer;&ndash;&gt;-->
+<!--&lt;!&ndash;      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);&ndash;&gt;-->
+<!--&lt;!&ndash;      display: flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 0.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .search-btn:hover {&ndash;&gt;-->
+<!--&lt;!&ndash;      transform: translateY(-1px);&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-md);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Filters & Controls */&ndash;&gt;-->
+<!--&lt;!&ndash;    .controls-section {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-xl);&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-lg);&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 1px solid var(&#45;&#45;border-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .control-group {&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 1.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .control-group:last-child {&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .control-title {&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 1.125rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      display: flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 0.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .filter-buttons {&ndash;&gt;-->
+<!--&lt;!&ndash;      display: flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      flex-wrap: wrap;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 0.75rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .filter-btn {&ndash;&gt;-->
+<!--&lt;!&ndash;      display: inline-flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 0.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 0.75rem 1.25rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-accent);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;      text-decoration: none;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-md);&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 1px solid var(&#45;&#45;border-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 500;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 0.95rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .filter-btn:hover {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;accent-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: white;&ndash;&gt;-->
+<!--&lt;!&ndash;      transform: translateY(-1px);&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-sm);&ndash;&gt;-->
+<!--&lt;!&ndash;      text-decoration: none;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .filter-btn.active {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));&ndash;&gt;-->
+<!--&lt;!&ndash;      color: white;&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-md);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Topics List */&ndash;&gt;-->
+<!--&lt;!&ndash;    .topics-section {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-xl);&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-lg);&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 1px solid var(&#45;&#45;border-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .empty-state {&ndash;&gt;-->
+<!--&lt;!&ndash;      text-align: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 4rem 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .empty-icon {&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 4rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-muted);&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 1.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .empty-title {&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 1.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .empty-message {&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 1.125rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Topic Cards */&ndash;&gt;-->
+<!--&lt;!&ndash;    .topic-card {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-lg);&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 1.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 1px solid var(&#45;&#45;border-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);&ndash;&gt;-->
+<!--&lt;!&ndash;      position: relative;&ndash;&gt;-->
+<!--&lt;!&ndash;      overflow: hidden;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .topic-card:hover {&ndash;&gt;-->
+<!--&lt;!&ndash;      transform: translateY(-2px);&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-lg);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .topic-card:last-child {&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .topic-header {&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .topic-title {&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 1.375rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 0.75rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .topic-title a {&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      text-decoration: none;&ndash;&gt;-->
+<!--&lt;!&ndash;      transition: color 0.2s ease;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .topic-title a:hover {&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;accent-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .topic-category {&ndash;&gt;-->
+<!--&lt;!&ndash;      display: inline-flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 0.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 0.5rem 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;accent-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-md);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 0.875rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 1px solid rgba(37, 99, 235, 0.2);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .topic-meta {&ndash;&gt;-->
+<!--&lt;!&ndash;      display: flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      flex-wrap: wrap;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 1.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 0.95rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .meta-item {&ndash;&gt;-->
+<!--&lt;!&ndash;      display: flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 0.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .meta-icon {&ndash;&gt;-->
+<!--&lt;!&ndash;      width: 16px;&ndash;&gt;-->
+<!--&lt;!&ndash;      text-align: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;accent-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .meta-value {&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Pagination */&ndash;&gt;-->
+<!--&lt;!&ndash;    .pagination {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-xl);&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-lg);&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 1px solid var(&#45;&#45;border-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      display: flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      justify-content: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .pagination-btn {&ndash;&gt;-->
+<!--&lt;!&ndash;      display: inline-flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 0.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 0.875rem 1.75rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;bg-accent);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-secondary);&ndash;&gt;-->
+<!--&lt;!&ndash;      text-decoration: none;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-md);&ndash;&gt;-->
+<!--&lt;!&ndash;      border: 1px solid var(&#45;&#45;border-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .pagination-btn:hover {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: var(&#45;&#45;accent-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: white;&ndash;&gt;-->
+<!--&lt;!&ndash;      transform: translateY(-1px);&ndash;&gt;-->
+<!--&lt;!&ndash;      box-shadow: var(&#45;&#45;shadow-md);&ndash;&gt;-->
+<!--&lt;!&ndash;      text-decoration: none;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .pagination-info {&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 600;&ndash;&gt;-->
+<!--&lt;!&ndash;      color: var(&#45;&#45;text-primary);&ndash;&gt;-->
+<!--&lt;!&ndash;      font-size: 1.125rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Alert Messages */&ndash;&gt;-->
+<!--&lt;!&ndash;    .alert {&ndash;&gt;-->
+<!--&lt;!&ndash;      padding: 1rem 1.5rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-radius: var(&#45;&#45;radius-md);&ndash;&gt;-->
+<!--&lt;!&ndash;      margin-bottom: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      font-weight: 500;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-left: 4px solid;&ndash;&gt;-->
+<!--&lt;!&ndash;      display: flex;&ndash;&gt;-->
+<!--&lt;!&ndash;      align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      gap: 0.75rem;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .alert-error {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(239, 68, 68, 0.1);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: #dc2626;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-color: #ef4444;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .alert-success {&ndash;&gt;-->
+<!--&lt;!&ndash;      background: rgba(5, 150, 105, 0.1);&ndash;&gt;-->
+<!--&lt;!&ndash;      color: #059669;&ndash;&gt;-->
+<!--&lt;!&ndash;      border-color: var(&#45;&#45;accent-success);&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Mobile Responsiveness */&ndash;&gt;-->
+<!--&lt;!&ndash;    @media (max-width: 768px) {&ndash;&gt;-->
+<!--&lt;!&ndash;      .main-content {&ndash;&gt;-->
+<!--&lt;!&ndash;        margin-left: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;        padding: 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;        padding-top: 80px;&ndash;&gt;-->
+<!--&lt;!&ndash;      }&ndash;&gt;-->
+
+<!--&lt;!&ndash;      .header-content {&ndash;&gt;-->
+<!--&lt;!&ndash;        flex-direction: column;&ndash;&gt;-->
+<!--&lt;!&ndash;        text-align: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      }&ndash;&gt;-->
+
+<!--&lt;!&ndash;      .header-title {&ndash;&gt;-->
+<!--&lt;!&ndash;        font-size: 2rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      }&ndash;&gt;-->
+
+<!--&lt;!&ndash;      .header-actions {&ndash;&gt;-->
+<!--&lt;!&ndash;        width: 100%;&ndash;&gt;-->
+<!--&lt;!&ndash;        justify-content: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      }&ndash;&gt;-->
+
+<!--&lt;!&ndash;      .search-form {&ndash;&gt;-->
+<!--&lt;!&ndash;        flex-direction: column;&ndash;&gt;-->
+<!--&lt;!&ndash;      }&ndash;&gt;-->
+
+<!--&lt;!&ndash;      .filter-buttons {&ndash;&gt;-->
+<!--&lt;!&ndash;        justify-content: center;&ndash;&gt;-->
+<!--&lt;!&ndash;      }&ndash;&gt;-->
+
+<!--&lt;!&ndash;      .topic-meta {&ndash;&gt;-->
+<!--&lt;!&ndash;        flex-direction: column;&ndash;&gt;-->
+<!--&lt;!&ndash;        gap: 0.75rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      }&ndash;&gt;-->
+
+<!--&lt;!&ndash;      .pagination {&ndash;&gt;-->
+<!--&lt;!&ndash;        flex-direction: column;&ndash;&gt;-->
+<!--&lt;!&ndash;        gap: 1rem;&ndash;&gt;-->
+<!--&lt;!&ndash;      }&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    @media (max-width: 1024px) {&ndash;&gt;-->
+<!--&lt;!&ndash;      .main-content {&ndash;&gt;-->
+<!--&lt;!&ndash;        margin-left: 80px;&ndash;&gt;-->
+<!--&lt;!&ndash;      }&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    /* Animations */&ndash;&gt;-->
+<!--&lt;!&ndash;    @keyframes fadeIn {&ndash;&gt;-->
+<!--&lt;!&ndash;      from {&ndash;&gt;-->
+<!--&lt;!&ndash;        opacity: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;        transform: translateY(20px);&ndash;&gt;-->
+<!--&lt;!&ndash;      }&ndash;&gt;-->
+<!--&lt;!&ndash;      to {&ndash;&gt;-->
+<!--&lt;!&ndash;        opacity: 1;&ndash;&gt;-->
+<!--&lt;!&ndash;        transform: translateY(0);&ndash;&gt;-->
+<!--&lt;!&ndash;      }&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    .topic-card {&ndash;&gt;-->
+<!--&lt;!&ndash;      animation: fadeIn 0.6s ease;&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+<!--&lt;!&ndash;  </style>&ndash;&gt;-->
+<!--&lt;!&ndash;</head>&ndash;&gt;-->
+<!--&lt;!&ndash;<body>&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash; Подключаем мобильный хедер и сайдбар &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>&ndash;&gt;-->
+<!--&lt;!&ndash;<th:block th:replace="~{fragments/sidebar :: sidebar('forums')}"></th:block>&ndash;&gt;-->
+
+<!--&lt;!&ndash;<main class="main-content">&ndash;&gt;-->
+<!--&lt;!&ndash;  &lt;!&ndash; Page Header &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <header class="page-header">&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="header-content">&ndash;&gt;-->
+<!--&lt;!&ndash;      <div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <h1 class="header-title">&ndash;&gt;-->
+<!--&lt;!&ndash;          <i class="fas fa-theater-masks"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;          Форум артистов&ndash;&gt;-->
+<!--&lt;!&ndash;        </h1>&ndash;&gt;-->
+<!--&lt;!&ndash;        <p class="header-subtitle">Место для общения и обмена опытом между артистами</p>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="header-actions">&ndash;&gt;-->
+<!--&lt;!&ndash;        <a th:href="@{/forums/create}" class="action-btn primary">&ndash;&gt;-->
+<!--&lt;!&ndash;          <i class="fas fa-plus"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;          <span>Создать тему</span>&ndash;&gt;-->
+<!--&lt;!&ndash;        </a>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;  </header>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  &lt;!&ndash; Alert Messages &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <div th:if="${successMessage}" class="alert alert-success">&ndash;&gt;-->
+<!--&lt;!&ndash;    <i class="fas fa-check-circle"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;    <span th:text="${successMessage}"></span>&ndash;&gt;-->
+<!--&lt;!&ndash;  </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  <div th:if="${errorMessage}" class="alert alert-error">&ndash;&gt;-->
+<!--&lt;!&ndash;    <i class="fas fa-exclamation-triangle"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;    <span th:text="${errorMessage}"></span>&ndash;&gt;-->
+<!--&lt;!&ndash;  </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  &lt;!&ndash; Search Section &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <section class="search-section">&ndash;&gt;-->
+<!--&lt;!&ndash;    <form th:action="@{/forums/search}" method="get" class="search-form">&ndash;&gt;-->
+<!--&lt;!&ndash;      <input type="text"&ndash;&gt;-->
+<!--&lt;!&ndash;             name="query"&ndash;&gt;-->
+<!--&lt;!&ndash;             class="search-input"&ndash;&gt;-->
+<!--&lt;!&ndash;             placeholder="Поиск по темам форума..."&ndash;&gt;-->
+<!--&lt;!&ndash;             required>&ndash;&gt;-->
+<!--&lt;!&ndash;      <button type="submit" class="search-btn">&ndash;&gt;-->
+<!--&lt;!&ndash;        <i class="fas fa-search"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;        <span>Найти</span>&ndash;&gt;-->
+<!--&lt;!&ndash;      </button>&ndash;&gt;-->
+<!--&lt;!&ndash;    </form>&ndash;&gt;-->
+<!--&lt;!&ndash;  </section>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  &lt;!&ndash; Filters & Controls &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <section class="controls-section">&ndash;&gt;-->
+<!--&lt;!&ndash;    &lt;!&ndash; Categories Filter &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="control-group">&ndash;&gt;-->
+<!--&lt;!&ndash;      <h3 class="control-title">&ndash;&gt;-->
+<!--&lt;!&ndash;        <i class="fas fa-filter"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;        Категории&ndash;&gt;-->
+<!--&lt;!&ndash;      </h3>&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="filter-buttons">&ndash;&gt;-->
+<!--&lt;!&ndash;        <a th:href="@{/forums}"&ndash;&gt;-->
+<!--&lt;!&ndash;           class="filter-btn"&ndash;&gt;-->
+<!--&lt;!&ndash;           th:classappend="${currentType == null} ? 'active' : ''">&ndash;&gt;-->
+<!--&lt;!&ndash;          <i class="fas fa-list"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;          <span>Все</span>&ndash;&gt;-->
+<!--&lt;!&ndash;        </a>&ndash;&gt;-->
+<!--&lt;!&ndash;        <a th:each="type : ${forumTypes}"&ndash;&gt;-->
+<!--&lt;!&ndash;           th:href="@{/forums(forumType=${type})}"&ndash;&gt;-->
+<!--&lt;!&ndash;           class="filter-btn"&ndash;&gt;-->
+<!--&lt;!&ndash;           th:classappend="${type == currentType} ? 'active' : ''">&ndash;&gt;-->
+<!--&lt;!&ndash;          <span th:text="${type.emoji}">📋</span>&ndash;&gt;-->
+<!--&lt;!&ndash;          <span th:text="${type.displayName}">Категория</span>&ndash;&gt;-->
+<!--&lt;!&ndash;        </a>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    &lt;!&ndash; Sorting Options &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="control-group">&ndash;&gt;-->
+<!--&lt;!&ndash;      <h3 class="control-title">&ndash;&gt;-->
+<!--&lt;!&ndash;        <i class="fas fa-sort"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;        Сортировка&ndash;&gt;-->
+<!--&lt;!&ndash;      </h3>&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="filter-buttons">&ndash;&gt;-->
+<!--&lt;!&ndash;        <a th:href="@{/forums(sortBy='createdAt', sortDirection='DESC', forumType=${currentType})}"&ndash;&gt;-->
+<!--&lt;!&ndash;           class="filter-btn"&ndash;&gt;-->
+<!--&lt;!&ndash;           th:classappend="${sortBy == 'createdAt' && sortDirection == 'DESC'} ? 'active' : ''">&ndash;&gt;-->
+<!--&lt;!&ndash;          <i class="fas fa-clock"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;          <span>Новые</span>&ndash;&gt;-->
+<!--&lt;!&ndash;        </a>&ndash;&gt;-->
+<!--&lt;!&ndash;        <a th:href="@{/forums(sortBy='createdAt', sortDirection='ASC', forumType=${currentType})}"&ndash;&gt;-->
+<!--&lt;!&ndash;           class="filter-btn"&ndash;&gt;-->
+<!--&lt;!&ndash;           th:classappend="${sortBy == 'createdAt' && sortDirection == 'ASC'} ? 'active' : ''">&ndash;&gt;-->
+<!--&lt;!&ndash;          <i class="fas fa-history"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;          <span>Старые</span>&ndash;&gt;-->
+<!--&lt;!&ndash;        </a>&ndash;&gt;-->
+<!--&lt;!&ndash;        <a th:href="@{/forums(sortBy='viewCount', sortDirection='DESC', forumType=${currentType})}"&ndash;&gt;-->
+<!--&lt;!&ndash;           class="filter-btn"&ndash;&gt;-->
+<!--&lt;!&ndash;           th:classappend="${sortBy == 'viewCount'} ? 'active' : ''">&ndash;&gt;-->
+<!--&lt;!&ndash;          <i class="fas fa-eye"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;          <span>По просмотрам</span>&ndash;&gt;-->
+<!--&lt;!&ndash;        </a>&ndash;&gt;-->
+<!--&lt;!&ndash;        <a th:href="@{/forums(sortBy='commentCount', sortDirection='DESC', forumType=${currentType})}"&ndash;&gt;-->
+<!--&lt;!&ndash;           class="filter-btn"&ndash;&gt;-->
+<!--&lt;!&ndash;           th:classappend="${sortBy == 'commentCount'} ? 'active' : ''">&ndash;&gt;-->
+<!--&lt;!&ndash;          <i class="fas fa-comments"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;          <span>По комментариям</span>&ndash;&gt;-->
+<!--&lt;!&ndash;        </a>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;  </section>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  &lt;!&ndash; Topics List &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <section class="topics-section">&ndash;&gt;-->
+<!--&lt;!&ndash;    &lt;!&ndash; Empty State &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <div th:if="${forums.content.empty}" class="empty-state">&ndash;&gt;-->
+<!--&lt;!&ndash;      <div class="empty-icon">&ndash;&gt;-->
+<!--&lt;!&ndash;        <i class="fas fa-comments"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;      </div>&ndash;&gt;-->
+<!--&lt;!&ndash;      <h2 class="empty-title">Пока нет тем для обсуждения</h2>&ndash;&gt;-->
+<!--&lt;!&ndash;      <p class="empty-message">Станьте первым, кто начнет обсуждение в сообществе артистов!</p>&ndash;&gt;-->
+<!--&lt;!&ndash;      <a th:href="@{/forums/create}" class="action-btn primary">&ndash;&gt;-->
+<!--&lt;!&ndash;        <i class="fas fa-plus"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;        <span>Создать первую тему</span>&ndash;&gt;-->
+<!--&lt;!&ndash;      </a>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    &lt;!&ndash; Topics List &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <div th:if="${!forums.content.empty}">&ndash;&gt;-->
+<!--&lt;!&ndash;      <article th:each="forum : ${forums.content}" class="topic-card">&ndash;&gt;-->
+<!--&lt;!&ndash;        <header class="topic-header">&ndash;&gt;-->
+<!--&lt;!&ndash;          <h2 class="topic-title">&ndash;&gt;-->
+<!--&lt;!&ndash;            <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.title}">Заголовок темы</a>&ndash;&gt;-->
+<!--&lt;!&ndash;          </h2>&ndash;&gt;-->
+<!--&lt;!&ndash;          <div class="topic-category">&ndash;&gt;-->
+<!--&lt;!&ndash;            <span th:text="${forum.forumType.emoji}">📋</span>&ndash;&gt;-->
+<!--&lt;!&ndash;            <span th:text="${forum.forumType.displayName}">Категория</span>&ndash;&gt;-->
+<!--&lt;!&ndash;          </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </header>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <footer class="topic-meta">&ndash;&gt;-->
+<!--&lt;!&ndash;          <div class="meta-item">&ndash;&gt;-->
+<!--&lt;!&ndash;            <i class="fas fa-user meta-icon"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;            <span th:text="${forum.authorName}">Автор</span>&ndash;&gt;-->
+<!--&lt;!&ndash;          </div>&ndash;&gt;-->
+<!--&lt;!&ndash;          <div class="meta-item">&ndash;&gt;-->
+<!--&lt;!&ndash;            <i class="fas fa-clock meta-icon"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;            <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span>&ndash;&gt;-->
+<!--&lt;!&ndash;          </div>&ndash;&gt;-->
+<!--&lt;!&ndash;          <div class="meta-item">&ndash;&gt;-->
+<!--&lt;!&ndash;            <i class="fas fa-eye meta-icon"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;            <span class="meta-value" th:text="${forum.viewCount}">0</span>&ndash;&gt;-->
+<!--&lt;!&ndash;            <span>просмотров</span>&ndash;&gt;-->
+<!--&lt;!&ndash;          </div>&ndash;&gt;-->
+<!--&lt;!&ndash;          <div class="meta-item">&ndash;&gt;-->
+<!--&lt;!&ndash;            <i class="fas fa-comments meta-icon"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;            <span class="meta-value" th:text="${forum.commentCount}">0</span>&ndash;&gt;-->
+<!--&lt;!&ndash;            <span>комментариев</span>&ndash;&gt;-->
+<!--&lt;!&ndash;          </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </footer>&ndash;&gt;-->
+<!--&lt;!&ndash;      </article>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;  </section>&ndash;&gt;-->
+
+<!--&lt;!&ndash;  &lt;!&ndash; Pagination &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;  <nav th:if="${forums.totalPages > 1}" class="pagination">&ndash;&gt;-->
+<!--&lt;!&ndash;    <a th:if="${forums.hasPrevious}"&ndash;&gt;-->
+<!--&lt;!&ndash;       th:href="@{/forums(page=${forums.page - 1}, size=${forums.size}, forumType=${currentType}, sortBy=${sortBy}, sortDirection=${sortDirection})}"&ndash;&gt;-->
+<!--&lt;!&ndash;       class="pagination-btn">&ndash;&gt;-->
+<!--&lt;!&ndash;      <i class="fas fa-chevron-left"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;      <span>Предыдущая</span>&ndash;&gt;-->
+<!--&lt;!&ndash;    </a>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <span class="pagination-info" th:text="'Страница ' + ${forums.page + 1} + ' из ' + ${forums.totalPages}">Страница 1 из 1</span>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <a th:if="${forums.hasNext}"&ndash;&gt;-->
+<!--&lt;!&ndash;       th:href="@{/forums(page=${forums.page + 1}, size=${forums.size}, forumType=${currentType}, sortBy=${sortBy}, sortDirection=${sortDirection})}"&ndash;&gt;-->
+<!--&lt;!&ndash;       class="pagination-btn">&ndash;&gt;-->
+<!--&lt;!&ndash;      <span>Следующая</span>&ndash;&gt;-->
+<!--&lt;!&ndash;      <i class="fas fa-chevron-right"></i>&ndash;&gt;-->
+<!--&lt;!&ndash;    </a>&ndash;&gt;-->
+<!--&lt;!&ndash;  </nav>&ndash;&gt;-->
+<!--&lt;!&ndash;</main>&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash; Подключаем скрипты сайдбара &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>&ndash;&gt;-->
+
+<!--&lt;!&ndash;<script>&ndash;&gt;-->
+<!--&lt;!&ndash;  document.addEventListener('DOMContentLoaded', function() {&ndash;&gt;-->
+<!--&lt;!&ndash;    // Highlight active filter buttons based on URL parameters&ndash;&gt;-->
+<!--&lt;!&ndash;    const urlParams = new URLSearchParams(window.location.search);&ndash;&gt;-->
+<!--&lt;!&ndash;    const currentSort = urlParams.get('sortBy');&ndash;&gt;-->
+<!--&lt;!&ndash;    const currentDirection = urlParams.get('sortDirection');&ndash;&gt;-->
+
+<!--&lt;!&ndash;    // Enhanced search functionality&ndash;&gt;-->
+<!--&lt;!&ndash;    const searchForm = document.querySelector('.search-form');&ndash;&gt;-->
+<!--&lt;!&ndash;    const searchInput = document.querySelector('.search-input');&ndash;&gt;-->
+
+<!--&lt;!&ndash;    if (searchForm && searchInput) {&ndash;&gt;-->
+<!--&lt;!&ndash;      // Auto-focus search on Ctrl+K or Cmd+K&ndash;&gt;-->
+<!--&lt;!&ndash;      document.addEventListener('keydown', function(e) {&ndash;&gt;-->
+<!--&lt;!&ndash;        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {&ndash;&gt;-->
+<!--&lt;!&ndash;          e.preventDefault();&ndash;&gt;-->
+<!--&lt;!&ndash;          searchInput.focus();&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+<!--&lt;!&ndash;      });&ndash;&gt;-->
+
+<!--&lt;!&ndash;      // Submit form on Enter&ndash;&gt;-->
+<!--&lt;!&ndash;      searchInput.addEventListener('keypress', function(e) {&ndash;&gt;-->
+<!--&lt;!&ndash;        if (e.key === 'Enter' && this.value.trim()) {&ndash;&gt;-->
+<!--&lt;!&ndash;          searchForm.submit();&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+<!--&lt;!&ndash;      });&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    // Smooth hover animations for topic cards&ndash;&gt;-->
+<!--&lt;!&ndash;    const topicCards = document.querySelectorAll('.topic-card');&ndash;&gt;-->
+<!--&lt;!&ndash;    topicCards.forEach(card => {&ndash;&gt;-->
+<!--&lt;!&ndash;      card.addEventListener('mouseenter', function() {&ndash;&gt;-->
+<!--&lt;!&ndash;        this.style.transform = 'translateY(-4px)';&ndash;&gt;-->
+<!--&lt;!&ndash;      });&ndash;&gt;-->
+
+<!--&lt;!&ndash;      card.addEventListener('mouseleave', function() {&ndash;&gt;-->
+<!--&lt;!&ndash;        this.style.transform = 'translateY(-2px)';&ndash;&gt;-->
+<!--&lt;!&ndash;      });&ndash;&gt;-->
+<!--&lt;!&ndash;    });&ndash;&gt;-->
+
+<!--&lt;!&ndash;    // Enhanced filter button interactions&ndash;&gt;-->
+<!--&lt;!&ndash;    const filterButtons = document.querySelectorAll('.filter-btn');&ndash;&gt;-->
+<!--&lt;!&ndash;    filterButtons.forEach(btn => {&ndash;&gt;-->
+<!--&lt;!&ndash;      btn.addEventListener('click', function(e) {&ndash;&gt;-->
+<!--&lt;!&ndash;        // Add loading state&ndash;&gt;-->
+<!--&lt;!&ndash;        const originalText = this.innerHTML;&ndash;&gt;-->
+<!--&lt;!&ndash;        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Загрузка...</span>';&ndash;&gt;-->
+
+<!--&lt;!&ndash;        // Reset after a short delay if navigation fails&ndash;&gt;-->
+<!--&lt;!&ndash;        setTimeout(() => {&ndash;&gt;-->
+<!--&lt;!&ndash;          this.innerHTML = originalText;&ndash;&gt;-->
+<!--&lt;!&ndash;        }, 3000);&ndash;&gt;-->
+<!--&lt;!&ndash;      });&ndash;&gt;-->
+<!--&lt;!&ndash;    });&ndash;&gt;-->
+
+<!--&lt;!&ndash;    // Auto-refresh page data every 5 minutes (optional)&ndash;&gt;-->
+<!--&lt;!&ndash;    setInterval(() => {&ndash;&gt;-->
+<!--&lt;!&ndash;      // Check if there are new topics available&ndash;&gt;-->
+<!--&lt;!&ndash;      const currentCount = document.querySelectorAll('.topic-card').length;&ndash;&gt;-->
+<!--&lt;!&ndash;      // Could implement AJAX check here&ndash;&gt;-->
+<!--&lt;!&ndash;    }, 300000); // 5 minutes&ndash;&gt;-->
+
+<!--&lt;!&ndash;    console.log('🎭 Forum list page initialized');&ndash;&gt;-->
+<!--&lt;!&ndash;    console.log(`📊 Loaded ${document.querySelectorAll('.topic-card').length} topics`);&ndash;&gt;-->
+<!--&lt;!&ndash;  });&ndash;&gt;-->
+<!--&lt;!&ndash;</script>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--&lt;!&ndash;</html>&ndash;&gt;-->
 
 <!--<!DOCTYPE html>-->
 <!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
 <!--<head>-->
 <!--  <meta charset="UTF-8">-->
 <!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--  <title>Форум артистов</title>-->
+<!--  <title>Форум артистов | Cleopatra</title>-->
+
+<!--  &lt;!&ndash; Подключаем стили сайдбара &ndash;&gt;-->
+<!--  <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>-->
+
+<!--  &lt;!&ndash; Font Awesome &ndash;&gt;-->
+<!--  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">-->
+
+<!--  &lt;!&ndash; Google Fonts &ndash;&gt;-->
+<!--  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+
+<!--  <style>-->
+<!--    /* Base Styles */-->
+<!--    * {-->
+<!--      margin: 0;-->
+<!--      padding: 0;-->
+<!--      box-sizing: border-box;-->
+<!--    }-->
+
+<!--    body {-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;bg-primary) 0%, var(&#45;&#45;bg-accent) 100%);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;-->
+<!--      font-weight: 400;-->
+<!--      line-height: 1.6;-->
+<!--      min-height: 100vh;-->
+<!--    }-->
+
+<!--    /* Main Content */-->
+<!--    .main-content {-->
+<!--      margin-left: 280px;-->
+<!--      min-height: 100vh;-->
+<!--      padding: 2rem;-->
+<!--    }-->
+
+<!--    /* Mobile Filter Toggle */-->
+<!--    .mobile-filter-toggle {-->
+<!--      display: none;-->
+<!--      position: fixed;-->
+<!--      bottom: 20px;-->
+<!--      right: 20px;-->
+<!--      width: 60px;-->
+<!--      height: 60px;-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      border-radius: 50%;-->
+<!--      font-size: 1.5rem;-->
+<!--      cursor: pointer;-->
+<!--      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);-->
+<!--      z-index: 1000;-->
+<!--      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--    }-->
+
+<!--    .mobile-filter-toggle:hover {-->
+<!--      transform: scale(1.1);-->
+<!--      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);-->
+<!--    }-->
+
+<!--    .mobile-filter-toggle.active {-->
+<!--      background: #ef4444;-->
+<!--      transform: rotate(45deg);-->
+<!--    }-->
+
+<!--    /* Mobile Filter Overlay */-->
+<!--    .mobile-filter-overlay {-->
+<!--      display: none;-->
+<!--      position: fixed;-->
+<!--      top: 0;-->
+<!--      left: 0;-->
+<!--      right: 0;-->
+<!--      bottom: 0;-->
+<!--      background: rgba(0, 0, 0, 0.5);-->
+<!--      z-index: 998;-->
+<!--      opacity: 0;-->
+<!--      transition: opacity 0.3s ease;-->
+<!--    }-->
+
+<!--    .mobile-filter-overlay.active {-->
+<!--      opacity: 1;-->
+<!--    }-->
+
+<!--    /* Mobile Filter Panel */-->
+<!--    .mobile-filter-panel {-->
+<!--      display: none;-->
+<!--      position: fixed;-->
+<!--      bottom: 0;-->
+<!--      left: 0;-->
+<!--      right: 0;-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: 20px 20px 0 0;-->
+<!--      padding: 1.5rem;-->
+<!--      box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.2);-->
+<!--      z-index: 999;-->
+<!--      transform: translateY(100%);-->
+<!--      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--      max-height: 80vh;-->
+<!--      overflow-y: auto;-->
+<!--    }-->
+
+<!--    .mobile-filter-panel.active {-->
+<!--      transform: translateY(0);-->
+<!--    }-->
+
+<!--    .mobile-filter-header {-->
+<!--      display: flex;-->
+<!--      justify-content: space-between;-->
+<!--      align-items: center;-->
+<!--      margin-bottom: 1.5rem;-->
+<!--      padding-bottom: 1rem;-->
+<!--      border-bottom: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .mobile-filter-title {-->
+<!--      font-size: 1.25rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--    }-->
+
+<!--    .mobile-filter-close {-->
+<!--      background: none;-->
+<!--      border: none;-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 1.5rem;-->
+<!--      cursor: pointer;-->
+<!--      padding: 0.5rem;-->
+<!--      border-radius: 50%;-->
+<!--      transition: all 0.2s ease;-->
+<!--    }-->
+
+<!--    .mobile-filter-close:hover {-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--    }-->
+
+<!--    /* Page Header */-->
+<!--    .page-header {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-xl);-->
+<!--      padding: 2.5rem;-->
+<!--      margin-bottom: 2rem;-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--      position: relative;-->
+<!--      overflow: hidden;-->
+<!--    }-->
+
+<!--    .page-header::before {-->
+<!--      content: '';-->
+<!--      position: absolute;-->
+<!--      top: 0;-->
+<!--      left: 0;-->
+<!--      right: 0;-->
+<!--      height: 4px;-->
+<!--      background: linear-gradient(90deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--    }-->
+
+<!--    .header-content {-->
+<!--      display: flex;-->
+<!--      justify-content: space-between;-->
+<!--      align-items: center;-->
+<!--      flex-wrap: wrap;-->
+<!--      gap: 1.5rem;-->
+<!--    }-->
+
+<!--    .header-title {-->
+<!--      font-family: 'Playfair Display', serif;-->
+<!--      font-size: 2.5rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      letter-spacing: -0.02em;-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.75rem;-->
+<!--    }-->
+
+<!--    .header-subtitle {-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 1.125rem;-->
+<!--      margin-top: 0.5rem;-->
+<!--    }-->
+
+<!--    .header-actions {-->
+<!--      display: flex;-->
+<!--      gap: 1rem;-->
+<!--    }-->
+
+<!--    .action-btn {-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.5rem;-->
+<!--      padding: 0.875rem 1.75rem;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      text-decoration: none;-->
+<!--      font-weight: 600;-->
+<!--      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--      border: 1px solid;-->
+<!--    }-->
+
+<!--    .action-btn.primary {-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--      border-color: transparent;-->
+<!--      box-shadow: var(&#45;&#45;shadow-md);-->
+<!--    }-->
+
+<!--    .action-btn.primary:hover {-->
+<!--      transform: translateY(-2px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--      text-decoration: none;-->
+<!--    }-->
+
+<!--    .action-btn.secondary {-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      border-color: var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .action-btn.secondary:hover {-->
+<!--      background: var(&#45;&#45;bg-primary);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      text-decoration: none;-->
+<!--    }-->
+
+<!--    /* Search Section */-->
+<!--    .search-section {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-xl);-->
+<!--      padding: 2rem;-->
+<!--      margin-bottom: 2rem;-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .search-form {-->
+<!--      display: flex;-->
+<!--      gap: 1rem;-->
+<!--      max-width: 600px;-->
+<!--      margin: 0 auto;-->
+<!--    }-->
+
+<!--    .search-input {-->
+<!--      flex: 1;-->
+<!--      padding: 1rem 1.5rem;-->
+<!--      border: 2px solid var(&#45;&#45;border-primary);-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      background: var(&#45;&#45;bg-primary);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      font-size: 1rem;-->
+<!--      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--    }-->
+
+<!--    .search-input:focus {-->
+<!--      outline: none;-->
+<!--      border-color: var(&#45;&#45;accent-primary);-->
+<!--      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--    }-->
+
+<!--    .search-btn {-->
+<!--      padding: 1rem 2rem;-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      font-weight: 600;-->
+<!--      cursor: pointer;-->
+<!--      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.5rem;-->
+<!--    }-->
+
+<!--    .search-btn:hover {-->
+<!--      transform: translateY(-1px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-md);-->
+<!--    }-->
+
+<!--    /* Filters & Controls - Hidden on mobile by default */-->
+<!--    .controls-section {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-xl);-->
+<!--      padding: 2rem;-->
+<!--      margin-bottom: 2rem;-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .control-group {-->
+<!--      margin-bottom: 1.5rem;-->
+<!--    }-->
+
+<!--    .control-group:last-child {-->
+<!--      margin-bottom: 0;-->
+<!--    }-->
+
+<!--    .control-title {-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: 1rem;-->
+<!--      font-size: 1.125rem;-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.5rem;-->
+<!--    }-->
+
+<!--    .filter-buttons {-->
+<!--      display: flex;-->
+<!--      flex-wrap: wrap;-->
+<!--      gap: 0.75rem;-->
+<!--    }-->
+
+<!--    .filter-btn {-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.5rem;-->
+<!--      padding: 0.75rem 1.25rem;-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      text-decoration: none;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      border: 1px solid var(&#45;&#45;border-secondary);-->
+<!--      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--      font-weight: 500;-->
+<!--      font-size: 0.95rem;-->
+<!--    }-->
+
+<!--    .filter-btn:hover {-->
+<!--      background: var(&#45;&#45;accent-primary);-->
+<!--      color: white;-->
+<!--      transform: translateY(-1px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--      text-decoration: none;-->
+<!--    }-->
+
+<!--    .filter-btn.active {-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--      box-shadow: var(&#45;&#45;shadow-md);-->
+<!--    }-->
+
+<!--    /* Mobile Filter Buttons */-->
+<!--    .mobile-filter-buttons {-->
+<!--      display: flex;-->
+<!--      flex-direction: column;-->
+<!--      gap: 0.5rem;-->
+<!--    }-->
+
+<!--    .mobile-filter-btn {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.75rem;-->
+<!--      padding: 1rem;-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      text-decoration: none;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      border: 1px solid var(&#45;&#45;border-secondary);-->
+<!--      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--      font-weight: 500;-->
+<!--      width: 100%;-->
+<!--    }-->
+
+<!--    .mobile-filter-btn:hover {-->
+<!--      background: var(&#45;&#45;accent-primary);-->
+<!--      color: white;-->
+<!--      text-decoration: none;-->
+<!--    }-->
+
+<!--    .mobile-filter-btn.active {-->
+<!--      background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--      color: white;-->
+<!--    }-->
+
+<!--    /* Topics List */-->
+<!--    .topics-section {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-xl);-->
+<!--      padding: 2rem;-->
+<!--      margin-bottom: 2rem;-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .empty-state {-->
+<!--      text-align: center;-->
+<!--      padding: 4rem 2rem;-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--    }-->
+
+<!--    .empty-icon {-->
+<!--      font-size: 4rem;-->
+<!--      color: var(&#45;&#45;text-muted);-->
+<!--      margin-bottom: 1.5rem;-->
+<!--    }-->
+
+<!--    .empty-title {-->
+<!--      font-size: 1.5rem;-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      margin-bottom: 1rem;-->
+<!--    }-->
+
+<!--    .empty-message {-->
+<!--      font-size: 1.125rem;-->
+<!--      margin-bottom: 2rem;-->
+<!--    }-->
+
+<!--    /* Topic Cards */-->
+<!--    .topic-card {-->
+<!--      background: var(&#45;&#45;bg-primary);-->
+<!--      border-radius: var(&#45;&#45;radius-lg);-->
+<!--      padding: 2rem;-->
+<!--      margin-bottom: 1.5rem;-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--      position: relative;-->
+<!--      overflow: hidden;-->
+<!--    }-->
+
+<!--    .topic-card:hover {-->
+<!--      transform: translateY(-2px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--    }-->
+
+<!--    .topic-card:last-child {-->
+<!--      margin-bottom: 0;-->
+<!--    }-->
+
+<!--    .topic-header {-->
+<!--      margin-bottom: 1rem;-->
+<!--    }-->
+
+<!--    .topic-title {-->
+<!--      font-size: 1.375rem;-->
+<!--      font-weight: 600;-->
+<!--      margin-bottom: 0.75rem;-->
+<!--    }-->
+
+<!--    .topic-title a {-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      text-decoration: none;-->
+<!--      transition: color 0.2s ease;-->
+<!--    }-->
+
+<!--    .topic-title a:hover {-->
+<!--      color: var(&#45;&#45;accent-primary);-->
+<!--    }-->
+
+<!--    .topic-category {-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.5rem;-->
+<!--      padding: 0.5rem 1rem;-->
+<!--      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));-->
+<!--      color: var(&#45;&#45;accent-primary);-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      font-weight: 600;-->
+<!--      font-size: 0.875rem;-->
+<!--      border: 1px solid rgba(37, 99, 235, 0.2);-->
+<!--    }-->
+
+<!--    .topic-meta {-->
+<!--      display: flex;-->
+<!--      flex-wrap: wrap;-->
+<!--      gap: 1.5rem;-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      font-size: 0.95rem;-->
+<!--    }-->
+
+<!--    .meta-item {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.5rem;-->
+<!--    }-->
+
+<!--    .meta-icon {-->
+<!--      width: 16px;-->
+<!--      text-align: center;-->
+<!--      color: var(&#45;&#45;accent-primary);-->
+<!--    }-->
+
+<!--    .meta-value {-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--    }-->
+
+<!--    /* Pagination */-->
+<!--    .pagination {-->
+<!--      background: var(&#45;&#45;bg-secondary);-->
+<!--      border-radius: var(&#45;&#45;radius-xl);-->
+<!--      padding: 2rem;-->
+<!--      box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--      display: flex;-->
+<!--      justify-content: center;-->
+<!--      align-items: center;-->
+<!--      gap: 2rem;-->
+<!--    }-->
+
+<!--    .pagination-btn {-->
+<!--      display: inline-flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.5rem;-->
+<!--      padding: 0.875rem 1.75rem;-->
+<!--      background: var(&#45;&#45;bg-accent);-->
+<!--      color: var(&#45;&#45;text-secondary);-->
+<!--      text-decoration: none;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      border: 1px solid var(&#45;&#45;border-primary);-->
+<!--      font-weight: 600;-->
+<!--      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--    }-->
+
+<!--    .pagination-btn:hover {-->
+<!--      background: var(&#45;&#45;accent-primary);-->
+<!--      color: white;-->
+<!--      transform: translateY(-1px);-->
+<!--      box-shadow: var(&#45;&#45;shadow-md);-->
+<!--      text-decoration: none;-->
+<!--    }-->
+
+<!--    .pagination-info {-->
+<!--      font-weight: 600;-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--      font-size: 1.125rem;-->
+<!--    }-->
+
+<!--    /* Alert Messages */-->
+<!--    .alert {-->
+<!--      padding: 1rem 1.5rem;-->
+<!--      border-radius: var(&#45;&#45;radius-md);-->
+<!--      margin-bottom: 2rem;-->
+<!--      font-weight: 500;-->
+<!--      border-left: 4px solid;-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: 0.75rem;-->
+<!--    }-->
+
+<!--    .alert-error {-->
+<!--      background: rgba(239, 68, 68, 0.1);-->
+<!--      color: #dc2626;-->
+<!--      border-color: #ef4444;-->
+<!--    }-->
+
+<!--    .alert-success {-->
+<!--      background: rgba(5, 150, 105, 0.1);-->
+<!--      color: #059669;-->
+<!--      border-color: var(&#45;&#45;accent-success);-->
+<!--    }-->
+
+<!--    /* Mobile Responsiveness */-->
+<!--    @media (max-width: 768px) {-->
+<!--      .main-content {-->
+<!--        margin-left: 0;-->
+<!--        padding: 1rem;-->
+<!--        padding-top: 80px;-->
+<!--        padding-bottom: 100px; /* Space for floating button */-->
+<!--      }-->
+
+<!--      /* Hide desktop filters on mobile */-->
+<!--      .controls-section {-->
+<!--        display: none;-->
+<!--      }-->
+
+<!--      /* Show mobile filter toggle */-->
+<!--      .mobile-filter-toggle,-->
+<!--      .mobile-filter-overlay,-->
+<!--      .mobile-filter-panel {-->
+<!--        display: block;-->
+<!--      }-->
+
+<!--      .header-content {-->
+<!--        flex-direction: column;-->
+<!--        text-align: center;-->
+<!--      }-->
+
+<!--      .header-title {-->
+<!--        font-size: 2rem;-->
+<!--      }-->
+
+<!--      .header-actions {-->
+<!--        width: 100%;-->
+<!--        justify-content: center;-->
+<!--      }-->
+
+<!--      .search-form {-->
+<!--        flex-direction: column;-->
+<!--      }-->
+
+<!--      .search-btn {-->
+<!--        justify-content: center;-->
+<!--      }-->
+
+<!--      .topic-meta {-->
+<!--        flex-direction: column;-->
+<!--        gap: 0.75rem;-->
+<!--      }-->
+
+<!--      .topic-card {-->
+<!--        padding: 1.5rem;-->
+<!--      }-->
+
+<!--      .pagination {-->
+<!--        flex-direction: column;-->
+<!--        gap: 1rem;-->
+<!--      }-->
+
+<!--      .pagination-btn {-->
+<!--        width: 100%;-->
+<!--        justify-content: center;-->
+<!--      }-->
+
+<!--      /* Empty state adjustments */-->
+<!--      .empty-state {-->
+<!--        padding: 2rem 1rem;-->
+<!--      }-->
+
+<!--      .empty-icon {-->
+<!--        font-size: 3rem;-->
+<!--      }-->
+
+<!--      .empty-title {-->
+<!--        font-size: 1.25rem;-->
+<!--      }-->
+
+<!--      .empty-message {-->
+<!--        font-size: 1rem;-->
+<!--      }-->
+<!--    }-->
+
+<!--    @media (max-width: 1024px) {-->
+<!--      .main-content {-->
+<!--        margin-left: 80px;-->
+<!--      }-->
+<!--    }-->
+
+<!--    /* Desktop - show controls section normally */-->
+<!--    @media (min-width: 769px) {-->
+<!--      .mobile-filter-toggle,-->
+<!--      .mobile-filter-overlay,-->
+<!--      .mobile-filter-panel {-->
+<!--        display: none !important;-->
+<!--      }-->
+<!--    }-->
+
+<!--    /* Animations */-->
+<!--    @keyframes fadeIn {-->
+<!--      from {-->
+<!--        opacity: 0;-->
+<!--        transform: translateY(20px);-->
+<!--      }-->
+<!--      to {-->
+<!--        opacity: 1;-->
+<!--        transform: translateY(0);-->
+<!--      }-->
+<!--    }-->
+
+<!--    .topic-card {-->
+<!--      animation: fadeIn 0.6s ease;-->
+<!--    }-->
+<!--  </style>-->
 <!--</head>-->
 <!--<body>-->
-<!--<header>-->
-<!--  <h1>🎭 Форум артистов</h1>-->
-<!--  <nav>-->
-<!--    <a th:href="@{/forums/create}">📝 Создать тему</a>-->
-<!--    <a th:href="@{/profile}">👤 Профиль</a>-->
-<!--    <a th:href="@{/logout}">🚪 Выход</a>-->
-<!--  </nav>-->
-<!--</header>-->
+<!--&lt;!&ndash; Подключаем мобильный хедер и сайдбар &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>-->
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar('forums')}"></th:block>-->
 
-<!--<main>-->
-<!--  &lt;!&ndash; Поиск &ndash;&gt;-->
-<!--  <section>-->
-<!--    <form th:action="@{/forums/search}" method="get">-->
-<!--      <input type="text" name="query" placeholder="Поиск по темам..." required>-->
-<!--      <button type="submit">🔍 Найти</button>-->
+<!--&lt;!&ndash; Mobile Filter Toggle Button &ndash;&gt;-->
+<!--<button class="mobile-filter-toggle" id="mobileFilterToggle" aria-label="Открыть фильтры">-->
+<!--  <i class="fas fa-filter"></i>-->
+<!--</button>-->
+
+<!--&lt;!&ndash; Mobile Filter Overlay &ndash;&gt;-->
+<!--<div class="mobile-filter-overlay" id="mobileFilterOverlay"></div>-->
+
+<!--&lt;!&ndash; Mobile Filter Panel &ndash;&gt;-->
+<!--<div class="mobile-filter-panel" id="mobileFilterPanel">-->
+<!--  <div class="mobile-filter-header">-->
+<!--    <h3 class="mobile-filter-title">Фильтры и сортировка</h3>-->
+<!--    <button class="mobile-filter-close" id="mobileFilterClose" aria-label="Закрыть фильтры">-->
+<!--      <i class="fas fa-times"></i>-->
+<!--    </button>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Categories Filter for Mobile &ndash;&gt;-->
+<!--  <div class="control-group">-->
+<!--    <h4 class="control-title">-->
+<!--      <i class="fas fa-filter"></i>-->
+<!--      Категории-->
+<!--    </h4>-->
+<!--    <div class="mobile-filter-buttons">-->
+<!--      <a th:href="@{/forums}"-->
+<!--         class="mobile-filter-btn"-->
+<!--         th:classappend="${currentType == null} ? 'active' : ''">-->
+<!--        <i class="fas fa-list"></i>-->
+<!--        <span>Все категории</span>-->
+<!--      </a>-->
+<!--      <a th:each="type : ${forumTypes}"-->
+<!--         th:href="@{/forums(forumType=${type})}"-->
+<!--         class="mobile-filter-btn"-->
+<!--         th:classappend="${type == currentType} ? 'active' : ''">-->
+<!--        <span th:text="${type.emoji}">📋</span>-->
+<!--        <span th:text="${type.displayName}">Категория</span>-->
+<!--      </a>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Sorting Options for Mobile &ndash;&gt;-->
+<!--  <div class="control-group">-->
+<!--    <h4 class="control-title">-->
+<!--      <i class="fas fa-sort"></i>-->
+<!--      Сортировка-->
+<!--    </h4>-->
+<!--    <div class="mobile-filter-buttons">-->
+<!--      <a th:href="@{/forums(sortBy='createdAt', sortDirection='DESC', forumType=${currentType})}"-->
+<!--         class="mobile-filter-btn"-->
+<!--         th:classappend="${sortBy == 'createdAt' && sortDirection == 'DESC'} ? 'active' : ''">-->
+<!--        <i class="fas fa-clock"></i>-->
+<!--        <span>Сначала новые</span>-->
+<!--      </a>-->
+<!--      <a th:href="@{/forums(sortBy='createdAt', sortDirection='ASC', forumType=${currentType})}"-->
+<!--         class="mobile-filter-btn"-->
+<!--         th:classappend="${sortBy == 'createdAt' && sortDirection == 'ASC'} ? 'active' : ''">-->
+<!--        <i class="fas fa-history"></i>-->
+<!--        <span>Сначала старые</span>-->
+<!--      </a>-->
+<!--      <a th:href="@{/forums(sortBy='viewCount', sortDirection='DESC', forumType=${currentType})}"-->
+<!--         class="mobile-filter-btn"-->
+<!--         th:classappend="${sortBy == 'viewCount'} ? 'active' : ''">-->
+<!--        <i class="fas fa-eye"></i>-->
+<!--        <span>По количеству просмотров</span>-->
+<!--      </a>-->
+<!--      <a th:href="@{/forums(sortBy='commentCount', sortDirection='DESC', forumType=${currentType})}"-->
+<!--         class="mobile-filter-btn"-->
+<!--         th:classappend="${sortBy == 'commentCount'} ? 'active' : ''">-->
+<!--        <i class="fas fa-comments"></i>-->
+<!--        <span>По количеству комментариев</span>-->
+<!--      </a>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--<main class="main-content">-->
+<!--  &lt;!&ndash; Page Header &ndash;&gt;-->
+<!--  <header class="page-header">-->
+<!--    <div class="header-content">-->
+<!--      <div>-->
+<!--        <h1 class="header-title">-->
+<!--          <i class="fas fa-theater-masks"></i>-->
+<!--          Форум артистов-->
+<!--        </h1>-->
+<!--        <p class="header-subtitle">Место для общения и обмена опытом между артистами</p>-->
+<!--      </div>-->
+<!--      <div class="header-actions">-->
+<!--        <a th:href="@{/forums/create}" class="action-btn primary">-->
+<!--          <i class="fas fa-plus"></i>-->
+<!--          <span>Создать тему</span>-->
+<!--        </a>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </header>-->
+
+<!--  &lt;!&ndash; Alert Messages &ndash;&gt;-->
+<!--  <div th:if="${successMessage}" class="alert alert-success">-->
+<!--    <i class="fas fa-check-circle"></i>-->
+<!--    <span th:text="${successMessage}"></span>-->
+<!--  </div>-->
+
+<!--  <div th:if="${errorMessage}" class="alert alert-error">-->
+<!--    <i class="fas fa-exclamation-triangle"></i>-->
+<!--    <span th:text="${errorMessage}"></span>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Search Section &ndash;&gt;-->
+<!--  <section class="search-section">-->
+<!--    <form th:action="@{/forums/search}" method="get" class="search-form">-->
+<!--      <input type="text"-->
+<!--             name="query"-->
+<!--             class="search-input"-->
+<!--             placeholder="Поиск по темам форума..."-->
+<!--             required>-->
+<!--      <button type="submit" class="search-btn">-->
+<!--        <i class="fas fa-search"></i>-->
+<!--        <span>Найти</span>-->
+<!--      </button>-->
 <!--    </form>-->
 <!--  </section>-->
 
-<!--  &lt;!&ndash; Фильтры &ndash;&gt;-->
-<!--  <section>-->
-<!--    <h3>Категории:</h3>-->
-<!--    <a th:href="@{/forums}">Все</a>-->
-<!--    <a th:each="type : ${forumTypes}"-->
-<!--       th:href="@{/forums(forumType=${type})}"-->
-<!--       th:text="${type.emoji + ' ' + type.displayName}"-->
-<!--       th:classappend="${type == currentType} ? 'active' : ''">-->
-<!--    </a>-->
-<!--  </section>-->
-
-<!--  &lt;!&ndash; Сортировка &ndash;&gt;-->
-<!--  <section>-->
-<!--    <span>Сортировка:</span>-->
-<!--    <a th:href="@{/forums(sortBy='createdAt', sortDirection='DESC')}">🕒 По дате (новые)</a>-->
-<!--    <a th:href="@{/forums(sortBy='createdAt', sortDirection='ASC')}">🕒 По дате (старые)</a>-->
-<!--    <a th:href="@{/forums(sortBy='viewCount', sortDirection='DESC')}">👁️ По просмотрам</a>-->
-<!--    <a th:href="@{/forums(sortBy='commentCount', sortDirection='DESC')}">💬 По комментариям</a>-->
-<!--  </section>-->
-
-<!--  &lt;!&ndash; Список тем &ndash;&gt;-->
-<!--  <section>-->
-<!--    <div th:if="${forums.content.empty}">-->
-<!--      <p>Тем пока нет. <a th:href="@{/forums/create}">Создайте первую!</a></p>-->
+<!--  &lt;!&ndash; Desktop Filters & Controls (Hidden on mobile) &ndash;&gt;-->
+<!--  <section class="controls-section">-->
+<!--    &lt;!&ndash; Categories Filter &ndash;&gt;-->
+<!--    <div class="control-group">-->
+<!--      <h3 class="control-title">-->
+<!--        <i class="fas fa-filter"></i>-->
+<!--        Категории-->
+<!--      </h3>-->
+<!--      <div class="filter-buttons">-->
+<!--        <a th:href="@{/forums}"-->
+<!--           class="filter-btn"-->
+<!--           th:classappend="${currentType == null} ? 'active' : ''">-->
+<!--          <i class="fas fa-list"></i>-->
+<!--          <span>Все</span>-->
+<!--        </a>-->
+<!--        <a th:each="type : ${forumTypes}"-->
+<!--           th:href="@{/forums(forumType=${type})}"-->
+<!--           class="filter-btn"-->
+<!--           th:classappend="${type == currentType} ? 'active' : ''">-->
+<!--          <span th:text="${type.emoji}">📋</span>-->
+<!--          <span th:text="${type.displayName}">Категория</span>-->
+<!--        </a>-->
+<!--      </div>-->
 <!--    </div>-->
 
-<!--    <article th:each="forum : ${forums.content}">-->
-<!--      <header>-->
-<!--        <h2>-->
-<!--          <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.getTitle()}"></a>-->
-<!--        </h2>-->
-<!--        <div>-->
-<!--          <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}"></span>-->
-<!--        </div>-->
-<!--      </header>-->
-
-<!--      <footer>-->
-<!--        <div>-->
-<!--          <span>👤 <span th:text="${forum.authorName}"></span></span>-->
-<!--          <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}"></span></span>-->
-<!--          <span>👁️ <span th:text="${forum.viewCount}"></span></span>-->
-<!--          <span>💬 <span th:text="${forum.commentCount}"></span></span>-->
-<!--        </div>-->
-<!--      </footer>-->
-<!--    </article>-->
+<!--    &lt;!&ndash; Sorting Options &ndash;&gt;-->
+<!--    <div class="control-group">-->
+<!--      <h3 class="control-title">-->
+<!--        <i class="fas fa-sort"></i>-->
+<!--        Сортировка-->
+<!--      </h3>-->
+<!--      <div class="filter-buttons">-->
+<!--        <a th:href="@{/forums(sortBy='createdAt', sortDirection='DESC', forumType=${currentType})}"-->
+<!--           class="filter-btn"-->
+<!--           th:classappend="${sortBy == 'createdAt' && sortDirection == 'DESC'} ? 'active' : ''">-->
+<!--          <i class="fas fa-clock"></i>-->
+<!--          <span>Новые</span>-->
+<!--        </a>-->
+<!--        <a th:href="@{/forums(sortBy='createdAt', sortDirection='ASC', forumType=${currentType})}"-->
+<!--           class="filter-btn"-->
+<!--           th:classappend="${sortBy == 'createdAt' && sortDirection == 'ASC'} ? 'active' : ''">-->
+<!--          <i class="fas fa-history"></i>-->
+<!--          <span>Старые</span>-->
+<!--        </a>-->
+<!--        <a th:href="@{/forums(sortBy='viewCount', sortDirection='DESC', forumType=${currentType})}"-->
+<!--           class="filter-btn"-->
+<!--           th:classappend="${sortBy == 'viewCount'} ? 'active' : ''">-->
+<!--          <i class="fas fa-eye"></i>-->
+<!--          <span>По просмотрам</span>-->
+<!--        </a>-->
+<!--        <a th:href="@{/forums(sortBy='commentCount', sortDirection='DESC', forumType=${currentType})}"-->
+<!--           class="filter-btn"-->
+<!--           th:classappend="${sortBy == 'commentCount'} ? 'active' : ''">-->
+<!--          <i class="fas fa-comments"></i>-->
+<!--          <span>По комментариям</span>-->
+<!--        </a>-->
+<!--      </div>-->
+<!--    </div>-->
 <!--  </section>-->
 
-<!--  &lt;!&ndash; Пагинация &ndash;&gt;-->
-<!--  <nav th:if="${forums.totalPages > 1}">-->
+<!--  &lt;!&ndash; Topics List &ndash;&gt;-->
+<!--  <section class="topics-section">-->
+<!--    &lt;!&ndash; Empty State &ndash;&gt;-->
+<!--    <div th:if="${forums.content.empty}" class="empty-state">-->
+<!--      <div class="empty-icon">-->
+<!--        <i class="fas fa-comments"></i>-->
+<!--      </div>-->
+<!--      <h2 class="empty-title">Пока нет тем для обсуждения</h2>-->
+<!--      <p class="empty-message">Станьте первым, кто начнет обсуждение в сообществе артистов!</p>-->
+<!--      <a th:href="@{/forums/create}" class="action-btn primary">-->
+<!--        <i class="fas fa-plus"></i>-->
+<!--        <span>Создать первую тему</span>-->
+<!--      </a>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Topics List &ndash;&gt;-->
+<!--    <div th:if="${!forums.content.empty}">-->
+<!--      <article th:each="forum : ${forums.content}" class="topic-card">-->
+<!--        <header class="topic-header">-->
+<!--          <h2 class="topic-title">-->
+<!--            <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.title}">Заголовок темы</a>-->
+<!--          </h2>-->
+<!--          <div class="topic-category">-->
+<!--            <span th:text="${forum.forumType.emoji}">📋</span>-->
+<!--            <span th:text="${forum.forumType.displayName}">Категория</span>-->
+<!--          </div>-->
+<!--        </header>-->
+
+<!--        <footer class="topic-meta">-->
+<!--          <div class="meta-item">-->
+<!--            <i class="fas fa-user meta-icon"></i>-->
+<!--            <span th:text="${forum.authorName}">Автор</span>-->
+<!--          </div>-->
+<!--          <div class="meta-item">-->
+<!--            <i class="fas fa-clock meta-icon"></i>-->
+<!--            <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span>-->
+<!--          </div>-->
+<!--          <div class="meta-item">-->
+<!--            <i class="fas fa-eye meta-icon"></i>-->
+<!--            <span class="meta-value" th:text="${forum.viewCount}">0</span>-->
+<!--            <span>просмотров</span>-->
+<!--          </div>-->
+<!--          <div class="meta-item">-->
+<!--            <i class="fas fa-comments meta-icon"></i>-->
+<!--            <span class="meta-value" th:text="${forum.commentCount}">0</span>-->
+<!--            <span>комментариев</span>-->
+<!--          </div>-->
+<!--        </footer>-->
+<!--      </article>-->
+<!--    </div>-->
+<!--  </section>-->
+
+<!--  &lt;!&ndash; Pagination &ndash;&gt;-->
+<!--  <nav th:if="${forums.totalPages > 1}" class="pagination">-->
 <!--    <a th:if="${forums.hasPrevious}"-->
-<!--       th:href="@{/forums(page=${forums.page - 1}, size=${forums.size}, forumType=${currentType})}">-->
-<!--      ⬅️ Предыдущая-->
+<!--       th:href="@{/forums(page=${forums.page - 1}, size=${forums.size}, forumType=${currentType}, sortBy=${sortBy}, sortDirection=${sortDirection})}"-->
+<!--       class="pagination-btn">-->
+<!--      <i class="fas fa-chevron-left"></i>-->
+<!--      <span>Предыдущая</span>-->
 <!--    </a>-->
 
-<!--    <span th:text="'Страница ' + ${forums.page + 1} + ' из ' + ${forums.totalPages}"></span>-->
+<!--    <span class="pagination-info" th:text="'Страница ' + ${forums.page + 1} + ' из ' + ${forums.totalPages}">Страница 1 из 1</span>-->
 
 <!--    <a th:if="${forums.hasNext}"-->
-<!--       th:href="@{/forums(page=${forums.page + 1}, size=${forums.size}, forumType=${currentType})}">-->
-<!--      Следующая ➡️-->
+<!--       th:href="@{/forums(page=${forums.page + 1}, size=${forums.size}, forumType=${currentType}, sortBy=${sortBy}, sortDirection=${sortDirection})}"-->
+<!--       class="pagination-btn">-->
+<!--      <span>Следующая</span>-->
+<!--      <i class="fas fa-chevron-right"></i>-->
 <!--    </a>-->
 <!--  </nav>-->
 <!--</main>-->
 
-<!--&lt;!&ndash; Сообщения &ndash;&gt;-->
-<!--<div th:if="${successMessage}" th:text="${successMessage}"></div>-->
-<!--<div th:if="${errorMessage}" th:text="${errorMessage}"></div>-->
+<!--&lt;!&ndash; Подключаем скрипты сайдбара &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>-->
+
+<!--<script>-->
+<!--  document.addEventListener('DOMContentLoaded', function() {-->
+<!--    // Mobile Filter Panel Logic-->
+<!--    const mobileFilterToggle = document.getElementById('mobileFilterToggle');-->
+<!--    const mobileFilterOverlay = document.getElementById('mobileFilterOverlay');-->
+<!--    const mobileFilterPanel = document.getElementById('mobileFilterPanel');-->
+<!--    const mobileFilterClose = document.getElementById('mobileFilterClose');-->
+
+<!--    function openMobileFilters() {-->
+<!--      mobileFilterToggle.classList.add('active');-->
+<!--      mobileFilterOverlay.classList.add('active');-->
+<!--      mobileFilterPanel.classList.add('active');-->
+<!--      document.body.style.overflow = 'hidden';-->
+<!--    }-->
+
+<!--    function closeMobileFilters() {-->
+<!--      mobileFilterToggle.classList.remove('active');-->
+<!--      mobileFilterOverlay.classList.remove('active');-->
+<!--      mobileFilterPanel.classList.remove('active');-->
+<!--      document.body.style.overflow = '';-->
+<!--    }-->
+
+<!--    // Event listeners for mobile filter panel-->
+<!--    if (mobileFilterToggle) {-->
+<!--      mobileFilterToggle.addEventListener('click', function() {-->
+<!--        // Check if panel is already open-->
+<!--        if (mobileFilterPanel.classList.contains('active')) {-->
+<!--          closeMobileFilters();-->
+<!--        } else {-->
+<!--          openMobileFilters();-->
+<!--        }-->
+<!--      });-->
+<!--    }-->
+
+<!--    if (mobileFilterClose) {-->
+<!--      mobileFilterClose.addEventListener('click', closeMobileFilters);-->
+<!--    }-->
+
+<!--    if (mobileFilterOverlay) {-->
+<!--      mobileFilterOverlay.addEventListener('click', closeMobileFilters);-->
+<!--    }-->
+
+<!--    // Close on escape key-->
+<!--    document.addEventListener('keydown', function(e) {-->
+<!--      if (e.key === 'Escape' && mobileFilterPanel.classList.contains('active')) {-->
+<!--        closeMobileFilters();-->
+<!--      }-->
+<!--    });-->
+
+<!--    // Auto-close mobile filter panel when clicking on filter options-->
+<!--    const mobileFilterButtons = document.querySelectorAll('.mobile-filter-btn');-->
+<!--    mobileFilterButtons.forEach(btn => {-->
+<!--      btn.addEventListener('click', function() {-->
+<!--        // Add a small delay to allow navigation to start-->
+<!--        setTimeout(closeMobileFilters, 100);-->
+<!--      });-->
+<!--    });-->
+
+<!--    // Highlight active filter buttons based on URL parameters-->
+<!--    const urlParams = new URLSearchParams(window.location.search);-->
+<!--    const currentSort = urlParams.get('sortBy');-->
+<!--    const currentDirection = urlParams.get('sortDirection');-->
+
+<!--    // Enhanced search functionality-->
+<!--    const searchForm = document.querySelector('.search-form');-->
+<!--    const searchInput = document.querySelector('.search-input');-->
+
+<!--    if (searchForm && searchInput) {-->
+<!--      // Auto-focus search on Ctrl+K or Cmd+K-->
+<!--      document.addEventListener('keydown', function(e) {-->
+<!--        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {-->
+<!--          e.preventDefault();-->
+<!--          searchInput.focus();-->
+<!--        }-->
+<!--      });-->
+
+<!--      // Submit form on Enter-->
+<!--      searchInput.addEventListener('keypress', function(e) {-->
+<!--        if (e.key === 'Enter' && this.value.trim()) {-->
+<!--          searchForm.submit();-->
+<!--        }-->
+<!--      });-->
+<!--    }-->
+
+<!--    // Smooth hover animations for topic cards-->
+<!--    const topicCards = document.querySelectorAll('.topic-card');-->
+<!--    topicCards.forEach(card => {-->
+<!--      card.addEventListener('mouseenter', function() {-->
+<!--        this.style.transform = 'translateY(-4px)';-->
+<!--      });-->
+
+<!--      card.addEventListener('mouseleave', function() {-->
+<!--        this.style.transform = 'translateY(-2px)';-->
+<!--      });-->
+<!--    });-->
+
+<!--    // Enhanced filter button interactions-->
+<!--    const filterButtons = document.querySelectorAll('.filter-btn');-->
+<!--    filterButtons.forEach(btn => {-->
+<!--      btn.addEventListener('click', function(e) {-->
+<!--        // Add loading state-->
+<!--        const originalText = this.innerHTML;-->
+<!--        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Загрузка...</span>';-->
+
+<!--        // Reset after a short delay if navigation fails-->
+<!--        setTimeout(() => {-->
+<!--          this.innerHTML = originalText;-->
+<!--        }, 3000);-->
+<!--      });-->
+<!--    });-->
+
+<!--    // Touch gestures for mobile filter panel-->
+<!--    let startY = 0;-->
+<!--    let currentY = 0;-->
+<!--    let isDragging = false;-->
+
+<!--    if (mobileFilterPanel) {-->
+<!--      mobileFilterPanel.addEventListener('touchstart', function(e) {-->
+<!--        startY = e.touches[0].clientY;-->
+<!--        isDragging = true;-->
+<!--      });-->
+
+<!--      mobileFilterPanel.addEventListener('touchmove', function(e) {-->
+<!--        if (!isDragging) return;-->
+
+<!--        currentY = e.touches[0].clientY;-->
+<!--        const diffY = currentY - startY;-->
+
+<!--        // Only allow dragging down to close-->
+<!--        if (diffY > 0) {-->
+<!--          const translateY = Math.min(diffY, 200);-->
+<!--          this.style.transform = `translateY(${translateY}px)`;-->
+<!--        }-->
+<!--      });-->
+
+<!--      mobileFilterPanel.addEventListener('touchend', function(e) {-->
+<!--        if (!isDragging) return;-->
+<!--        isDragging = false;-->
+
+<!--        const diffY = currentY - startY;-->
+
+<!--        // If dragged down more than 100px, close the panel-->
+<!--        if (diffY > 100) {-->
+<!--          closeMobileFilters();-->
+<!--        } else {-->
+<!--          // Reset position-->
+<!--          this.style.transform = 'translateY(0)';-->
+<!--        }-->
+<!--      });-->
+<!--    }-->
+
+<!--    // Auto-refresh page data every 5 minutes (optional)-->
+<!--    setInterval(() => {-->
+<!--      // Check if there are new topics available-->
+<!--      const currentCount = document.querySelectorAll('.topic-card').length;-->
+<!--      // Could implement AJAX check here-->
+<!--    }, 300000); // 5 minutes-->
+
+<!--    console.log('🎭 Mobile-optimized forum list page initialized');-->
+<!--    console.log(`📊 Loaded ${document.querySelectorAll('.topic-card').length} topics`);-->
+<!--    console.log('📱 Mobile filter panel ready');-->
+<!--  });-->
+<!--</script>-->
 <!--</body>-->
 <!--</html>-->
+
+
 
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
@@ -132,6 +1877,106 @@
       margin-left: 280px;
       min-height: 100vh;
       padding: 2rem;
+    }
+
+    /* Mobile Filter Toggle */
+    .mobile-filter-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mobile-filter-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .mobile-filter-toggle.active {
+      background: #ef4444;
+      transform: rotate(45deg);
+    }
+
+    /* Mobile Filter Overlay */
+    .mobile-filter-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 998;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .mobile-filter-overlay.active {
+      opacity: 1;
+    }
+
+    /* Mobile Filter Panel */
+    .mobile-filter-panel {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border-radius: 20px 20px 0 0;
+      padding: 1.5rem;
+      box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .mobile-filter-panel.active {
+      transform: translateY(0);
+    }
+
+    .mobile-filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-primary);
+    }
+
+    .mobile-filter-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .mobile-filter-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .mobile-filter-close:hover {
+      background: var(--bg-accent);
+      color: var(--text-primary);
     }
 
     /* Page Header */
@@ -277,7 +2122,7 @@
       box-shadow: var(--shadow-md);
     }
 
-    /* Filters & Controls */
+    /* Filters & Controls - Hidden on mobile by default */
     .controls-section {
       background: var(--bg-secondary);
       border-radius: var(--radius-xl);
@@ -340,6 +2185,39 @@
       box-shadow: var(--shadow-md);
     }
 
+    /* Mobile Filter Buttons */
+    .mobile-filter-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .mobile-filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: var(--bg-accent);
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-secondary);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 500;
+      width: 100%;
+    }
+
+    .mobile-filter-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+      text-decoration: none;
+    }
+
+    .mobile-filter-btn.active {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+    }
+
     /* Topics List */
     .topics-section {
       background: var(--bg-secondary);
@@ -384,6 +2262,7 @@
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
+      cursor: pointer;
     }
 
     .topic-card:hover {
@@ -524,6 +2403,19 @@
         margin-left: 0;
         padding: 1rem;
         padding-top: 80px;
+        padding-bottom: 100px; /* Space for floating button */
+      }
+
+      /* Hide desktop filters on mobile */
+      .controls-section {
+        display: none;
+      }
+
+      /* Show mobile filter toggle */
+      .mobile-filter-toggle,
+      .mobile-filter-overlay,
+      .mobile-filter-panel {
+        display: block;
       }
 
       .header-content {
@@ -544,7 +2436,7 @@
         flex-direction: column;
       }
 
-      .filter-buttons {
+      .search-btn {
         justify-content: center;
       }
 
@@ -553,15 +2445,50 @@
         gap: 0.75rem;
       }
 
+      .topic-card {
+        padding: 1.5rem;
+      }
+
       .pagination {
         flex-direction: column;
         gap: 1rem;
+      }
+
+      .pagination-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* Empty state adjustments */
+      .empty-state {
+        padding: 2rem 1rem;
+      }
+
+      .empty-icon {
+        font-size: 3rem;
+      }
+
+      .empty-title {
+        font-size: 1.25rem;
+      }
+
+      .empty-message {
+        font-size: 1rem;
       }
     }
 
     @media (max-width: 1024px) {
       .main-content {
         margin-left: 80px;
+      }
+    }
+
+    /* Desktop - show controls section normally */
+    @media (min-width: 769px) {
+      .mobile-filter-toggle,
+      .mobile-filter-overlay,
+      .mobile-filter-panel {
+        display: none !important;
       }
     }
 
@@ -586,6 +2513,81 @@
 <!-- Подключаем мобильный хедер и сайдбар -->
 <th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>
 <th:block th:replace="~{fragments/sidebar :: sidebar('forums')}"></th:block>
+
+<!-- Mobile Filter Toggle Button -->
+<button class="mobile-filter-toggle" id="mobileFilterToggle" aria-label="Открыть фильтры">
+  <i class="fas fa-filter"></i>
+</button>
+
+<!-- Mobile Filter Overlay -->
+<div class="mobile-filter-overlay" id="mobileFilterOverlay"></div>
+
+<!-- Mobile Filter Panel -->
+<div class="mobile-filter-panel" id="mobileFilterPanel">
+  <div class="mobile-filter-header">
+    <h3 class="mobile-filter-title">Фильтры и сортировка</h3>
+    <button class="mobile-filter-close" id="mobileFilterClose" aria-label="Закрыть фильтры">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Categories Filter for Mobile -->
+  <div class="control-group">
+    <h4 class="control-title">
+      <i class="fas fa-filter"></i>
+      Категории
+    </h4>
+    <div class="mobile-filter-buttons">
+      <a th:href="@{/forums}"
+         class="mobile-filter-btn"
+         th:classappend="${currentType == null} ? 'active' : ''">
+        <i class="fas fa-list"></i>
+        <span>Все категории</span>
+      </a>
+      <a th:each="type : ${forumTypes}"
+         th:href="@{/forums(forumType=${type})}"
+         class="mobile-filter-btn"
+         th:classappend="${type == currentType} ? 'active' : ''">
+        <span th:text="${type.emoji}">📋</span>
+        <span th:text="${type.displayName}">Категория</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Sorting Options for Mobile -->
+  <div class="control-group">
+    <h4 class="control-title">
+      <i class="fas fa-sort"></i>
+      Сортировка
+    </h4>
+    <div class="mobile-filter-buttons">
+      <a th:href="@{/forums(sortBy='createdAt', sortDirection='DESC', forumType=${currentType})}"
+         class="mobile-filter-btn"
+         th:classappend="${sortBy == 'createdAt' && sortDirection == 'DESC'} ? 'active' : ''">
+        <i class="fas fa-clock"></i>
+        <span>Сначала новые</span>
+      </a>
+      <a th:href="@{/forums(sortBy='createdAt', sortDirection='ASC', forumType=${currentType})}"
+         class="mobile-filter-btn"
+         th:classappend="${sortBy == 'createdAt' && sortDirection == 'ASC'} ? 'active' : ''">
+        <i class="fas fa-history"></i>
+        <span>Сначала старые</span>
+      </a>
+      <a th:href="@{/forums(sortBy='viewCount', sortDirection='DESC', forumType=${currentType})}"
+         class="mobile-filter-btn"
+         th:classappend="${sortBy == 'viewCount'} ? 'active' : ''">
+        <i class="fas fa-eye"></i>
+        <span>По количеству просмотров</span>
+      </a>
+      <a th:href="@{/forums(sortBy='commentCount', sortDirection='DESC', forumType=${currentType})}"
+         class="mobile-filter-btn"
+         th:classappend="${sortBy == 'commentCount'} ? 'active' : ''">
+        <i class="fas fa-comments"></i>
+        <span>По количеству комментариев</span>
+      </a>
+    </div>
+  </div>
+</div>
 
 <main class="main-content">
   <!-- Page Header -->
@@ -633,7 +2635,7 @@
     </form>
   </section>
 
-  <!-- Filters & Controls -->
+  <!-- Desktop Filters & Controls (Hidden on mobile) -->
   <section class="controls-section">
     <!-- Categories Filter -->
     <div class="control-group">
@@ -710,7 +2712,7 @@
 
     <!-- Topics List -->
     <div th:if="${!forums.content.empty}">
-      <article th:each="forum : ${forums.content}" class="topic-card">
+      <article th:each="forum : ${forums.content}" class="topic-card" th:data-forum-id="${forum.id}">
         <header class="topic-header">
           <h2 class="topic-title">
             <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.title}">Заголовок темы</a>
@@ -770,6 +2772,62 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Mobile Filter Panel Logic
+    const mobileFilterToggle = document.getElementById('mobileFilterToggle');
+    const mobileFilterOverlay = document.getElementById('mobileFilterOverlay');
+    const mobileFilterPanel = document.getElementById('mobileFilterPanel');
+    const mobileFilterClose = document.getElementById('mobileFilterClose');
+
+    function openMobileFilters() {
+      mobileFilterToggle.classList.add('active');
+      mobileFilterOverlay.classList.add('active');
+      mobileFilterPanel.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileFilters() {
+      mobileFilterToggle.classList.remove('active');
+      mobileFilterOverlay.classList.remove('active');
+      mobileFilterPanel.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // Event listeners for mobile filter panel
+    if (mobileFilterToggle) {
+      mobileFilterToggle.addEventListener('click', function() {
+        // Check if panel is already open
+        if (mobileFilterPanel.classList.contains('active')) {
+          closeMobileFilters();
+        } else {
+          openMobileFilters();
+        }
+      });
+    }
+
+    if (mobileFilterClose) {
+      mobileFilterClose.addEventListener('click', closeMobileFilters);
+    }
+
+    if (mobileFilterOverlay) {
+      mobileFilterOverlay.addEventListener('click', closeMobileFilters);
+    }
+
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && mobileFilterPanel.classList.contains('active')) {
+        closeMobileFilters();
+      }
+    });
+
+    // Auto-close mobile filter panel when clicking on filter options
+    const mobileFilterButtons = document.querySelectorAll('.mobile-filter-btn');
+    mobileFilterButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Add a small delay to allow navigation to start
+        setTimeout(closeMobileFilters, 100);
+      });
+    });
+
     // Highlight active filter buttons based on URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const currentSort = urlParams.get('sortBy');
@@ -799,6 +2857,20 @@
     // Smooth hover animations for topic cards
     const topicCards = document.querySelectorAll('.topic-card');
     topicCards.forEach(card => {
+      // Add click handler for entire card
+      card.addEventListener('click', function(e) {
+        // Don't trigger if clicking on a link directly
+        if (e.target.tagName === 'A' || e.target.closest('a')) {
+          return;
+        }
+
+        const forumId = this.getAttribute('data-forum-id');
+        if (forumId) {
+          // Navigate to forum detail page
+          window.location.href = `/forums/${forumId}`;
+        }
+      });
+
       card.addEventListener('mouseenter', function() {
         this.style.transform = 'translateY(-4px)';
       });
@@ -823,6 +2895,46 @@
       });
     });
 
+    // Touch gestures for mobile filter panel
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+
+    if (mobileFilterPanel) {
+      mobileFilterPanel.addEventListener('touchstart', function(e) {
+        startY = e.touches[0].clientY;
+        isDragging = true;
+      });
+
+      mobileFilterPanel.addEventListener('touchmove', function(e) {
+        if (!isDragging) return;
+
+        currentY = e.touches[0].clientY;
+        const diffY = currentY - startY;
+
+        // Only allow dragging down to close
+        if (diffY > 0) {
+          const translateY = Math.min(diffY, 200);
+          this.style.transform = `translateY(${translateY}px)`;
+        }
+      });
+
+      mobileFilterPanel.addEventListener('touchend', function(e) {
+        if (!isDragging) return;
+        isDragging = false;
+
+        const diffY = currentY - startY;
+
+        // If dragged down more than 100px, close the panel
+        if (diffY > 100) {
+          closeMobileFilters();
+        } else {
+          // Reset position
+          this.style.transform = 'translateY(0)';
+        }
+      });
+    }
+
     // Auto-refresh page data every 5 minutes (optional)
     setInterval(() => {
       // Check if there are new topics available
@@ -830,8 +2942,9 @@
       // Could implement AJAX check here
     }, 300000); // 5 minutes
 
-    console.log('🎭 Forum list page initialized');
+    console.log('🎭 Mobile-optimized forum list page initialized');
     console.log(`📊 Loaded ${document.querySelectorAll('.topic-card').length} topics`);
+    console.log('📱 Mobile filter panel ready');
   });
 </script>
 </body>

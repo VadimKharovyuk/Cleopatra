@@ -611,27 +611,6 @@
             <span>Вернуться к списку тем</span>
         </a>
     </div>
-
-    <!-- Debug Panel (remove in production) -->
-    <div class="debug-panel" th:remove="tag">
-        <div class="debug-title">🔍 Debug Information</div>
-        <div class="debug-item">
-            Forum object:
-            <span class="debug-value" th:text="${forum != null ? 'Found' : 'NULL'}">null</span>
-        </div>
-        <div class="debug-item">
-            Forum != null:
-            <span class="debug-value" th:text="${forum != null}">false</span>
-        </div>
-        <div class="debug-item">
-            Error message:
-            <span class="debug-value" th:text="${errorMessage ?: 'none'}">none</span>
-        </div>
-        <div class="debug-item" th:if="${forum != null}">
-            Forum title:
-            <span class="debug-value" th:text="${forum.title}">-</span>
-        </div>
-    </div>
 </main>
 
 <!-- Подключаем скрипты сайдбара -->

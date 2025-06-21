@@ -471,9 +471,6 @@
 
             <div class="photo-overlay">
               <div class="photo-overlay-content">
-                <div class="photo-overlay-title" th:text="'Фото #' + ${photo.id}">
-                  Фото #1
-                </div>
                 <div class="photo-overlay-date"
                      th:text="${#temporals.format(photo.uploadDate, 'd MMMM yyyy', #locale)}">
                   15 июня 2025
@@ -483,10 +480,10 @@
           </div>
 
           <div class="photo-card-content">
-            <div class="photo-description"
-                 th:text="${photo.description ?: 'Без описания'}">
-              Описание фотографии
-            </div>
+<!--            <div class="photo-description"-->
+<!--                 th:text="${photo.description ?: 'Без описания'}">-->
+<!--              Описание фотографии-->
+<!--            </div>-->
 
             <div class="photo-meta">
                             <span th:text="${#temporals.format(photo.uploadDate, 'd MMM yyyy', #locale)}">
