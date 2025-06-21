@@ -8,6 +8,7 @@ import com.example.cleopatra.enums.ForumType;
 
 public interface ForumService {
 
+
     ForumCreateResponseDTO createForum(ForumCreateDTO forumCreateDTO, String userEmail);
 
     void deleteForum(Long forumId, String userEmail, boolean isAdmin);

@@ -26,6 +26,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ForumReadService {
 
+
     private final ForumRepository forumRepository;
     private final ForumMapper forumMapper;
 

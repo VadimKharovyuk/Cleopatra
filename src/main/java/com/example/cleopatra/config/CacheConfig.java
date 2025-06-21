@@ -37,7 +37,7 @@ public class CacheConfig {
                         .recordStats()
                         .build());
 
-        // =================== НОВЫЕ КЭШИ ДЛЯ НОВОСТЕЙ ===================
+        // =================== СУЩЕСТВУЮЩИЕ КЭШИ ДЛЯ НОВОСТЕЙ ===================
 
         // Кеш для отдельных новостей по ID
         cacheManager.registerCustomCache("newsById",
@@ -57,9 +57,54 @@ public class CacheConfig {
                         .recordStats()
                         .build());
 
+        // =================== НОВЫЕ КЭШИ ДЛЯ ФОРУМА ===================
+
+        // Кеш для детального просмотра тем форума
+        cacheManager.registerCustomCache("forums-detailed",
+                Caffeine.newBuilder()
+                        .maximumSize(2000)                    // Много тем форума
+                        .expireAfterWrite(25, TimeUnit.MINUTES)  // Темы живут долго
+                        .expireAfterAccess(10, TimeUnit.MINUTES) // Популярные темы остаются в кеше
+                        .recordStats()
+                        .build());
+
+        // Кеш для страниц списка тем форума (с пагинацией и фильтрами)
+        cacheManager.registerCustomCache("forum-pages",
+                Caffeine.newBuilder()
+                        .maximumSize(1500)                    // Много комбинаций фильтров и страниц
+                        .expireAfterWrite(15, TimeUnit.MINUTES)  // Списки обновляются при новых темах
+                        .expireAfterAccess(5, TimeUnit.MINUTES)  // Быстро устаревают без обращений
+                        .recordStats()
+                        .build());
+
+        // Кеш для результатов поиска по форуму
+        cacheManager.registerCustomCache("forum-search",
+                Caffeine.newBuilder()
+                        .maximumSize(1000)                    // Много различных поисковых запросов
+                        .expireAfterWrite(10, TimeUnit.MINUTES)  // Результаты поиска быстро устаревают
+                        .expireAfterAccess(3, TimeUnit.MINUTES)  // Редко повторяющиеся запросы
+                        .recordStats()
+                        .build());
+
+        // Кеш для проверки существования тем форума
+        cacheManager.registerCustomCache("forum-exists",
+                Caffeine.newBuilder()
+                        .maximumSize(5000)                    // Легкие булевы значения, можем много
+                        .expireAfterWrite(30, TimeUnit.MINUTES)  // Существование темы меняется редко
+                        .expireAfterAccess(15, TimeUnit.MINUTES) // Долго актуальны
+                        .recordStats()
+                        .build());
+
+        // Кеш для счетчиков тем по типам
+        cacheManager.registerCustomCache("forum-count",
+                Caffeine.newBuilder()
+                        .maximumSize(100)                     // Мало типов форума
+                        .expireAfterWrite(20, TimeUnit.MINUTES)  // Счетчики обновляются при создании/удалении
+                        .expireAfterAccess(10, TimeUnit.MINUTES) // Статистика часто запрашивается
+                        .recordStats()
+                        .build());
 
         return cacheManager;
     }
-
 
 }
