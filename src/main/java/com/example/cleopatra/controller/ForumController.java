@@ -47,7 +47,6 @@ public class ForumController {
             model.addAttribute("sortBy", sortBy);
             model.addAttribute("sortDirection", sortDirection);
 
-            log.debug("Отображена страница форумов: page={}, type={}", page, forumType);
             return "forum/list";
 
         } catch (Exception e) {
