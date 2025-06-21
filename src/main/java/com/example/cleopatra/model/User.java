@@ -40,6 +40,13 @@ public class User {
     @Column(nullable = false)
     private Role role = Role.USER;
 
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("createdAt DESC")
+    @Builder.Default
+    private List<Forum> forums = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Gender gender ;
@@ -277,8 +284,6 @@ public class User {
     @Column(name = "wall_access_level")
     @Builder.Default
     private WallAccessLevel wallAccessLevel = WallAccessLevel.PUBLIC;
-
-
 
     // Системные поля
     @Column(name = "created_at", nullable = false)

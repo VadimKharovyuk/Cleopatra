@@ -15,7 +15,5 @@ public enum Status {
         this.displayName = displayName;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
+
 }

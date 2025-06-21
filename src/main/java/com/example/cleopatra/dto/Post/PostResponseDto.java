@@ -26,7 +26,7 @@ public class PostResponseDto {
     private Long viewsCount;
 
     // ✅ ДОБАВИТЬ поля для лайков
-    private Boolean isLikedByCurrentUser; // Лайкнул ли текущий пользователь
+    private Boolean isLikedByCurrentUser;
     private List<LikeUserDto> recentLikes;
 
 

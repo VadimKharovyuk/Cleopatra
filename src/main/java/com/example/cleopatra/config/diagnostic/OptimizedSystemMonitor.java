@@ -66,13 +66,12 @@ public class OptimizedSystemMonitor {
 
             // Database Pool
             PoolStats pool = getDatabasePoolStats();
-
-            // Основной лог - компактный формат на русском
-            log.info("Мониторинг #{} - Память: {}/{} МБ ({}%), БД пул: {}/{}, Время работы: {} мин",
-                    cycle,
-                    memory.usedMB, memory.totalMB, memory.usagePercent,
-                    pool.active, pool.total,
-                    (System.currentTimeMillis() - startTime) / 60000);
+//
+//            log.info("Мониторинг #{} - Память: {}/{} МБ ({}%), БД пул: {}/{}, Время работы: {} мин",
+//                    cycle,
+//                    memory.usedMB, memory.totalMB, memory.usagePercent,
+//                    pool.active, pool.total,
+//                    (System.currentTimeMillis() - startTime) / 60000);
 
             // Детальное логирование только при проблемах
             if (memory.usagePercent > 85 || pool.active >= pool.total) {

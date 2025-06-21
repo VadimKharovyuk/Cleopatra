@@ -116,8 +116,6 @@ public class PostServiceImpl implements PostService {
 
     // ✅ ДОБАВЛЯЕМ приватный метод для обработки локации с подробными логами
     private void handleLocationForPost(Post post, PostCreateDto postCreateDto) {
-//        log.info("=== ОБРАБОТКА ГЕОЛОКАЦИИ ===");
-
         try {
             // Вариант 1: Используем существующую локацию по ID
             if (postCreateDto.getLocationId() != null) {
@@ -353,7 +351,6 @@ public class PostServiceImpl implements PostService {
         return convertPostSliceToListDto(postSlice, page);
     }
 
-    // ✅ НОВЫЕ МЕТОДЫ для работы с лайками
 
     /**
      * Лайкнуть/убрать лайк с поста
