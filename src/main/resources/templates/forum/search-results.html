@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="'Поиск: ' + ${searchQuery} + ' | Форум артистов'"></title>
+</head>
+<body>
+<header>
+  <nav>
+    <a th:href="@{/forums}">⬅️ Назад к форуму</a>
+  </nav>
+  <h1>🔍 Результаты поиска</h1>
+  <p>Запрос: "<span th:text="${searchQuery}"></span>"</p>
+  <p>Найдено: <span th:text="${forums.totalElements}"></span> результатов</p>
+</header>
+
+<main>
+  <!-- Повторная форма поиска -->
+  <form th:action="@{/forums/search}" method="get">
+    <input type="text" name="query" th:value="${searchQuery}" placeholder="Поиск по темам..." required>
+    <button type="submit">🔍 Найти</button>
+  </form>
+
+  <!-- Результаты поиска (переиспользуем логику из list.html) -->
+  <section>
+    <div th:if="${forums.content.empty}">
+      <p>По вашему запросу ничего не найдено.</p>
+      <a th:href="@{/forums}">Вернуться к списку всех тем</a>
+    </div>
+
+    <article th:each="forum : ${forums.content}">
+      <header>
+        <h2>
+          <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.title}"></a>
+        </h2>
+        <div>
+          <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}"></span>
+        </div>
+      </header>
+
+      <footer>
+        <div>
+          <span>👤 <span th:text="${forum.authorName}"></span></span>
+          <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}"></span></span>
+          <span>👁️ <span th:text="${forum.viewCount}"></span></span>
+          <span>💬 <span th:text="${forum.commentCount}"></span></span>
+        </div>
+      </footer>
+    </article>
+  </section>
+
+  <!-- Пагинация для поиска -->
+  <nav th:if="${forums.totalPages > 1}">
+    <a th:if="${forums.hasPrevious}"
+       th:href="@{/forums/search(query=${searchQuery}, page=${forums.page - 1})}">
+      ⬅️ Предыдущая
+    </a>
+
+    <span th:text="'Страница ' + ${forums.page + 1} + ' из ' + ${forums.totalPages}"></span>
+
+    <a th:if="${forums.hasNext}"
+       th:href="@{/forums/search(query=${searchQuery}, page=${forums.page + 1})}">
+      Следующая ➡️
+    </a>
+  </nav>
+</main>
+</body>
+</html>

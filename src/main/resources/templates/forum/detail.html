@@ -1,0 +1,62 @@
+// === templates/forum/detail.html ===
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${forum.title} + ' | Форум артистов'"></title>
+</head>
+<body>
+<header>
+    <nav>
+        <a th:href="@{/forums}">⬅️ Назад к списку</a>
+        <a th:href="@{/forums/create}">📝 Создать тему</a>
+    </nav>
+</header>
+
+<main>
+    <article>
+        <header>
+            <h1 th:text="${forum.title}"></h1>
+            <div>
+                <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}"></span>
+            </div>
+
+            <div>
+                <span>👤 <span th:text="${forum.authorName}"></span></span>
+                <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}"></span></span>
+                <span>👁️ <span th:text="${forum.viewCount}"></span></span>
+                <span>💬 <span th:text="${forum.commentCount}"></span></span>
+            </div>
+
+            <!-- Кнопка удаления для владельца или админа -->
+            <div th:if="${isOwner or isAdmin}">
+                <form th:action="@{/forums/{id}/delete(id=${forum.id})}" method="post"
+                      onsubmit="return confirm('Вы уверены, что хотите удалить эту тему?')">
+                    <button type="submit">🗑️ Удалить тему</button>
+                </form>
+            </div>
+        </header>
+
+        <section>
+            <p th:text="${forum.description}" style="white-space: pre-line;"></p>
+        </section>
+
+        <footer>
+            <p th:if="${forum.updatedAt != null and !forum.updatedAt.equals(forum.createdAt)}">
+                ✏️ Обновлено: <span th:text="${#temporals.format(forum.updatedAt, 'dd.MM.yyyy HH:mm')}"></span>
+            </p>
+        </footer>
+    </article>
+
+    <!-- Здесь будут комментарии в будущем -->
+    <section>
+        <h3>💬 Комментарии</h3>
+        <p>Комментарии скоро появятся...</p>
+    </section>
+</main>
+
+<!-- Сообщения -->
+<div th:if="${successMessage}" th:text="${successMessage}"></div>
+<div th:if="${errorMessage}" th:text="${errorMessage}"></div>
+</body>
+</html>

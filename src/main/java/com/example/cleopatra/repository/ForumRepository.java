@@ -15,6 +15,17 @@ import java.util.Optional;
 
 public interface ForumRepository extends JpaRepository<Forum, Long> {
 
+    // ✅ Кастомный метод с @Query (работает)
+    @EntityGraph(attributePaths = {"user"})
+    @Query("SELECT f FROM Forum f WHERE f.id = :id")
+    Optional<Forum> findByIdWithUser(@Param("id") Long id);
+
+    // ✅ Переопределяем стандартные методы JPA
+    @Override
+    @EntityGraph(attributePaths = {"user"})
+    Page<Forum> findAll(Pageable pageable);
+
+    // ✅ Стандартные методы JPA (убрали WithUser из названий!)
     @EntityGraph(attributePaths = {"user"})
     Page<Forum> findByForumType(ForumType forumType, Pageable pageable);
 
@@ -22,12 +33,15 @@ public interface ForumRepository extends JpaRepository<Forum, Long> {
     Page<Forum> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
             String title, String description, Pageable pageable);
 
+    // ✅ Метод подсчета
+    long countByForumType(ForumType forumType);
+
+    // ✅ Обновление счетчика
     @Modifying
     @Query("UPDATE Forum f SET f.viewCount = f.viewCount + 1 WHERE f.id = :forumId")
     void incrementViewCount(@Param("forumId") Long forumId);
 
 
-    @EntityGraph(attributePaths = {"user"})
-    Optional<Forum> findByIdWithUser(Long id); // ✅ Более явно и безопасно
+
 }
 

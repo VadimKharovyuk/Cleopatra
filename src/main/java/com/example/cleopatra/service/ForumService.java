@@ -12,15 +12,8 @@ public interface ForumService {
 
     void deleteForum(Long forumId, String userEmail, boolean isAdmin);
 
-
-    ForumDetailDTO getForumByIdDetailed(Long forumId);
-
     ForumDetailDTO viewForum(Long forumId, String userEmail);
 
-    ForumPageResponseDTO getAllForums(int page, int size, String sortBy, String sortDirection, ForumType forumType);
-
-
-    ForumPageResponseDTO searchForums(String searchQuery, int page, int size);
 
 
 }

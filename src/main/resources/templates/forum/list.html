@@ -1,0 +1,96 @@
+
+// === templates/forum/list.html ===
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Форум артистов</title>
+</head>
+<body>
+<header>
+  <h1>🎭 Форум артистов</h1>
+  <nav>
+    <a th:href="@{/forums/create}">📝 Создать тему</a>
+    <a th:href="@{/profile}">👤 Профиль</a>
+    <a th:href="@{/logout}">🚪 Выход</a>
+  </nav>
+</header>
+
+<main>
+  <!-- Поиск -->
+  <section>
+    <form th:action="@{/forums/search}" method="get">
+      <input type="text" name="query" placeholder="Поиск по темам..." required>
+      <button type="submit">🔍 Найти</button>
+    </form>
+  </section>
+
+  <!-- Фильтры -->
+  <section>
+    <h3>Категории:</h3>
+    <a th:href="@{/forums}">Все</a>
+    <a th:each="type : ${forumTypes}"
+       th:href="@{/forums(forumType=${type})}"
+       th:text="${type.emoji + ' ' + type.displayName}"
+       th:classappend="${type == currentType} ? 'active' : ''">
+    </a>
+  </section>
+
+  <!-- Сортировка -->
+  <section>
+    <span>Сортировка:</span>
+    <a th:href="@{/forums(sortBy='createdAt', sortDirection='DESC')}">🕒 По дате (новые)</a>
+    <a th:href="@{/forums(sortBy='createdAt', sortDirection='ASC')}">🕒 По дате (старые)</a>
+    <a th:href="@{/forums(sortBy='viewCount', sortDirection='DESC')}">👁️ По просмотрам</a>
+    <a th:href="@{/forums(sortBy='commentCount', sortDirection='DESC')}">💬 По комментариям</a>
+  </section>
+
+  <!-- Список тем -->
+  <section>
+    <div th:if="${forums.content.empty}">
+      <p>Тем пока нет. <a th:href="@{/forums/create}">Создайте первую!</a></p>
+    </div>
+
+    <article th:each="forum : ${forums.content}">
+      <header>
+        <h2>
+          <a th:href="@{/forums/{id}(id=${forum.id})}" th:text="${forum.title}"></a>
+        </h2>
+        <div>
+          <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}"></span>
+        </div>
+      </header>
+
+      <footer>
+        <div>
+          <span>👤 <span th:text="${forum.authorName}"></span></span>
+          <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}"></span></span>
+          <span>👁️ <span th:text="${forum.viewCount}"></span></span>
+          <span>💬 <span th:text="${forum.commentCount}"></span></span>
+        </div>
+      </footer>
+    </article>
+  </section>
+
+  <!-- Пагинация -->
+  <nav th:if="${forums.totalPages > 1}">
+    <a th:if="${forums.hasPrevious}"
+       th:href="@{/forums(page=${forums.page - 1}, size=${forums.size}, forumType=${currentType})}">
+      ⬅️ Предыдущая
+    </a>
+
+    <span th:text="'Страница ' + ${forums.page + 1} + ' из ' + ${forums.totalPages}"></span>
+
+    <a th:if="${forums.hasNext}"
+       th:href="@{/forums(page=${forums.page + 1}, size=${forums.size}, forumType=${currentType})}">
+      Следующая ➡️
+    </a>
+  </nav>
+</main>
+
+<!-- Сообщения -->
+<div th:if="${successMessage}" th:text="${successMessage}"></div>
+<div th:if="${errorMessage}" th:text="${errorMessage}"></div>
+</body>
+</html>
