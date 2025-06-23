@@ -134,6 +134,7 @@ public class ForumController {
         }
     }
 
+
     // Форма создания новой темы
     @GetMapping("/create")
     public String showCreateForm(Model model, Authentication authentication) {
