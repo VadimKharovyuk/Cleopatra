@@ -2,80 +2,592 @@
 <!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
 <!--<head>-->
 <!--    <meta charset="UTF-8">-->
-<!--    <title>Форум</title>-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title th:text="${forum != null ? forum.title + ' | Форум артистов' : 'Тема не найдена | Форум артистов'}">Форум артистов</title>-->
+
+<!--    &lt;!&ndash; Подключаем стили сайдбара &ndash;&gt;-->
+<!--    <th:block th:replace="~{fragments/sidebar :: sidebar-styles}"></th:block>-->
+
+<!--    &lt;!&ndash; Font Awesome &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">-->
+
+<!--    &lt;!&ndash; Google Fonts &ndash;&gt;-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">-->
+
+<!--    <style>-->
+<!--        /* Base Styles */-->
+<!--        * {-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            box-sizing: border-box;-->
+<!--        }-->
+
+<!--        body {-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;bg-primary) 0%, var(&#45;&#45;bg-accent) 100%);-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;-->
+<!--            font-weight: 400;-->
+<!--            line-height: 1.6;-->
+<!--            min-height: 100vh;-->
+<!--        }-->
+
+<!--        /* Main Content */-->
+<!--        .main-content {-->
+<!--            margin-left: 280px;-->
+<!--            min-height: 100vh;-->
+<!--            padding: 2rem;-->
+<!--        }-->
+
+<!--        /* Navigation */-->
+<!--        .topic-nav {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 1rem;-->
+<!--            margin-bottom: 2rem;-->
+<!--        }-->
+
+<!--        .nav-btn {-->
+<!--            display: inline-flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--            padding: 0.75rem 1.5rem;-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            text-decoration: none;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--            border: 1px solid var(&#45;&#45;border-primary);-->
+<!--            font-weight: 500;-->
+<!--            box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--        }-->
+
+<!--        .nav-btn:hover {-->
+<!--            background: var(&#45;&#45;accent-primary);-->
+<!--            color: white;-->
+<!--            transform: translateY(-1px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--            text-decoration: none;-->
+<!--        }-->
+
+<!--        .nav-btn.primary {-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .nav-btn.primary:hover {-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--        }-->
+
+<!--        /* Topic Header */-->
+<!--        .topic-header {-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            border-radius: var(&#45;&#45;radius-xl);-->
+<!--            padding: 2.5rem;-->
+<!--            margin-bottom: 2rem;-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            border: 1px solid var(&#45;&#45;border-primary);-->
+<!--            position: relative;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        .topic-header::before {-->
+<!--            content: '';-->
+<!--            position: absolute;-->
+<!--            top: 0;-->
+<!--            left: 0;-->
+<!--            right: 0;-->
+<!--            height: 4px;-->
+<!--            background: linear-gradient(90deg, var(&#45;&#45;accent-primary), var(&#45;&#45;accent-secondary));-->
+<!--        }-->
+
+<!--        .topic-title {-->
+<!--            font-family: 'Playfair Display', serif;-->
+<!--            font-size: 2.25rem;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            margin-bottom: 1rem;-->
+<!--            letter-spacing: -0.02em;-->
+<!--            line-height: 1.3;-->
+<!--        }-->
+
+<!--        .topic-category {-->
+<!--            display: inline-flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--            padding: 0.5rem 1rem;-->
+<!--            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));-->
+<!--            color: var(&#45;&#45;accent-primary);-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            font-weight: 600;-->
+<!--            font-size: 0.95rem;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--            border: 1px solid rgba(37, 99, 235, 0.2);-->
+<!--        }-->
+
+<!--        .topic-meta {-->
+<!--            display: flex;-->
+<!--            flex-wrap: wrap;-->
+<!--            gap: 2rem;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--            padding: 1rem 0;-->
+<!--            border-top: 1px solid var(&#45;&#45;border-secondary);-->
+<!--            border-bottom: 1px solid var(&#45;&#45;border-secondary);-->
+<!--        }-->
+
+<!--        .meta-item {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            font-size: 0.95rem;-->
+<!--        }-->
+
+<!--        .meta-icon {-->
+<!--            width: 20px;-->
+<!--            text-align: center;-->
+<!--            color: var(&#45;&#45;accent-primary);-->
+<!--        }-->
+
+<!--        .meta-value {-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--        }-->
+
+<!--        /* Action Buttons */-->
+<!--        .topic-actions {-->
+<!--            display: flex;-->
+<!--            gap: 1rem;-->
+<!--            justify-content: flex-end;-->
+<!--        }-->
+
+<!--        .action-btn {-->
+<!--            display: inline-flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--            padding: 0.75rem 1.5rem;-->
+<!--            border: none;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            font-weight: 600;-->
+<!--            cursor: pointer;-->
+<!--            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--            text-decoration: none;-->
+<!--            font-size: 0.95rem;-->
+<!--        }-->
+
+<!--        .action-btn.danger {-->
+<!--            background: rgba(239, 68, 68, 0.1);-->
+<!--            color: #dc2626;-->
+<!--            border: 1px solid rgba(239, 68, 68, 0.2);-->
+<!--        }-->
+
+<!--        .action-btn.danger:hover {-->
+<!--            background: #dc2626;-->
+<!--            color: white;-->
+<!--            transform: translateY(-1px);-->
+<!--            box-shadow: var(&#45;&#45;shadow-md);-->
+<!--        }-->
+
+<!--        /* Topic Content */-->
+<!--        .topic-content {-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            border-radius: var(&#45;&#45;radius-xl);-->
+<!--            padding: 2.5rem;-->
+<!--            margin-bottom: 2rem;-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            border: 1px solid var(&#45;&#45;border-primary);-->
+<!--        }-->
+
+<!--        .topic-description {-->
+<!--            font-size: 1.125rem;-->
+<!--            line-height: 1.7;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            white-space: pre-line;-->
+<!--            margin: 0;-->
+<!--        }-->
+
+<!--        .topic-footer {-->
+<!--            margin-top: 2rem;-->
+<!--            padding-top: 1.5rem;-->
+<!--            border-top: 1px solid var(&#45;&#45;border-secondary);-->
+<!--        }-->
+
+<!--        .update-info {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.5rem;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            font-size: 0.95rem;-->
+<!--            font-style: italic;-->
+<!--        }-->
+
+<!--        /* Comments Section */-->
+<!--        .comments-section {-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            border-radius: var(&#45;&#45;radius-xl);-->
+<!--            padding: 2.5rem;-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            border: 1px solid var(&#45;&#45;border-primary);-->
+<!--        }-->
+
+<!--        .comments-header {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.75rem;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--            padding-bottom: 1rem;-->
+<!--            border-bottom: 1px solid var(&#45;&#45;border-secondary);-->
+<!--        }-->
+
+<!--        .comments-title {-->
+<!--            font-size: 1.5rem;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--        }-->
+
+<!--        .comments-placeholder {-->
+<!--            text-align: center;-->
+<!--            padding: 3rem 1rem;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--        }-->
+
+<!--        .placeholder-icon {-->
+<!--            font-size: 3rem;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            margin-bottom: 1rem;-->
+<!--        }-->
+
+<!--        /* Error/Success Messages */-->
+<!--        .alert {-->
+<!--            padding: 1rem 1.5rem;-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            margin-bottom: 2rem;-->
+<!--            font-weight: 500;-->
+<!--            border-left: 4px solid;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 0.75rem;-->
+<!--        }-->
+
+<!--        .alert-error {-->
+<!--            background: rgba(239, 68, 68, 0.1);-->
+<!--            color: #dc2626;-->
+<!--            border-color: #ef4444;-->
+<!--        }-->
+
+<!--        .alert-success {-->
+<!--            background: rgba(5, 150, 105, 0.1);-->
+<!--            color: #059669;-->
+<!--            border-color: var(&#45;&#45;accent-success);-->
+<!--        }-->
+
+<!--        /* Not Found State */-->
+<!--        .not-found {-->
+<!--            text-align: center;-->
+<!--            padding: 4rem 2rem;-->
+<!--            background: var(&#45;&#45;bg-secondary);-->
+<!--            border-radius: var(&#45;&#45;radius-xl);-->
+<!--            box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            border: 1px solid var(&#45;&#45;border-primary);-->
+<!--        }-->
+
+<!--        .not-found-icon {-->
+<!--            font-size: 4rem;-->
+<!--            color: var(&#45;&#45;text-muted);-->
+<!--            margin-bottom: 1.5rem;-->
+<!--        }-->
+
+<!--        .not-found-title {-->
+<!--            font-size: 1.75rem;-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            margin-bottom: 1rem;-->
+<!--        }-->
+
+<!--        .not-found-message {-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--            font-size: 1.125rem;-->
+<!--            margin-bottom: 2rem;-->
+<!--        }-->
+
+<!--        /* Debug Panel (remove in production) */-->
+<!--        .debug-panel {-->
+<!--            background: var(&#45;&#45;bg-accent);-->
+<!--            border: 1px solid var(&#45;&#45;border-primary);-->
+<!--            border-radius: var(&#45;&#45;radius-md);-->
+<!--            padding: 1.5rem;-->
+<!--            margin-top: 2rem;-->
+<!--            font-family: 'Courier New', monospace;-->
+<!--            font-size: 0.875rem;-->
+<!--        }-->
+
+<!--        .debug-title {-->
+<!--            font-weight: 600;-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            margin-bottom: 1rem;-->
+<!--            font-family: 'Inter', sans-serif;-->
+<!--        }-->
+
+<!--        .debug-item {-->
+<!--            margin-bottom: 0.5rem;-->
+<!--            color: var(&#45;&#45;text-secondary);-->
+<!--        }-->
+
+<!--        .debug-value {-->
+<!--            color: var(&#45;&#45;text-primary);-->
+<!--            font-weight: 500;-->
+<!--        }-->
+
+<!--        /* Mobile Responsiveness */-->
+<!--        @media (max-width: 768px) {-->
+<!--            .main-content {-->
+<!--                margin-left: 0;-->
+<!--                padding: 1rem;-->
+<!--                padding-top: 80px;-->
+<!--            }-->
+
+<!--            .topic-nav {-->
+<!--                flex-direction: column;-->
+<!--                align-items: stretch;-->
+<!--            }-->
+
+<!--            .nav-btn {-->
+<!--                justify-content: center;-->
+<!--            }-->
+
+<!--            .topic-header {-->
+<!--                padding: 2rem 1.5rem;-->
+<!--            }-->
+
+<!--            .topic-title {-->
+<!--                font-size: 1.75rem;-->
+<!--            }-->
+
+<!--            .topic-meta {-->
+<!--                flex-direction: column;-->
+<!--                gap: 1rem;-->
+<!--            }-->
+
+<!--            .topic-actions {-->
+<!--                justify-content: stretch;-->
+<!--                flex-direction: column;-->
+<!--            }-->
+
+<!--            .topic-content {-->
+<!--                padding: 2rem 1.5rem;-->
+<!--            }-->
+
+<!--            .comments-section {-->
+<!--                padding: 2rem 1.5rem;-->
+<!--            }-->
+<!--        }-->
+
+<!--        @media (max-width: 1024px) {-->
+<!--            .main-content {-->
+<!--                margin-left: 80px;-->
+<!--            }-->
+<!--        }-->
+
+<!--        /* Animations */-->
+<!--        @keyframes fadeIn {-->
+<!--            from {-->
+<!--                opacity: 0;-->
+<!--                transform: translateY(20px);-->
+<!--            }-->
+<!--            to {-->
+<!--                opacity: 1;-->
+<!--                transform: translateY(0);-->
+<!--            }-->
+<!--        }-->
+
+<!--        .topic-header,-->
+<!--        .topic-content,-->
+<!--        .comments-section {-->
+<!--            animation: fadeIn 0.6s ease;-->
+<!--        }-->
+<!--    </style>-->
 <!--</head>-->
 <!--<body>-->
-<!--<header>-->
-<!--    <nav>-->
-<!--        <a th:href="@{/forums}">⬅️ Назад к списку</a>-->
-<!--        <a th:href="@{/forums/create}">📝 Создать тему</a>-->
+<!--&lt;!&ndash; Подключаем мобильный хедер и сайдбар &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: mobile-header}"></th:block>-->
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar('forums')}"></th:block>-->
+
+<!--<main class="main-content">-->
+<!--    &lt;!&ndash; Navigation &ndash;&gt;-->
+<!--    <nav class="topic-nav">-->
+<!--        <a th:href="@{/forums}" class="nav-btn">-->
+<!--            <i class="fas fa-arrow-left"></i>-->
+<!--            <span>Назад к списку</span>-->
+<!--        </a>-->
+<!--        <a th:href="@{/forums/create}" class="nav-btn primary">-->
+<!--            <i class="fas fa-plus"></i>-->
+<!--            <span>Создать тему</span>-->
+<!--        </a>-->
 <!--    </nav>-->
-<!--</header>-->
 
-<!--<main>-->
-<!--    &lt;!&ndash; ✅ ДОБАВЛЕНА ЗАЩИТА ОТ NULL &ndash;&gt;-->
+<!--    &lt;!&ndash; Alert Messages &ndash;&gt;-->
+<!--    <div th:if="${successMessage}" class="alert alert-success">-->
+<!--        <i class="fas fa-check-circle"></i>-->
+<!--        <span th:text="${successMessage}"></span>-->
+<!--    </div>-->
+
+<!--    <div th:if="${errorMessage}" class="alert alert-error">-->
+<!--        <i class="fas fa-exclamation-triangle"></i>-->
+<!--        <span th:text="${errorMessage}"></span>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Topic Content &ndash;&gt;-->
 <!--    <div th:if="${forum != null}">-->
-<!--        <article>-->
-<!--            <header>-->
-<!--                <h1 th:text="${forum.title}">Заголовок темы</h1>-->
-<!--                <div>-->
-<!--                    <span th:text="${forum.forumType.emoji + ' ' + forum.forumType.displayName}">Категория</span>-->
+<!--        &lt;!&ndash; Topic Header &ndash;&gt;-->
+<!--        <header class="topic-header">-->
+<!--            <h1 class="topic-title" th:text="${forum.title}">Заголовок темы</h1>-->
+
+<!--            <div class="topic-category">-->
+<!--                <span th:text="${forum.forumType.emoji}">📋</span>-->
+<!--                <span th:text="${forum.forumType.displayName}">Категория</span>-->
+<!--            </div>-->
+
+<!--            <div class="topic-meta">-->
+<!--                <div class="meta-item">-->
+<!--                    <i class="fas fa-user meta-icon"></i>-->
+<!--                    <span>Автор:</span>-->
+<!--                    <span class="meta-value" th:text="${forum.authorName}">Автор</span>-->
 <!--                </div>-->
-
-<!--                <div>-->
-<!--                    <span>👤 <span th:text="${forum.authorName}">Автор</span></span>-->
-<!--                    <span>🕒 <span th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span></span>-->
-<!--                    <span>👁️ <span th:text="${forum.viewCount}">0</span></span>-->
-<!--                    <span>💬 <span th:text="${forum.commentCount}">0</span></span>-->
+<!--                <div class="meta-item">-->
+<!--                    <i class="fas fa-clock meta-icon"></i>-->
+<!--                    <span>Создано:</span>-->
+<!--                    <span class="meta-value" th:text="${#temporals.format(forum.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</span>-->
 <!--                </div>-->
-
-<!--                &lt;!&ndash; Кнопка удаления для владельца или админа &ndash;&gt;-->
-<!--                <div th:if="${isOwner or isAdmin}">-->
-<!--                    <form th:action="@{/forums/{id}/delete(id=${forum.id})}" method="post"-->
-<!--                          onsubmit="return confirm('Вы уверены, что хотите удалить эту тему?')">-->
-<!--                        <button type="submit">🗑️ Удалить тему</button>-->
-<!--                    </form>-->
+<!--                <div class="meta-item">-->
+<!--                    <i class="fas fa-eye meta-icon"></i>-->
+<!--                    <span>Просмотры:</span>-->
+<!--                    <span class="meta-value" th:text="${forum.viewCount}">0</span>-->
 <!--                </div>-->
-<!--            </header>-->
+<!--                <div class="meta-item">-->
+<!--                    <i class="fas fa-comments meta-icon"></i>-->
+<!--                    <span>Комментарии:</span>-->
+<!--                    <span class="meta-value" th:text="${forum.commentCount}">0</span>-->
+<!--                </div>-->
+<!--            </div>-->
 
-<!--            <section>-->
-<!--                <p th:text="${forum.description}" style="white-space: pre-line;">Описание темы</p>-->
-<!--            </section>-->
+<!--            &lt;!&ndash; Action Buttons &ndash;&gt;-->
+<!--            <div class="topic-actions" th:if="${isOwner or isAdmin}">-->
+<!--                <form th:action="@{/forums/{id}/delete(id=${forum.id})}" method="post" style="display: inline;">-->
+<!--                    <button type="submit"-->
+<!--                            class="action-btn danger"-->
+<!--                            onclick="return confirm('Вы уверены, что хотите удалить эту тему? Это действие нельзя отменить.')">-->
+<!--                        <i class="fas fa-trash-alt"></i>-->
+<!--                        <span>Удалить тему</span>-->
+<!--                    </button>-->
+<!--                </form>-->
+<!--            </div>-->
+<!--        </header>-->
 
-<!--            <footer>-->
-<!--                <p th:if="${forum.updatedAt != null and !forum.updatedAt.equals(forum.createdAt)}">-->
-<!--                    ✏️ Обновлено: <span th:text="${#temporals.format(forum.updatedAt, 'dd.MM.yyyy HH:mm')}">Дата обновления</span>-->
-<!--                </p>-->
+<!--        &lt;!&ndash; Topic Content &ndash;&gt;-->
+<!--        <article class="topic-content">-->
+<!--            <p class="topic-description" th:text="${forum.description}">Описание темы</p>-->
+
+<!--            <footer class="topic-footer" th:if="${forum.updatedAt != null and !forum.updatedAt.equals(forum.createdAt)}">-->
+<!--                <div class="update-info">-->
+<!--                    <i class="fas fa-edit"></i>-->
+<!--                    <span>Обновлено:</span>-->
+<!--                    <span th:text="${#temporals.format(forum.updatedAt, 'dd.MM.yyyy HH:mm')}">Дата обновления</span>-->
+<!--                </div>-->
 <!--            </footer>-->
 <!--        </article>-->
 
-<!--        &lt;!&ndash; Здесь будут комментарии в будущем &ndash;&gt;-->
-<!--        <section>-->
-<!--            <h3>💬 Комментарии</h3>-->
-<!--            <p>Комментарии скоро появятся...</p>-->
+<!--        &lt;!&ndash; Comments Section &ndash;&gt;-->
+<!--        <section class="comments-section">-->
+<!--            <header class="comments-header">-->
+<!--                <i class="fas fa-comments"></i>-->
+<!--                <h3 class="comments-title">Комментарии</h3>-->
+<!--            </header>-->
+
+<!--            <div class="comments-placeholder">-->
+<!--                <div class="placeholder-icon">-->
+<!--                    <i class="fas fa-comment-slash"></i>-->
+<!--                </div>-->
+<!--                <p>Комментарии скоро появятся...</p>-->
+<!--                <p style="color: var(&#45;&#45;text-muted); font-size: 0.95rem; margin-top: 0.5rem;">-->
+<!--                    Здесь будет система комментариев для обсуждения темы-->
+<!--                </p>-->
+<!--            </div>-->
 <!--        </section>-->
 <!--    </div>-->
 
-<!--    &lt;!&ndash; ✅ СООБЩЕНИЕ ЕСЛИ FORUM NULL &ndash;&gt;-->
-<!--    <div th:if="${forum == null}">-->
-<!--        <h1>❌ Тема не найдена</h1>-->
-<!--        <p>Запрашиваемая тема не существует или была удалена.</p>-->
-<!--        <a th:href="@{/forums}">🔙 Вернуться к списку тем</a>-->
+<!--    &lt;!&ndash; Not Found State &ndash;&gt;-->
+<!--    <div th:if="${forum == null}" class="not-found">-->
+<!--        <div class="not-found-icon">-->
+<!--            <i class="fas fa-search"></i>-->
+<!--        </div>-->
+<!--        <h1 class="not-found-title">Тема не найдена</h1>-->
+<!--        <p class="not-found-message">-->
+<!--            Запрашиваемая тема не существует или была удалена.-->
+<!--        </p>-->
+<!--        <a th:href="@{/forums}" class="nav-btn primary">-->
+<!--            <i class="fas fa-arrow-left"></i>-->
+<!--            <span>Вернуться к списку тем</span>-->
+<!--        </a>-->
 <!--    </div>-->
 <!--</main>-->
 
-<!--&lt;!&ndash; Сообщения об ошибках &ndash;&gt;-->
-<!--<div th:if="${successMessage}" th:text="${successMessage}" style="color: green; padding: 10px;"></div>-->
-<!--<div th:if="${errorMessage}" th:text="${errorMessage}" style="color: red; padding: 10px;"></div>-->
+<!--&lt;!&ndash; Подключаем скрипты сайдбара &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: sidebar-scripts}"></th:block>-->
 
-<!--&lt;!&ndash; ✅ ОТЛАДОЧНАЯ ИНФОРМАЦИЯ (удалить в продакшене) &ndash;&gt;-->
-<!--<div style="background: #f0f0f0; padding: 10px; margin: 10px 0;">-->
-<!--    <h4>🔍 Debug Info:</h4>-->
-<!--    <p>Forum object: <span th:text="${forum}">null</span></p>-->
-<!--    <p>Forum != null: <span th:text="${forum != null}">false</span></p>-->
-<!--    <p>Error message: <span th:text="${errorMessage}">none</span></p>-->
-<!--</div>-->
+<!--<script>-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        // Enhanced delete confirmation-->
+<!--        const deleteForm = document.querySelector('form[action*="/delete"]');-->
+<!--        if (deleteForm) {-->
+<!--            deleteForm.addEventListener('submit', function(e) {-->
+<!--                const confirmed = confirm(-->
+<!--                    'Вы уверены, что хотите удалить эту тему?\n\n' +-->
+<!--                    'Это действие нельзя отменить. Тема и все связанные с ней данные будут удалены навсегда.'-->
+<!--                );-->
 
+<!--                if (!confirmed) {-->
+<!--                    e.preventDefault();-->
+<!--                    return false;-->
+<!--                }-->
+
+<!--                // Disable button to prevent double submission-->
+<!--                const submitBtn = this.querySelector('button[type="submit"]');-->
+<!--                if (submitBtn) {-->
+<!--                    submitBtn.disabled = true;-->
+<!--                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Удаление...</span>';-->
+<!--                }-->
+<!--            });-->
+<!--        }-->
+
+<!--        // View count animation (subtle effect)-->
+<!--        const viewCountElement = document.querySelector('[th\\:text="${forum.viewCount}"]');-->
+<!--        if (viewCountElement) {-->
+<!--            setTimeout(() => {-->
+<!--                viewCountElement.style.transition = 'color 0.3s ease';-->
+<!--                viewCountElement.style.color = 'var(&#45;&#45;accent-success)';-->
+<!--                setTimeout(() => {-->
+<!--                    viewCountElement.style.color = '';-->
+<!--                }, 1000);-->
+<!--            }, 500);-->
+<!--        }-->
+
+<!--        // Smooth scroll for in-page navigation-->
+<!--        document.querySelectorAll('a[href^="#"]').forEach(link => {-->
+<!--            link.addEventListener('click', function(e) {-->
+<!--                e.preventDefault();-->
+<!--                const target = document.querySelector(this.getAttribute('href'));-->
+<!--                if (target) {-->
+<!--                    target.scrollIntoView({-->
+<!--                        behavior: 'smooth',-->
+<!--                        block: 'start'-->
+<!--                    });-->
+<!--                }-->
+<!--            });-->
+<!--        });-->
+
+<!--        console.log('🏛️ Forum detail page initialized');-->
+<!--    });-->
+<!--</script>-->
 <!--</body>-->
 <!--</html>-->
 
@@ -315,25 +827,320 @@
         .comments-header {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 0.75rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             padding-bottom: 1rem;
             border-bottom: 1px solid var(--border-secondary);
         }
 
         .comments-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--text-primary);
         }
 
-        .comments-placeholder {
+        .comments-count {
+            background: var(--accent-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        /* Comment Form */
+        .comment-form {
+            background: var(--bg-accent);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Comments List */
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .comment {
+            background: var(--bg-accent);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            border: 1px solid var(--border-primary);
+            transition: all 0.2s ease;
+        }
+
+        .comment:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .comment.reply {
+            margin-left: 2rem;
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .comment-author {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .comment-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comment-username {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .comment-date {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .comment-btn {
+            padding: 0.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .comment-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .comment-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }
+
+        .comment-content {
+            color: var(--text-primary);
+            line-height: 1.6;
+            white-space: pre-line;
+            margin-bottom: 1rem;
+        }
+
+        .comment-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-secondary);
+        }
+
+        .comment-level {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .reply-btn {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .reply-btn:hover {
+            color: var(--accent-secondary);
+            text-decoration: none;
+        }
+
+        /* Reply Form */
+        .reply-form {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-primary);
+            display: none;
+        }
+
+        .reply-form.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .reply-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.75rem;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-sm);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .reply-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .reply-submit {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .reply-cancel {
+            background: none;
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        /* Pagination */
+        .comments-pagination {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .pagination-btn {
+            padding: 0.75rem 1rem;
+            background: var(--bg-accent);
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover,
+        .pagination-btn.active {
+            background: var(--accent-primary);
+            color: white;
+            text-decoration: none;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Empty State */
+        .comments-empty {
             text-align: center;
             padding: 3rem 1rem;
             color: var(--text-secondary);
         }
 
-        .placeholder-icon {
+        .empty-icon {
             font-size: 3rem;
             color: var(--text-muted);
             margin-bottom: 1rem;
@@ -361,63 +1168,6 @@
             background: rgba(5, 150, 105, 0.1);
             color: #059669;
             border-color: var(--accent-success);
-        }
-
-        /* Not Found State */
-        .not-found {
-            text-align: center;
-            padding: 4rem 2rem;
-            background: var(--bg-secondary);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-primary);
-        }
-
-        .not-found-icon {
-            font-size: 4rem;
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
-        }
-
-        .not-found-title {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-        }
-
-        .not-found-message {
-            color: var(--text-secondary);
-            font-size: 1.125rem;
-            margin-bottom: 2rem;
-        }
-
-        /* Debug Panel (remove in production) */
-        .debug-panel {
-            background: var(--bg-accent);
-            border: 1px solid var(--border-primary);
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-            margin-top: 2rem;
-            font-family: 'Courier New', monospace;
-            font-size: 0.875rem;
-        }
-
-        .debug-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .debug-item {
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
-        }
-
-        .debug-value {
-            color: var(--text-primary);
-            font-weight: 500;
         }
 
         /* Mobile Responsiveness */
@@ -455,12 +1205,24 @@
                 flex-direction: column;
             }
 
-            .topic-content {
+            .topic-content,
+            .comments-section {
                 padding: 2rem 1.5rem;
             }
 
-            .comments-section {
-                padding: 2rem 1.5rem;
+            .comment.reply {
+                margin-left: 1rem;
+            }
+
+            .comment-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .comments-header {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
 
@@ -482,10 +1244,25 @@
             }
         }
 
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .topic-header,
         .topic-content,
         .comments-section {
             animation: fadeIn 0.6s ease;
+        }
+
+        .comment {
+            animation: fadeIn 0.4s ease;
         }
     </style>
 </head>
@@ -581,18 +1358,135 @@
         <!-- Comments Section -->
         <section class="comments-section">
             <header class="comments-header">
-                <i class="fas fa-comments"></i>
-                <h3 class="comments-title">Комментарии</h3>
+                <div class="comments-title">
+                    <i class="fas fa-comments"></i>
+                    <span>Комментарии</span>
+                    <span class="comments-count" th:text="${comments?.numberOfElements ?: 0}">0</span>
+                </div>
             </header>
 
-            <div class="comments-placeholder">
-                <div class="placeholder-icon">
+            <!-- Comment Form -->
+            <form th:action="@{/forums/{id}/comments(id=${forum.id})}" method="post" th:object="${createCommentDto}" class="comment-form">
+                <!-- Скрытое поле для ID форума -->
+                <input type="hidden" name="forumId" th:value="${forum.id}" />
+
+                <div class="form-group">
+                    <label for="content" class="form-label">Добавить комментарий:</label>
+                    <textarea id="content"
+                              name="content"
+                              th:field="*{content}"
+                              class="form-textarea"
+                              placeholder="Поделитесь своими мыслями о данной теме..."
+                              required
+                              minlength="3"
+                              maxlength="2000"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Отправить комментарий</span>
+                </button>
+            </form>
+
+            <!-- Comments List -->
+            <div th:if="${comments != null and !comments.comments.empty}" class="comments-list">
+                <div th:each="comment : ${comments.comments}"
+                     class="comment"
+                     th:classappend="${comment.level > 0} ? 'reply'"
+                     th:id="'comment-' + ${comment.id}">
+
+                    <div class="comment-header">
+                        <div class="comment-author">
+                            <div class="comment-avatar" th:text="${comment.authorName?.substring(0,1)?.toUpperCase()}">A</div>
+                            <div class="comment-info">
+                                <div class="comment-username" th:text="${comment.authorName}">Пользователь</div>
+                                <div class="comment-date" th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</div>
+                            </div>
+                        </div>
+                        <div class="comment-actions">
+                            <!-- Reply button -->
+                            <button type="button"
+                                    class="comment-btn reply-toggle"
+                                    th:data-comment-id="${comment.id}"
+                                    title="Ответить">
+                                <i class="fas fa-reply"></i>
+                            </button>
+                            <!-- Delete button (only for author or admin) -->
+                            <form th:if="${comment.authorName == #authentication.name or isAdmin}"
+                                  th:action="@{/forums/{forumId}/comments/{commentId}/delete(forumId=${forum.id}, commentId=${comment.id})}"
+                                  method="post"
+                                  style="display: inline;">
+                                <button type="submit"
+                                        class="comment-btn danger"
+                                        title="Удалить"
+                                        onclick="return confirm('Удалить этот комментарий?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="comment-content" th:text="${comment.content}">Текст комментария</div>
+
+                    <div class="comment-footer">
+                        <div class="comment-level" th:if="${comment.level > 0}" th:text="'Уровень ' + ${comment.level}">Уровень</div>
+                        <div th:if="${comment.childrenCount > 0}" class="reply-count">
+                            <i class="fas fa-comments"></i>
+                            <span th:text="${comment.childrenCount} + ' ответов'">ответов</span>
+                        </div>
+                    </div>
+
+                    <!-- Reply Form -->
+                    <div class="reply-form" th:id="'reply-form-' + ${comment.id}">
+                        <form th:action="@{/forums/{forumId}/comments/{parentId}/reply(forumId=${forum.id}, parentId=${comment.id})}" method="post">
+                            <!-- Скрытые поля для передачи данных -->
+                            <input type="hidden" name="forumId" th:value="${forum.id}" />
+                            <input type="hidden" name="parentId" th:value="${comment.id}" />
+
+                            <textarea name="content"
+                                      class="reply-textarea"
+                                      placeholder="Напишите ваш ответ..."
+                                      required
+                                      minlength="3"
+                                      maxlength="1000"></textarea>
+                            <div class="reply-actions">
+                                <button type="submit" class="reply-submit">
+                                    <i class="fas fa-paper-plane"></i> Ответить
+                                </button>
+                                <button type="button" class="reply-cancel">Отмена</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${comments == null or comments.comments.empty}" class="comments-empty">
+                <div class="empty-icon">
                     <i class="fas fa-comment-slash"></i>
                 </div>
-                <p>Комментарии скоро появятся...</p>
+                <p>Пока нет комментариев</p>
                 <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem;">
-                    Здесь будет система комментариев для обсуждения темы
+                    Станьте первым, кто оставит комментарий к этой теме!
                 </p>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${comments != null and (comments.hasNext or comments.hasPrevious)}" class="comments-pagination">
+                <a th:if="${comments.hasPrevious}"
+                   th:href="@{/forums/{id}(id=${forum.id}, page=${currentPage - 1})}"
+                   class="pagination-btn">
+                    <i class="fas fa-chevron-left"></i> Предыдущая
+                </a>
+
+                <span class="pagination-btn active">
+                    Страница <span th:text="${currentPage + 1}">1</span>
+                </span>
+
+                <a th:if="${comments.hasNext}"
+                   th:href="@{/forums/{id}(id=${forum.id}, page=${currentPage + 1})}"
+                   class="pagination-btn">
+                    Следующая <i class="fas fa-chevron-right"></i>
+                </a>
             </div>
         </section>
     </div>
@@ -641,8 +1535,177 @@
             });
         }
 
+        // Reply form toggle functionality
+        const replyToggleButtons = document.querySelectorAll('.reply-toggle');
+        console.log(`Found ${replyToggleButtons.length} reply buttons`);
+
+        replyToggleButtons.forEach((button, index) => {
+            button.addEventListener('click', function() {
+                const commentId = this.dataset.commentId;
+                console.log(`Reply button clicked for comment ${commentId}`);
+
+                const replyForm = document.getElementById(`reply-form-${commentId}`);
+                console.log(`Reply form found:`, replyForm);
+
+                if (!replyForm) {
+                    console.error(`Reply form not found for comment ${commentId}`);
+                    return;
+                }
+
+                const isActive = replyForm.classList.contains('active');
+                console.log(`Form is currently active: ${isActive}`);
+
+                // Close all other reply forms
+                document.querySelectorAll('.reply-form.active').forEach(form => {
+                    form.classList.remove('active');
+                    console.log('Closed active form');
+                });
+
+                // Toggle current form
+                if (!isActive) {
+                    replyForm.classList.add('active');
+                    console.log(`Opened reply form for comment ${commentId}`);
+
+                    const textarea = replyForm.querySelector('textarea');
+                    if (textarea) {
+                        // Небольшая задержка для анимации
+                        setTimeout(() => {
+                            textarea.focus();
+                        }, 100);
+                    }
+                }
+            });
+        });
+
+        // Reply form cancel buttons
+        const cancelButtons = document.querySelectorAll('.reply-cancel');
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const replyForm = this.closest('.reply-form');
+                replyForm.classList.remove('active');
+                // Clear textarea
+                const textarea = replyForm.querySelector('textarea');
+                if (textarea) {
+                    textarea.value = '';
+                }
+            });
+        });
+
+        // Comment form validation
+        const commentForm = document.querySelector('.comment-form form');
+        if (commentForm) {
+            commentForm.addEventListener('submit', function(e) {
+                const textarea = this.querySelector('textarea[name="content"]');
+                const content = textarea.value.trim();
+
+                if (content.length < 3) {
+                    e.preventDefault();
+                    alert('Комментарий должен содержать не менее 3 символов');
+                    textarea.focus();
+                    return false;
+                }
+
+                if (content.length > 2000) {
+                    e.preventDefault();
+                    alert('Комментарий не должен превышать 2000 символов');
+                    textarea.focus();
+                    return false;
+                }
+
+                // Disable submit button to prevent double submission
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Отправка...</span>';
+                }
+            });
+        }
+
+        // Reply form validation
+        const replyForms = document.querySelectorAll('.reply-form form');
+        replyForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const textarea = this.querySelector('textarea[name="content"]');
+                const content = textarea.value.trim();
+
+                if (content.length < 3) {
+                    e.preventDefault();
+                    alert('Ответ должен содержать не менее 3 символов');
+                    textarea.focus();
+                    return false;
+                }
+
+                if (content.length > 1000) {
+                    e.preventDefault();
+                    alert('Ответ не должен превышать 1000 символов');
+                    textarea.focus();
+                    return false;
+                }
+
+                // Disable submit button
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+                }
+            });
+        });
+
+        // Auto-resize textareas
+        const textareas = document.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 300) + 'px';
+            });
+        });
+
+        // Character counter for main comment form
+        const commentTextarea = document.querySelector('.comment-form textarea');
+        if (commentTextarea) {
+            const maxLength = 2000;
+            const counterElement = document.createElement('div');
+            counterElement.className = 'character-counter';
+            counterElement.style.cssText = `
+                font-size: 0.875rem;
+                color: var(--text-secondary);
+                text-align: right;
+                margin-top: 0.5rem;
+            `;
+
+            commentTextarea.parentNode.appendChild(counterElement);
+
+            function updateCounter() {
+                const currentLength = commentTextarea.value.length;
+                const remaining = maxLength - currentLength;
+                counterElement.textContent = `${currentLength}/${maxLength}`;
+
+                if (remaining < 100) {
+                    counterElement.style.color = '#dc2626';
+                } else if (remaining < 200) {
+                    counterElement.style.color = '#f59e0b';
+                } else {
+                    counterElement.style.color = 'var(--text-secondary)';
+                }
+            }
+
+            commentTextarea.addEventListener('input', updateCounter);
+            updateCounter();
+        }
+
+        // Smooth scroll to comments section when coming from notification
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('scrollTo') === 'comments') {
+            setTimeout(() => {
+                document.querySelector('.comments-section').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 500);
+        }
+
         // View count animation (subtle effect)
-        const viewCountElement = document.querySelector('[th\\:text="${forum.viewCount}"]');
+        const viewCountElement = document.querySelector('.meta-value');
         if (viewCountElement) {
             setTimeout(() => {
                 viewCountElement.style.transition = 'color 0.3s ease';
@@ -653,22 +1716,180 @@
             }, 500);
         }
 
-        // Smooth scroll for in-page navigation
-        document.querySelectorAll('a[href^="#"]').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+        // Load more comments functionality (if needed for AJAX)
+        let isLoading = false;
+
+        function loadMoreComments(page) {
+            if (isLoading) return;
+
+            isLoading = true;
+            const forumId = window.location.pathname.split('/').pop();
+
+            fetch(`/forums/${forumId}/comments?page=${page}&size=10`)
+                .then(response => response.json())
+                .then(data => {
+                    // Handle response - append new comments
+                    console.log('Loaded more comments:', data);
+                    // Implementation would depend on your specific needs
+                })
+                .catch(error => {
+                    console.error('Error loading comments:', error);
+                })
+                .finally(() => {
+                    isLoading = false;
+                });
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter to submit comment form
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName === 'TEXTAREA') {
+                    const form = activeElement.closest('form');
+                    if (form) {
+                        form.requestSubmit();
+                    }
                 }
-            });
+            }
+
+            // Escape to close reply forms
+            if (e.key === 'Escape') {
+                const activeReplyForms = document.querySelectorAll('.reply-form.active');
+                activeReplyForms.forEach(form => {
+                    form.classList.remove('active');
+                    const textarea = form.querySelector('textarea');
+                    if (textarea) {
+                        textarea.value = '';
+                    }
+                });
+            }
         });
 
-        console.log('🏛️ Forum detail page initialized');
+        // Add tooltip for keyboard shortcuts
+        const commentTextareaForTooltip = document.querySelector('.comment-form textarea');
+        if (commentTextareaForTooltip) {
+            commentTextareaForTooltip.title = 'Используйте Ctrl+Enter для быстрой отправки';
+        }
+
+        console.log('🏛️ Forum detail page with comments initialized');
+        console.log(`📊 Comments loaded: ${document.querySelectorAll('.comment').length}`);
     });
 </script>
+
+<style>
+    /* Character counter styles */
+    .character-counter {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        text-align: right;
+        margin-top: 0.5rem;
+        transition: color 0.2s ease;
+    }
+
+    /* Loading states */
+    .submit-btn:disabled,
+    .reply-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Improved focus states */
+    .form-textarea:focus,
+    .reply-textarea:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Better hover effects for comment actions */
+    .comment:hover .comment-actions {
+        opacity: 1;
+    }
+
+    .comment-actions {
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+    }
+
+    /* Improved reply form animation */
+    .reply-form {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+        padding: 0 1rem;
+    }
+
+    .reply-form.active {
+        max-height: 300px;
+        padding: 1rem;
+    }
+
+    /* Better mobile responsiveness for comments */
+    @media (max-width: 480px) {
+        .comment-header {
+            gap: 0.5rem;
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 1rem;
+        }
+
+        .comment-actions {
+            opacity: 1; /* Always visible on mobile */
+        }
+
+        .reply-actions {
+            flex-direction: column;
+        }
+
+        .reply-submit,
+        .reply-cancel {
+            width: 100%;
+        }
+    }
+
+    /* Enhanced loading spinner */
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .fa-spinner {
+        animation: spin 1s linear infinite;
+    }
+
+    /* Improved not found state */
+    .not-found {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-secondary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-primary);
+    }
+
+    .not-found-icon {
+        font-size: 4rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    .not-found-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .not-found-message {
+        color: var(--text-secondary);
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+    }
+</style>
 </body>
 </html>

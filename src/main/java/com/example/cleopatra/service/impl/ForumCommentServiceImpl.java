@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -98,7 +99,6 @@ public class ForumCommentServiceImpl implements ForumCommentService {
         // Преобразование в DTO
         return forumCommentMapper.toDto(savedComment);
     }
-
     @Override
     @Transactional
     public boolean deleteForumComment(Long forumCommentId, Long userId) {
@@ -139,7 +139,7 @@ public class ForumCommentServiceImpl implements ForumCommentService {
             forumRepository.decrementCommentCount(comment.getForum().getId());
 
             if (comment.getParent() != null) {
-                forumCommentRepository.decrementCommentCount(comment.getParent().getId());
+                forumCommentRepository.decrementChildrenCount(comment.getParent().getId());
             }
 
             log.info("Комментарий ID: {} успешно удален", forumCommentId);

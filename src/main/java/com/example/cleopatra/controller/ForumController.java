@@ -1,11 +1,16 @@
 package com.example.cleopatra.controller;
 
 import com.example.cleopatra.dto.Forum.*;
+import com.example.cleopatra.dto.ForumComment.*;
 import com.example.cleopatra.enums.ForumType;
+import com.example.cleopatra.model.User;
+import com.example.cleopatra.service.ForumCommentService;
 import com.example.cleopatra.service.ForumReadService;
 import com.example.cleopatra.service.ForumService;
+import com.example.cleopatra.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Controller;
@@ -15,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
-
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -25,6 +30,10 @@ public class ForumController {
 
     private final ForumService forumService; // write operations
     private final ForumReadService forumReadService; // read operations
+    private final ForumCommentService forumCommentService; // comment operations
+    private final UserService userService;
+
+    // ========== FORUM METHODS ==========
 
     // Главная страница форума со списком тем
     @GetMapping
@@ -92,6 +101,8 @@ public class ForumController {
     // Просмотр конкретной темы
     @GetMapping("/{id}")
     public String viewForum(@PathVariable Long id,
+                            @RequestParam(defaultValue = "0") int page,
+                            @RequestParam(defaultValue = "10") int size,
                             Authentication authentication,
                             Model model) {
 
@@ -99,7 +110,13 @@ public class ForumController {
             // ✅ Используем ForumService для viewForum (увеличивает счетчик)
             ForumDetailDTO forum = forumService.viewForum(id, authentication.getName());
 
+            // Получаем комментарии для форума
+            ForumCommentPageDto comments = forumCommentService.getForumComments(id, page, size);
+
             model.addAttribute("forum", forum);
+            model.addAttribute("comments", comments);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("createCommentDto", new CreateForumCommentDto());
 
             model.addAttribute("isOwner", forum.getAuthorName() != null &&
                     forum.getAuthorName().equals(authentication.getName()));
@@ -185,6 +202,162 @@ public class ForumController {
 
         return "redirect:/forums";
     }
+
+    // ========== COMMENT METHODS ==========
+
+    // Создание комментария
+    @PostMapping("/{forumId}/comments")
+    public String createComment(@PathVariable Long forumId,
+                                @Valid @ModelAttribute CreateForumCommentDto createCommentDto,
+                                BindingResult bindingResult,
+                                Authentication authentication,
+                                RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка валидации комментария");
+            return "redirect:/forums/" + forumId;
+        }
+
+        try {
+            // Устанавливаем ID форума в DTO
+            createCommentDto.setForumId(forumId);
+
+            // Получаем ID пользователя
+            Long userId = userService.getUserIdByEmail(authentication.getName());
+
+            ForumCommentDto comment = forumCommentService.createForumComment(createCommentDto, userId);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Комментарий успешно добавлен");
+            log.info("Пользователь {} добавил комментарий к теме {}", authentication.getName(), forumId);
+
+        } catch (Exception e) {
+            log.error("Ошибка при создании комментария пользователем {} к теме {}",
+                    authentication.getName(), forumId, e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при добавлении комментария: " + e.getMessage());
+        }
+
+        return "redirect:/forums/" + forumId;
+    }
+
+    // Создание ответа на комментарий - ИСПРАВЛЕННАЯ ВЕРСИЯ
+    @PostMapping("/{forumId}/comments/{parentId}/reply")
+    public String replyToComment(@PathVariable Long forumId,
+                                 @PathVariable Long parentId,
+                                 @RequestParam String content,
+                                 Authentication authentication,
+                                 RedirectAttributes redirectAttributes) {
+
+        // Логирование для отладки
+        log.info("Reply request: forumId={}, parentId={}, content length={}, user={}",
+                forumId, parentId, content.length(), authentication.getName());
+
+        try {
+            // Валидация контента
+            if (content == null || content.trim().length() < 3) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Ответ должен содержать не менее 3 символов");
+                return "redirect:/forums/" + forumId;
+            }
+
+            if (content.length() > 1000) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Ответ не должен превышать 1000 символов");
+                return "redirect:/forums/" + forumId;
+            }
+
+            CreateForumCommentDto replyDto = CreateForumCommentDto.builder()
+                    .forumId(forumId)
+                    .parentId(parentId)
+                    .content(content.trim())
+                    .build();
+
+            // Получаем ID пользователя
+            Long currentUser = userService.getUserIdByEmail(authentication.getName());
+            if (currentUser == null) {
+                log.error("User not found: {}", authentication.getName());
+                redirectAttributes.addFlashAttribute("errorMessage", "Пользователь не найден");
+                return "redirect:/forums/" + forumId;
+            }
+
+            ForumCommentDto reply = forumCommentService.createForumComment(replyDto, currentUser);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Ответ успешно добавлен");
+            log.info("Пользователь {} ответил на комментарий {} в теме {}",
+                    authentication.getName(), parentId, forumId);
+
+        } catch (Exception e) {
+            log.error("Ошибка при создании ответа пользователем {} на комментарий {} в теме {}",
+                    authentication.getName(), parentId, forumId, e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при добавлении ответа: " + e.getMessage());
+        }
+
+        return "redirect:/forums/" + forumId + "#comment-" + parentId;
+    }
+
+    // Удаление комментария
+    @PostMapping("/{forumId}/comments/{commentId}/delete")
+    public String deleteComment(@PathVariable Long forumId,
+                                @PathVariable Long commentId,
+                                Authentication authentication,
+                                RedirectAttributes redirectAttributes) {
+
+        try {
+            // Получаем ID пользователя
+            Long userId = userService.getUserIdByEmail(authentication.getName());
+
+            boolean deleted = forumCommentService.deleteForumComment(commentId, userId);
+
+            if (deleted) {
+                redirectAttributes.addFlashAttribute("successMessage", "Комментарий успешно удален");
+                log.info("Пользователь {} удалил комментарий {} в теме {}",
+                        authentication.getName(), commentId, forumId);
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Не удалось удалить комментарий");
+            }
+
+        } catch (Exception e) {
+            log.error("Ошибка при удалении комментария {} пользователем {} в теме {}",
+                    commentId, authentication.getName(), forumId, e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при удалении комментария: " + e.getMessage());
+        }
+
+        return "redirect:/forums/" + forumId;
+    }
+
+    // AJAX методы для комментариев
+
+    // Получение ответов на комментарий (AJAX)
+    @GetMapping("/{forumId}/comments/{commentId}/replies")
+    @ResponseBody
+    public ResponseEntity<List<ForumCommentDto>> getCommentReplies(@PathVariable Long forumId,
+                                                                   @PathVariable Long commentId) {
+
+        try {
+            List<ForumCommentDto> replies = forumCommentService.getCommentReplies(commentId);
+            return ResponseEntity.ok(replies);
+
+        } catch (Exception e) {
+            log.error("Ошибка при получении ответов на комментарий {}", commentId, e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // Загрузка дополнительных комментариев (AJAX)
+    @GetMapping("/{forumId}/comments")
+    @ResponseBody
+    public ResponseEntity<ForumCommentPageDto> getMoreComments(@PathVariable Long forumId,
+                                                               @RequestParam(defaultValue = "0") int page,
+                                                               @RequestParam(defaultValue = "10") int size) {
+
+        try {
+            ForumCommentPageDto comments = forumCommentService.getForumComments(forumId, page, size);
+            return ResponseEntity.ok(comments);
+
+        } catch (Exception e) {
+            log.error("Ошибка при получении комментариев для форума {}", forumId, e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ========== UTILITY METHODS ==========
 
     // Дополнительный endpoint для проверки существования темы (AJAX)
     @GetMapping("/{id}/exists")
