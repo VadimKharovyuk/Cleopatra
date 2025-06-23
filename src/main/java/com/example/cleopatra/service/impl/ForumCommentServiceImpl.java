@@ -102,8 +102,6 @@ public class ForumCommentServiceImpl implements ForumCommentService {
     @Override
     @Transactional
     public boolean deleteForumComment(Long forumCommentId, Long userId) {
-        log.info("Попытка удаления комментария ID: {} пользователем ID: {}", forumCommentId, userId);
-
         try {
             // ✅ ОПТИМИЗАЦИЯ: Используем JOIN FETCH для загрузки автора
             Optional<ForumComment> commentOpt = forumCommentRepository.findByIdWithAuthor(forumCommentId);

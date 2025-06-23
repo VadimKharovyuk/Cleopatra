@@ -285,10 +285,8 @@ public class ForumController {
                 return "redirect:/forums/" + forumId;
             }
 
-            log.info("User found for reply: Email={}, ID={}", userEmail, currentUserId);
-
             ForumCommentDto reply = forumCommentService.createForumComment(replyDto, currentUserId);
-            log.info("Reply created successfully: {}", reply.getId());
+
 
             redirectAttributes.addFlashAttribute("successMessage", "Ответ успешно добавлен");
 
