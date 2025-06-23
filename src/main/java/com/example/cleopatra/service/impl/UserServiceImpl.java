@@ -625,4 +625,6 @@ public class UserServiceImpl implements UserService {
     public boolean updatePostsPrivacy(Long userId, ProfileAccessLevel accessLevel) {
         return profileAccessService.updatePostsAccessLevel(userId, userId, accessLevel);
     }
+
+
 }

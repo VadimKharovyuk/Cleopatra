@@ -111,6 +111,4 @@ public interface UserService {
      boolean updatePhotosPrivacy(Long userId, ProfileAccessLevel accessLevel) ;
      boolean updatePostsPrivacy(Long userId, ProfileAccessLevel accessLevel);
 
-
-
 }

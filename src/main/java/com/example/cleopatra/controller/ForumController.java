@@ -239,7 +239,7 @@ public class ForumController {
         return "redirect:/forums/" + forumId;
     }
 
-    // Создание ответа на комментарий - ИСПРАВЛЕННАЯ ВЕРСИЯ
+
     @PostMapping("/{forumId}/comments/{parentId}/reply")
     public String replyToComment(@PathVariable Long forumId,
                                  @PathVariable Long parentId,
@@ -247,18 +247,22 @@ public class ForumController {
                                  Authentication authentication,
                                  RedirectAttributes redirectAttributes) {
 
-        // Логирование для отладки
-        log.info("Reply request: forumId={}, parentId={}, content length={}, user={}",
-                forumId, parentId, content.length(), authentication.getName());
+        log.info("=== REPLY COMMENT DEBUG ===");
+        log.info("ForumId: {}", forumId);
+        log.info("ParentId: {}", parentId);
+        log.info("Content: '{}'", content);
+        log.info("User: {}", authentication.getName());
 
         try {
             // Валидация контента
             if (content == null || content.trim().length() < 3) {
+                log.warn("Content too short: '{}'", content);
                 redirectAttributes.addFlashAttribute("errorMessage", "Ответ должен содержать не менее 3 символов");
                 return "redirect:/forums/" + forumId;
             }
 
             if (content.length() > 1000) {
+                log.warn("Content too long: {} characters", content.length());
                 redirectAttributes.addFlashAttribute("errorMessage", "Ответ не должен превышать 1000 символов");
                 return "redirect:/forums/" + forumId;
             }
@@ -269,23 +273,27 @@ public class ForumController {
                     .content(content.trim())
                     .build();
 
-            // Получаем ID пользователя
-            Long currentUser = userService.getUserIdByEmail(authentication.getName());
-            if (currentUser == null) {
-                log.error("User not found: {}", authentication.getName());
+            log.info("Reply DTO created: {}", replyDto);
+
+            // Получаем ID пользователя через ваш метод
+            String userEmail = authentication.getName();
+            Long currentUserId = userService.getUserIdByEmail(userEmail);
+
+            if (currentUserId == null) {
+                log.error("User not found by email: {}", userEmail);
                 redirectAttributes.addFlashAttribute("errorMessage", "Пользователь не найден");
                 return "redirect:/forums/" + forumId;
             }
 
-            ForumCommentDto reply = forumCommentService.createForumComment(replyDto, currentUser);
+            log.info("User found for reply: Email={}, ID={}", userEmail, currentUserId);
+
+            ForumCommentDto reply = forumCommentService.createForumComment(replyDto, currentUserId);
+            log.info("Reply created successfully: {}", reply.getId());
 
             redirectAttributes.addFlashAttribute("successMessage", "Ответ успешно добавлен");
-            log.info("Пользователь {} ответил на комментарий {} в теме {}",
-                    authentication.getName(), parentId, forumId);
 
         } catch (Exception e) {
-            log.error("Ошибка при создании ответа пользователем {} на комментарий {} в теме {}",
-                    authentication.getName(), parentId, forumId, e);
+            log.error("Error creating reply", e);
             redirectAttributes.addFlashAttribute("errorMessage", "Ошибка при добавлении ответа: " + e.getMessage());
         }
 

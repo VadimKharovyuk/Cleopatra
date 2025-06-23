@@ -142,7 +142,7 @@ public class ForumCommentServiceImpl implements ForumCommentService {
                 forumCommentRepository.decrementChildrenCount(comment.getParent().getId());
             }
 
-            log.info("Комментарий ID: {} успешно удален", forumCommentId);
+
             return true;
 
         } catch (Exception e) {
@@ -154,7 +154,6 @@ public class ForumCommentServiceImpl implements ForumCommentService {
     @Override
     @Transactional(readOnly = true) // ✅ ОПТИМИЗАЦИЯ: read-only транзакция
     public ForumCommentPageDto getForumComments(Long forumId, int page, int size) {
-        log.info("Получение комментариев для форума ID: {}, страница: {}", forumId, page);
 
         // Проверяем существование форума
         if (!forumRepository.existsById(forumId)) {
@@ -188,7 +187,6 @@ public class ForumCommentServiceImpl implements ForumCommentService {
     @Override
     @Transactional(readOnly = true) // ✅ ОПТИМИЗАЦИЯ: read-only транзакция
     public List<ForumCommentDto> getCommentReplies(Long parentCommentId) {
-        log.info("Получение ответов на комментарий ID: {}", parentCommentId);
 
         // ✅ ОПТИМИЗАЦИЯ: Используем JOIN FETCH для авторов
         List<ForumComment> replies = forumCommentRepository

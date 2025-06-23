@@ -22,6 +22,7 @@ public class ForumCommentDto {
     private Integer childrenCount;
     private Boolean deleted;
 
+
     // Данные автора
     private Long authorId;
     private String authorName;
