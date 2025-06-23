@@ -3,6 +3,7 @@ package com.example.cleopatra.maper;
 import com.example.cleopatra.dto.ForumComment.CreateForumCommentDto;
 import com.example.cleopatra.dto.ForumComment.ForumCommentDto;
 import com.example.cleopatra.model.ForumComment;
+import com.example.cleopatra.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,29 @@ public class ForumCommentMapper {
         }
 
         try {
+            // ✅ Безопасное получение данных автора
+            Long authorId = null;
+            String authorName = "Удаленный пользователь";
+            String authorAvatar = null;
+
+            if (forumComment.getAuthor() != null) {
+                User author = forumComment.getAuthor();
+                authorId = author.getId();
+
+                // ✅ ИСПРАВЛЕНО: используем имя, а не email
+                if (author.getFirstName() != null && !author.getFirstName().trim().isEmpty()) {
+                    authorName = author.getFirstName();
+                    if (author.getLastName() != null && !author.getLastName().trim().isEmpty()) {
+                        authorName += " " + author.getLastName();
+                    }
+                } else {
+                    authorName = author.getEmail(); // fallback на email
+                }
+
+                // ✅ ИСПРАВЛЕНО: безопасное получение аватара
+                authorAvatar = author.getImageUrl(); // или getProfileImageUrl() - как у вас называется
+            }
+
             return ForumCommentDto.builder()
                     .id(forumComment.getId())
                     .content(forumComment.getContent())
@@ -28,9 +52,12 @@ public class ForumCommentMapper {
                     .level(forumComment.getLevel())
                     .childrenCount(forumComment.getChildrenCount())
                     .deleted(forumComment.getDeleted())
-                    // Данные автора
-                    .authorId(forumComment.getAuthor() != null ? forumComment.getAuthor().getId() : null)
-                    .authorName(forumComment.getAuthor() != null ? forumComment.getAuthor().getEmail() : "Unknown")
+
+                    // ✅ Данные автора
+                    .authorId(authorId)           // ← ID уже есть!
+                    .authorName(authorName)       // ← улучшенное имя
+                    .authorAvatar(authorAvatar)   // ← фото уже есть!
+
                     // Временные метки
                     .createdAt(forumComment.getCreatedAt())
                     .updatedAt(forumComment.getUpdatedAt())
@@ -94,53 +121,6 @@ public class ForumCommentMapper {
         }
     }
 
-    /**
-     * Создание DTO с базовой информацией (без чувствительных данных)
-     * Полезно для публичных API или когда нужно скрыть email автора
-     */
-    public ForumCommentDto toPublicDto(ForumComment forumComment) {
-        if (forumComment == null) {
-            return null;
-        }
 
-        ForumCommentDto dto = toDto(forumComment);
-        if (dto != null) {
-            // Скрываем email для публичного просмотра
 
-            // Если комментарий удален, скрываем контент
-            if (dto.isDeleted()) {
-                dto.setContent("[Комментарий удален]");
-            }
-        }
-
-        return dto;
-    }
-
-    /**
-     * Массовое преобразование списка сущностей в DTO
-     */
-    public java.util.List<ForumCommentDto> toDtoList(java.util.List<ForumComment> comments) {
-        if (comments == null || comments.isEmpty()) {
-            return java.util.Collections.emptyList();
-        }
-
-        return comments.stream()
-                .map(this::toDto)
-                .filter(dto -> dto != null) // Фильтруем null значения
-                .collect(java.util.stream.Collectors.toList());
-    }
-
-    /**
-     * Массовое преобразование в публичные DTO
-     */
-    public java.util.List<ForumCommentDto> toPublicDtoList(java.util.List<ForumComment> comments) {
-        if (comments == null || comments.isEmpty()) {
-            return java.util.Collections.emptyList();
-        }
-
-        return comments.stream()
-                .map(this::toPublicDto)
-                .filter(dto -> dto != null)
-                .collect(java.util.stream.Collectors.toList());
-    }
 }

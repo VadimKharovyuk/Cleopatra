@@ -27,6 +27,9 @@ public class ForumCommentDto {
     private Long authorId;
     private String authorName;
 
+    private String authorAvatar;
+
+
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;

@@ -38,19 +38,21 @@ public class ForumMapper {
                 .message(message != null ? message : "Операция выполнена")
                 .build();
     }
-
     public ForumDetailDTO toDetailDTO(Forum forum) {
         if (forum == null) {
             return null;
         }
 
-        // ✅ ИСПРАВЛЕНО: правильная обработка User
+        // Значения по умолчанию
         String authorName = "Неизвестный автор";
         String authorEmail = null;
+        String autorImageUrl = null;  // ✅ ДОБАВЛЕНО
+        Long authorId = null;         // ✅ ДОБАВЛЕНО
 
         if (forum.getUser() != null) {
             User user = forum.getUser();
-            // Проверяем есть ли firstName, иначе используем email
+
+            // Имя автора
             if (user.getFirstName() != null && !user.getFirstName().trim().isEmpty()) {
                 authorName = user.getFirstName();
                 if (user.getLastName() != null && !user.getLastName().trim().isEmpty()) {
@@ -59,8 +61,12 @@ public class ForumMapper {
             } else {
                 authorName = user.getEmail();
             }
+
             authorEmail = user.getEmail();
+            authorId = user.getId();                    // ✅ ДОБАВЛЕНО
+            autorImageUrl = user.getImageUrl();  // ✅ ДОБАВЛЕНО (или как называется поле)
         }
+
 
         return ForumDetailDTO.builder()
                 .id(forum.getId())
@@ -72,7 +78,9 @@ public class ForumMapper {
                 .createdAt(forum.getCreatedAt())
                 .updatedAt(forum.getUpdatedAt())
                 .authorName(authorName)
-                .authorEmail(authorEmail) // ✅ ДОБАВЛЕНО!
+                .authorEmail(authorEmail)
+                .authorId(authorId)           // ✅ ДОБАВЛЕНО
+                .authorImageUrl(autorImageUrl) // ✅ ДОБАВЛЕНО
                 .build();
     }
 
