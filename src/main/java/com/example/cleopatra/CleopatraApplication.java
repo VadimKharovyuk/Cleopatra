@@ -23,9 +23,7 @@ public class CleopatraApplication {
 //        Редактирование комментариев
 //        Упоминания пользователей (@username)
 
-
-//        Could not autowire. No beans of 'JavaMailSender' type foun
-//        EmailQueueManager
+        /// нотификация если ответили на клментарий в форуме
 
 
 

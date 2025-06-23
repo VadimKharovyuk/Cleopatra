@@ -63,6 +63,7 @@ public class PhotoController {
         return "photos/index";
     }
 
+
     // Загрузка нового фото
     @PostMapping("/upload")
     public String uploadPhoto(@ModelAttribute PhotoCreateDto photoCreateDto,
@@ -254,7 +255,7 @@ public class PhotoController {
         }
     }
 
-    // API для получения фотографий пользователя (обновлено с проверкой доступа)
+
     @GetMapping("/api/user/{userId}")
     @ResponseBody
     public ResponseEntity<List<PhotoResponseDto>> getUserPhotosApi(@PathVariable Long userId,
