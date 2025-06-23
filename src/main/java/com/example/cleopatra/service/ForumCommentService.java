@@ -11,4 +11,6 @@ public interface ForumCommentService {
     boolean deleteForumComment(Long forumCommentId, Long userId);
     ForumCommentPageDto getForumComments(Long forumId, int page, int size);
     List<ForumCommentDto> getCommentReplies(Long parentCommentId);
+
+    List<ForumCommentDto> getAllCommentReplies(Long commentId);
 }

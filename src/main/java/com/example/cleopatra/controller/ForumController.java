@@ -28,14 +28,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ForumController {
 
-    private final ForumService forumService; // write operations
-    private final ForumReadService forumReadService; // read operations
-    private final ForumCommentService forumCommentService; // comment operations
+    private final ForumService forumService;
+    private final ForumReadService forumReadService;
+    private final ForumCommentService forumCommentService;
     private final UserService userService;
 
-    // ========== FORUM METHODS ==========
 
-    // Главная страница форума со списком тем
+
     @GetMapping
     public String getAllForums(
             @RequestParam(defaultValue = "0") int page,
@@ -75,14 +74,13 @@ public class ForumController {
             Model model) {
 
         try {
-            // ✅ Используем ForumReadService для поиска
+
             ForumPageResponseDTO searchResults = forumReadService.searchForums(query, page, size);
 
             model.addAttribute("forums", searchResults);
             model.addAttribute("searchQuery", query);
             model.addAttribute("currentPage", page);
 
-            log.info("Выполнен поиск: '{}', найдено {} результатов", query, searchResults.getTotalElements());
             return "forum/search-results";
 
         } catch (IllegalArgumentException e) {
@@ -97,6 +95,7 @@ public class ForumController {
             return "forum/search-results";
         }
     }
+
 
     // Просмотр конкретной темы
     @GetMapping("/{id}")
@@ -138,7 +137,6 @@ public class ForumController {
     // Форма создания новой темы
     @GetMapping("/create")
     public String showCreateForm(Model model, Authentication authentication) {
-        // Проверяем аутентификацию (хотя Spring Security должен это делать)
         if (authentication == null) {
             return "redirect:/login";
         }
@@ -168,7 +166,7 @@ public class ForumController {
             ForumCreateResponseDTO response = forumService.createForum(forumCreateDTO, authentication.getName());
 
             redirectAttributes.addFlashAttribute("successMessage", response.getMessage());
-            log.info("Пользователь {} создал тему: {}", authentication.getName(), response.getTitle());
+
 
             return "redirect:/forums/" + response.getId();
 
@@ -228,7 +226,7 @@ public class ForumController {
             ForumCommentDto comment = forumCommentService.createForumComment(createCommentDto, userId);
 
             redirectAttributes.addFlashAttribute("successMessage", "Комментарий успешно добавлен");
-            log.info("Пользователь {} добавил комментарий к теме {}", authentication.getName(), forumId);
+
 
         } catch (Exception e) {
             log.error("Ошибка при создании комментария пользователем {} к теме {}",
@@ -247,11 +245,7 @@ public class ForumController {
                                  Authentication authentication,
                                  RedirectAttributes redirectAttributes) {
 
-        log.info("=== REPLY COMMENT DEBUG ===");
-        log.info("ForumId: {}", forumId);
-        log.info("ParentId: {}", parentId);
-        log.info("Content: '{}'", content);
-        log.info("User: {}", authentication.getName());
+
 
         try {
             // Валидация контента
@@ -273,7 +267,6 @@ public class ForumController {
                     .content(content.trim())
                     .build();
 
-            log.info("Reply DTO created: {}", replyDto);
 
             // Получаем ID пользователя через ваш метод
             String userEmail = authentication.getName();
@@ -298,7 +291,6 @@ public class ForumController {
         return "redirect:/forums/" + forumId + "#comment-" + parentId;
     }
 
-    // Удаление комментария
     @PostMapping("/{forumId}/comments/{commentId}/delete")
     public String deleteComment(@PathVariable Long forumId,
                                 @PathVariable Long commentId,
@@ -328,9 +320,8 @@ public class ForumController {
         return "redirect:/forums/" + forumId;
     }
 
-    // AJAX методы для комментариев
 
-    // Получение ответов на комментарий (AJAX)
+
     @GetMapping("/{forumId}/comments/{commentId}/replies")
     @ResponseBody
     public ResponseEntity<List<ForumCommentDto>> getCommentReplies(@PathVariable Long forumId,
@@ -363,41 +354,12 @@ public class ForumController {
         }
     }
 
-    // ========== UTILITY METHODS ==========
 
-    // Дополнительный endpoint для проверки существования темы (AJAX)
     @GetMapping("/{id}/exists")
     @ResponseBody
     public boolean checkForumExists(@PathVariable Long id) {
         return forumReadService.existsById(id);
     }
 
-    // Статистика по типам форумов (для админки или аналитики)
-    @GetMapping("/stats")
-    public String getForumStats(Model model, Authentication authentication) {
-        // Проверяем права админа
-        boolean isAdmin = authentication.getAuthorities()
-                .contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
 
-        if (!isAdmin) {
-            return "redirect:/forums";
-        }
-
-        try {
-            // Получаем статистику по всем типам
-            model.addAttribute("totalForums", forumReadService.getForumCountByType(null));
-
-            for (ForumType type : ForumType.values()) {
-                long count = forumReadService.getForumCountByType(type);
-                model.addAttribute(type.name().toLowerCase() + "Count", count);
-            }
-
-            return "forum/stats";
-
-        } catch (Exception e) {
-            log.error("Ошибка при получении статистики", e);
-            model.addAttribute("errorMessage", "Ошибка при загрузке статистики");
-            return "forum/stats";
-        }
-    }
 }

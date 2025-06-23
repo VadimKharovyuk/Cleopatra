@@ -203,6 +203,11 @@ public class ForumCommentServiceImpl implements ForumCommentService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<ForumCommentDto> getAllCommentReplies(Long commentId) {
+        return List.of();
+    }
+
     /**
      * Обновление счетчиков после создания комментария
      */

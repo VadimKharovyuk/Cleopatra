@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class ForumDetailDTO {
     private Long id;
     private String title;
-    private String description; // ← важно! В списке не показываем
+    private String description;
     private ForumType forumType;
     private Integer viewCount;
     private Integer commentCount;
