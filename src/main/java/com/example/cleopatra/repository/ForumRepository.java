@@ -43,5 +43,8 @@ public interface ForumRepository extends JpaRepository<Forum, Long> {
 
 
 
+    @Modifying
+    @Query("UPDATE Forum f SET f.commentCount = GREATEST(0, f.commentCount - 1) WHERE f.id = :forumId")
+    void decrementCommentCount(@Param("forumId") Long forumId);
 }
 

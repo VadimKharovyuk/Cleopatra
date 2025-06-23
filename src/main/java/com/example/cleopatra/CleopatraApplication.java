@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 @EnableCaching
 @EnableScheduling
 @SpringBootApplication
@@ -16,14 +15,20 @@ public class CleopatraApplication {
         SpringApplication.run(CleopatraApplication.class, args);
 
 
-
-//        curl https://cleopatra-brcc.onrender.com/health
-//        curl https://cleopatra-brcc.onrender.com/diagnostic/memory
-
+    ///форум /комент
+//
+//        Лайки/дизлайки
+//        Рейтинги пользователей
+//        Расширенная модерация
+//        Редактирование комментариев
+//        Упоминания пользователей (@username)
 
 
 //        Could not autowire. No beans of 'JavaMailSender' type foun
 //        EmailQueueManager
+
+
+
 
 
     }

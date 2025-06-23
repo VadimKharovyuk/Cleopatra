@@ -32,18 +32,12 @@ public class ForumReadService {
 
     @Cacheable(value = "forums-detailed", key = "#forumId")
     public ForumDetailDTO getForumById(Long forumId) {
-        log.info("🔍 ForumReadService.getForumById: {}", forumId);
-
         Forum forum = forumRepository.findByIdWithUser(forumId)
                 .orElseThrow(() -> {
                     log.warn("⚠️ Тема с ID {} не найдена в БД", forumId);
                     return new ForumNotFoundException("Тема не найдена");
                 });
-
-        log.info("📋 Найдена тема в БД: {}", forum.getTitle());
-
         ForumDetailDTO result = forumMapper.toDetailDTO(forum);
-        log.info("📋 Результат маппинга: {}", result != null ? result.getTitle() : "NULL");
 
         return result;
     }
@@ -61,10 +55,10 @@ public class ForumReadService {
 
         Page<Forum> forumPage;
         if (forumType != null) {
-            // ✅ ИСПРАВЛЕНО: убрали WithUser из названия
+
             forumPage = forumRepository.findByForumType(forumType, pageable);
         } else {
-            // ✅ ИСПРАВЛЕНО: используем стандартный findAll
+
             forumPage = forumRepository.findAll(pageable);
         }
 
@@ -85,11 +79,8 @@ public class ForumReadService {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        // ✅ ИСПРАВЛЕНО: убрали WithUser из названия
         Page<Forum> searchResults = forumRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
                 normalizedQuery, normalizedQuery, pageable);
-
-        log.info("Поиск '{}' вернул {} результатов", searchQuery, searchResults.getTotalElements());
         return forumMapper.toPageResponseDTO(searchResults);
     }
 

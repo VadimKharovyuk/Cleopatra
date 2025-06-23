@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 @Component
 public class ForumMapper {
 
+
     public Forum toEntity(ForumCreateDTO dto, User user) {
         if (dto == null || user == null) {
             return null;

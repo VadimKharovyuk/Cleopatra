@@ -48,8 +48,6 @@ public class ForumServiceImpl implements ForumService {
 
         Forum forum = forumMapper.toEntity(forumCreateDTO, user);
         Forum savedForum = forumRepository.save(forum);
-
-        log.info("Создана новая тема форума с ID: {} пользователем: {}", savedForum.getId(), userEmail);
         return forumMapper.toCreateResponseDTO(savedForum, "Тема успешно создана");
     }
 
@@ -68,7 +66,7 @@ public class ForumServiceImpl implements ForumService {
         }
 
         forumRepository.delete(forum);
-        log.info("Тема '{}' (ID: {}) удалена пользователем: {}", forum.getTitle(), forumId, userEmail);
+
     }
 
 
@@ -78,6 +76,8 @@ public class ForumServiceImpl implements ForumService {
         incrementViewCount(forumId);
         return result;
     }
+
+
 
 
     @Async
