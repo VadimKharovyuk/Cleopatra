@@ -298,15 +298,13 @@ public class ForumController {
                                 RedirectAttributes redirectAttributes) {
 
         try {
-            // Получаем ID пользователя
             Long userId = userService.getUserIdByEmail(authentication.getName());
 
             boolean deleted = forumCommentService.deleteForumComment(commentId, userId);
 
             if (deleted) {
                 redirectAttributes.addFlashAttribute("successMessage", "Комментарий успешно удален");
-                log.info("Пользователь {} удалил комментарий {} в теме {}",
-                        authentication.getName(), commentId, forumId);
+
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "Не удалось удалить комментарий");
             }
@@ -343,6 +341,7 @@ public class ForumController {
     public ResponseEntity<ForumCommentPageDto> getMoreComments(@PathVariable Long forumId,
                                                                @RequestParam(defaultValue = "0") int page,
                                                                @RequestParam(defaultValue = "10") int size) {
+
 
         try {
             ForumCommentPageDto comments = forumCommentService.getForumComments(forumId, page, size);

@@ -11,6 +11,7 @@ public interface ForumService {
 
     ForumCreateResponseDTO createForum(ForumCreateDTO forumCreateDTO, String userEmail);
 
+
     void deleteForum(Long forumId, String userEmail, boolean isAdmin);
 
     ForumDetailDTO viewForum(Long forumId, String userEmail);

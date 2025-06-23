@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -36,4 +38,9 @@ public interface ForumCommentRepository extends JpaRepository<ForumComment, Long
     @Modifying
     @Query("UPDATE ForumComment fc SET fc.childrenCount = GREATEST(0, fc.childrenCount - 1) WHERE fc.id = :commentId")
     void decrementChildrenCount(@Param("commentId") Long commentId);
+
+
+    @Modifying
+    @Transactional
+    void deleteByForumId(Long forumId);
 }

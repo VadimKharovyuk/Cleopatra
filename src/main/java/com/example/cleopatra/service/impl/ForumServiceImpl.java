@@ -10,6 +10,7 @@ import com.example.cleopatra.enums.ForumType;
 import com.example.cleopatra.maper.ForumMapper;
 import com.example.cleopatra.model.Forum;
 import com.example.cleopatra.model.User;
+import com.example.cleopatra.repository.ForumCommentRepository;
 import com.example.cleopatra.repository.ForumRepository;
 import com.example.cleopatra.service.ForumReadService;
 import com.example.cleopatra.service.ForumService;
@@ -38,6 +39,7 @@ public class ForumServiceImpl implements ForumService {
     private final ForumRepository forumRepository;
     private final ForumMapper forumMapper;
     private final ForumReadService forumReadService;
+    private final ForumCommentRepository forumCommentRepository;
 
 
     @Override
@@ -51,12 +53,14 @@ public class ForumServiceImpl implements ForumService {
         return forumMapper.toCreateResponseDTO(savedForum, "Тема успешно создана");
     }
 
+
     @Override
     @Caching(evict = {
             @CacheEvict(value = "forums-detailed", key = "#forumId"),
             @CacheEvict(value = "forum-pages", allEntries = true),
             @CacheEvict(value = "forum-search", allEntries = true)
     })
+    @Transactional
     public void deleteForum(Long forumId, String userEmail, boolean isAdmin) {
         Forum forum = forumRepository.findByIdWithUser(forumId)
                 .orElseThrow(() -> new ForumNotFoundException("Тема с ID " + forumId + " не найдена"));
@@ -65,10 +69,9 @@ public class ForumServiceImpl implements ForumService {
             throw new AccessDeniedException("Нет прав для удаления этой темы");
         }
 
+        forumCommentRepository.deleteByForumId(forumId);
         forumRepository.delete(forum);
-
     }
-
 
     @Override
     public ForumDetailDTO viewForum(Long forumId, String userEmail) {
