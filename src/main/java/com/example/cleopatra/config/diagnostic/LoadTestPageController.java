@@ -6,10 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-/**
- * Контроллер для страницы нагрузочного тестирования
- * Отвечает за отображение HTML интерфейса управления тестами
- */
+
 @Controller
 @RequestMapping("/diagnostic")
 @Slf4j
@@ -24,7 +21,6 @@ public class LoadTestPageController {
         model.addAttribute("appName", "Cleopatra");
         model.addAttribute("version", "1.0.0");
 
-        // Настройки по умолчанию для тестов
         model.addAttribute("defaultUrl", "https://cleopatra-brcc.onrender.com/profile/4");
         model.addAttribute("defaultUserId", 4);
         model.addAttribute("defaultRequests", 50);
@@ -33,9 +29,6 @@ public class LoadTestPageController {
         return "diagnostic/load-test";
     }
 
-    /**
-     * Страница результатов (если нужна отдельная)
-     */
     @GetMapping("/load-test/results")
     public String loadTestResults(Model model) {
         log.info("📊 Открыта страница результатов тестирования");
@@ -50,8 +43,6 @@ public class LoadTestPageController {
      */
     @GetMapping("/system-monitor")
     public String systemMonitorPage(Model model) {
-        log.info("💻 Открыта страница мониторинга системы");
-
         model.addAttribute("pageTitle", "Мониторинг системы - Cleopatra");
         model.addAttribute("refreshInterval", 5000); // 5 секунд
 

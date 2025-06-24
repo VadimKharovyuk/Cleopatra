@@ -16,10 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * Контроллер для нагрузочного тестирования
- * Позволяет тестировать производительность приложения
- */
+
 @RestController
 @RequestMapping("/diagnostic/load-test")
 @RequiredArgsConstructor
@@ -35,9 +32,7 @@ public class LoadTestController {
     private final AtomicLong totalResponseTime = new AtomicLong(0);
     private volatile boolean isTestRunning = false;
 
-    /**
-     * Запуск нагрузочного теста для профиля
-     */
+
     @PostMapping("/profile/{userId}")
     public ResponseEntity<Map<String, Object>> startProfileLoadTest(
             @PathVariable Long userId,

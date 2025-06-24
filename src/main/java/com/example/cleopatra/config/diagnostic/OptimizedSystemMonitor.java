@@ -66,12 +66,7 @@ public class OptimizedSystemMonitor {
 
             // Database Pool
             PoolStats pool = getDatabasePoolStats();
-//
-//            log.info("Мониторинг #{} - Память: {}/{} МБ ({}%), БД пул: {}/{}, Время работы: {} мин",
-//                    cycle,
-//                    memory.usedMB, memory.totalMB, memory.usagePercent,
-//                    pool.active, pool.total,
-//                    (System.currentTimeMillis() - startTime) / 60000);
+
 
             // Детальное логирование только при проблемах
             if (memory.usagePercent > 85 || pool.active >= pool.total) {
@@ -103,10 +98,7 @@ public class OptimizedSystemMonitor {
         }
     }
 
-    /**
-     * Быстрая проверка критичных метрик - каждые 5 минут
-     * Только важная информация без лишних объектов
-     */
+
     @Scheduled(fixedRate = 300000) // 5 минут
     public void performQuickHealthCheck() {
         try {

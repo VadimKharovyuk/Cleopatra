@@ -1,0 +1,121 @@
+<!-- groups/create-group.html -->
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Создать группу - Cleopatra</title>
+</head>
+<body>
+<header>
+  <nav>
+    <h1>Cleopatra</h1>
+    <div>
+      <a href="/groups">Группы</a>
+      <a href="/profile">Профиль</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="container">
+    <h2>Создать новую группу</h2>
+
+    <!-- Ошибки -->
+    <div th:if="${errorMessage}" class="alert-error">
+      <p th:text="${errorMessage}"></p>
+    </div>
+
+    <form th:action="@{/groups/create}"
+          th:object="${createGroupRequestDTO}"
+          method="post"
+          enctype="multipart/form-data">
+
+      <!-- Название группы -->
+      <div class="form-group">
+        <label for="name">Название группы *</label>
+        <input type="text"
+               id="name"
+               th:field="*{name}"
+               placeholder="Введите название группы"
+               required>
+        <div th:if="${#fields.hasErrors('name')}" class="error">
+          <span th:errors="*{name}"></span>
+        </div>
+      </div>
+
+      <!-- Описание -->
+      <div class="form-group">
+        <label for="description">Описание</label>
+        <textarea id="description"
+                  th:field="*{description}"
+                  placeholder="Расскажите о вашей группе"
+                  rows="4"></textarea>
+        <div th:if="${#fields.hasErrors('description')}" class="error">
+          <span th:errors="*{description}"></span>
+        </div>
+      </div>
+
+      <!-- Тип группы -->
+      <div class="form-group">
+        <label>Тип группы *</label>
+        <div class="radio-group">
+          <input type="radio"
+                 id="open"
+                 th:field="*{groupType}"
+                 value="OPEN">
+          <label for="open">🌍 Открытая - любой может присоединиться</label>
+        </div>
+        <div class="radio-group">
+          <input type="radio"
+                 id="closed"
+                 th:field="*{groupType}"
+                 value="CLOSED">
+          <label for="closed">🔒 Закрытая - нужно одобрение администратора</label>
+        </div>
+        <div class="radio-group">
+          <input type="radio"
+                 id="private"
+                 th:field="*{groupType}"
+                 value="PRIVATE">
+          <label for="private">👁️ Приватная - только по приглашениям</label>
+        </div>
+        <div th:if="${#fields.hasErrors('groupType')}" class="error">
+          <span th:errors="*{groupType}"></span>
+        </div>
+      </div>
+
+      <!-- Основное изображение -->
+      <div class="form-group">
+        <label for="image">Изображение группы</label>
+        <input type="file"
+               id="image"
+               th:field="*{image}"
+               accept="image/*">
+        <small>Поддерживаемые форматы: JPG, PNG, HEIF, HEIC. Максимум 10 МБ.</small>
+      </div>
+
+      <!-- Фоновое изображение -->
+      <div class="form-group">
+        <label for="backgroundImage">Фоновое изображение</label>
+        <input type="file"
+               id="backgroundImage"
+               th:field="*{backgroundImage}"
+               accept="image/*">
+        <small>Поддерживаемые форматы: JPG, PNG, HEIF, HEIC. Максимум 10 МБ.</small>
+      </div>
+
+      <!-- Кнопки -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+          Создать группу
+        </button>
+        <a href="/groups" class="btn btn-secondary">
+          Отмена
+        </a>
+      </div>
+    </form>
+  </div>
+</main>
+</body>
+</html>

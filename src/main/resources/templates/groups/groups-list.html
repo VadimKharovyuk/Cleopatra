@@ -1,0 +1,113 @@
+
+<!-- groups/groups-list.html -->
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Группы - Cleopatra</title>
+</head>
+<body>
+<header>
+    <nav>
+        <h1>Cleopatra - Группы</h1>
+        <div>
+            <a href="/groups">Все группы</a>
+            <a href="/groups/my">Мои группы</a>
+            <a href="/groups/create">Создать группу</a>
+            <a href="/profile">Профиль</a>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <div class="container">
+        <!-- Сообщения -->
+        <div th:if="${successMessage}" class="alert-success">
+            <p th:text="${successMessage}"></p>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert-error">
+            <p th:text="${errorMessage}"></p>
+        </div>
+
+        <!-- Заголовок страницы -->
+        <h2 th:if="${currentPage == 'public-groups'}">Публичные группы</h2>
+        <h2 th:if="${currentPage == 'my-groups'}">Мои группы</h2>
+
+        <!-- Список групп -->
+        <div class="groups-grid">
+            <div th:each="group : ${groupPage.groups}" class="group-card">
+                <div class="group-image">
+                    <img th:if="${group.imageUrl}"
+                         th:src="${group.imageUrl}"
+                         th:alt="${group.name}"
+                         style="width: 100%; height: 150px; object-fit: cover;">
+                    <div th:unless="${group.imageUrl}" class="no-image">
+                        Нет изображения
+                    </div>
+                </div>
+
+                <div class="group-info">
+                    <h3 th:text="${group.name}">Название группы</h3>
+                    <p th:text="${group.description}" class="description">Описание группы</p>
+
+                    <div class="group-meta">
+                        <span class="group-type" th:text="${group.groupType.displayName}">Тип</span>
+                        <span class="member-count" th:text="${group.memberCount} + ' участников'">0 участников</span>
+                    </div>
+
+                    <div class="group-actions">
+                        <a th:href="@{/groups/{id}(id=${group.id})}" class="btn btn-primary">
+                            Подробнее
+                        </a>
+
+                        <span th:if="${group.isMember}" class="status-badge member">
+                                Участник
+                            </span>
+
+                        <span th:if="${group.currentUserMembershipStatus?.name() == 'PENDING'}"
+                              class="status-badge pending">
+                                Ожидает одобрения
+                            </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Пустое состояние -->
+        <div th:if="${groupPage.isEmpty}" class="empty-state">
+            <h3>Групп не найдено</h3>
+            <p th:if="${currentPage == 'public-groups'}">
+                Пока нет доступных групп.
+            </p>
+            <p th:if="${currentPage == 'my-groups'}">
+                Вы еще не состоите ни в одной группе.
+                <a href="/groups/create">Создайте первую группу</a> или
+                <a href="/groups">найдите интересную</a>.
+            </p>
+        </div>
+
+        <!-- Пагинация -->
+        <div th:if="${!groupPage.isEmpty}" class="pagination">
+            <a th:if="${groupPage.currentPage > 0}"
+               th:href="@{''(page=${groupPage.currentPage - 1}, size=${groupPage.size})}"
+               class="btn btn-secondary">
+                ← Предыдущая
+            </a>
+
+            <span class="page-info">
+                    Страница <span th:text="${groupPage.currentPage + 1}">1</span>
+                    (<span th:text="${groupPage.numberOfElements}">0</span> групп)
+                </span>
+
+            <a th:if="${groupPage.hasNext}"
+               th:href="@{''(page=${groupPage.currentPage + 1}, size=${groupPage.size})}"
+               class="btn btn-secondary">
+                Следующая →
+            </a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

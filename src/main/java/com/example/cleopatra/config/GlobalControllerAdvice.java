@@ -25,10 +25,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Глобальный ControllerAdvice для автоматического добавления
- * текущего пользователя во все модели контроллеров
- */
+
 @ControllerAdvice
 @RequiredArgsConstructor
 @Slf4j
