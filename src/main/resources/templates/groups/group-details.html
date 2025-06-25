@@ -1,3 +1,130 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title th:text="${group.name} + ' - Cleopatra'">Группа - Cleopatra</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<header>-->
+<!--    <nav>-->
+<!--        <h1>Cleopatra</h1>-->
+<!--        <div>-->
+<!--            <a href="/groups">Группы</a>-->
+<!--            <a href="/profile">Профиль</a>-->
+<!--        </div>-->
+<!--    </nav>-->
+<!--</header>-->
+
+<!--<main>-->
+<!--    <div class="container">-->
+<!--        &lt;!&ndash; Фоновое изображение &ndash;&gt;-->
+<!--        <div class="group-header">-->
+<!--            <div th:if="${group.backgroundImageUrl}"-->
+<!--                 class="background-image"-->
+<!--                 th:style="'background-image: url(' + ${group.backgroundImageUrl} + ')'">-->
+<!--            </div>-->
+
+<!--            <div class="group-main-info">-->
+<!--                &lt;!&ndash; Основное изображение &ndash;&gt;-->
+<!--                <div class="group-avatar">-->
+<!--                    <img th:if="${group.imageUrl}"-->
+<!--                         th:src="${group.imageUrl}"-->
+<!--                         th:alt="${group.name}"-->
+<!--                         style="width: 120px; height: 120px; border-radius: 8px; object-fit: cover;">-->
+<!--                    <div th:unless="${group.imageUrl}" class="no-avatar">-->
+<!--                        Нет фото-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                &lt;!&ndash; Информация о группе &ndash;&gt;-->
+<!--                <div class="group-info">-->
+<!--                    <h1 th:text="${group.name}">Название группы</h1>-->
+<!--                    <p th:text="${group.description}">Описание группы</p>-->
+
+<!--                    <div class="group-stats">-->
+<!--                            <span class="stat">-->
+<!--                                👥 <span th:text="${group.memberCount}">0</span> участников-->
+<!--                            </span>-->
+<!--                        <span class="stat" th:text="${group.groupType.displayName}">Тип группы</span>-->
+<!--                        <span class="stat">-->
+<!--                                Создана: <span th:text="${#temporals.format(group.createdAt, 'dd.MM.yyyy')}">дата</span>-->
+<!--                            </span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Действия пользователя &ndash;&gt;-->
+<!--        <div class="group-actions">-->
+<!--            &lt;!&ndash; Если пользователь может присоединиться &ndash;&gt;-->
+<!--            <button th:if="${group.canJoin}"-->
+<!--                    class="btn btn-primary">-->
+<!--                Присоединиться-->
+<!--            </button>-->
+
+<!--            &lt;!&ndash; Если пользователь может покинуть &ndash;&gt;-->
+<!--            <button th:if="${group.canLeave}"-->
+<!--                    class="btn btn-secondary">-->
+<!--                Покинуть группу-->
+<!--            </button>-->
+
+<!--            &lt;!&ndash; Если пользователь может управлять &ndash;&gt;-->
+<!--            <button th:if="${group.canManage}"-->
+<!--                    class="btn btn-primary">-->
+<!--                Настройки группы-->
+<!--            </button>-->
+
+<!--            &lt;!&ndash; Статусы участия &ndash;&gt;-->
+<!--            <span th:if="${group.isMember}" class="status-badge member">-->
+<!--                    ✅ Вы участник-->
+<!--                </span>-->
+
+<!--            <span th:if="${group.currentUserMembershipStatus?.name() == 'PENDING'}"-->
+<!--                  class="status-badge pending">-->
+<!--                    ⏳ Заявка на рассмотрении-->
+<!--                </span>-->
+
+<!--            <span th:if="${group.currentUserRole?.name() == 'OWNER'}"-->
+<!--                  class="status-badge owner">-->
+<!--                    👑 Владелец-->
+<!--                </span>-->
+
+<!--            <span th:if="${group.currentUserRole?.name() == 'ADMIN'}"-->
+<!--                  class="status-badge admin">-->
+<!--                    ⚡ Администратор-->
+<!--                </span>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Информация о владельце &ndash;&gt;-->
+<!--        <div class="owner-info">-->
+<!--            <h3>Владелец группы</h3>-->
+<!--            <div class="owner-card">-->
+<!--                <img th:if="${group.ownerImageUrl}"-->
+<!--                     th:src="${group.ownerImageUrl}"-->
+<!--                     th:alt="${group.ownerFirstName}"-->
+<!--                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">-->
+<!--                <span th:text="${group.ownerFirstName} + ' ' + ${group.ownerLastName}">-->
+<!--                        Имя владельца-->
+<!--                    </span>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Участники группы (заглушка для будущей реализации) &ndash;&gt;-->
+<!--        <div class="group-members">-->
+<!--            <h3>Участники</h3>-->
+<!--            <p>Список участников будет реализован позже через GroupMembershipService</p>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Посты группы (заглушка для будущей реализации) &ndash;&gt;-->
+<!--        <div class="group-posts">-->
+<!--            <h3>Посты группы</h3>-->
+<!--            <p>Посты группы будут реализованы позже</p>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</main>-->
+<!--</body>-->
+<!--</html>-->
 
 <!-- groups/group-details.html -->
 <!DOCTYPE html>
@@ -6,124 +133,1420 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${group.name} + ' - Cleopatra'">Группа - Cleopatra</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<header>
-    <nav>
-        <h1>Cleopatra</h1>
-        <div>
-            <a href="/groups">Группы</a>
-            <a href="/profile">Профиль</a>
-        </div>
-    </nav>
-</header>
+<!-- Include Sidebar -->
+<th:block th:replace="~{fragments/sidebar :: complete-sidebar('groups')}"></th:block>
 
-<main>
-    <div class="container">
-        <!-- Фоновое изображение -->
-        <div class="group-header">
-            <div th:if="${group.backgroundImageUrl}"
-                 class="background-image"
-                 th:style="'background-image: url(' + ${group.backgroundImageUrl} + ')'">
+<!-- Main Content -->
+<main class="main-content">
+    <div class="content-wrapper">
+        <!-- Group Header Section -->
+        <div class="group-header-container">
+            <!-- Background Image -->
+            <div class="group-background">
+                <div th:if="${group.backgroundImageUrl}"
+                     class="background-image"
+                     th:style="'background-image: url(' + ${group.backgroundImageUrl} + ')'">
+                    <div class="background-overlay"></div>
+                </div>
+                <div th:unless="${group.backgroundImageUrl}"
+                     class="background-gradient">
+                    <div class="background-overlay"></div>
+                </div>
             </div>
 
+            <!-- Group Main Info -->
             <div class="group-main-info">
-                <!-- Основное изображение -->
-                <div class="group-avatar">
-                    <img th:if="${group.imageUrl}"
-                         th:src="${group.imageUrl}"
-                         th:alt="${group.name}"
-                         style="width: 120px; height: 120px; border-radius: 8px; object-fit: cover;">
-                    <div th:unless="${group.imageUrl}" class="no-avatar">
-                        Нет фото
+                <div class="group-avatar-container">
+                    <div class="group-avatar">
+                        <img th:if="${group.imageUrl}"
+                             th:src="${group.imageUrl}"
+                             th:alt="${group.name}">
+                        <div th:unless="${group.imageUrl}" class="no-avatar">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+
+                    <!-- Group Type Badge -->
+                    <div class="group-type-badge" th:text="${group.groupType.displayName}">
+                        🌍 Открытая
                     </div>
                 </div>
 
-                <!-- Информация о группе -->
                 <div class="group-info">
-                    <h1 th:text="${group.name}">Название группы</h1>
-                    <p th:text="${group.description}">Описание группы</p>
+                    <div class="group-title-section">
+                        <h1 class="group-title" th:text="${group.name}">Название группы</h1>
 
+                        <!-- Membership Status Badges -->
+                        <div class="status-badges">
+                                <span th:if="${group.isMember}" class="status-badge member">
+                                    <i class="fas fa-check"></i> Участник
+                                </span>
+                            <span th:if="${group.currentUserMembershipStatus?.name() == 'PENDING'}"
+                                  class="status-badge pending">
+                                    <i class="fas fa-clock"></i> На рассмотрении
+                                </span>
+                            <span th:if="${group.currentUserRole?.name() == 'OWNER'}"
+                                  class="status-badge owner">
+                                    <i class="fas fa-crown"></i> Владелец
+                                </span>
+                            <span th:if="${group.currentUserRole?.name() == 'ADMIN'}"
+                                  class="status-badge admin">
+                                    <i class="fas fa-shield-alt"></i> Администратор
+                                </span>
+                        </div>
+                    </div>
+
+                    <p class="group-description" th:text="${group.description}">Описание группы</p>
+
+                    <!-- Group Stats -->
                     <div class="group-stats">
-                            <span class="stat">
-                                👥 <span th:text="${group.memberCount}">0</span> участников
-                            </span>
-                        <span class="stat" th:text="${group.groupType.displayName}">Тип группы</span>
-                        <span class="stat">
-                                Создана: <span th:text="${#temporals.format(group.createdAt, 'dd.MM.yyyy')}">дата</span>
-                            </span>
+                        <div class="stat-item">
+                            <i class="fas fa-users"></i>
+                            <span class="stat-value" th:text="${group.memberCount}">0</span>
+                            <span class="stat-label">участников</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-calendar"></i>
+                            <span class="stat-value" th:text="${#temporals.format(group.createdAt, 'dd.MM.yyyy')}">01.01.2024</span>
+                            <span class="stat-label">создана</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-globe"></i>
+                            <span class="stat-value" th:text="${group.groupType.displayName}">Открытая</span>
+                            <span class="stat-label">тип группы</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Действия пользователя -->
-        <div class="group-actions">
-            <!-- Если пользователь может присоединиться -->
-            <button th:if="${group.canJoin}"
-                    class="btn btn-primary">
-                Присоединиться
-            </button>
+            <!-- Action Buttons -->
+            <div class="group-actions">
+                <button th:if="${group.canJoin}"
+                        class="btn btn-primary action-btn join-btn"
+                        th:attr="data-group-id=${group.id}">
+                    <i class="fas fa-plus"></i>
+                    <span>Присоединиться</span>
+                </button>
 
-            <!-- Если пользователь может покинуть -->
-            <button th:if="${group.canLeave}"
-                    class="btn btn-secondary">
-                Покинуть группу
-            </button>
+                <button th:if="${group.canLeave}"
+                        class="btn btn-danger action-btn leave-btn"
+                        th:attr="data-group-id=${group.id}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Покинуть группу</span>
+                </button>
 
-            <!-- Если пользователь может управлять -->
-            <button th:if="${group.canManage}"
-                    class="btn btn-primary">
-                Настройки группы
-            </button>
+                <a th:if="${group.canManage}"
+                   th:href="@{/groups/{id}/settings(id=${group.id})}"
+                   class="btn btn-secondary action-btn">
+                    <i class="fas fa-cog"></i>
+                    <span>Настройки</span>
+                </a>
 
-            <!-- Статусы участия -->
-            <span th:if="${group.isMember}" class="status-badge member">
-                    ✅ Вы участник
-                </span>
+                <form th:if="${group.canManage}"
+                      th:action="@{/groups/delete/{id}(id=${group.id})}"
+                      method="post"
+                      class="delete-form"
+                      onsubmit="return confirm('Вы уверены, что хотите удалить группу?')">
+                    <button type="submit" class="btn btn-danger action-btn">
+                        <i class="fas fa-trash"></i>
+                        <span>Удалить</span>
+                    </button>
+                </form>
 
-            <span th:if="${group.currentUserMembershipStatus?.name() == 'PENDING'}"
-                  class="status-badge pending">
-                    ⏳ Заявка на рассмотрении
-                </span>
-
-            <span th:if="${group.currentUserRole?.name() == 'OWNER'}"
-                  class="status-badge owner">
-                    👑 Владелец
-                </span>
-
-            <span th:if="${group.currentUserRole?.name() == 'ADMIN'}"
-                  class="status-badge admin">
-                    ⚡ Администратор
-                </span>
-        </div>
-
-        <!-- Информация о владельце -->
-        <div class="owner-info">
-            <h3>Владелец группы</h3>
-            <div class="owner-card">
-                <img th:if="${group.ownerImageUrl}"
-                     th:src="${group.ownerImageUrl}"
-                     th:alt="${group.ownerFirstName}"
-                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                <span th:text="${group.ownerFirstName} + ' ' + ${group.ownerLastName}">
-                        Имя владельца
-                    </span>
+                <a href="/groups" class="btn btn-outline action-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Назад к группам</span>
+                </a>
             </div>
         </div>
 
-        <!-- Участники группы (заглушка для будущей реализации) -->
-        <div class="group-members">
-            <h3>Участники</h3>
-            <p>Список участников будет реализован позже через GroupMembershipService</p>
-        </div>
+        <!-- Content Sections -->
+        <div class="content-sections">
+            <!-- Post Creation Section (for future) -->
+            <div th:if="${group.isMember}" class="post-creation-section">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-edit"></i>
+                            Создать пост
+                        </h3>
+                    </div>
 
-        <!-- Посты группы (заглушка для будущей реализации) -->
-        <div class="group-posts">
-            <h3>Посты группы</h3>
-            <p>Посты группы будут реализованы позже</p>
+                    <div class="post-creation-form">
+                        <div class="post-textarea-wrapper">
+                                <textarea class="post-textarea"
+                                          placeholder="Поделитесь своими мыслями с группой..."
+                                          rows="3"></textarea>
+                        </div>
+
+                        <div class="post-actions">
+                            <div class="post-attachments">
+                                <button class="attachment-btn" title="Добавить фото">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                                <button class="attachment-btn" title="Добавить видео">
+                                    <i class="fas fa-video"></i>
+                                </button>
+                                <button class="attachment-btn" title="Добавить файл">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                            </div>
+
+                            <button class="btn btn-primary post-submit-btn">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Опубликовать</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Group Owner Section -->
+            <div class="owner-section">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-crown"></i>
+                            Владелец группы
+                        </h3>
+                    </div>
+
+                    <div class="owner-card">
+                        <div class="owner-avatar">
+                            <img th:if="${group.ownerImageUrl}"
+                                 th:src="${group.ownerImageUrl}"
+                                 th:alt="${group.ownerFirstName}">
+                            <div th:unless="${group.ownerImageUrl}" class="no-owner-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+
+                        <div class="owner-info">
+                            <h4 class="owner-name" th:text="${group.ownerFirstName} + ' ' + ${group.ownerLastName}">
+                                Имя владельца
+                            </h4>
+                            <p class="owner-role">Создатель и администратор группы</p>
+                        </div>
+
+                        <a th:href="@{/profile/{id}(id=${group.ownerId})}"
+                           class="btn btn-outline btn-sm">
+                            <i class="fas fa-user"></i>
+                            Профиль
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Group Members Section -->
+            <div class="members-section">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-users"></i>
+                            Участники
+                            <span class="member-count" th:text="'(' + ${group.memberCount} + ')'">
+                                    (0)
+                                </span>
+                        </h3>
+                        <a th:if="${group.isMember}"
+                           th:href="@{/groups/{id}/members(id=${group.id})}"
+                           class="btn btn-outline btn-sm">
+                            <i class="fas fa-eye"></i>
+                            Все участники
+                        </a>
+                    </div>
+
+                    <div class="members-preview">
+                        <div class="members-placeholder">
+                            <div class="placeholder-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <p class="placeholder-text">
+                                Список участников будет реализован через GroupMembershipService
+                            </p>
+                            <small class="placeholder-note">
+                                Здесь будут отображаться аватарки последних присоединившихся участников
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Group Posts Section -->
+            <div class="posts-section">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-newspaper"></i>
+                            Посты группы
+                        </h3>
+                        <div class="posts-filter">
+                            <select class="filter-select">
+                                <option value="recent">Новые</option>
+                                <option value="popular">Популярные</option>
+                                <option value="discussed">Обсуждаемые</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="posts-content">
+                        <div class="posts-placeholder">
+                            <div class="placeholder-icon">
+                                <i class="fas fa-newspaper"></i>
+                            </div>
+                            <h4 class="placeholder-title">Пока нет постов</h4>
+                            <p class="placeholder-text">
+                                Станьте первым, кто поделится интересным контентом в этой группе!
+                            </p>
+                            <button th:if="${group.isMember}"
+                                    class="btn btn-primary"
+                                    onclick="focusPostCreation()">
+                                <i class="fas fa-plus"></i>
+                                Создать первый пост
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
+
+<!-- Styles -->
+<style>
+    /* ==================== LIGHT THEME VARIABLES ==================== */
+    :root {
+        /* Light Background Colors */
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8fafc;
+        --bg-accent: #f1f5f9;
+        --bg-hover: #e2e8f0;
+        --surface-elevated: #ffffff;
+
+        /* Light Text Colors */
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --text-light: #94a3b8;
+        --text-white: #ffffff;
+
+        /* Light Premium Accent Colors */
+        --accent-primary: #3b82f6;
+        --accent-secondary: #8b5cf6;
+        --accent-success: #10b981;
+        --accent-warning: #f59e0b;
+        --accent-error: #ef4444;
+
+        /* Light Borders & Shadows */
+        --border-primary: #e2e8f0;
+        --border-secondary: #f1f5f9;
+        --border-accent: #cbd5e1;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+        /* Light Gradients */
+        --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        --gradient-light: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        --gradient-hero: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+
+        /* Spacing & Sizing */
+        --radius-sm: 6px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+    }
+
+    /* ==================== BASIC LAYOUT ==================== */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        color: var(--text-primary);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-weight: 400;
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    .main-content {
+        margin-left: 280px;
+        min-height: 100vh;
+        padding: 2rem;
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .content-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* ==================== GROUP HEADER ==================== */
+    .group-header-container {
+        position: relative;
+        margin-bottom: 2rem;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        background: var(--surface-elevated);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-primary);
+    }
+
+    .group-background {
+        position: relative;
+        height: 300px;
+        overflow: hidden;
+    }
+
+    .background-image {
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .background-gradient {
+        width: 100%;
+        height: 100%;
+        background: var(--gradient-hero);
+    }
+
+    .background-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
+    }
+
+    .group-main-info {
+        position: relative;
+        padding: 2rem;
+        margin-top: -80px;
+        z-index: 10;
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+
+    .group-avatar-container {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .group-avatar {
+        width: 160px;
+        height: 160px;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        background: var(--surface-elevated);
+        border: 4px solid var(--surface-elevated);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .group-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .no-avatar {
+        font-size: 4rem;
+        color: var(--text-muted);
+        background: var(--gradient-light);
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .group-type-badge {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--gradient-primary);
+        color: var(--text-white);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-lg);
+        font-size: 0.875rem;
+        font-weight: 600;
+        box-shadow: var(--shadow-md);
+        white-space: nowrap;
+    }
+
+    .group-info {
+        flex: 1;
+        padding-top: 1rem;
+    }
+
+    .group-title-section {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .group-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .status-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-white);
+    }
+
+    .status-badge.member {
+        background: var(--accent-success);
+    }
+
+    .status-badge.pending {
+        background: var(--accent-warning);
+    }
+
+    .status-badge.owner {
+        background: var(--accent-secondary);
+    }
+
+    .status-badge.admin {
+        background: var(--accent-primary);
+    }
+
+    .group-description {
+        font-size: 1.125rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .group-stats {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+    }
+
+    .stat-item i {
+        font-size: 1.125rem;
+        color: var(--accent-primary);
+    }
+
+    .stat-value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+    }
+
+    /* ==================== ACTION BUTTONS ==================== */
+    .group-actions {
+        padding: 1.5rem 2rem;
+        background: var(--bg-accent);
+        border-top: 1px solid var(--border-primary);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        font-size: 0.875rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary {
+        background: var(--gradient-primary);
+        color: var(--text-white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: var(--text-white);
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-primary);
+    }
+
+    .btn-secondary:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    .btn-danger {
+        background: var(--accent-error);
+        color: var(--text-white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: var(--text-white);
+        text-decoration: none;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-accent);
+    }
+
+    .btn-outline:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+        text-decoration: none;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+    }
+
+    .delete-form {
+        display: inline-block;
+    }
+
+    /* ==================== CONTENT SECTIONS ==================== */
+    .content-sections {
+        display: grid;
+        gap: 2rem;
+    }
+
+    .section-card {
+        background: var(--surface-elevated);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-primary);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-primary);
+        background: var(--bg-secondary);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .section-title i {
+        color: var(--accent-primary);
+    }
+
+    .member-count {
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+    /* ==================== POST CREATION ==================== */
+    .post-creation-section {
+        order: 1;
+    }
+
+    .post-creation-form {
+        padding: 2rem;
+    }
+
+    .post-textarea-wrapper {
+        margin-bottom: 1rem;
+    }
+
+    .post-textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 1rem;
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 1rem;
+        line-height: 1.5;
+        resize: vertical;
+        transition: all 0.2s;
+    }
+
+    .post-textarea:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .post-textarea::placeholder {
+        color: var(--text-muted);
+    }
+
+    .post-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .post-attachments {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .attachment-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-primary);
+        background: var(--bg-secondary);
+        color: var(--text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .attachment-btn:hover {
+        background: var(--bg-hover);
+        color: var(--accent-primary);
+        transform: translateY(-1px);
+    }
+
+    .post-submit-btn {
+        padding: 0.75rem 2rem;
+    }
+
+    /* ==================== OWNER SECTION ==================== */
+    .owner-section {
+        order: 2;
+    }
+
+    .owner-card {
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .owner-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: var(--gradient-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .owner-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .no-owner-avatar {
+        font-size: 2rem;
+        color: var(--text-muted);
+    }
+
+    .owner-info {
+        flex: 1;
+    }
+
+    .owner-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .owner-role {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    /* ==================== MEMBERS SECTION ==================== */
+    .members-section {
+        order: 3;
+    }
+
+    .members-preview {
+        padding: 2rem;
+    }
+
+    .members-placeholder,
+    .posts-placeholder {
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+
+    .placeholder-icon {
+        font-size: 3rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        opacity: 0.6;
+    }
+
+    .placeholder-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .placeholder-text {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .placeholder-note {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    /* ==================== POSTS SECTION ==================== */
+    .posts-section {
+        order: 4;
+    }
+
+    .posts-filter {
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-select {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        background: var(--surface-elevated);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+    }
+
+    .posts-content {
+        padding: 0;
+    }
+
+    /* ==================== RESPONSIVE DESIGN ==================== */
+    @media (max-width: 1024px) {
+        .main-content {
+            margin-left: 80px;
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .main-content {
+            margin-left: 0;
+            margin-top: 60px;
+            padding: 1rem;
+        }
+
+        .group-background {
+            height: 200px;
+        }
+
+        .group-avatar {
+            width: 120px;
+            height: 120px;
+        }
+
+        .group-title {
+            font-size: 2rem;
+        }
+
+        .group-title-section {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .group-stats {
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.25rem;
+        }
+
+        .group-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .section-header {
+            padding: 1rem 1.5rem;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .post-creation-form {
+            padding: 1.5rem;
+        }
+
+        .post-actions {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .post-attachments {
+            justify-content: center;
+        }
+
+        .owner-card {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .owner-avatar {
+            width: 100px;
+            height: 100px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .group-avatar {
+            width: 100px;
+            height: 100px;
+        }
+
+        .group-title {
+            font-size: 1.75rem;
+        }
+
+        .status-badges {
+            justify-content: center;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .section-header {
+            padding: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+        }
+
+        .post-creation-form,
+        .owner-card,
+        .members-preview,
+        .posts-content {
+            padding: 1rem;
+        }
+
+        .placeholder-icon {
+            font-size: 2.5rem;
+        }
+
+        .placeholder-title {
+            font-size: 1.125rem;
+        }
+    }
+
+    /* ==================== ANIMATIONS ==================== */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .section-card {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .section-card:nth-child(1) { animation-delay: 0.1s; }
+    .section-card:nth-child(2) { animation-delay: 0.2s; }
+    .section-card:nth-child(3) { animation-delay: 0.3s; }
+    .section-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .group-header-container {
+        animation: slideUp 0.8s ease-out;
+    }
+
+    /* ==================== HOVER EFFECTS ==================== */
+    .section-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+    }
+
+    .owner-card:hover .owner-avatar {
+        transform: scale(1.05);
+        transition: transform 0.3s ease;
+    }
+
+    .attachment-btn:hover {
+        transform: translateY(-2px) scale(1.05);
+    }
+
+    /* ==================== UTILITY CLASSES ==================== */
+    .text-center { text-align: center; }
+    .text-muted { color: var(--text-muted); }
+    .mb-1 { margin-bottom: 0.5rem; }
+    .mb-2 { margin-bottom: 1rem; }
+    .mt-2 { margin-top: 1rem; }
+
+    /* ==================== CUSTOM SCROLLBAR ==================== */
+    .post-textarea::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .post-textarea::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+        border-radius: 4px;
+    }
+
+    .post-textarea::-webkit-scrollbar-thumb {
+        background: var(--border-accent);
+        border-radius: 4px;
+    }
+
+    .post-textarea::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted);
+    }
+</style>
+
+<!-- JavaScript -->
+<script>
+    // ==================== GROUP DETAILS FUNCTIONALITY ====================
+
+    /**
+     * Initialize group details page
+     */
+    function initializeGroupDetails() {
+        initializeJoinButton();
+        initializeLeaveButton();
+        initializePostCreation();
+        initializeAnimations();
+
+        console.log('🏛️ Group details page initialized');
+    }
+
+    /**
+     * Join button functionality
+     */
+    function initializeJoinButton() {
+        const joinBtn = document.querySelector('.join-btn');
+        if (!joinBtn) return;
+
+        joinBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const groupId = this.getAttribute('data-group-id');
+            const buttonText = this.querySelector('span');
+            const buttonIcon = this.querySelector('i');
+
+            // Disable button and show loading
+            this.disabled = true;
+            buttonIcon.className = 'fas fa-spinner fa-spin';
+            buttonText.textContent = 'Отправка...';
+
+            // Simulate API call
+            setTimeout(() => {
+                // Success state
+                buttonIcon.className = 'fas fa-check';
+                buttonText.textContent = 'Заявка отправлена';
+
+                // Show success message
+                showNotification('Заявка на вступление отправлена!', 'success');
+
+                // Hide button after delay
+                setTimeout(() => {
+                    this.style.animation = 'fadeOut 0.3s ease-out';
+                    setTimeout(() => {
+                        this.style.display = 'none';
+                    }, 300);
+                }, 2000);
+
+            }, 1500);
+
+            console.log(`👥 Joining group ID: ${groupId}`);
+        });
+    }
+
+    /**
+     * Leave button functionality
+     */
+    function initializeLeaveButton() {
+        const leaveBtn = document.querySelector('.leave-btn');
+        if (!leaveBtn) return;
+
+        leaveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            if (!confirm('Вы уверены, что хотите покинуть эту группу?')) {
+                return;
+            }
+
+            const groupId = this.getAttribute('data-group-id');
+            const buttonText = this.querySelector('span');
+            const buttonIcon = this.querySelector('i');
+
+            // Disable button and show loading
+            this.disabled = true;
+            buttonIcon.className = 'fas fa-spinner fa-spin';
+            buttonText.textContent = 'Выход...';
+
+            // Simulate API call
+            setTimeout(() => {
+                showNotification('Вы покинули группу', 'success');
+                // Redirect to groups list
+                setTimeout(() => {
+                    window.location.href = '/groups';
+                }, 1000);
+            }, 1500);
+
+            console.log(`👋 Leaving group ID: ${groupId}`);
+        });
+    }
+
+    /**
+     * Post creation functionality
+     */
+    function initializePostCreation() {
+        const textarea = document.querySelector('.post-textarea');
+        const submitBtn = document.querySelector('.post-submit-btn');
+        const attachmentBtns = document.querySelectorAll('.attachment-btn');
+
+        if (!textarea || !submitBtn) return;
+
+        // Auto-resize textarea
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(this.scrollHeight, 120) + 'px';
+
+            // Enable/disable submit button
+            const hasContent = this.value.trim().length > 0;
+            submitBtn.disabled = !hasContent;
+            submitBtn.style.opacity = hasContent ? '1' : '0.5';
+        });
+
+        // Submit post
+        submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const content = textarea.value.trim();
+            if (!content) return;
+
+            const buttonText = this.querySelector('span');
+            const buttonIcon = this.querySelector('i');
+
+            // Disable and show loading
+            this.disabled = true;
+            buttonIcon.className = 'fas fa-spinner fa-spin';
+            buttonText.textContent = 'Публикация...';
+
+            // Simulate API call
+            setTimeout(() => {
+                // Success
+                textarea.value = '';
+                textarea.style.height = '120px';
+
+                buttonIcon.className = 'fas fa-paper-plane';
+                buttonText.textContent = 'Опубликовать';
+                this.disabled = false;
+                this.style.opacity = '0.5';
+
+                showNotification('Пост успешно опубликован!', 'success');
+
+                // Here you would typically reload posts or add the new post to the list
+
+            }, 2000);
+        });
+
+        // Attachment buttons
+        attachmentBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                const type = icon.classList.contains('fa-camera') ? 'photo' :
+                    icon.classList.contains('fa-video') ? 'video' : 'file';
+
+                showNotification(`Функция добавления ${type === 'photo' ? 'фото' : type === 'video' ? 'видео' : 'файлов'} будет реализована позже`, 'info');
+            });
+        });
+
+        // Initially disable submit button
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+    }
+
+    /**
+     * Focus post creation area
+     */
+    function focusPostCreation() {
+        const textarea = document.querySelector('.post-textarea');
+        if (textarea) {
+            textarea.focus();
+            textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    /**
+     * Initialize animations
+     */
+    function initializeAnimations() {
+        // Stagger animation for sections
+        const sections = document.querySelectorAll('.section-card');
+        sections.forEach((section, index) => {
+            section.style.animationDelay = `${(index + 1) * 0.1}s`;
+        });
+
+        // Parallax effect for background
+        const background = document.querySelector('.group-background');
+        if (background) {
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * -0.5;
+                background.style.transform = `translateY(${rate}px)`;
+            });
+        }
+
+        // Intersection observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '50px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeIn 0.6s ease-out forwards';
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+    }
+
+    /**
+     * Show notification
+     */
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+                <button class="notification-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+        // Add styles for notification
+        const notificationStyles = `
+                .notification {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: var(--surface-elevated);
+                    border: 1px solid var(--border-primary);
+                    border-radius: var(--radius-md);
+                    padding: 1rem 1.5rem;
+                    box-shadow: var(--shadow-lg);
+                    z-index: 9999;
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    max-width: 400px;
+                    animation: slideInRight 0.3s ease-out;
+                }
+
+                .notification-success { border-left: 4px solid var(--accent-success); }
+                .notification-error { border-left: 4px solid var(--accent-error); }
+                .notification-info { border-left: 4px solid var(--accent-primary); }
+
+                .notification-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    flex: 1;
+                }
+
+                .notification-content i {
+                    font-size: 1.25rem;
+                }
+
+                .notification-success i { color: var(--accent-success); }
+                .notification-error i { color: var(--accent-error); }
+                .notification-info i { color: var(--accent-primary); }
+
+                .notification-close {
+                    background: none;
+                    border: none;
+                    color: var(--text-muted);
+                    cursor: pointer;
+                    padding: 0.25rem;
+                    border-radius: var(--radius-sm);
+                }
+
+                .notification-close:hover {
+                    background: var(--bg-hover);
+                    color: var(--text-primary);
+                }
+
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes fadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+            `;
+
+        // Inject styles if not already present
+        if (!document.querySelector('#notification-styles')) {
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'notification-styles';
+            styleSheet.textContent = notificationStyles;
+            document.head.appendChild(styleSheet);
+        }
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }
+        }, 5000);
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeGroupDetails);
+    } else {
+        initializeGroupDetails();
+    }
+
+    // Expose functions globally
+    window.focusPostCreation = focusPostCreation;
+
+    console.log('🏛️ Cleopatra Group Details Page Script Loaded - Light Theme');
+</script>
 </body>
 </html>
+

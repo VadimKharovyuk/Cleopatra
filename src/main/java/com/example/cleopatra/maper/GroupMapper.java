@@ -194,4 +194,5 @@ public class GroupMapper {
                 .anyMatch(membership -> Objects.equals(membership.getUserId(), userId)
                         && membership.isApproved());
     }
+
 }

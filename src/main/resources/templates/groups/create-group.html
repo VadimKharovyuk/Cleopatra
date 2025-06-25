@@ -1,3 +1,126 @@
+<!--&lt;!&ndash; groups/create-group.html &ndash;&gt;-->
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Создать группу - Cleopatra</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<header>-->
+<!--  <nav>-->
+<!--    <h1>Cleopatra</h1>-->
+<!--    <div>-->
+<!--      <a href="/groups">Группы</a>-->
+<!--      <a href="/profile">Профиль</a>-->
+<!--    </div>-->
+<!--  </nav>-->
+<!--</header>-->
+
+<!--<main>-->
+<!--  <div class="container">-->
+<!--    <h2>Создать новую группу</h2>-->
+
+<!--    &lt;!&ndash; Ошибки &ndash;&gt;-->
+<!--    <div th:if="${errorMessage}" class="alert-error">-->
+<!--      <p th:text="${errorMessage}"></p>-->
+<!--    </div>-->
+
+<!--    <form th:action="@{/groups/create}"-->
+<!--          th:object="${createGroupRequestDTO}"-->
+<!--          method="post"-->
+<!--          enctype="multipart/form-data">-->
+
+<!--      &lt;!&ndash; Название группы &ndash;&gt;-->
+<!--      <div class="form-group">-->
+<!--        <label for="name">Название группы *</label>-->
+<!--        <input type="text"-->
+<!--               id="name"-->
+<!--               th:field="*{name}"-->
+<!--               placeholder="Введите название группы"-->
+<!--               required>-->
+<!--        <div th:if="${#fields.hasErrors('name')}" class="error">-->
+<!--          <span th:errors="*{name}"></span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Описание &ndash;&gt;-->
+<!--      <div class="form-group">-->
+<!--        <label for="description">Описание</label>-->
+<!--        <textarea id="description"-->
+<!--                  th:field="*{description}"-->
+<!--                  placeholder="Расскажите о вашей группе"-->
+<!--                  rows="4"></textarea>-->
+<!--        <div th:if="${#fields.hasErrors('description')}" class="error">-->
+<!--          <span th:errors="*{description}"></span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Тип группы &ndash;&gt;-->
+<!--      <div class="form-group">-->
+<!--        <label>Тип группы *</label>-->
+<!--        <div class="radio-group">-->
+<!--          <input type="radio"-->
+<!--                 id="open"-->
+<!--                 th:field="*{groupType}"-->
+<!--                 value="OPEN">-->
+<!--          <label for="open">🌍 Открытая - любой может присоединиться</label>-->
+<!--        </div>-->
+<!--        <div class="radio-group">-->
+<!--          <input type="radio"-->
+<!--                 id="closed"-->
+<!--                 th:field="*{groupType}"-->
+<!--                 value="CLOSED">-->
+<!--          <label for="closed">🔒 Закрытая - нужно одобрение администратора</label>-->
+<!--        </div>-->
+<!--        <div class="radio-group">-->
+<!--          <input type="radio"-->
+<!--                 id="private"-->
+<!--                 th:field="*{groupType}"-->
+<!--                 value="PRIVATE">-->
+<!--          <label for="private">👁️ Приватная - только по приглашениям</label>-->
+<!--        </div>-->
+<!--        <div th:if="${#fields.hasErrors('groupType')}" class="error">-->
+<!--          <span th:errors="*{groupType}"></span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Основное изображение &ndash;&gt;-->
+<!--      <div class="form-group">-->
+<!--        <label for="image">Изображение группы</label>-->
+<!--        <input type="file"-->
+<!--               id="image"-->
+<!--               th:field="*{image}"-->
+<!--               accept="image/*">-->
+<!--        <small>Поддерживаемые форматы: JPG, PNG, HEIF, HEIC. Максимум 10 МБ.</small>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Фоновое изображение &ndash;&gt;-->
+<!--      <div class="form-group">-->
+<!--        <label for="backgroundImage">Фоновое изображение</label>-->
+<!--        <input type="file"-->
+<!--               id="backgroundImage"-->
+<!--               th:field="*{backgroundImage}"-->
+<!--               accept="image/*">-->
+<!--        <small>Поддерживаемые форматы: JPG, PNG, HEIF, HEIC. Максимум 10 МБ.</small>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Кнопки &ndash;&gt;-->
+<!--      <div class="form-actions">-->
+<!--        <button type="submit" class="btn btn-primary">-->
+<!--          Создать группу-->
+<!--        </button>-->
+<!--        <a href="/groups" class="btn btn-secondary">-->
+<!--          Отмена-->
+<!--        </a>-->
+<!--      </div>-->
+<!--    </form>-->
+<!--  </div>-->
+<!--</main>-->
+<!--</body>-->
+<!--</html>-->
+
+
 <!-- groups/create-group.html -->
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
@@ -5,117 +128,1676 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Создать группу - Cleopatra</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<header>
-  <nav>
-    <h1>Cleopatra</h1>
-    <div>
-      <a href="/groups">Группы</a>
-      <a href="/profile">Профиль</a>
+<!-- Include Sidebar -->
+<th:block th:replace="~{fragments/sidebar :: complete-sidebar('groups')}"></th:block>
+
+<!-- Main Content -->
+<main class="main-content">
+  <div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="page-title">
+            <i class="fas fa-plus-circle page-title-icon"></i>
+            Создать новую группу
+          </h1>
+          <p class="page-subtitle">
+            Создайте сообщество единомышленников и делитесь интересным контентом
+          </p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+          <div class="progress-step active">
+            <div class="step-number">1</div>
+            <span class="step-label">Основная информация</span>
+          </div>
+          <div class="progress-line"></div>
+          <div class="progress-step">
+            <div class="step-number">2</div>
+            <span class="step-label">Настройки</span>
+          </div>
+          <div class="progress-line"></div>
+          <div class="progress-step">
+            <div class="step-number">3</div>
+            <span class="step-label">Готово</span>
+          </div>
+        </div>
+      </div>
     </div>
-  </nav>
-</header>
 
-<main>
-  <div class="container">
-    <h2>Создать новую группу</h2>
-
-    <!-- Ошибки -->
-    <div th:if="${errorMessage}" class="alert-error">
-      <p th:text="${errorMessage}"></p>
+    <!-- Error Messages -->
+    <div th:if="${errorMessage}" class="alert alert-error">
+      <i class="fas fa-exclamation-triangle"></i>
+      <div class="alert-content">
+        <h4>Ошибка при создании группы</h4>
+        <p th:text="${errorMessage}">Произошла ошибка</p>
+      </div>
+      <button class="alert-close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
 
-    <form th:action="@{/groups/create}"
-          th:object="${createGroupRequestDTO}"
-          method="post"
-          enctype="multipart/form-data">
+    <!-- Form Container -->
+    <div class="form-container">
+      <form th:action="@{/groups/create}"
+            th:object="${createGroupRequestDTO}"
+            method="post"
+            enctype="multipart/form-data"
+            class="create-group-form"
+            id="createGroupForm">
 
-      <!-- Название группы -->
-      <div class="form-group">
-        <label for="name">Название группы *</label>
-        <input type="text"
-               id="name"
-               th:field="*{name}"
-               placeholder="Введите название группы"
-               required>
-        <div th:if="${#fields.hasErrors('name')}" class="error">
-          <span th:errors="*{name}"></span>
-        </div>
-      </div>
+        <!-- Form Section 1: Basic Info -->
+        <div class="form-section active" data-section="1">
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Основная информация
+              </h3>
+              <p class="section-subtitle">Расскажите о вашей группе</p>
+            </div>
 
-      <!-- Описание -->
-      <div class="form-group">
-        <label for="description">Описание</label>
-        <textarea id="description"
-                  th:field="*{description}"
-                  placeholder="Расскажите о вашей группе"
-                  rows="4"></textarea>
-        <div th:if="${#fields.hasErrors('description')}" class="error">
-          <span th:errors="*{description}"></span>
-        </div>
-      </div>
+            <div class="section-content">
+              <!-- Group Name -->
+              <div class="form-group">
+                <label for="name" class="form-label">
+                  <i class="fas fa-tag"></i>
+                  Название группы *
+                </label>
+                <input type="text"
+                       id="name"
+                       th:field="*{name}"
+                       class="form-input"
+                       placeholder="Введите название группы"
+                       maxlength="100"
+                       required>
+                <div class="input-helper">
+                                        <span class="char-counter">
+                                            <span id="nameCounter">0</span>/100
+                                        </span>
+                </div>
+                <div th:if="${#fields.hasErrors('name')}" class="field-error">
+                  <i class="fas fa-exclamation-circle"></i>
+                  <span th:errors="*{name}"></span>
+                </div>
+              </div>
 
-      <!-- Тип группы -->
-      <div class="form-group">
-        <label>Тип группы *</label>
-        <div class="radio-group">
-          <input type="radio"
-                 id="open"
-                 th:field="*{groupType}"
-                 value="OPEN">
-          <label for="open">🌍 Открытая - любой может присоединиться</label>
-        </div>
-        <div class="radio-group">
-          <input type="radio"
-                 id="closed"
-                 th:field="*{groupType}"
-                 value="CLOSED">
-          <label for="closed">🔒 Закрытая - нужно одобрение администратора</label>
-        </div>
-        <div class="radio-group">
-          <input type="radio"
-                 id="private"
-                 th:field="*{groupType}"
-                 value="PRIVATE">
-          <label for="private">👁️ Приватная - только по приглашениям</label>
-        </div>
-        <div th:if="${#fields.hasErrors('groupType')}" class="error">
-          <span th:errors="*{groupType}"></span>
-        </div>
-      </div>
+              <!-- Group Description -->
+              <div class="form-group">
+                <label for="description" class="form-label">
+                  <i class="fas fa-align-left"></i>
+                  Описание группы
+                </label>
+                <textarea id="description"
+                          th:field="*{description}"
+                          class="form-textarea"
+                          placeholder="Расскажите о целях и тематике вашей группы..."
+                          rows="4"
+                          maxlength="500"></textarea>
+                <div class="input-helper">
+                                        <span class="input-tip">
+                                            Хорошее описание поможет людям понять, подходит ли им ваша группа
+                                        </span>
+                  <span class="char-counter">
+                                            <span id="descCounter">0</span>/500
+                                        </span>
+                </div>
+                <div th:if="${#fields.hasErrors('description')}" class="field-error">
+                  <i class="fas fa-exclamation-circle"></i>
+                  <span th:errors="*{description}"></span>
+                </div>
+              </div>
 
-      <!-- Основное изображение -->
-      <div class="form-group">
-        <label for="image">Изображение группы</label>
-        <input type="file"
-               id="image"
-               th:field="*{image}"
-               accept="image/*">
-        <small>Поддерживаемые форматы: JPG, PNG, HEIF, HEIC. Максимум 10 МБ.</small>
-      </div>
+              <!-- Group Type -->
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-shield-alt"></i>
+                  Тип группы *
+                </label>
+                <div class="radio-group-container">
+                  <div class="radio-option">
+                    <input type="radio"
+                           id="open"
+                           th:field="*{groupType}"
+                           value="OPEN"
+                           class="radio-input">
+                    <label for="open" class="radio-label">
+                      <div class="radio-icon">🌍</div>
+                      <div class="radio-content">
+                        <h4 class="radio-title">Открытая группа</h4>
+                        <p class="radio-description">
+                          Любой пользователь может присоединиться без одобрения
+                        </p>
+                      </div>
+                      <div class="radio-check">
+                        <i class="fas fa-check"></i>
+                      </div>
+                    </label>
+                  </div>
 
-      <!-- Фоновое изображение -->
-      <div class="form-group">
-        <label for="backgroundImage">Фоновое изображение</label>
-        <input type="file"
-               id="backgroundImage"
-               th:field="*{backgroundImage}"
-               accept="image/*">
-        <small>Поддерживаемые форматы: JPG, PNG, HEIF, HEIC. Максимум 10 МБ.</small>
-      </div>
+                  <div class="radio-option">
+                    <input type="radio"
+                           id="closed"
+                           th:field="*{groupType}"
+                           value="CLOSED"
+                           class="radio-input">
+                    <label for="closed" class="radio-label">
+                      <div class="radio-icon">🔒</div>
+                      <div class="radio-content">
+                        <h4 class="radio-title">Закрытая группа</h4>
+                        <p class="radio-description">
+                          Участники добавляются после одобрения администратора
+                        </p>
+                      </div>
+                      <div class="radio-check">
+                        <i class="fas fa-check"></i>
+                      </div>
+                    </label>
+                  </div>
 
-      <!-- Кнопки -->
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">
-          Создать группу
-        </button>
-        <a href="/groups" class="btn btn-secondary">
-          Отмена
-        </a>
-      </div>
-    </form>
+                  <div class="radio-option">
+                    <input type="radio"
+                           id="private"
+                           th:field="*{groupType}"
+                           value="PRIVATE"
+                           class="radio-input">
+                    <label for="private" class="radio-label">
+                      <div class="radio-icon">👁️</div>
+                      <div class="radio-content">
+                        <h4 class="radio-title">Приватная группа</h4>
+                        <p class="radio-description">
+                          Только по личным приглашениям от администраторов
+                        </p>
+                      </div>
+                      <div class="radio-check">
+                        <i class="fas fa-check"></i>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                <div th:if="${#fields.hasErrors('groupType')}" class="field-error">
+                  <i class="fas fa-exclamation-circle"></i>
+                  <span th:errors="*{groupType}"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Section 2: Images -->
+        <div class="form-section" data-section="2">
+          <div class="section-card">
+            <div class="section-header">
+              <h3 class="section-title">
+                <i class="fas fa-images"></i>
+                Оформление группы
+              </h3>
+              <p class="section-subtitle">Добавьте изображения для привлекательного вида</p>
+            </div>
+
+            <div class="section-content">
+              <!-- Group Avatar -->
+              <div class="form-group">
+                <label for="image" class="form-label">
+                  <i class="fas fa-user-circle"></i>
+                  Аватар группы
+                </label>
+
+                <div class="file-upload-container">
+                  <div class="file-upload-area" id="avatarUpload">
+                    <div class="file-preview" id="avatarPreview">
+                      <div class="preview-placeholder">
+                        <i class="fas fa-camera"></i>
+                        <h4>Загрузите аватар</h4>
+                        <p>Нажмите или перетащите файл</p>
+                      </div>
+                    </div>
+                    <input type="file"
+                           id="image"
+                           th:field="*{image}"
+                           class="file-input"
+                           accept="image/*"
+                           hidden>
+                  </div>
+                  <div class="file-upload-info">
+                    <small class="file-format-info">
+                      <i class="fas fa-info-circle"></i>
+                      Поддерживаемые форматы: JPG, PNG, HEIF, HEIC. Максимум 10 МБ
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Background Image -->
+              <div class="form-group">
+                <label for="backgroundImage" class="form-label">
+                  <i class="fas fa-image"></i>
+                  Фоновое изображение
+                </label>
+
+                <div class="file-upload-container">
+                  <div class="file-upload-area background-upload" id="backgroundUpload">
+                    <div class="file-preview" id="backgroundPreview">
+                      <div class="preview-placeholder">
+                        <i class="fas fa-mountain"></i>
+                        <h4>Загрузите фон</h4>
+                        <p>Изображение будет отображаться в шапке группы</p>
+                      </div>
+                    </div>
+                    <input type="file"
+                           id="backgroundImage"
+                           th:field="*{backgroundImage}"
+                           class="file-input"
+                           accept="image/*"
+                           hidden>
+                  </div>
+                  <div class="file-upload-info">
+                    <small class="file-format-info">
+                      <i class="fas fa-info-circle"></i>
+                      Рекомендуемое разрешение: 1200x400 пикселей
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Preview Section -->
+              <div class="preview-section">
+                <h4 class="preview-title">
+                  <i class="fas fa-eye"></i>
+                  Предварительный просмотр
+                </h4>
+                <div class="group-preview">
+                  <div class="preview-background" id="previewBackground">
+                    <div class="preview-overlay"></div>
+                  </div>
+                  <div class="preview-content">
+                    <div class="preview-avatar" id="previewAvatar">
+                      <i class="fas fa-users"></i>
+                    </div>
+                    <div class="preview-info">
+                      <h3 class="preview-name" id="previewName">Название группы</h3>
+                      <p class="preview-description" id="previewDescription">Описание группы</p>
+                      <div class="preview-type" id="previewType">🌍 Открытая</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">
+            <i class="fas fa-arrow-left"></i>
+            Назад
+          </button>
+
+          <div class="action-spacer"></div>
+
+          <a href="/groups" class="btn btn-outline">
+            <i class="fas fa-times"></i>
+            Отмена
+          </a>
+
+          <button type="button" class="btn btn-primary" id="nextBtn">
+            Далее
+            <i class="fas fa-arrow-right"></i>
+          </button>
+
+          <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
+            <i class="fas fa-plus"></i>
+            Создать группу
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </main>
+
+<!-- Styles -->
+<style>
+  /* ==================== LIGHT THEME VARIABLES ==================== */
+  :root {
+    /* Light Background Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-accent: #f1f5f9;
+    --bg-hover: #e2e8f0;
+    --surface-elevated: #ffffff;
+
+    /* Light Text Colors */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --text-white: #ffffff;
+
+    /* Light Premium Accent Colors */
+    --accent-primary: #3b82f6;
+    --accent-secondary: #8b5cf6;
+    --accent-success: #10b981;
+    --accent-warning: #f59e0b;
+    --accent-error: #ef4444;
+
+    /* Light Borders & Shadows */
+    --border-primary: #e2e8f0;
+    --border-secondary: #f1f5f9;
+    --border-accent: #cbd5e1;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    /* Light Gradients */
+    --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    --gradient-light: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    --gradient-hero: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+
+    /* Spacing & Sizing */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+  }
+
+  /* ==================== BASIC LAYOUT ==================== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .main-content {
+    margin-left: 280px;
+    min-height: 100vh;
+    padding: 2rem;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .content-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* ==================== PAGE HEADER ==================== */
+  .page-header {
+    margin-bottom: 2rem;
+    background: var(--surface-elevated);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-primary);
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-title-icon {
+    font-size: 2rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .page-subtitle {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  /* ==================== PROGRESS INDICATOR ==================== */
+  .progress-indicator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+
+  .progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+  }
+
+  .progress-step.active {
+    opacity: 1;
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-accent);
+    border: 2px solid var(--border-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+  }
+
+  .progress-step.active .step-number {
+    background: var(--gradient-primary);
+    border-color: var(--accent-primary);
+    color: var(--text-white);
+  }
+
+  .step-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .progress-step.active .step-label {
+    color: var(--text-primary);
+  }
+
+  .progress-line {
+    width: 60px;
+    height: 2px;
+    background: var(--border-accent);
+    transition: all 0.3s ease;
+  }
+
+  /* ==================== ALERT ==================== */
+  .alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 2rem;
+    position: relative;
+    animation: slideInDown 0.3s ease-out;
+  }
+
+  .alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--accent-error);
+  }
+
+  .alert-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .alert-content p {
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  .alert-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  .alert-close:hover {
+    opacity: 1;
+  }
+
+  @keyframes slideInDown {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* ==================== FORM CONTAINER ==================== */
+  .form-container {
+    background: var(--surface-elevated);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-primary);
+    overflow: hidden;
+  }
+
+  .form-section {
+    display: none;
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .form-section.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .section-card {
+    padding: 0;
+  }
+
+  .section-header {
+    padding: 2rem 2rem 1rem;
+    border-bottom: 1px solid var(--border-primary);
+    background: var(--bg-secondary);
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-title i {
+    color: var(--accent-primary);
+  }
+
+  .section-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+  }
+
+  .section-content {
+    padding: 2rem;
+  }
+
+  /* ==================== FORM ELEMENTS ==================== */
+  .form-group {
+    margin-bottom: 2rem;
+  }
+
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .form-label i {
+    color: var(--accent-primary);
+    font-size: 1rem;
+  }
+
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .form-input:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: var(--surface-elevated);
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .input-helper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+
+  .input-tip {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .char-counter {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .field-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent-error);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+
+  /* ==================== RADIO GROUP ==================== */
+  .radio-group-container {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .radio-option {
+    position: relative;
+  }
+
+  .radio-input {
+    display: none;
+  }
+
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    border: 2px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .radio-label:hover {
+    border-color: var(--border-accent);
+    background: var(--surface-elevated);
+  }
+
+  .radio-input:checked + .radio-label {
+    border-color: var(--accent-primary);
+    background: rgba(59, 130, 246, 0.05);
+  }
+
+  .radio-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+
+  .radio-content {
+    flex: 1;
+  }
+
+  .radio-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .radio-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .radio-check {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border-accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-white);
+    background: transparent;
+    transition: all 0.2s ease;
+  }
+
+  .radio-input:checked + .radio-label .radio-check {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+  }
+
+  .radio-check i {
+    font-size: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .radio-input:checked + .radio-label .radio-check i {
+    opacity: 1;
+  }
+
+  /* ==================== FILE UPLOAD ==================== */
+  .file-upload-container {
+    width: 100%;
+  }
+
+  .file-upload-area {
+    border: 2px dashed var(--border-accent);
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .file-upload-area:hover {
+    border-color: var(--accent-primary);
+    background: rgba(59, 130, 246, 0.05);
+  }
+
+  .file-upload-area.has-file {
+    border-color: var(--accent-primary);
+  }
+
+  .file-preview {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .background-upload .file-preview {
+    height: 150px;
+  }
+
+  .preview-placeholder {
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .preview-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--text-light);
+  }
+
+  .preview-placeholder h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .preview-placeholder p {
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  .file-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+  }
+
+  .file-upload-info {
+    padding: 1rem;
+    background: var(--bg-accent);
+    border-top: 1px solid var(--border-primary);
+  }
+
+  .file-format-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+
+  .file-format-info i {
+    color: var(--accent-primary);
+  }
+
+  /* ==================== PREVIEW SECTION ==================== */
+  .preview-section {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: var(--bg-accent);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-primary);
+  }
+
+  .preview-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .preview-title i {
+    color: var(--accent-primary);
+  }
+
+  .group-preview {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .preview-background {
+    height: 120px;
+    background: var(--gradient-hero);
+    position: relative;
+  }
+
+  .preview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
+  }
+
+  .preview-content {
+    padding: 1.5rem;
+    margin-top: -40px;
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .preview-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-md);
+    background: var(--surface-elevated);
+    border: 3px solid var(--surface-elevated);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .preview-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .preview-info {
+    flex: 1;
+    padding-top: 0.5rem;
+  }
+
+  .preview-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .preview-description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .preview-type {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: var(--gradient-primary);
+    color: var(--text-white);
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  /* ==================== FORM ACTIONS ==================== */
+  .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    background: var(--bg-accent);
+    border-top: 1px solid var(--border-primary);
+  }
+
+  .action-spacer {
+    flex: 1;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: var(--gradient-primary);
+    color: var(--text-white);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    color: var(--text-white);
+    text-decoration: none;
+  }
+
+  .btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-primary);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  .btn-success {
+    background: var(--accent-success);
+    color: var(--text-white);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-success:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    color: var(--text-white);
+    text-decoration: none;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-accent);
+  }
+
+  .btn-outline:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+
+  /* ==================== RESPONSIVE DESIGN ==================== */
+  @media (max-width: 1024px) {
+    .main-content {
+      margin-left: 80px;
+      padding: 1.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .main-content {
+      margin-left: 0;
+      margin-top: 60px;
+      padding: 1rem;
+    }
+
+    .header-content {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .page-title {
+      font-size: 2rem;
+    }
+
+    .progress-indicator {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .progress-step {
+      flex: 1;
+    }
+
+    .step-label {
+      font-size: 0.75rem;
+    }
+
+    .section-header,
+    .section-content {
+      padding: 1.5rem;
+    }
+
+    .form-actions {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1.5rem;
+    }
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .action-spacer {
+      display: none;
+    }
+
+    .preview-content {
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+    }
+
+    .preview-info {
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-title {
+      font-size: 1.75rem;
+      flex-direction: column;
+      text-align: center;
+      gap: 0.5rem;
+    }
+
+    .progress-indicator {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .progress-line {
+      width: 2px;
+      height: 20px;
+    }
+
+    .section-header,
+    .section-content {
+      padding: 1rem;
+    }
+
+    .radio-label {
+      flex-direction: column;
+      text-align: center;
+      gap: 1rem;
+    }
+
+    .radio-content {
+      text-align: center;
+    }
+
+    .file-preview {
+      height: 150px;
+    }
+
+    .background-upload .file-preview {
+      height: 120px;
+    }
+
+    .preview-avatar {
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+    }
+
+    .preview-name {
+      font-size: 1.125rem;
+    }
+  }
+
+  /* ==================== ANIMATIONS ==================== */
+  .form-section {
+    animation: slideIn 0.5s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .radio-label {
+    animation: fadeInUp 0.3s ease-out;
+  }
+
+  .radio-option:nth-child(1) .radio-label { animation-delay: 0.1s; }
+  .radio-option:nth-child(2) .radio-label { animation-delay: 0.2s; }
+  .radio-option:nth-child(3) .radio-label { animation-delay: 0.3s; }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ==================== LOADING STATES ==================== */
+  .btn.loading {
+    position: relative;
+    color: transparent;
+  }
+
+  .btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+</style>
+
+<!-- JavaScript -->
+<script>
+  // ==================== CREATE GROUP FUNCTIONALITY ====================
+
+  let currentSection = 1;
+  const totalSections = 2;
+
+  /**
+   * Initialize create group page
+   */
+  function initializeCreateGroup() {
+    initializeNavigation();
+    initializeFileUploads();
+    initializePreview();
+    initializeCharCounters();
+    initializeFormValidation();
+
+    console.log('🏛️ Create group page initialized');
+  }
+
+  /**
+   * Navigation between sections
+   */
+  function initializeNavigation() {
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const submitBtn = document.getElementById('submitBtn');
+
+    nextBtn.addEventListener('click', function() {
+      if (validateCurrentSection()) {
+        showSection(currentSection + 1);
+      }
+    });
+
+    prevBtn.addEventListener('click', function() {
+      showSection(currentSection - 1);
+    });
+
+    // Initial state
+    updateNavigationButtons();
+  }
+
+  /**
+   * Show specific section
+   */
+  function showSection(sectionNumber) {
+    if (sectionNumber < 1 || sectionNumber > totalSections) return;
+
+    // Hide current section
+    document.querySelector(`.form-section[data-section="${currentSection}"]`).classList.remove('active');
+
+    // Show new section
+    currentSection = sectionNumber;
+    document.querySelector(`.form-section[data-section="${currentSection}"]`).classList.add('active');
+
+    // Update progress indicator
+    updateProgressIndicator();
+    updateNavigationButtons();
+
+    // Scroll to top
+    document.querySelector('.main-content').scrollTop = 0;
+  }
+
+  /**
+   * Update progress indicator
+   */
+  function updateProgressIndicator() {
+    const steps = document.querySelectorAll('.progress-step');
+    steps.forEach((step, index) => {
+      if (index + 1 <= currentSection) {
+        step.classList.add('active');
+      } else {
+        step.classList.remove('active');
+      }
+    });
+  }
+
+  /**
+   * Update navigation buttons
+   */
+  function updateNavigationButtons() {
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Previous button
+    if (currentSection > 1) {
+      prevBtn.style.display = 'flex';
+    } else {
+      prevBtn.style.display = 'none';
+    }
+
+    // Next/Submit button
+    if (currentSection === totalSections) {
+      nextBtn.style.display = 'none';
+      submitBtn.style.display = 'flex';
+    } else {
+      nextBtn.style.display = 'flex';
+      submitBtn.style.display = 'none';
+    }
+  }
+
+  /**
+   * File upload functionality
+   */
+  function initializeFileUploads() {
+    initializeFileUpload('avatarUpload', 'image', 'avatarPreview', false);
+    initializeFileUpload('backgroundUpload', 'backgroundImage', 'backgroundPreview', true);
+  }
+
+  function initializeFileUpload(uploadAreaId, inputId, previewId, isBackground) {
+    const uploadArea = document.getElementById(uploadAreaId);
+    const fileInput = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+
+    if (!uploadArea || !fileInput || !preview) return;
+
+    // Click to upload
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'var(--accent-primary)';
+      uploadArea.style.background = 'rgba(59, 130, 246, 0.05)';
+    });
+
+    uploadArea.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'var(--border-accent)';
+      uploadArea.style.background = 'var(--bg-secondary)';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'var(--border-accent)';
+      uploadArea.style.background = 'var(--bg-secondary)';
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFileSelect(files[0], uploadArea, preview, isBackground);
+      }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFileSelect(e.target.files[0], uploadArea, preview, isBackground);
+      }
+    });
+  }
+
+  /**
+   * Handle file selection
+   */
+  function handleFileSelect(file, uploadArea, preview, isBackground) {
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      showNotification('Пожалуйста, выберите изображение', 'error');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      showNotification('Размер файла не должен превышать 10 МБ', 'error');
+      return;
+    }
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      uploadArea.classList.add('has-file');
+      preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+
+      // Update form preview
+      updateFormPreview();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /**
+   * Initialize live preview
+   */
+  function initializePreview() {
+    const nameInput = document.getElementById('name');
+    const descInput = document.getElementById('description');
+    const typeInputs = document.querySelectorAll('input[name="groupType"]');
+
+    if (nameInput) {
+      nameInput.addEventListener('input', updateFormPreview);
+    }
+    if (descInput) {
+      descInput.addEventListener('input', updateFormPreview);
+    }
+    typeInputs.forEach(input => {
+      input.addEventListener('change', updateFormPreview);
+    });
+
+    // Initial update
+    updateFormPreview();
+  }
+
+  /**
+   * Update form preview
+   */
+  function updateFormPreview() {
+    const nameInput = document.getElementById('name');
+    const descInput = document.getElementById('description');
+    const selectedType = document.querySelector('input[name="groupType"]:checked');
+
+    const previewName = document.getElementById('previewName');
+    const previewDesc = document.getElementById('previewDescription');
+    const previewType = document.getElementById('previewType');
+    const previewAvatar = document.getElementById('previewAvatar');
+    const previewBackground = document.getElementById('previewBackground');
+
+    // Update name
+    if (previewName && nameInput) {
+      previewName.textContent = nameInput.value || 'Название группы';
+    }
+
+    // Update description
+    if (previewDesc && descInput) {
+      previewDesc.textContent = descInput.value || 'Описание группы';
+    }
+
+    // Update type
+    if (previewType && selectedType) {
+      const typeLabels = {
+        'OPEN': '🌍 Открытая',
+        'CLOSED': '🔒 Закрытая',
+        'PRIVATE': '👁️ Приватная'
+      };
+      previewType.textContent = typeLabels[selectedType.value] || '🌍 Открытая';
+    }
+
+    // Update avatar
+    const avatarImg = document.querySelector('#avatarPreview img');
+    if (previewAvatar && avatarImg) {
+      previewAvatar.innerHTML = `<img src="${avatarImg.src}" alt="Avatar">`;
+    }
+
+    // Update background
+    const backgroundImg = document.querySelector('#backgroundPreview img');
+    if (previewBackground && backgroundImg) {
+      previewBackground.style.backgroundImage = `url(${backgroundImg.src})`;
+    }
+  }
+
+  /**
+   * Character counters
+   */
+  function initializeCharCounters() {
+    const nameInput = document.getElementById('name');
+    const descInput = document.getElementById('description');
+    const nameCounter = document.getElementById('nameCounter');
+    const descCounter = document.getElementById('descCounter');
+
+    if (nameInput && nameCounter) {
+      nameInput.addEventListener('input', () => {
+        nameCounter.textContent = nameInput.value.length;
+      });
+    }
+
+    if (descInput && descCounter) {
+      descInput.addEventListener('input', () => {
+        descCounter.textContent = descInput.value.length;
+      });
+    }
+  }
+
+  /**
+   * Form validation
+   */
+  function initializeFormValidation() {
+    const form = document.getElementById('createGroupForm');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      if (validateForm()) {
+        submitForm();
+      }
+    });
+  }
+
+  /**
+   * Validate current section
+   */
+  function validateCurrentSection() {
+    if (currentSection === 1) {
+      const nameInput = document.getElementById('name');
+      const selectedType = document.querySelector('input[name="groupType"]:checked');
+
+      if (!nameInput.value.trim()) {
+        showNotification('Пожалуйста, введите название группы', 'error');
+        nameInput.focus();
+        return false;
+      }
+
+      if (!selectedType) {
+        showNotification('Пожалуйста, выберите тип группы', 'error');
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Validate entire form
+   */
+  function validateForm() {
+    return validateCurrentSection();
+  }
+
+  /**
+   * Submit form
+   */
+  function submitForm() {
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Show loading state
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    // Submit form
+    setTimeout(() => {
+      document.getElementById('createGroupForm').submit();
+    }, 1000);
+  }
+
+  /**
+   * Show notification
+   */
+  function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+                <button class="notification-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+    // Inject notification styles if not present
+    if (!document.querySelector('#notification-styles')) {
+      const styles = `
+                    .notification {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: var(--surface-elevated);
+                        border: 1px solid var(--border-primary);
+                        border-radius: var(--radius-md);
+                        padding: 1rem 1.5rem;
+                        box-shadow: var(--shadow-lg);
+                        z-index: 9999;
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        max-width: 400px;
+                        animation: slideInRight 0.3s ease-out;
+                    }
+
+                    .notification-success { border-left: 4px solid var(--accent-success); }
+                    .notification-error { border-left: 4px solid var(--accent-error); }
+                    .notification-info { border-left: 4px solid var(--accent-primary); }
+
+                    .notification-content {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        flex: 1;
+                    }
+
+                    .notification-close {
+                        background: none;
+                        border: none;
+                        color: var(--text-muted);
+                        cursor: pointer;
+                        padding: 0.25rem;
+                        border-radius: var(--radius-sm);
+                    }
+
+                    @keyframes slideInRight {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `;
+      const styleSheet = document.createElement('style');
+      styleSheet.id = 'notification-styles';
+      styleSheet.textContent = styles;
+      document.head.appendChild(styleSheet);
+    }
+
+    document.body.appendChild(notification);
+
+    // Auto remove
+    setTimeout(() => {
+      if (notification.parentElement) {
+        notification.style.animation = 'fadeOut 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+      }
+    }, 5000);
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeCreateGroup);
+  } else {
+    initializeCreateGroup();
+  }
+
+  console.log('🏛️ Cleopatra Create Group Page Script Loaded - Light Theme');
+</script>
 </body>
 </html>

@@ -4,10 +4,7 @@ import com.example.cleopatra.ExistsException.*;
 import com.example.cleopatra.dto.GroupDto.CreateGroupRequestDTO;
 import com.example.cleopatra.dto.GroupDto.GroupPageResponse;
 import com.example.cleopatra.dto.GroupDto.GroupResponseDTO;
-import com.example.cleopatra.enums.GroupRole;
-import com.example.cleopatra.enums.GroupStatus;
-import com.example.cleopatra.enums.GroupType;
-import com.example.cleopatra.enums.MembershipStatus;
+import com.example.cleopatra.enums.*;
 import com.example.cleopatra.maper.GroupMapper;
 import com.example.cleopatra.model.Group;
 import com.example.cleopatra.model.GroupMembership;
@@ -210,6 +207,82 @@ public class GroupServiceImpl implements GroupService {
             log.error("Ошибка при получении доступных групп для пользователя ID {}: {}",
                     currentUserId, e.getMessage());
             throw new GroupRetrievalException("Не удалось получить список доступных групп: " + e.getMessage());
+        }
+    }
+
+
+
+    @Override
+    @Transactional
+    public void deleteGroup(Long groupId, Long currentUserId) {
+        log.info("Удаление группы ID: {} пользователем ID: {}", groupId, currentUserId);
+
+        try {
+            // 1. Проверяем существование группы
+            Group group = groupRepository.findById(groupId).orElse(null);
+            if (group == null) {
+                throw new GroupNotFoundException("Группа с ID " + groupId + " не найдена");
+            }
+
+            // 2. Проверяем существование пользователя
+            User user = userService.findById(currentUserId);
+            if (user == null) {
+                throw new UsernameNotFoundException("Пользователь с ID " + currentUserId + " не найден");
+            }
+
+            // 3. Проверяем права на удаление (только владелец или админ системы)
+            if (!group.getOwnerId().equals(currentUserId) && !isSystemAdmin(user)) {
+                throw new GroupAccessDeniedException("Недостаточно прав для удаления группы");
+            }
+
+            // 4. Проверяем, не удалена ли уже группа
+            if (GroupStatus.DELETED.equals(group.getGroupStatus())) {
+                throw new GroupAlreadyDeletedException("Группа уже удалена");
+            }
+
+            // 5. Soft delete - меняем статус вместо физического удаления
+            group.setGroupStatus(GroupStatus.DELETED);
+            groupRepository.save(group);
+
+            // 6. Опционально: удаляем изображения из хранилища
+            deleteGroupImages(group);
+
+            log.info("Группа '{}' (ID: {}) успешно удалена пользователем ID: {}",
+                    group.getName(), groupId, currentUserId);
+
+        } catch (GroupNotFoundException | UsernameNotFoundException | GroupAccessDeniedException | GroupAlreadyDeletedException e) {
+            log.error("Ошибка при удалении группы ID {}: {}", groupId, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Неожиданная ошибка при удалении группы ID {}: {}", groupId, e.getMessage());
+            throw new GroupDeletionException("Не удалось удалить группу: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Проверяет, является ли пользователь админом системы
+     */
+    private boolean isSystemAdmin(User user) {
+        return Role.ADMIN.equals(user.getRole()) || GroupRole.ADMIN.equals(user.getRole());
+    }
+
+    /**
+     * Удаляет изображения группы из хранилища
+     */
+    private void deleteGroupImages(Group group) {
+        try {
+            if (group.getImgId() != null) {
+                storageService.deleteImage(group.getImgId());
+                log.debug("Удалено основное изображение группы: {}", group.getImgId());
+            }
+
+            if (group.getBackgroundImgId() != null) {
+                storageService.deleteImage(group.getBackgroundImgId());
+                log.debug("Удалено фоновое изображение группы: {}", group.getBackgroundImgId());
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось удалить изображения группы ID {}: {}", group.getId(), e.getMessage());
+
         }
     }
 
