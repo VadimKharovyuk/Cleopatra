@@ -1,119 +1,1622 @@
 
+<!--&lt;!&ndash;&lt;!&ndash; groups/groups-list.html &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;<!DOCTYPE html>&ndash;&gt;-->
+<!--&lt;!&ndash;<html lang="ru" xmlns:th="http://www.thymeleaf.org">&ndash;&gt;-->
+<!--&lt;!&ndash;<head>&ndash;&gt;-->
+<!--&lt;!&ndash;    <meta charset="UTF-8">&ndash;&gt;-->
+<!--&lt;!&ndash;    <meta name="viewport" content="width=device-width, initial-scale=1.0">&ndash;&gt;-->
+<!--&lt;!&ndash;    <title>Группы - Cleopatra</title>&ndash;&gt;-->
+<!--&lt;!&ndash;</head>&ndash;&gt;-->
+<!--&lt;!&ndash;<body>&ndash;&gt;-->
+<!--&lt;!&ndash;<header>&ndash;&gt;-->
+<!--&lt;!&ndash;    <nav>&ndash;&gt;-->
+<!--&lt;!&ndash;        <h1>Cleopatra - Группы</h1>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <a href="/groups">Все группы</a>&ndash;&gt;-->
+<!--&lt;!&ndash;            <a href="/groups/my">Мои группы</a>&ndash;&gt;-->
+<!--&lt;!&ndash;            <a href="/groups/create">Создать группу</a>&ndash;&gt;-->
+<!--&lt;!&ndash;            <a href="/profile">Профиль</a>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </nav>&ndash;&gt;-->
+<!--&lt;!&ndash;</header>&ndash;&gt;-->
+
+<!--&lt;!&ndash;<main>&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="container">&ndash;&gt;-->
+<!--&lt;!&ndash;        &lt;!&ndash; Сообщения &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <div th:if="${successMessage}" class="alert-success">&ndash;&gt;-->
+<!--&lt;!&ndash;            <p th:text="${successMessage}"></p>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        <div th:if="${errorMessage}" class="alert-error">&ndash;&gt;-->
+<!--&lt;!&ndash;            <p th:text="${errorMessage}"></p>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        &lt;!&ndash; Заголовок страницы &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <h2 th:if="${currentPage == 'public-groups'}">Публичные группы</h2>&ndash;&gt;-->
+<!--&lt;!&ndash;        <h2 th:if="${currentPage == 'my-groups'}">Мои группы</h2>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        &lt;!&ndash; Список групп &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="groups-grid">&ndash;&gt;-->
+<!--&lt;!&ndash;            <div th:each="group : ${groupPage.groups}" class="group-card">&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="group-image">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <img th:if="${group.imageUrl}"&ndash;&gt;-->
+<!--&lt;!&ndash;                         th:src="${group.imageUrl}"&ndash;&gt;-->
+<!--&lt;!&ndash;                         th:alt="${group.name}"&ndash;&gt;-->
+<!--&lt;!&ndash;                         style="width: 100%; height: 150px; object-fit: cover;">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <div th:unless="${group.imageUrl}" class="no-image">&ndash;&gt;-->
+<!--&lt;!&ndash;                        Нет изображения&ndash;&gt;-->
+<!--&lt;!&ndash;                    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <div class="group-info">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <h3 th:text="${group.name}">Название группы</h3>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <p th:text="${group.description}" class="description">Описание группы</p>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <div class="group-meta">&ndash;&gt;-->
+<!--&lt;!&ndash;                        <span class="group-type" th:text="${group.groupType.displayName}">Тип</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <span class="member-count" th:text="${group.memberCount} + ' участников'">0 участников</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                    <div class="group-actions">&ndash;&gt;-->
+<!--&lt;!&ndash;                        <a th:href="@{/groups/{id}(id=${group.id})}" class="btn btn-primary">&ndash;&gt;-->
+<!--&lt;!&ndash;                            Подробнее&ndash;&gt;-->
+<!--&lt;!&ndash;                        </a>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                        <span th:if="${group.isMember}" class="status-badge member">&ndash;&gt;-->
+<!--&lt;!&ndash;                                Участник&ndash;&gt;-->
+<!--&lt;!&ndash;                            </span>&ndash;&gt;-->
+
+<!--&lt;!&ndash;                        <span th:if="${group.currentUserMembershipStatus?.name() == 'PENDING'}"&ndash;&gt;-->
+<!--&lt;!&ndash;                              class="status-badge pending">&ndash;&gt;-->
+<!--&lt;!&ndash;                                Ожидает одобрения&ndash;&gt;-->
+<!--&lt;!&ndash;                            </span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        &lt;!&ndash; Пустое состояние &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <div th:if="${groupPage.isEmpty}" class="empty-state">&ndash;&gt;-->
+<!--&lt;!&ndash;            <h3>Групп не найдено</h3>&ndash;&gt;-->
+<!--&lt;!&ndash;            <p th:if="${currentPage == 'public-groups'}">&ndash;&gt;-->
+<!--&lt;!&ndash;                Пока нет доступных групп.&ndash;&gt;-->
+<!--&lt;!&ndash;            </p>&ndash;&gt;-->
+<!--&lt;!&ndash;            <p th:if="${currentPage == 'my-groups'}">&ndash;&gt;-->
+<!--&lt;!&ndash;                Вы еще не состоите ни в одной группе.&ndash;&gt;-->
+<!--&lt;!&ndash;                <a href="/groups/create">Создайте первую группу</a> или&ndash;&gt;-->
+<!--&lt;!&ndash;                <a href="/groups">найдите интересную</a>.&ndash;&gt;-->
+<!--&lt;!&ndash;            </p>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        &lt;!&ndash; Пагинация &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <div th:if="${!groupPage.isEmpty}" class="pagination">&ndash;&gt;-->
+<!--&lt;!&ndash;            <a th:if="${groupPage.currentPage > 0}"&ndash;&gt;-->
+<!--&lt;!&ndash;               th:href="@{''(page=${groupPage.currentPage - 1}, size=${groupPage.size})}"&ndash;&gt;-->
+<!--&lt;!&ndash;               class="btn btn-secondary">&ndash;&gt;-->
+<!--&lt;!&ndash;                ← Предыдущая&ndash;&gt;-->
+<!--&lt;!&ndash;            </a>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <span class="page-info">&ndash;&gt;-->
+<!--&lt;!&ndash;                    Страница <span th:text="${groupPage.currentPage + 1}">1</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    (<span th:text="${groupPage.numberOfElements}">0</span> групп)&ndash;&gt;-->
+<!--&lt;!&ndash;                </span>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <a th:if="${groupPage.hasNext}"&ndash;&gt;-->
+<!--&lt;!&ndash;               th:href="@{''(page=${groupPage.currentPage + 1}, size=${groupPage.size})}"&ndash;&gt;-->
+<!--&lt;!&ndash;               class="btn btn-secondary">&ndash;&gt;-->
+<!--&lt;!&ndash;                Следующая →&ndash;&gt;-->
+<!--&lt;!&ndash;            </a>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;</main>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--&lt;!&ndash;</html>&ndash;&gt;-->
+
 <!--&lt;!&ndash; groups/groups-list.html &ndash;&gt;-->
 <!--<!DOCTYPE html>-->
 <!--<html lang="ru" xmlns:th="http://www.thymeleaf.org">-->
 <!--<head>-->
 <!--    <meta charset="UTF-8">-->
 <!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>Группы - Cleopatra</title>-->
+<!--    <title th:text="${currentPage == 'my-groups'} ? 'Мои группы - Cleopatra' : 'Группы - Cleopatra'">Группы - Cleopatra</title>-->
+
+<!--    &lt;!&ndash; Font Awesome &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">-->
+
+<!--    &lt;!&ndash; Google Fonts &ndash;&gt;-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">-->
 <!--</head>-->
 <!--<body>-->
-<!--<header>-->
-<!--    <nav>-->
-<!--        <h1>Cleopatra - Группы</h1>-->
-<!--        <div>-->
-<!--            <a href="/groups">Все группы</a>-->
-<!--            <a href="/groups/my">Мои группы</a>-->
-<!--            <a href="/groups/create">Создать группу</a>-->
-<!--            <a href="/profile">Профиль</a>-->
-<!--        </div>-->
-<!--    </nav>-->
-<!--</header>-->
+<!--&lt;!&ndash; Include Sidebar &ndash;&gt;-->
+<!--<th:block th:replace="~{fragments/sidebar :: complete-sidebar('groups')}"></th:block>-->
 
-<!--<main>-->
-<!--    <div class="container">-->
-<!--        &lt;!&ndash; Сообщения &ndash;&gt;-->
-<!--        <div th:if="${successMessage}" class="alert-success">-->
-<!--            <p th:text="${successMessage}"></p>-->
-<!--        </div>-->
-
-<!--        <div th:if="${errorMessage}" class="alert-error">-->
-<!--            <p th:text="${errorMessage}"></p>-->
-<!--        </div>-->
-
-<!--        &lt;!&ndash; Заголовок страницы &ndash;&gt;-->
-<!--        <h2 th:if="${currentPage == 'public-groups'}">Публичные группы</h2>-->
-<!--        <h2 th:if="${currentPage == 'my-groups'}">Мои группы</h2>-->
-
-<!--        &lt;!&ndash; Список групп &ndash;&gt;-->
-<!--        <div class="groups-grid">-->
-<!--            <div th:each="group : ${groupPage.groups}" class="group-card">-->
-<!--                <div class="group-image">-->
-<!--                    <img th:if="${group.imageUrl}"-->
-<!--                         th:src="${group.imageUrl}"-->
-<!--                         th:alt="${group.name}"-->
-<!--                         style="width: 100%; height: 150px; object-fit: cover;">-->
-<!--                    <div th:unless="${group.imageUrl}" class="no-image">-->
-<!--                        Нет изображения-->
-<!--                    </div>-->
+<!--&lt;!&ndash; Main Content &ndash;&gt;-->
+<!--<main class="main-content">-->
+<!--    <div class="content-wrapper">-->
+<!--        &lt;!&ndash; Header Section &ndash;&gt;-->
+<!--        <div class="page-header">-->
+<!--            <div class="header-content">-->
+<!--                <div class="header-text">-->
+<!--                    <h1 class="page-title">-->
+<!--                        <i class="fas fa-users page-title-icon"></i>-->
+<!--                        <span th:if="${currentPage == 'public-groups'}">Все группы</span>-->
+<!--                        <span th:if="${currentPage == 'my-groups'}">Мои группы</span>-->
+<!--                    </h1>-->
+<!--                    <p class="page-subtitle" th:if="${currentPage == 'public-groups'}">-->
+<!--                        Откройте для себя интересные сообщества и присоединяйтесь к ним-->
+<!--                    </p>-->
+<!--                    <p class="page-subtitle" th:if="${currentPage == 'my-groups'}">-->
+<!--                        Группы, в которых вы состоите или которыми управляете-->
+<!--                    </p>-->
 <!--                </div>-->
 
-<!--                <div class="group-info">-->
-<!--                    <h3 th:text="${group.name}">Название группы</h3>-->
-<!--                    <p th:text="${group.description}" class="description">Описание группы</p>-->
+<!--                &lt;!&ndash; Action Buttons &ndash;&gt;-->
+<!--                <div class="header-actions">-->
+<!--                    <a href="/groups/create" class="btn btn-primary btn-create">-->
+<!--                        <i class="fas fa-plus"></i>-->
+<!--                        <span>Создать группу</span>-->
+<!--                    </a>-->
 
-<!--                    <div class="group-meta">-->
-<!--                        <span class="group-type" th:text="${group.groupType.displayName}">Тип</span>-->
-<!--                        <span class="member-count" th:text="${group.memberCount} + ' участников'">0 участников</span>-->
-<!--                    </div>-->
-
-<!--                    <div class="group-actions">-->
-<!--                        <a th:href="@{/groups/{id}(id=${group.id})}" class="btn btn-primary">-->
-<!--                            Подробнее-->
+<!--                    <div class="view-toggle">-->
+<!--                        <a href="/groups"-->
+<!--                           class="toggle-btn"-->
+<!--                           th:classappend="${currentPage == 'public-groups'} ? 'active' : ''">-->
+<!--                            <i class="fas fa-globe"></i>-->
+<!--                            <span>Все</span>-->
 <!--                        </a>-->
-
-<!--                        <span th:if="${group.isMember}" class="status-badge member">-->
-<!--                                Участник-->
-<!--                            </span>-->
-
-<!--                        <span th:if="${group.currentUserMembershipStatus?.name() == 'PENDING'}"-->
-<!--                              class="status-badge pending">-->
-<!--                                Ожидает одобрения-->
-<!--                            </span>-->
+<!--                        <a href="/groups/my"-->
+<!--                           class="toggle-btn"-->
+<!--                           th:classappend="${currentPage == 'my-groups'} ? 'active' : ''">-->
+<!--                            <i class="fas fa-user"></i>-->
+<!--                            <span>Мои</span>-->
+<!--                        </a>-->
 <!--                    </div>-->
 <!--                </div>-->
 <!--            </div>-->
 <!--        </div>-->
 
-<!--        &lt;!&ndash; Пустое состояние &ndash;&gt;-->
-<!--        <div th:if="${groupPage.isEmpty}" class="empty-state">-->
-<!--            <h3>Групп не найдено</h3>-->
-<!--            <p th:if="${currentPage == 'public-groups'}">-->
-<!--                Пока нет доступных групп.-->
-<!--            </p>-->
-<!--            <p th:if="${currentPage == 'my-groups'}">-->
-<!--                Вы еще не состоите ни в одной группе.-->
-<!--                <a href="/groups/create">Создайте первую группу</a> или-->
-<!--                <a href="/groups">найдите интересную</a>.-->
-<!--            </p>-->
+<!--        &lt;!&ndash; Flash Messages &ndash;&gt;-->
+<!--        <div class="flash-messages">-->
+<!--            <div th:if="${successMessage}" class="alert alert-success">-->
+<!--                <i class="fas fa-check-circle"></i>-->
+<!--                <span th:text="${successMessage}"></span>-->
+<!--                <button class="alert-close" onclick="this.parentElement.remove()">-->
+<!--                    <i class="fas fa-times"></i>-->
+<!--                </button>-->
+<!--            </div>-->
+
+<!--            <div th:if="${errorMessage}" class="alert alert-error">-->
+<!--                <i class="fas fa-exclamation-triangle"></i>-->
+<!--                <span th:text="${errorMessage}"></span>-->
+<!--                <button class="alert-close" onclick="this.parentElement.remove()">-->
+<!--                    <i class="fas fa-times"></i>-->
+<!--                </button>-->
+<!--            </div>-->
 <!--        </div>-->
 
-<!--        &lt;!&ndash; Пагинация &ndash;&gt;-->
-<!--        <div th:if="${!groupPage.isEmpty}" class="pagination">-->
-<!--            <a th:if="${groupPage.currentPage > 0}"-->
-<!--               th:href="@{''(page=${groupPage.currentPage - 1}, size=${groupPage.size})}"-->
-<!--               class="btn btn-secondary">-->
-<!--                ← Предыдущая-->
-<!--            </a>-->
+<!--        &lt;!&ndash; Search and Filters &ndash;&gt;-->
+<!--        <div class="search-section">-->
+<!--            <div class="search-container">-->
+<!--                <div class="search-input-wrapper">-->
+<!--                    <i class="fas fa-search search-icon"></i>-->
+<!--                    <input type="text"-->
+<!--                           class="search-input"-->
+<!--                           placeholder="Поиск групп по названию или описанию..."-->
+<!--                           id="groupSearch">-->
+<!--                    <button class="search-clear" id="clearSearch" style="display: none;">-->
+<!--                        <i class="fas fa-times"></i>-->
+<!--                    </button>-->
+<!--                </div>-->
 
-<!--            <span class="page-info">-->
-<!--                    Страница <span th:text="${groupPage.currentPage + 1}">1</span>-->
-<!--                    (<span th:text="${groupPage.numberOfElements}">0</span> групп)-->
-<!--                </span>-->
+<!--                <div class="filter-dropdown">-->
+<!--                    <button class="filter-btn" onclick="toggleFilterDropdown()">-->
+<!--                        <i class="fas fa-filter"></i>-->
+<!--                        <span>Фильтры</span>-->
+<!--                        <i class="fas fa-chevron-down"></i>-->
+<!--                    </button>-->
 
-<!--            <a th:if="${groupPage.hasNext}"-->
-<!--               th:href="@{''(page=${groupPage.currentPage + 1}, size=${groupPage.size})}"-->
-<!--               class="btn btn-secondary">-->
-<!--                Следующая →-->
-<!--            </a>-->
+<!--                    <div class="filter-menu" id="filterMenu">-->
+<!--                        <div class="filter-group">-->
+<!--                            <label class="filter-label">Тип группы:</label>-->
+<!--                            <div class="filter-options">-->
+<!--                                <label class="filter-option">-->
+<!--                                    <input type="radio" name="groupType" value="" checked>-->
+<!--                                    <span class="filter-radio"></span>-->
+<!--                                    <span>Все типы</span>-->
+<!--                                </label>-->
+<!--                                <label class="filter-option">-->
+<!--                                    <input type="radio" name="groupType" value="OPEN">-->
+<!--                                    <span class="filter-radio"></span>-->
+<!--                                    <span>🌍 Открытые</span>-->
+<!--                                </label>-->
+<!--                                <label class="filter-option">-->
+<!--                                    <input type="radio" name="groupType" value="CLOSED">-->
+<!--                                    <span class="filter-radio"></span>-->
+<!--                                    <span>🔒 Закрытые</span>-->
+<!--                                </label>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Groups Grid &ndash;&gt;-->
+<!--        <div class="groups-container">-->
+<!--            &lt;!&ndash; Loading State &ndash;&gt;-->
+<!--            <div class="loading-state" id="loadingState" style="display: none;">-->
+<!--                <div class="loading-spinner"></div>-->
+<!--                <p>Загрузка групп...</p>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Groups Grid &ndash;&gt;-->
+<!--            <div class="groups-grid" id="groupsGrid">-->
+<!--                <div th:each="group : ${groupPage.groups}"-->
+<!--                     class="group-card"-->
+<!--                     th:attr="data-group-type=${group.groupType},data-group-name=${group.name}">-->
+
+<!--                    &lt;!&ndash; Group Image &ndash;&gt;-->
+<!--                    <div class="group-image-container">-->
+<!--                        <div class="group-image">-->
+<!--                            <img th:if="${group.imageUrl}"-->
+<!--                                 th:src="${group.imageUrl}"-->
+<!--                                 th:alt="${group.name}"-->
+<!--                                 loading="lazy">-->
+<!--                            <div th:unless="${group.imageUrl}" class="no-image">-->
+<!--                                <i class="fas fa-users"></i>-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+<!--                        &lt;!&ndash; Group Type Badge &ndash;&gt;-->
+<!--                        <div class="group-type-badge" th:text="${group.groupType.displayName}">-->
+<!--                            🌍 Открытая-->
+<!--                        </div>-->
+
+<!--                        &lt;!&ndash; Membership Status &ndash;&gt;-->
+<!--                        <div class="membership-status">-->
+<!--                                <span th:if="${group.isMember}" class="status-badge member">-->
+<!--                                    <i class="fas fa-check"></i> Участник-->
+<!--                                </span>-->
+<!--                            <span th:if="${group.currentUserMembershipStatus?.name() == 'PENDING'}"-->
+<!--                                  class="status-badge pending">-->
+<!--                                    <i class="fas fa-clock"></i> Ожидает-->
+<!--                                </span>-->
+<!--                            <span th:if="${group.currentUserRole?.name() == 'OWNER'}"-->
+<!--                                  class="status-badge owner">-->
+<!--                                    <i class="fas fa-crown"></i> Владелец-->
+<!--                                </span>-->
+<!--                            <span th:if="${group.currentUserRole?.name() == 'ADMIN'}"-->
+<!--                                  class="status-badge admin">-->
+<!--                                    <i class="fas fa-shield-alt"></i> Админ-->
+<!--                                </span>-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; Group Info &ndash;&gt;-->
+<!--                    <div class="group-info">-->
+<!--                        <h3 class="group-name" th:text="${group.name}">Название группы</h3>-->
+<!--                        <p class="group-description"-->
+<!--                           th:text="${group.description}"-->
+<!--                           th:title="${group.description}">-->
+<!--                            Описание группы-->
+<!--                        </p>-->
+
+<!--                        &lt;!&ndash; Group Stats &ndash;&gt;-->
+<!--                        <div class="group-stats">-->
+<!--                            <div class="stat-item">-->
+<!--                                <i class="fas fa-users"></i>-->
+<!--                                <span th:text="${group.memberCount}">0</span>-->
+<!--                                <span th:text="${group.memberCount == 1 ? 'участник' : (group.memberCount % 10 == 1 and group.memberCount % 100 != 11 ? 'участник' : ((group.memberCount % 10 >= 2 and group.memberCount % 10 <= 4) and (group.memberCount % 100 < 10 or group.memberCount % 100 >= 20) ? 'участника' : 'участников'))}">-->
+<!--                                        участников-->
+<!--                                    </span>-->
+<!--                            </div>-->
+
+<!--                            <div class="stat-item">-->
+<!--                                <i class="fas fa-calendar"></i>-->
+<!--                                <span th:text="${#temporals.format(group.createdAt, 'dd.MM.yyyy')}">-->
+<!--                                        01.01.2024-->
+<!--                                    </span>-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+<!--                        &lt;!&ndash; Group Actions &ndash;&gt;-->
+<!--                        <div class="group-actions">-->
+<!--                            <a th:href="@{/groups/{id}(id=${group.id})}"-->
+<!--                               class="btn btn-primary btn-sm">-->
+<!--                                <i class="fas fa-eye"></i>-->
+<!--                                <span>Подробнее</span>-->
+<!--                            </a>-->
+
+<!--                            <button th:if="${group.canJoin}"-->
+<!--                                    class="btn btn-secondary btn-sm join-btn"-->
+<!--                                    th:attr="data-group-id=${group.id}">-->
+<!--                                <i class="fas fa-plus"></i>-->
+<!--                                <span>Присоединиться</span>-->
+<!--                            </button>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Empty State &ndash;&gt;-->
+<!--            <div th:if="${groupPage.isEmpty}" class="empty-state">-->
+<!--                <div class="empty-icon">-->
+<!--                    <i class="fas fa-users"></i>-->
+<!--                </div>-->
+<!--                <h3 class="empty-title">Групп не найдено</h3>-->
+<!--                <p class="empty-message" th:if="${currentPage == 'public-groups'}">-->
+<!--                    Пока нет доступных групп. Создайте первую!-->
+<!--                </p>-->
+<!--                <p class="empty-message" th:if="${currentPage == 'my-groups'}">-->
+<!--                    Вы еще не состоите ни в одной группе.-->
+<!--                </p>-->
+<!--                <div class="empty-actions">-->
+<!--                    <a href="/groups/create" class="btn btn-primary">-->
+<!--                        <i class="fas fa-plus"></i>-->
+<!--                        Создать группу-->
+<!--                    </a>-->
+<!--                    <a th:if="${currentPage == 'my-groups'}"-->
+<!--                       href="/groups"-->
+<!--                       class="btn btn-secondary">-->
+<!--                        <i class="fas fa-search"></i>-->
+<!--                        Найти группы-->
+<!--                    </a>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Pagination &ndash;&gt;-->
+<!--        <div th:if="${!groupPage.isEmpty}" class="pagination-container">-->
+<!--            <div class="pagination-info">-->
+<!--                    <span>-->
+<!--                        Показано <strong th:text="${groupPage.numberOfElements}">0</strong>-->
+<!--                        из <strong th:text="${groupPage.numberOfElements}">0</strong> групп-->
+<!--                    </span>-->
+<!--            </div>-->
+
+<!--            <div class="pagination">-->
+<!--                <a th:if="${groupPage.currentPage > 0}"-->
+<!--                   th:href="@{''(page=${groupPage.currentPage - 1}, size=${groupPage.size})}"-->
+<!--                   class="pagination-btn pagination-prev">-->
+<!--                    <i class="fas fa-chevron-left"></i>-->
+<!--                    <span>Предыдущая</span>-->
+<!--                </a>-->
+
+<!--                <span class="pagination-info-mobile">-->
+<!--                        Страница <span th:text="${groupPage.currentPage + 1}">1</span>-->
+<!--                    </span>-->
+
+<!--                <a th:if="${groupPage.hasNext}"-->
+<!--                   th:href="@{''(page=${groupPage.currentPage + 1}, size=${groupPage.size})}"-->
+<!--                   class="pagination-btn pagination-next">-->
+<!--                    <span>Следующая</span>-->
+<!--                    <i class="fas fa-chevron-right"></i>-->
+<!--                </a>-->
+<!--            </div>-->
 <!--        </div>-->
 <!--    </div>-->
 <!--</main>-->
-<!--</body>-->
-<!--</html>-->
 
-<!-- groups/groups-list.html -->
-<!DOCTYPE html>
+<!--&lt;!&ndash; Styles &ndash;&gt;-->
+<!--<style>-->
+<!--    /* ==================== LIGHT THEME VARIABLES ==================== */-->
+<!--    :root {-->
+<!--        /* Light Background Colors */-->
+<!--        &#45;&#45;bg-primary: #ffffff;-->
+<!--        &#45;&#45;bg-secondary: #f8fafc;-->
+<!--        &#45;&#45;bg-accent: #f1f5f9;-->
+<!--        &#45;&#45;bg-hover: #e2e8f0;-->
+<!--        &#45;&#45;surface-elevated: #ffffff;-->
+
+<!--        /* Light Text Colors */-->
+<!--        &#45;&#45;text-primary: #0f172a;-->
+<!--        &#45;&#45;text-secondary: #475569;-->
+<!--        &#45;&#45;text-muted: #64748b;-->
+<!--        &#45;&#45;text-light: #94a3b8;-->
+<!--        &#45;&#45;text-white: #ffffff;-->
+
+<!--        /* Light Premium Accent Colors */-->
+<!--        &#45;&#45;accent-primary: #3b82f6;-->
+<!--        &#45;&#45;accent-secondary: #8b5cf6;-->
+<!--        &#45;&#45;accent-success: #10b981;-->
+<!--        &#45;&#45;accent-warning: #f59e0b;-->
+<!--        &#45;&#45;accent-error: #ef4444;-->
+
+<!--        /* Light Borders & Shadows */-->
+<!--        &#45;&#45;border-primary: #e2e8f0;-->
+<!--        &#45;&#45;border-secondary: #f1f5f9;-->
+<!--        &#45;&#45;border-accent: #cbd5e1;-->
+<!--        &#45;&#45;shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);-->
+<!--        &#45;&#45;shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);-->
+<!--        &#45;&#45;shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);-->
+<!--        &#45;&#45;shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);-->
+
+<!--        /* Light Gradients */-->
+<!--        &#45;&#45;gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);-->
+<!--        &#45;&#45;gradient-light: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);-->
+<!--        &#45;&#45;gradient-card: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);-->
+
+<!--        /* Spacing & Sizing */-->
+<!--        &#45;&#45;radius-sm: 6px;-->
+<!--        &#45;&#45;radius-md: 8px;-->
+<!--        &#45;&#45;radius-lg: 12px;-->
+<!--        &#45;&#45;radius-xl: 16px;-->
+<!--    }-->
+
+<!--    /* ==================== BASIC LAYOUT ==================== */-->
+<!--    * {-->
+<!--        margin: 0;-->
+<!--        padding: 0;-->
+<!--        box-sizing: border-box;-->
+<!--    }-->
+
+<!--    body {-->
+<!--        background: linear-gradient(135deg, var(&#45;&#45;bg-primary) 0%, var(&#45;&#45;bg-secondary) 100%);-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;-->
+<!--        font-weight: 400;-->
+<!--        line-height: 1.6;-->
+<!--        min-height: 100vh;-->
+<!--    }-->
+
+<!--    .main-content {-->
+<!--        margin-left: 280px;-->
+<!--        min-height: 100vh;-->
+<!--        padding: 2rem;-->
+<!--        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--    }-->
+
+<!--    .content-wrapper {-->
+<!--        max-width: 1400px;-->
+<!--        margin: 0 auto;-->
+<!--    }-->
+
+<!--    /* ==================== HEADER SECTION ==================== */-->
+<!--    .page-header {-->
+<!--        margin-bottom: 2rem;-->
+<!--        background: var(&#45;&#45;surface-elevated);-->
+<!--        border-radius: var(&#45;&#45;radius-lg);-->
+<!--        padding: 2rem;-->
+<!--        box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--        border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .header-content {-->
+<!--        display: flex;-->
+<!--        justify-content: space-between;-->
+<!--        align-items: flex-start;-->
+<!--        gap: 2rem;-->
+<!--    }-->
+
+<!--    .page-title {-->
+<!--        font-family: 'Playfair Display', serif;-->
+<!--        font-size: 2.5rem;-->
+<!--        font-weight: 600;-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--        display: flex;-->
+<!--        align-items: center;-->
+<!--        gap: 1rem;-->
+<!--        margin-bottom: 0.5rem;-->
+<!--    }-->
+
+<!--    .page-title-icon {-->
+<!--        font-size: 2rem;-->
+<!--        background: var(&#45;&#45;gradient-primary);-->
+<!--        -webkit-background-clip: text;-->
+<!--        -webkit-text-fill-color: transparent;-->
+<!--        background-clip: text;-->
+<!--    }-->
+
+<!--    .page-subtitle {-->
+<!--        font-size: 1.125rem;-->
+<!--        color: var(&#45;&#45;text-secondary);-->
+<!--        font-weight: 400;-->
+<!--    }-->
+
+<!--    .header-actions {-->
+<!--        display: flex;-->
+<!--        align-items: center;-->
+<!--        gap: 1rem;-->
+<!--        flex-shrink: 0;-->
+<!--    }-->
+
+<!--    /* ==================== LIGHT BUTTONS ==================== */-->
+<!--    .btn {-->
+<!--        display: inline-flex;-->
+<!--        align-items: center;-->
+<!--        gap: 0.5rem;-->
+<!--        padding: 0.75rem 1.5rem;-->
+<!--        border-radius: var(&#45;&#45;radius-md);-->
+<!--        font-weight: 500;-->
+<!--        font-size: 0.875rem;-->
+<!--        text-decoration: none;-->
+<!--        border: none;-->
+<!--        cursor: pointer;-->
+<!--        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--    }-->
+
+<!--    .btn-primary {-->
+<!--        background: var(&#45;&#45;gradient-primary);-->
+<!--        color: var(&#45;&#45;text-white);-->
+<!--        box-shadow: var(&#45;&#45;shadow-md);-->
+<!--    }-->
+
+<!--    .btn-primary:hover {-->
+<!--        transform: translateY(-2px);-->
+<!--        box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--        color: var(&#45;&#45;text-white);-->
+<!--        text-decoration: none;-->
+<!--    }-->
+
+<!--    .btn-secondary {-->
+<!--        background: var(&#45;&#45;bg-secondary);-->
+<!--        color: var(&#45;&#45;text-secondary);-->
+<!--        border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .btn-secondary:hover {-->
+<!--        background: var(&#45;&#45;bg-hover);-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--        text-decoration: none;-->
+<!--        transform: translateY(-1px);-->
+<!--    }-->
+
+<!--    .btn-sm {-->
+<!--        padding: 0.5rem 1rem;-->
+<!--        font-size: 0.75rem;-->
+<!--    }-->
+
+<!--    .btn-create {-->
+<!--        font-size: 0.875rem;-->
+<!--        padding: 0.875rem 1.5rem;-->
+<!--    }-->
+
+<!--    /* ==================== LIGHT VIEW TOGGLE ==================== */-->
+<!--    .view-toggle {-->
+<!--        display: flex;-->
+<!--        background: var(&#45;&#45;bg-accent);-->
+<!--        border-radius: var(&#45;&#45;radius-md);-->
+<!--        padding: 0.25rem;-->
+<!--        border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .toggle-btn {-->
+<!--        display: flex;-->
+<!--        align-items: center;-->
+<!--        gap: 0.5rem;-->
+<!--        padding: 0.5rem 1rem;-->
+<!--        border-radius: var(&#45;&#45;radius-sm);-->
+<!--        text-decoration: none;-->
+<!--        color: var(&#45;&#45;text-secondary);-->
+<!--        font-size: 0.875rem;-->
+<!--        font-weight: 500;-->
+<!--        transition: all 0.2s;-->
+<!--    }-->
+
+<!--    .toggle-btn.active {-->
+<!--        background: var(&#45;&#45;surface-elevated);-->
+<!--        color: var(&#45;&#45;accent-primary);-->
+<!--        box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--    }-->
+
+<!--    .toggle-btn:hover {-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--        text-decoration: none;-->
+<!--    }-->
+
+<!--    /* ==================== LIGHT FLASH MESSAGES ==================== */-->
+<!--    .flash-messages {-->
+<!--        margin-bottom: 2rem;-->
+<!--    }-->
+
+<!--    .alert {-->
+<!--        display: flex;-->
+<!--        align-items: center;-->
+<!--        gap: 0.75rem;-->
+<!--        padding: 1rem 1.25rem;-->
+<!--        border-radius: var(&#45;&#45;radius-md);-->
+<!--        margin-bottom: 1rem;-->
+<!--        font-weight: 500;-->
+<!--        position: relative;-->
+<!--        animation: slideInDown 0.3s ease-out;-->
+<!--    }-->
+
+<!--    .alert-success {-->
+<!--        background: rgba(16, 185, 129, 0.1);-->
+<!--        color: var(&#45;&#45;accent-success);-->
+<!--        border: 1px solid rgba(16, 185, 129, 0.2);-->
+<!--    }-->
+
+<!--    .alert-error {-->
+<!--        background: rgba(239, 68, 68, 0.1);-->
+<!--        color: var(&#45;&#45;accent-error);-->
+<!--        border: 1px solid rgba(239, 68, 68, 0.2);-->
+<!--    }-->
+
+<!--    .alert-close {-->
+<!--        background: none;-->
+<!--        border: none;-->
+<!--        color: inherit;-->
+<!--        cursor: pointer;-->
+<!--        padding: 0.25rem;-->
+<!--        margin-left: auto;-->
+<!--        border-radius: var(&#45;&#45;radius-sm);-->
+<!--        opacity: 0.7;-->
+<!--        transition: opacity 0.2s;-->
+<!--    }-->
+
+<!--    .alert-close:hover {-->
+<!--        opacity: 1;-->
+<!--    }-->
+
+<!--    @keyframes slideInDown {-->
+<!--        from {-->
+<!--            transform: translateY(-20px);-->
+<!--            opacity: 0;-->
+<!--        }-->
+<!--        to {-->
+<!--            transform: translateY(0);-->
+<!--            opacity: 1;-->
+<!--        }-->
+<!--    }-->
+
+<!--    /* ==================== LIGHT SEARCH SECTION ==================== */-->
+<!--    .search-section {-->
+<!--        margin-bottom: 2rem;-->
+<!--    }-->
+
+<!--    .search-container {-->
+<!--        display: flex;-->
+<!--        gap: 1rem;-->
+<!--        align-items: center;-->
+<!--    }-->
+
+<!--    .search-input-wrapper {-->
+<!--        flex: 1;-->
+<!--        position: relative;-->
+<!--    }-->
+
+<!--    .search-input {-->
+<!--        width: 100%;-->
+<!--        padding: 0.875rem 1rem 0.875rem 3rem;-->
+<!--        border: 1px solid var(&#45;&#45;border-primary);-->
+<!--        border-radius: var(&#45;&#45;radius-md);-->
+<!--        background: var(&#45;&#45;surface-elevated);-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--        font-size: 0.875rem;-->
+<!--        transition: all 0.2s;-->
+<!--    }-->
+
+<!--    .search-input:focus {-->
+<!--        outline: none;-->
+<!--        border-color: var(&#45;&#45;accent-primary);-->
+<!--        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);-->
+<!--    }-->
+
+<!--    .search-input::placeholder {-->
+<!--        color: var(&#45;&#45;text-muted);-->
+<!--    }-->
+
+<!--    .search-icon {-->
+<!--        position: absolute;-->
+<!--        left: 1rem;-->
+<!--        top: 50%;-->
+<!--        transform: translateY(-50%);-->
+<!--        color: var(&#45;&#45;text-muted);-->
+<!--        font-size: 0.875rem;-->
+<!--    }-->
+
+<!--    .search-clear {-->
+<!--        position: absolute;-->
+<!--        right: 1rem;-->
+<!--        top: 50%;-->
+<!--        transform: translateY(-50%);-->
+<!--        background: none;-->
+<!--        border: none;-->
+<!--        color: var(&#45;&#45;text-muted);-->
+<!--        cursor: pointer;-->
+<!--        padding: 0.25rem;-->
+<!--        border-radius: var(&#45;&#45;radius-sm);-->
+<!--    }-->
+
+<!--    .search-clear:hover {-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--        background: var(&#45;&#45;bg-hover);-->
+<!--    }-->
+
+<!--    /* ==================== LIGHT FILTER DROPDOWN ==================== */-->
+<!--    .filter-dropdown {-->
+<!--        position: relative;-->
+<!--    }-->
+
+<!--    .filter-btn {-->
+<!--        display: flex;-->
+<!--        align-items: center;-->
+<!--        gap: 0.5rem;-->
+<!--        padding: 0.875rem 1rem;-->
+<!--        background: var(&#45;&#45;surface-elevated);-->
+<!--        border: 1px solid var(&#45;&#45;border-primary);-->
+<!--        border-radius: var(&#45;&#45;radius-md);-->
+<!--        color: var(&#45;&#45;text-secondary);-->
+<!--        cursor: pointer;-->
+<!--        transition: all 0.2s;-->
+<!--    }-->
+
+<!--    .filter-btn:hover {-->
+<!--        background: var(&#45;&#45;bg-hover);-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--    }-->
+
+<!--    .filter-menu {-->
+<!--        position: absolute;-->
+<!--        top: 100%;-->
+<!--        right: 0;-->
+<!--        margin-top: 0.5rem;-->
+<!--        background: var(&#45;&#45;surface-elevated);-->
+<!--        border: 1px solid var(&#45;&#45;border-primary);-->
+<!--        border-radius: var(&#45;&#45;radius-md);-->
+<!--        box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--        padding: 1rem;-->
+<!--        min-width: 200px;-->
+<!--        z-index: 100;-->
+<!--        display: none;-->
+<!--        animation: fadeInUp 0.2s ease-out;-->
+<!--    }-->
+
+<!--    .filter-menu.active {-->
+<!--        display: block;-->
+<!--    }-->
+
+<!--    @keyframes fadeInUp {-->
+<!--        from {-->
+<!--            transform: translateY(10px);-->
+<!--            opacity: 0;-->
+<!--        }-->
+<!--        to {-->
+<!--            transform: translateY(0);-->
+<!--            opacity: 1;-->
+<!--        }-->
+<!--    }-->
+
+<!--    .filter-label {-->
+<!--        font-size: 0.875rem;-->
+<!--        font-weight: 600;-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--        margin-bottom: 0.5rem;-->
+<!--        display: block;-->
+<!--    }-->
+
+<!--    .filter-options {-->
+<!--        display: flex;-->
+<!--        flex-direction: column;-->
+<!--        gap: 0.5rem;-->
+<!--    }-->
+
+<!--    .filter-option {-->
+<!--        display: flex;-->
+<!--        align-items: center;-->
+<!--        gap: 0.5rem;-->
+<!--        cursor: pointer;-->
+<!--        padding: 0.25rem 0;-->
+<!--        color: var(&#45;&#45;text-secondary);-->
+<!--    }-->
+
+<!--    .filter-option:hover {-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--    }-->
+
+<!--    .filter-option input[type="radio"] {-->
+<!--        display: none;-->
+<!--    }-->
+
+<!--    .filter-radio {-->
+<!--        width: 16px;-->
+<!--        height: 16px;-->
+<!--        border: 2px solid var(&#45;&#45;border-accent);-->
+<!--        border-radius: 50%;-->
+<!--        position: relative;-->
+<!--        transition: all 0.2s;-->
+<!--    }-->
+
+<!--    .filter-option input[type="radio"]:checked + .filter-radio {-->
+<!--        border-color: var(&#45;&#45;accent-primary);-->
+<!--    }-->
+
+<!--    .filter-option input[type="radio"]:checked + .filter-radio::after {-->
+<!--        content: '';-->
+<!--        position: absolute;-->
+<!--        top: 50%;-->
+<!--        left: 50%;-->
+<!--        transform: translate(-50%, -50%);-->
+<!--        width: 6px;-->
+<!--        height: 6px;-->
+<!--        background: var(&#45;&#45;accent-primary);-->
+<!--        border-radius: 50%;-->
+<!--    }-->
+
+<!--    /* ==================== LIGHT GROUPS GRID ==================== */-->
+<!--    .groups-container {-->
+<!--        margin-bottom: 2rem;-->
+<!--    }-->
+
+<!--    .groups-grid {-->
+<!--        display: grid;-->
+<!--        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));-->
+<!--        gap: 1.5rem;-->
+<!--        animation: fadeIn 0.5s ease-out;-->
+<!--    }-->
+
+<!--    @keyframes fadeIn {-->
+<!--        from { opacity: 0; }-->
+<!--        to { opacity: 1; }-->
+<!--    }-->
+
+<!--    .group-card {-->
+<!--        background: var(&#45;&#45;surface-elevated);-->
+<!--        border-radius: var(&#45;&#45;radius-lg);-->
+<!--        overflow: hidden;-->
+<!--        box-shadow: var(&#45;&#45;shadow-sm);-->
+<!--        border: 1px solid var(&#45;&#45;border-primary);-->
+<!--        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);-->
+<!--        position: relative;-->
+<!--    }-->
+
+<!--    .group-card:hover {-->
+<!--        transform: translateY(-4px);-->
+<!--        box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--    }-->
+
+<!--    .group-image-container {-->
+<!--        position: relative;-->
+<!--        height: 200px;-->
+<!--        overflow: hidden;-->
+<!--    }-->
+
+<!--    .group-image {-->
+<!--        width: 100%;-->
+<!--        height: 100%;-->
+<!--        display: flex;-->
+<!--        align-items: center;-->
+<!--        justify-content: center;-->
+<!--    }-->
+
+<!--    .group-image img {-->
+<!--        width: 100%;-->
+<!--        height: 100%;-->
+<!--        object-fit: cover;-->
+<!--        transition: transform 0.3s ease;-->
+<!--    }-->
+
+<!--    .group-card:hover .group-image img {-->
+<!--        transform: scale(1.05);-->
+<!--    }-->
+
+<!--    .no-image {-->
+<!--        width: 100%;-->
+<!--        height: 100%;-->
+<!--        background: var(&#45;&#45;gradient-light);-->
+<!--        display: flex;-->
+<!--        align-items: center;-->
+<!--        justify-content: center;-->
+<!--        color: var(&#45;&#45;text-muted);-->
+<!--        font-size: 3rem;-->
+<!--    }-->
+
+<!--    .group-type-badge {-->
+<!--        position: absolute;-->
+<!--        top: 1rem;-->
+<!--        left: 1rem;-->
+<!--        background: rgba(15, 23, 42, 0.8);-->
+<!--        backdrop-filter: blur(10px);-->
+<!--        color: var(&#45;&#45;text-white);-->
+<!--        padding: 0.25rem 0.75rem;-->
+<!--        border-radius: var(&#45;&#45;radius-sm);-->
+<!--        font-size: 0.75rem;-->
+<!--        font-weight: 500;-->
+<!--    }-->
+
+<!--    .membership-status {-->
+<!--        position: absolute;-->
+<!--        top: 1rem;-->
+<!--        right: 1rem;-->
+<!--    }-->
+
+<!--    .status-badge {-->
+<!--        display: inline-flex;-->
+<!--        align-items: center;-->
+<!--        gap: 0.25rem;-->
+<!--        padding: 0.25rem 0.75rem;-->
+<!--        border-radius: var(&#45;&#45;radius-sm);-->
+<!--        font-size: 0.75rem;-->
+<!--        font-weight: 500;-->
+<!--        backdrop-filter: blur(10px);-->
+<!--        color: var(&#45;&#45;text-white);-->
+<!--    }-->
+
+<!--    .status-badge.member {-->
+<!--        background: rgba(16, 185, 129, 0.9);-->
+<!--    }-->
+
+<!--    .status-badge.pending {-->
+<!--        background: rgba(245, 158, 11, 0.9);-->
+<!--    }-->
+
+<!--    .status-badge.owner {-->
+<!--        background: rgba(139, 92, 246, 0.9);-->
+<!--    }-->
+
+<!--    .status-badge.admin {-->
+<!--        background: rgba(59, 130, 246, 0.9);-->
+<!--    }-->
+
+<!--    /* ==================== LIGHT GROUP INFO ==================== */-->
+<!--    .group-info {-->
+<!--        padding: 1.5rem;-->
+<!--        background: var(&#45;&#45;surface-elevated);-->
+<!--    }-->
+
+<!--    .group-name {-->
+<!--        font-size: 1.25rem;-->
+<!--        font-weight: 600;-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--        margin-bottom: 0.5rem;-->
+<!--        line-height: 1.3;-->
+<!--    }-->
+
+<!--    .group-description {-->
+<!--        color: var(&#45;&#45;text-secondary);-->
+<!--        font-size: 0.875rem;-->
+<!--        line-height: 1.4;-->
+<!--        margin-bottom: 1rem;-->
+<!--        display: -webkit-box;-->
+<!--        -webkit-line-clamp: 2;-->
+<!--        -webkit-box-orient: vertical;-->
+<!--        overflow: hidden;-->
+<!--    }-->
+
+<!--    .group-stats {-->
+<!--        display: flex;-->
+<!--        gap: 1rem;-->
+<!--        margin-bottom: 1rem;-->
+<!--        flex-wrap: wrap;-->
+<!--    }-->
+
+<!--    .stat-item {-->
+<!--        display: flex;-->
+<!--        align-items: center;-->
+<!--        gap: 0.5rem;-->
+<!--        color: var(&#45;&#45;text-muted);-->
+<!--        font-size: 0.75rem;-->
+<!--    }-->
+
+<!--    .stat-item i {-->
+<!--        font-size: 0.875rem;-->
+<!--        color: var(&#45;&#45;accent-primary);-->
+<!--    }-->
+
+<!--    .group-actions {-->
+<!--        display: flex;-->
+<!--        gap: 0.75rem;-->
+<!--        align-items: center;-->
+<!--    }-->
+
+<!--    .join-btn {-->
+<!--        background: rgba(59, 130, 246, 0.1);-->
+<!--        color: var(&#45;&#45;accent-primary);-->
+<!--        border: 1px solid rgba(59, 130, 246, 0.2);-->
+<!--    }-->
+
+<!--    .join-btn:hover {-->
+<!--        background: var(&#45;&#45;accent-primary);-->
+<!--        color: var(&#45;&#45;text-white);-->
+<!--        text-decoration: none;-->
+<!--    }-->
+
+<!--    /* ==================== LIGHT EMPTY STATE ==================== */-->
+<!--    .empty-state {-->
+<!--        text-align: center;-->
+<!--        padding: 4rem 2rem;-->
+<!--        background: var(&#45;&#45;surface-elevated);-->
+<!--        border-radius: var(&#45;&#45;radius-lg);-->
+<!--        border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .empty-icon {-->
+<!--        font-size: 4rem;-->
+<!--        color: var(&#45;&#45;text-muted);-->
+<!--        margin-bottom: 1rem;-->
+<!--        opacity: 0.6;-->
+<!--    }-->
+
+<!--    .empty-title {-->
+<!--        font-size: 1.5rem;-->
+<!--        font-weight: 600;-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--        margin-bottom: 0.5rem;-->
+<!--    }-->
+
+<!--    .empty-message {-->
+<!--        color: var(&#45;&#45;text-secondary);-->
+<!--        font-size: 1rem;-->
+<!--        margin-bottom: 2rem;-->
+<!--    }-->
+
+<!--    .empty-actions {-->
+<!--        display: flex;-->
+<!--        gap: 1rem;-->
+<!--        justify-content: center;-->
+<!--        flex-wrap: wrap;-->
+<!--    }-->
+
+<!--    /* ==================== LIGHT PAGINATION ==================== */-->
+<!--    .pagination-container {-->
+<!--        display: flex;-->
+<!--        justify-content: space-between;-->
+<!--        align-items: center;-->
+<!--        padding: 1.5rem;-->
+<!--        background: var(&#45;&#45;surface-elevated);-->
+<!--        border-radius: var(&#45;&#45;radius-lg);-->
+<!--        border: 1px solid var(&#45;&#45;border-primary);-->
+<!--    }-->
+
+<!--    .pagination-info {-->
+<!--        color: var(&#45;&#45;text-secondary);-->
+<!--        font-size: 0.875rem;-->
+<!--    }-->
+
+<!--    .pagination {-->
+<!--        display: flex;-->
+<!--        align-items: center;-->
+<!--        gap: 1rem;-->
+<!--    }-->
+
+<!--    .pagination-btn {-->
+<!--        display: flex;-->
+<!--        align-items: center;-->
+<!--        gap: 0.5rem;-->
+<!--        padding: 0.75rem 1rem;-->
+<!--        border: 1px solid var(&#45;&#45;border-primary);-->
+<!--        border-radius: var(&#45;&#45;radius-md);-->
+<!--        background: var(&#45;&#45;surface-elevated);-->
+<!--        color: var(&#45;&#45;text-secondary);-->
+<!--        text-decoration: none;-->
+<!--        font-size: 0.875rem;-->
+<!--        font-weight: 500;-->
+<!--        transition: all 0.2s;-->
+<!--    }-->
+
+<!--    .pagination-btn:hover {-->
+<!--        background: var(&#45;&#45;bg-hover);-->
+<!--        color: var(&#45;&#45;text-primary);-->
+<!--        text-decoration: none;-->
+<!--        transform: translateY(-1px);-->
+<!--    }-->
+
+<!--    .pagination-info-mobile {-->
+<!--        color: var(&#45;&#45;text-muted);-->
+<!--        font-size: 0.875rem;-->
+<!--        font-weight: 500;-->
+<!--    }-->
+
+<!--    /* ==================== LIGHT LOADING STATE ==================== */-->
+<!--    .loading-state {-->
+<!--        text-align: center;-->
+<!--        padding: 4rem 2rem;-->
+<!--        color: var(&#45;&#45;text-secondary);-->
+<!--    }-->
+
+<!--    .loading-spinner {-->
+<!--        width: 40px;-->
+<!--        height: 40px;-->
+<!--        border: 3px solid var(&#45;&#45;border-primary);-->
+<!--        border-top: 3px solid var(&#45;&#45;accent-primary);-->
+<!--        border-radius: 50%;-->
+<!--        animation: spin 1s linear infinite;-->
+<!--        margin: 0 auto 1rem;-->
+<!--    }-->
+
+<!--    @keyframes spin {-->
+<!--        0% { transform: rotate(0deg); }-->
+<!--        100% { transform: rotate(360deg); }-->
+<!--    }-->
+
+<!--    /* ==================== RESPONSIVE DESIGN ==================== */-->
+<!--    @media (max-width: 1024px) {-->
+<!--        .main-content {-->
+<!--            margin-left: 80px;-->
+<!--            padding: 1.5rem;-->
+<!--        }-->
+<!--    }-->
+
+<!--    @media (max-width: 768px) {-->
+<!--        .main-content {-->
+<!--            margin-left: 0;-->
+<!--            margin-top: 60px;-->
+<!--            padding: 1rem;-->
+<!--        }-->
+
+<!--        .page-header {-->
+<!--            padding: 1.5rem;-->
+<!--            margin-bottom: 1.5rem;-->
+<!--        }-->
+
+<!--        .header-content {-->
+<!--            flex-direction: column;-->
+<!--            align-items: flex-start;-->
+<!--            gap: 1.5rem;-->
+<!--        }-->
+
+<!--        .page-title {-->
+<!--            font-size: 2rem;-->
+<!--        }-->
+
+<!--        .header-actions {-->
+<!--            width: 100%;-->
+<!--            justify-content: space-between;-->
+<!--        }-->
+
+<!--        .btn-create {-->
+<!--            flex: 1;-->
+<!--            justify-content: center;-->
+<!--        }-->
+
+<!--        .search-container {-->
+<!--            flex-direction: column;-->
+<!--            gap: 1rem;-->
+<!--        }-->
+
+<!--        .filter-menu {-->
+<!--            right: auto;-->
+<!--            left: 0;-->
+<!--            width: 100%;-->
+<!--        }-->
+
+<!--        .groups-grid {-->
+<!--            grid-template-columns: 1fr;-->
+<!--            gap: 1rem;-->
+<!--        }-->
+
+<!--        .pagination-container {-->
+<!--            flex-direction: column;-->
+<!--            gap: 1rem;-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        .pagination {-->
+<!--            width: 100%;-->
+<!--            justify-content: center;-->
+<!--        }-->
+
+<!--        .empty-state {-->
+<!--            padding: 3rem 1rem;-->
+<!--        }-->
+
+<!--        .empty-actions {-->
+<!--            flex-direction: column;-->
+<!--        }-->
+<!--    }-->
+
+<!--    @media (max-width: 480px) {-->
+<!--        .page-title {-->
+<!--            font-size: 1.75rem;-->
+<!--        }-->
+
+<!--        .group-card {-->
+<!--            margin: 0;-->
+<!--        }-->
+
+<!--        .group-image-container {-->
+<!--            height: 160px;-->
+<!--        }-->
+
+<!--        .group-info {-->
+<!--            padding: 1rem;-->
+<!--        }-->
+
+<!--        .group-actions {-->
+<!--            flex-direction: column;-->
+<!--            gap: 0.5rem;-->
+<!--        }-->
+
+<!--        .btn {-->
+<!--            width: 100%;-->
+<!--            justify-content: center;-->
+<!--        }-->
+
+<!--        .view-toggle {-->
+<!--            width: 100%;-->
+<!--        }-->
+
+<!--        .toggle-btn {-->
+<!--            flex: 1;-->
+<!--            justify-content: center;-->
+<!--        }-->
+<!--    }-->
+<!--</style>-->
+
+
+<!--<script>-->
+<!--    // ==================== GROUPS LIST FUNCTIONALITY ====================-->
+
+<!--    /**-->
+<!--     * Initialize groups page functionality-->
+<!--     */-->
+<!--    function initializeGroupsPage() {-->
+<!--        initializeSearch();-->
+<!--        initializeFilters();-->
+<!--        initializeJoinButtons();-->
+<!--        initializeAnimations();-->
+
+<!--        console.log('🏛️ Groups page initialized');-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Search functionality-->
+<!--     */-->
+<!--    function initializeSearch() {-->
+<!--        const searchInput = document.getElementById('groupSearch');-->
+<!--        const clearButton = document.getElementById('clearSearch');-->
+<!--        const groupCards = document.querySelectorAll('.group-card');-->
+
+<!--        if (!searchInput) return;-->
+
+<!--        let searchTimeout;-->
+
+<!--        searchInput.addEventListener('input', function() {-->
+<!--            clearTimeout(searchTimeout);-->
+<!--            const query = this.value.toLowerCase().trim();-->
+
+<!--            // Show/hide clear button-->
+<!--            clearButton.style.display = query ? 'block' : 'none';-->
+
+<!--            // Debounced search-->
+<!--            searchTimeout = setTimeout(() => {-->
+<!--                filterGroups(query);-->
+<!--            }, 300);-->
+<!--        });-->
+
+<!--        clearButton.addEventListener('click', function() {-->
+<!--            searchInput.value = '';-->
+<!--            this.style.display = 'none';-->
+<!--            filterGroups('');-->
+<!--            searchInput.focus();-->
+<!--        });-->
+
+<!--        function filterGroups(query) {-->
+<!--            const loadingState = document.getElementById('loadingState');-->
+<!--            const groupsGrid = document.getElementById('groupsGrid');-->
+
+<!--            if (!query) {-->
+<!--                // Show all groups-->
+<!--                groupCards.forEach(card => {-->
+<!--                    card.style.display = 'block';-->
+<!--                    card.style.animation = 'fadeIn 0.3s ease-out';-->
+<!--                });-->
+<!--                updateEmptyState();-->
+<!--                return;-->
+<!--            }-->
+
+<!--            // Show loading-->
+<!--            loadingState.style.display = 'block';-->
+<!--            groupsGrid.style.opacity = '0.5';-->
+
+<!--            setTimeout(() => {-->
+<!--                let visibleCount = 0;-->
+
+<!--                groupCards.forEach(card => {-->
+<!--                    const groupName = card.getAttribute('data-group-name') || '';-->
+<!--                    const description = card.querySelector('.group-description')?.textContent || '';-->
+
+<!--                    const matchesSearch =-->
+<!--                        groupName.toLowerCase().includes(query) ||-->
+<!--                        description.toLowerCase().includes(query);-->
+
+<!--                    if (matchesSearch) {-->
+<!--                        card.style.display = 'block';-->
+<!--                        card.style.animation = 'fadeIn 0.3s ease-out';-->
+<!--                        visibleCount++;-->
+<!--                    } else {-->
+<!--                        card.style.display = 'none';-->
+<!--                    }-->
+<!--                });-->
+
+<!--                // Hide loading-->
+<!--                loadingState.style.display = 'none';-->
+<!--                groupsGrid.style.opacity = '1';-->
+
+<!--                updateEmptyState();-->
+
+<!--                console.log(`🔍 Search: "${query}" - Found ${visibleCount} groups`);-->
+<!--            }, 500);-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Filter functionality-->
+<!--     */-->
+<!--    function initializeFilters() {-->
+<!--        const filterMenu = document.getElementById('filterMenu');-->
+<!--        const filterOptions = document.querySelectorAll('input[name="groupType"]');-->
+
+<!--        filterOptions.forEach(option => {-->
+<!--            option.addEventListener('change', function() {-->
+<!--                const selectedType = this.value;-->
+<!--                filterByType(selectedType);-->
+
+<!--                // Close filter menu-->
+<!--                setTimeout(() => {-->
+<!--                    filterMenu.classList.remove('active');-->
+<!--                }, 100);-->
+<!--            });-->
+<!--        });-->
+<!--    }-->
+
+<!--    function toggleFilterDropdown() {-->
+<!--        const filterMenu = document.getElementById('filterMenu');-->
+<!--        filterMenu.classList.toggle('active');-->
+
+<!--        // Close when clicking outside-->
+<!--        setTimeout(() => {-->
+<!--            document.addEventListener('click', function closeFilter(e) {-->
+<!--                if (!e.target.closest('.filter-dropdown')) {-->
+<!--                    filterMenu.classList.remove('active');-->
+<!--                    document.removeEventListener('click', closeFilter);-->
+<!--                }-->
+<!--            });-->
+<!--        }, 0);-->
+<!--    }-->
+
+<!--    function filterByType(type) {-->
+<!--        const groupCards = document.querySelectorAll('.group-card');-->
+<!--        let visibleCount = 0;-->
+
+<!--        groupCards.forEach(card => {-->
+<!--            const groupType = card.getAttribute('data-group-type');-->
+
+<!--            if (!type || groupType === type) {-->
+<!--                card.style.display = 'block';-->
+<!--                card.style.animation = 'fadeIn 0.3s ease-out';-->
+<!--                visibleCount++;-->
+<!--            } else {-->
+<!--                card.style.display = 'none';-->
+<!--            }-->
+<!--        });-->
+
+<!--        updateEmptyState();-->
+<!--        console.log(`🏷️ Filter: "${type || 'All'}" - Showing ${visibleCount} groups`);-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Join buttons functionality-->
+<!--     */-->
+<!--    function initializeJoinButtons() {-->
+<!--        const joinButtons = document.querySelectorAll('.join-btn');-->
+
+<!--        joinButtons.forEach(button => {-->
+<!--            button.addEventListener('click', function(e) {-->
+<!--                e.preventDefault();-->
+
+<!--                const groupId = this.getAttribute('data-group-id');-->
+<!--                const buttonText = this.querySelector('span');-->
+<!--                const buttonIcon = this.querySelector('i');-->
+
+<!--                // Disable button and show loading-->
+<!--                this.disabled = true;-->
+<!--                buttonIcon.className = 'fas fa-spinner fa-spin';-->
+<!--                buttonText.textContent = 'Отправка...';-->
+
+<!--                // Simulate API call-->
+<!--                setTimeout(() => {-->
+<!--                    // Success state-->
+<!--                    buttonIcon.className = 'fas fa-check';-->
+<!--                    buttonText.textContent = 'Заявка отправлена';-->
+<!--                    this.classList.remove('btn-secondary');-->
+<!--                    this.classList.add('btn-success');-->
+
+<!--                    // Show success message-->
+<!--                    showNotification('Заявка на вступление отправлена!', 'success');-->
+
+<!--                    // Remove button after delay-->
+<!--                    setTimeout(() => {-->
+<!--                        this.style.animation = 'fadeOut 0.3s ease-out';-->
+<!--                        setTimeout(() => {-->
+<!--                            this.remove();-->
+<!--                        }, 300);-->
+<!--                    }, 2000);-->
+
+<!--                }, 1500);-->
+
+<!--                console.log(`👥 Joining group ID: ${groupId}`);-->
+<!--            });-->
+<!--        });-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Update empty state visibility-->
+<!--     */-->
+<!--    function updateEmptyState() {-->
+<!--        const groupCards = document.querySelectorAll('.group-card');-->
+<!--        const visibleCards = Array.from(groupCards).filter(card =>-->
+<!--            card.style.display !== 'none'-->
+<!--        );-->
+
+<!--        const emptyState = document.querySelector('.empty-state');-->
+<!--        const groupsGrid = document.getElementById('groupsGrid');-->
+
+<!--        if (visibleCards.length === 0 && emptyState) {-->
+<!--            emptyState.style.display = 'block';-->
+<!--            groupsGrid.style.display = 'none';-->
+<!--        } else if (emptyState) {-->
+<!--            emptyState.style.display = 'none';-->
+<!--            groupsGrid.style.display = 'grid';-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Initialize animations-->
+<!--     */-->
+<!--    function initializeAnimations() {-->
+<!--        // Stagger animation for group cards-->
+<!--        const groupCards = document.querySelectorAll('.group-card');-->
+<!--        groupCards.forEach((card, index) => {-->
+<!--            card.style.animationDelay = `${index * 0.1}s`;-->
+<!--            card.style.animation = 'fadeIn 0.5s ease-out forwards';-->
+<!--        });-->
+
+<!--        // Parallax effect for group images on scroll-->
+<!--        const observerOptions = {-->
+<!--            threshold: 0.1,-->
+<!--            rootMargin: '50px'-->
+<!--        };-->
+
+<!--        const imageObserver = new IntersectionObserver((entries) => {-->
+<!--            entries.forEach(entry => {-->
+<!--                if (entry.isIntersecting) {-->
+<!--                    entry.target.style.animation = 'slideInUp 0.6s ease-out forwards';-->
+<!--                }-->
+<!--            });-->
+<!--        }, observerOptions);-->
+
+<!--        groupCards.forEach(card => {-->
+<!--            imageObserver.observe(card);-->
+<!--        });-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Show notification-->
+<!--     */-->
+<!--    function showNotification(message, type = 'info') {-->
+<!--        const notification = document.createElement('div');-->
+<!--        notification.className = `alert alert-${type}`;-->
+<!--        notification.innerHTML = `-->
+<!--                <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>-->
+<!--                <span>${message}</span>-->
+<!--                <button class="alert-close" onclick="this.parentElement.remove()">-->
+<!--                    <i class="fas fa-times"></i>-->
+<!--                </button>-->
+<!--            `;-->
+
+<!--        const flashMessages = document.querySelector('.flash-messages');-->
+<!--        if (flashMessages) {-->
+<!--            flashMessages.appendChild(notification);-->
+
+<!--            // Auto remove after 5 seconds-->
+<!--            setTimeout(() => {-->
+<!--                if (notification.parentElement) {-->
+<!--                    notification.style.animation = 'slideOutUp 0.3s ease-out';-->
+<!--                    setTimeout(() => {-->
+<!--                        notification.remove();-->
+<!--                    }, 300);-->
+<!--                }-->
+<!--            }, 5000);-->
+<!--        }-->
+<!--    }-->
+
+<!--    /**-->
+<!--     * Utility: Additional CSS animations for light theme-->
+<!--     */-->
+<!--    const additionalAnimations = `-->
+<!--            @keyframes slideInUp {-->
+<!--                from {-->
+<!--                    transform: translateY(30px);-->
+<!--                    opacity: 0;-->
+<!--                }-->
+<!--                to {-->
+<!--                    transform: translateY(0);-->
+<!--                    opacity: 1;-->
+<!--                }-->
+<!--            }-->
+
+<!--            @keyframes slideOutUp {-->
+<!--                from {-->
+<!--                    transform: translateY(0);-->
+<!--                    opacity: 1;-->
+<!--                }-->
+<!--                to {-->
+<!--                    transform: translateY(-30px);-->
+<!--                    opacity: 0;-->
+<!--                }-->
+<!--            }-->
+
+<!--            @keyframes fadeOut {-->
+<!--                from { opacity: 1; }-->
+<!--                to { opacity: 0; }-->
+<!--            }-->
+
+<!--            .btn-success {-->
+<!--                background: linear-gradient(135deg, var(&#45;&#45;accent-success), #059669) !important;-->
+<!--                color: var(&#45;&#45;text-white) !important;-->
+<!--                border: 1px solid var(&#45;&#45;accent-success) !important;-->
+<!--            }-->
+
+<!--            .btn-success:hover {-->
+<!--                transform: translateY(-2px);-->
+<!--                box-shadow: var(&#45;&#45;shadow-lg);-->
+<!--            }-->
+
+<!--            /* Light theme card hover effects */-->
+<!--            .group-card::before {-->
+<!--                content: '';-->
+<!--                position: absolute;-->
+<!--                top: 0;-->
+<!--                left: 0;-->
+<!--                right: 0;-->
+<!--                bottom: 0;-->
+<!--                background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));-->
+<!--                opacity: 0;-->
+<!--                transition: opacity 0.3s ease;-->
+<!--                border-radius: var(&#45;&#45;radius-lg);-->
+<!--                pointer-events: none;-->
+<!--            }-->
+
+<!--            .group-card:hover::before {-->
+<!--                opacity: 1;-->
+<!--            }-->
+
+<!--            /* Light loading spinner enhancement */-->
+<!--            .loading-spinner {-->
+<!--                border-color: var(&#45;&#45;border-secondary);-->
+<!--                border-top-color: var(&#45;&#45;accent-primary);-->
+<!--            }-->
+
+<!--            /* Light scrollbar for webkit browsers */-->
+<!--            ::-webkit-scrollbar {-->
+<!--                width: 8px;-->
+<!--            }-->
+
+<!--            ::-webkit-scrollbar-track {-->
+<!--                background: var(&#45;&#45;bg-secondary);-->
+<!--            }-->
+
+<!--            ::-webkit-scrollbar-thumb {-->
+<!--                background: var(&#45;&#45;border-accent);-->
+<!--                border-radius: 4px;-->
+<!--            }-->
+
+<!--            ::-webkit-scrollbar-thumb:hover {-->
+<!--                background: var(&#45;&#45;text-muted);-->
+<!--            }-->
+<!--        `;-->
+
+<!--    // Inject additional CSS-->
+<!--    const styleSheet = document.createElement('style');-->
+<!--    styleSheet.textContent = additionalAnimations;-->
+<!--    document.head.appendChild(styleSheet);-->
+
+<!--    // Initialize when DOM is ready-->
+<!--    if (document.readyState === 'loading') {-->
+<!--        document.addEventListener('DOMContentLoaded', initializeGroupsPage);-->
+<!--    } else {-->
+<!--        initializeGroupsPage();-->
+<!--    }-->
+
+<!--    // Expose functions globally-->
+<!--    window.toggleFilterDropdown = toggleFilterDropdown;-->
+
+<!--    console.log('🏛️ Cleopatra Groups Page Script Loaded - Light Theme');-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>--><!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -261,11 +1764,15 @@
                             <img th:if="${group.imageUrl}"
                                  th:src="${group.imageUrl}"
                                  th:alt="${group.name}"
-                                 loading="lazy">
+                                 loading="lazy"
+                                 class="group-image-photo">
                             <div th:unless="${group.imageUrl}" class="no-image">
                                 <i class="fas fa-users"></i>
                             </div>
                         </div>
+
+                        <!-- Image Overlay for Better Text Visibility -->
+                        <div class="image-overlay"></div>
 
                         <!-- Group Type Badge -->
                         <div class="group-type-badge" th:text="${group.groupType.displayName}">
@@ -520,7 +2027,7 @@
         flex-shrink: 0;
     }
 
-    /* ==================== LIGHT BUTTONS ==================== */
+    /* ==================== BUTTONS ==================== */
     .btn {
         display: inline-flex;
         align-items: center;
@@ -571,7 +2078,7 @@
         padding: 0.875rem 1.5rem;
     }
 
-    /* ==================== LIGHT VIEW TOGGLE ==================== */
+    /* ==================== VIEW TOGGLE ==================== */
     .view-toggle {
         display: flex;
         background: var(--bg-accent);
@@ -604,7 +2111,7 @@
         text-decoration: none;
     }
 
-    /* ==================== LIGHT FLASH MESSAGES ==================== */
+    /* ==================== FLASH MESSAGES ==================== */
     .flash-messages {
         margin-bottom: 2rem;
     }
@@ -660,7 +2167,7 @@
         }
     }
 
-    /* ==================== LIGHT SEARCH SECTION ==================== */
+    /* ==================== SEARCH SECTION ==================== */
     .search-section {
         margin-bottom: 2rem;
     }
@@ -724,7 +2231,7 @@
         background: var(--bg-hover);
     }
 
-    /* ==================== LIGHT FILTER DROPDOWN ==================== */
+    /* ==================== FILTER DROPDOWN ==================== */
     .filter-dropdown {
         position: relative;
     }
@@ -834,7 +2341,7 @@
         border-radius: 50%;
     }
 
-    /* ==================== LIGHT GROUPS GRID ==================== */
+    /* ==================== GROUPS GRID ==================== */
     .groups-container {
         margin-bottom: 2rem;
     }
@@ -866,10 +2373,12 @@
         box-shadow: var(--shadow-lg);
     }
 
+    /* ==================== ИСПРАВЛЕННЫЕ СТИЛИ ДЛЯ ИЗОБРАЖЕНИЙ ГРУПП ==================== */
     .group-image-container {
         position: relative;
         height: 200px;
         overflow: hidden;
+        background: var(--bg-secondary);
     }
 
     .group-image {
@@ -878,19 +2387,38 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
     }
 
-    .group-image img {
+    /* ИСПРАВЛЕНИЕ: Правильное отображение фотографий */
+    .group-image-photo {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: cover; /* Вернули cover для корректного отображения */
+        object-position: center top; /* Фокус на верхней части изображения */
+        background: var(--bg-secondary); /* Фон для пустых областей */
         transition: transform 0.3s ease;
+        display: block; /* Принудительно показываем изображение */
     }
 
-    .group-card:hover .group-image img {
-        transform: scale(1.05);
+    /* Альтернативный стиль для contain (если нужно показать всё изображение) */
+    .group-image-photo.contain-mode {
+        object-fit: contain;
+        object-position: center;
+        background: var(--bg-secondary);
     }
 
+    /* Hover эффект только для содержащихся изображений */
+    .group-card:hover .group-image-photo {
+        transform: scale(1.05); /* Вернули нормальный масштаб */
+    }
+
+    /* Для contain режима - меньший hover эффект */
+    .group-card:hover .group-image-photo.contain-mode {
+        transform: scale(1.02);
+    }
+
+    /* Улучшенная заглушка для отсутствующих изображений */
     .no-image {
         width: 100%;
         height: 100%;
@@ -900,37 +2428,64 @@
         justify-content: center;
         color: var(--text-muted);
         font-size: 3rem;
+        opacity: 0.8;
+    }
+
+    /* Полупрозрачный оверлей для лучшей читаемости текста на изображениях */
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+                180deg,
+                rgba(0,0,0,0.1) 0%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.1) 100%
+        );
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .group-card:hover .image-overlay {
+        opacity: 1;
     }
 
     .group-type-badge {
         position: absolute;
         top: 1rem;
         left: 1rem;
-        background: rgba(15, 23, 42, 0.8);
+        background: rgba(15, 23, 42, 0.9);
         backdrop-filter: blur(10px);
         color: var(--text-white);
-        padding: 0.25rem 0.75rem;
+        padding: 0.35rem 0.75rem;
         border-radius: var(--radius-sm);
         font-size: 0.75rem;
         font-weight: 500;
+        z-index: 10;
+        box-shadow: var(--shadow-md);
     }
 
     .membership-status {
         position: absolute;
         top: 1rem;
         right: 1rem;
+        z-index: 10;
     }
 
     .status-badge {
         display: inline-flex;
         align-items: center;
         gap: 0.25rem;
-        padding: 0.25rem 0.75rem;
+        padding: 0.35rem 0.75rem;
         border-radius: var(--radius-sm);
         font-size: 0.75rem;
         font-weight: 500;
         backdrop-filter: blur(10px);
         color: var(--text-white);
+        box-shadow: var(--shadow-md);
     }
 
     .status-badge.member {
@@ -949,7 +2504,7 @@
         background: rgba(59, 130, 246, 0.9);
     }
 
-    /* ==================== LIGHT GROUP INFO ==================== */
+    /* ==================== GROUP INFO ==================== */
     .group-info {
         padding: 1.5rem;
         background: var(--surface-elevated);
@@ -1012,7 +2567,7 @@
         text-decoration: none;
     }
 
-    /* ==================== LIGHT EMPTY STATE ==================== */
+    /* ==================== EMPTY STATE ==================== */
     .empty-state {
         text-align: center;
         padding: 4rem 2rem;
@@ -1048,7 +2603,7 @@
         flex-wrap: wrap;
     }
 
-    /* ==================== LIGHT PAGINATION ==================== */
+    /* ==================== PAGINATION ==================== */
     .pagination-container {
         display: flex;
         justify-content: space-between;
@@ -1098,7 +2653,7 @@
         font-weight: 500;
     }
 
-    /* ==================== LIGHT LOADING STATE ==================== */
+    /* ==================== LOADING STATE ==================== */
     .loading-state {
         text-align: center;
         padding: 4rem 2rem;
@@ -1120,11 +2675,84 @@
         100% { transform: rotate(360deg); }
     }
 
+    /* ==================== ДОПОЛНИТЕЛЬНЫЕ УЛУЧШЕНИЯ ДЛЯ ИЗОБРАЖЕНИЙ ==================== */
+
+    /* Обработка ошибок загрузки изображений */
+    .group-image-photo:not([src]),
+    .group-image-photo[src=""],
+    .group-image-photo[src="#"] {
+        display: none;
+    }
+
+    /* Принудительное отображение изображения с src */
+    .group-image-photo[src]:not([src=""]):not([src="#"]) {
+        display: block !important;
+        opacity: 1;
+    }
+
+    /* Lazy loading поддержка */
+    .group-image-photo[loading="lazy"] {
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+
+    .group-image-photo[loading="lazy"].loaded,
+    .group-image-photo[loading="lazy"]:not([loading]) {
+        opacity: 1 !important;
+    }
+
+    /* Индикатор загрузки для изображений */
+    .group-image.loading::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 30px;
+        height: 30px;
+        margin: -15px 0 0 -15px;
+        border: 2px solid var(--border-primary);
+        border-top: 2px solid var(--accent-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        z-index: 5;
+        background: var(--surface-elevated);
+    }
+
+    /* Скрыть индикатор загрузки когда изображение загружено */
+    .group-image.loaded::before,
+    .group-image:not(.loading)::before {
+        display: none;
+    }
+
+    /* Улучшенный hover эффект для карточек */
+    .group-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(139, 92, 246, 0.03));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: var(--radius-lg);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .group-card:hover::before {
+        opacity: 1;
+    }
+
     /* ==================== RESPONSIVE DESIGN ==================== */
     @media (max-width: 1024px) {
         .main-content {
             margin-left: 80px;
             padding: 1.5rem;
+        }
+
+        .groups-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         }
     }
 
@@ -1174,6 +2802,10 @@
         .groups-grid {
             grid-template-columns: 1fr;
             gap: 1rem;
+        }
+
+        .group-image-container {
+            height: 180px; /* Немного увеличили для мобильных */
         }
 
         .pagination-container {
@@ -1231,9 +2863,70 @@
             flex: 1;
             justify-content: center;
         }
+
+        .no-image {
+            font-size: 2.5rem;
+        }
+    }
+
+    /* ==================== ДОПОЛНИТЕЛЬНЫЕ АНИМАЦИИ ==================== */
+    @keyframes slideInUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOutUp {
+        from {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(-30px);
+            opacity: 0;
+        }
+    }
+
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    /* Успешное состояние кнопки */
+    .btn-success {
+        background: linear-gradient(135deg, var(--accent-success), #059669) !important;
+        color: var(--text-white) !important;
+        border: 1px solid var(--accent-success) !important;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* ==================== КАСТОМНЫЙ СКРОЛЛБАР ==================== */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--border-accent);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted);
     }
 </style>
-
 
 <script>
     // ==================== GROUPS LIST FUNCTIONALITY ====================
@@ -1246,6 +2939,7 @@
         initializeFilters();
         initializeJoinButtons();
         initializeAnimations();
+        initializeImageLoading();
 
         console.log('🏛️ Groups page initialized');
     }
@@ -1432,6 +3126,77 @@
     }
 
     /**
+     * Initialize image loading with improved error handling
+     */
+    function initializeImageLoading() {
+        const images = document.querySelectorAll('.group-image-photo');
+
+        images.forEach((img, index) => {
+            const container = img.closest('.group-image');
+
+            // Debug: Log image src
+            console.log(`📸 Image ${index + 1}: ${img.src || 'No src'}`);
+
+            // Only add loading state if image has src
+            if (img.src && img.src !== '' && img.src !== '#') {
+                container.classList.add('loading');
+
+                // Remove lazy loading for debugging
+                img.removeAttribute('loading');
+
+                img.addEventListener('load', function() {
+                    console.log(`✅ Image loaded: ${this.src}`);
+                    this.classList.add('loaded');
+                    container.classList.remove('loading');
+                    container.classList.add('loaded');
+                    this.style.opacity = '1';
+                    this.style.display = 'block';
+                });
+
+                img.addEventListener('error', function() {
+                    console.log(`❌ Image failed to load: ${this.src}`);
+                    container.classList.remove('loading');
+                    this.style.display = 'none';
+
+                    // Create fallback if it doesn't exist
+                    if (!container.querySelector('.no-image')) {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'no-image';
+                        fallback.innerHTML = '<i class="fas fa-users"></i>';
+                        container.appendChild(fallback);
+                        console.log('🔄 Fallback image created');
+                    }
+                });
+
+                // Force trigger load event if image is already cached
+                if (img.complete) {
+                    img.dispatchEvent(new Event('load'));
+                }
+            } else {
+                // No valid src, show fallback immediately
+                img.style.display = 'none';
+                if (!container.querySelector('.no-image')) {
+                    const fallback = document.createElement('div');
+                    fallback.className = 'no-image';
+                    fallback.innerHTML = '<i class="fas fa-users"></i>';
+                    container.appendChild(fallback);
+                    console.log('🔄 No src - fallback created');
+                }
+            }
+        });
+
+        // Add debugging for all group images
+        const groupImages = document.querySelectorAll('.group-image');
+        console.log(`🖼️ Total group image containers: ${groupImages.length}`);
+
+        groupImages.forEach((container, index) => {
+            const img = container.querySelector('.group-image-photo');
+            const noImage = container.querySelector('.no-image');
+            console.log(`Container ${index + 1}: img=${!!img}, src=${img?.src || 'none'}, fallback=${!!noImage}`);
+        });
+    }
+
+    /**
      * Update empty state visibility
      */
     function updateEmptyState() {
@@ -1463,13 +3228,13 @@
             card.style.animation = 'fadeIn 0.5s ease-out forwards';
         });
 
-        // Parallax effect for group images on scroll
+        // Intersection observer for scroll animations
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '50px'
         };
 
-        const imageObserver = new IntersectionObserver((entries) => {
+        const cardObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.style.animation = 'slideInUp 0.6s ease-out forwards';
@@ -1478,7 +3243,7 @@
         }, observerOptions);
 
         groupCards.forEach(card => {
-            imageObserver.observe(card);
+            cardObserver.observe(card);
         });
     }
 
@@ -1512,97 +3277,6 @@
         }
     }
 
-    /**
-     * Utility: Additional CSS animations for light theme
-     */
-    const additionalAnimations = `
-            @keyframes slideInUp {
-                from {
-                    transform: translateY(30px);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateY(0);
-                    opacity: 1;
-                }
-            }
-
-            @keyframes slideOutUp {
-                from {
-                    transform: translateY(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateY(-30px);
-                    opacity: 0;
-                }
-            }
-
-            @keyframes fadeOut {
-                from { opacity: 1; }
-                to { opacity: 0; }
-            }
-
-            .btn-success {
-                background: linear-gradient(135deg, var(--accent-success), #059669) !important;
-                color: var(--text-white) !important;
-                border: 1px solid var(--accent-success) !important;
-            }
-
-            .btn-success:hover {
-                transform: translateY(-2px);
-                box-shadow: var(--shadow-lg);
-            }
-
-            /* Light theme card hover effects */
-            .group-card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
-                opacity: 0;
-                transition: opacity 0.3s ease;
-                border-radius: var(--radius-lg);
-                pointer-events: none;
-            }
-
-            .group-card:hover::before {
-                opacity: 1;
-            }
-
-            /* Light loading spinner enhancement */
-            .loading-spinner {
-                border-color: var(--border-secondary);
-                border-top-color: var(--accent-primary);
-            }
-
-            /* Light scrollbar for webkit browsers */
-            ::-webkit-scrollbar {
-                width: 8px;
-            }
-
-            ::-webkit-scrollbar-track {
-                background: var(--bg-secondary);
-            }
-
-            ::-webkit-scrollbar-thumb {
-                background: var(--border-accent);
-                border-radius: 4px;
-            }
-
-            ::-webkit-scrollbar-thumb:hover {
-                background: var(--text-muted);
-            }
-        `;
-
-    // Inject additional CSS
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = additionalAnimations;
-    document.head.appendChild(styleSheet);
-
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeGroupsPage);
@@ -1613,7 +3287,7 @@
     // Expose functions globally
     window.toggleFilterDropdown = toggleFilterDropdown;
 
-    console.log('🏛️ Cleopatra Groups Page Script Loaded - Light Theme');
+    console.log('🏛️ Cleopatra Groups List Page Script Loaded - Fixed Photo Display');
 </script>
 </body>
 </html>
