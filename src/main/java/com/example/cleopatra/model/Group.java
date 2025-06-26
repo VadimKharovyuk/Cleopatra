@@ -65,6 +65,16 @@ public class Group {
     @Builder.Default
     private List<GroupMembership> memberships = new ArrayList<>();
 
+    @Column(name = "post_count")
+    @Builder.Default
+    private Long postCount = 0L;
+
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OrderBy("createdAt DESC")
+    @Builder.Default
+    private List<GroupPost> posts = new ArrayList<>();
+
     // Системные поля
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -81,6 +91,9 @@ public class Group {
         if (this.memberCount == null) {
             this.memberCount = 0L;
         }
+        if (this.postCount == null) {
+            this.postCount = 0L;
+        }
         if (this.groupType == null) {
             this.groupType = GroupType.OPEN;
         }
@@ -88,6 +101,8 @@ public class Group {
             this.groupStatus = GroupStatus.ACTIVE;
         }
     }
+
+
 
     @PreUpdate
     protected void onUpdate() {

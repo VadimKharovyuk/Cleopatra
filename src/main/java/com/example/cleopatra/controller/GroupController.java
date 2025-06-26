@@ -2,9 +2,8 @@ package com.example.cleopatra.controller;
 
 import com.example.cleopatra.ExistsException.GroupAccessDeniedException;
 import com.example.cleopatra.ExistsException.GroupNotFoundException;
-import com.example.cleopatra.dto.GroupDto.CreateGroupRequestDTO;
-import com.example.cleopatra.dto.GroupDto.GroupPageResponse;
-import com.example.cleopatra.dto.GroupDto.GroupResponseDTO;
+import com.example.cleopatra.dto.GroupDto.*;
+import com.example.cleopatra.service.GroupPostService;
 import com.example.cleopatra.service.GroupService;
 import com.example.cleopatra.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -12,15 +11,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
+
+import java.util.Map;
 
 @Controller
 @RequestMapping("/groups")
@@ -30,6 +33,156 @@ public class GroupController {
 
     private final GroupService groupService;
     private final UserService userService;
+    private final GroupPostService groupPostService;
+
+
+    /**
+     * Детальная страница группы с постами
+     */
+    @GetMapping("/{groupId}")
+    public String showGroupDetails(
+            @PathVariable Long groupId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Authentication auth,
+            Model model) {
+
+        Long currentUserId = getCurrentUserId(auth);
+        log.info("Отображение группы ID: {} для пользователя ID: {}", groupId, currentUserId);
+
+        try {
+            // Получаем данные группы
+            GroupResponseDTO group = groupService.getGroupById(groupId, currentUserId);
+
+            // Получаем посты группы
+            GroupPostsSliceResponse posts = groupPostService.getGroupPosts(groupId, currentUserId, page, size);
+
+            // Добавляем атрибуты для шаблона
+            model.addAttribute("group", group);
+            model.addAttribute("groupId", groupId);
+            model.addAttribute("posts", posts);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("currentUserId", currentUserId);
+            model.addAttribute("createPostRequest", new CreateGroupPostRequest());
+
+            return "groups/group-details";
+
+        } catch (Exception e) {
+            log.error("Ошибка при получении группы ID {}: {}", groupId, e.getMessage());
+            model.addAttribute("errorMessage", "Группа не найдена или недоступна");
+            return "error/404";
+        }
+    }
+    /**
+     * AJAX: Создание поста в группе (для fetch запросов)
+     */
+    @PostMapping("/{groupId}/posts")
+    @ResponseBody
+    public ResponseEntity<?> createPost(
+            @PathVariable Long groupId,
+            @RequestParam(required = false) String text,
+            @RequestParam(required = false) MultipartFile image,
+            Authentication auth) {
+
+        Long currentUserId = getCurrentUserId(auth);
+
+        if (currentUserId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Необходимо войти в систему"));
+        }
+
+        log.info("AJAX создание поста в группе {} пользователем {}", groupId, currentUserId);
+
+        try {
+            // Создаем DTO запроса
+            CreateGroupPostRequest request = CreateGroupPostRequest.builder()
+                    .groupId(groupId)
+                    .text(text)
+                    .imageUrl(image)
+                    .build();
+
+            // Создаем пост
+            GroupPostResponse response = groupPostService.createPost(request, currentUserId);
+
+            log.info("Пост {} успешно создан в группе {} через AJAX", response.getId(), groupId);
+
+            // Возвращаем успешный ответ с данными поста
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Пост успешно создан!",
+                    "post", response
+            ));
+
+        } catch (IllegalArgumentException e) {
+            log.warn("AJAX ошибка валидации при создании поста: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(Map.of(
+                            "success", false,
+                            "error", e.getMessage()
+                    ));
+
+        } catch (Exception e) {
+            log.error("AJAX ошибка при создании поста в группе {}: {}", groupId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "success", false,
+                            "error", "Не удалось создать пост. Попробуйте еще раз."
+                    ));
+        }
+    }
+
+    /**
+     * Удаление поста
+     */
+    @PostMapping("/{groupId}/posts/{postId}/delete")
+    public String deletePost(
+            @PathVariable Long groupId,
+            @PathVariable Long postId,
+            Authentication auth,
+            RedirectAttributes redirectAttributes) {
+
+        Long currentUserId = getCurrentUserId(auth);
+        log.info("Удаление поста {} пользователем {}", postId, currentUserId);
+
+        try {
+            groupPostService.deletePost(postId, currentUserId);
+            redirectAttributes.addFlashAttribute("success", "Пост успешно удален!");
+            log.info("Пост {} успешно удален из группы {}", postId, groupId);
+
+        } catch (RuntimeException e) {
+            log.warn("Ошибка при удалении поста {}: {}", postId, e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Не удалось удалить пост: " + e.getMessage());
+
+        } catch (Exception e) {
+            log.error("Ошибка при удалении поста {}: {}", postId, e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Произошла ошибка при удалении поста.");
+        }
+
+        return "redirect:/groups/" + groupId;
+    }
+
+    /**
+     * AJAX: Загрузка дополнительных постов (для бесконечной прокрутки)
+     */
+    @GetMapping("/{groupId}/posts/load-more")
+    @ResponseBody
+    public ResponseEntity<GroupPostsSliceResponse> loadMorePosts(
+            @PathVariable Long groupId,
+            @RequestParam int page,
+            @RequestParam(defaultValue = "10") int size,
+            Authentication auth) {
+
+        Long currentUserId = getCurrentUserId(auth);
+
+        try {
+            GroupPostsSliceResponse posts = groupPostService.getGroupPosts(groupId, currentUserId, page, size);
+            return ResponseEntity.ok(posts);
+
+        } catch (Exception e) {
+            log.error("Ошибка при загрузке постов: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 
     @GetMapping
@@ -121,31 +274,7 @@ public class GroupController {
         }
     }
 
-    /**
-     * Детальная страница группы
-     */
-    @GetMapping("/{groupId}")
-    public String showGroupDetails(
-            @PathVariable Long groupId,
-            Authentication auth,
-            Model model) {
 
-        Long currentUserId = getCurrentUserId(auth);
-        log.info("Отображение группы ID: {} для пользователя ID: {}", groupId, currentUserId);
-
-        try {
-            GroupResponseDTO group = groupService.getGroupById(groupId, currentUserId);
-
-            model.addAttribute("group", group);
-
-            return "groups/group-details";
-
-        } catch (Exception e) {
-            log.error("Ошибка при получении группы ID {}: {}", groupId, e.getMessage());
-            model.addAttribute("errorMessage", "Группа не найдена или недоступна");
-            return "error/404";
-        }
-    }
 
 
     @PostMapping("/delete/{groupId}")

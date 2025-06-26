@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -18,6 +19,9 @@
 <!-- Main Content -->
 <main class="main-content">
     <div class="content-wrapper">
+        <!-- Flash Messages Container -->
+        <div id="alertContainer"></div>
+
         <!-- Group Header Section -->
         <div class="group-header-container">
             <!-- Background Image -->
@@ -57,21 +61,21 @@
 
                         <!-- Membership Status Badges -->
                         <div class="status-badges">
-                                <span th:if="${group.isMember}" class="status-badge member">
-                                    <i class="fas fa-check"></i> Участник
-                                </span>
+                            <span th:if="${group.isMember}" class="status-badge member">
+                                <i class="fas fa-check"></i> Участник
+                            </span>
                             <span th:if="${group.currentUserMembershipStatus?.name() == 'PENDING'}"
                                   class="status-badge pending">
-                                    <i class="fas fa-clock"></i> На рассмотрении
-                                </span>
+                                <i class="fas fa-clock"></i> На рассмотрении
+                            </span>
                             <span th:if="${group.currentUserRole?.name() == 'OWNER'}"
                                   class="status-badge owner">
-                                    <i class="fas fa-crown"></i> Владелец
-                                </span>
+                                <i class="fas fa-crown"></i> Владелец
+                            </span>
                             <span th:if="${group.currentUserRole?.name() == 'ADMIN'}"
                                   class="status-badge admin">
-                                    <i class="fas fa-shield-alt"></i> Администратор
-                                </span>
+                                <i class="fas fa-shield-alt"></i> Администратор
+                            </span>
                         </div>
                     </div>
 
@@ -140,9 +144,9 @@
         </div>
 
         <!-- Content Sections -->
-        <div class="content-sections">
-            <!-- Post Creation Section (for future) -->
-            <div th:if="${group.isMember}" class="post-creation-section">
+        <div class="content-sections" th:attr="data-group-id=${group.id}">
+            <!-- Post Creation Section -->
+            <div th:if="${group.isMember != null and group.isMember}" class="post-creation-section">
                 <div class="section-card">
                     <div class="section-header">
                         <h3 class="section-title">
@@ -152,35 +156,47 @@
                     </div>
 
                     <div class="post-creation-form">
-                        <div class="post-textarea-wrapper">
-                                <textarea class="post-textarea"
+                        <form id="createPostForm" enctype="multipart/form-data">
+                            <div class="post-textarea-wrapper">
+                                <textarea name="text" class="post-textarea" id="postText"
                                           placeholder="Поделитесь своими мыслями с группой..."
                                           rows="3"></textarea>
-                        </div>
-
-                        <div class="post-actions">
-                            <div class="post-attachments">
-                                <button class="attachment-btn" title="Добавить фото">
-                                    <i class="fas fa-camera"></i>
-                                </button>
-                                <button class="attachment-btn" title="Добавить видео">
-                                    <i class="fas fa-video"></i>
-                                </button>
-                                <button class="attachment-btn" title="Добавить файл">
-                                    <i class="fas fa-paperclip"></i>
-                                </button>
                             </div>
 
-                            <button class="btn btn-primary post-submit-btn">
-                                <i class="fas fa-paper-plane"></i>
-                                <span>Опубликовать</span>
-                            </button>
-                        </div>
+                            <div class="image-upload-section" style="display: none;">
+                                <div class="image-preview-container">
+                                    <img id="imagePreview" style="max-width: 100%; max-height: 200px; border-radius: 8px;" alt="Preview">
+                                    <button type="button" class="remove-image-btn" onclick="removeImagePreview()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="post-actions">
+                                <div class="post-attachments">
+                                    <label class="attachment-btn" title="Добавить фото">
+                                        <i class="fas fa-camera"></i>
+                                        <input type="file" name="image" id="imageInput" accept="image/*" style="display: none;">
+                                    </label>
+                                    <button type="button" class="attachment-btn" title="Добавить видео" onclick="showComingSoon('видео')">
+                                        <i class="fas fa-video"></i>
+                                    </button>
+                                    <button type="button" class="attachment-btn" title="Добавить файл" onclick="showComingSoon('файлы')">
+                                        <i class="fas fa-paperclip"></i>
+                                    </button>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary post-submit-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>Опубликовать</span>
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
 
-            <!-- Group Owner Section -->
+            <!-- Owner Section -->
             <div class="owner-section">
                 <div class="section-card">
                     <div class="section-header">
@@ -216,7 +232,7 @@
                 </div>
             </div>
 
-            <!-- Group Members Section -->
+            <!-- Members Section -->
             <div class="members-section">
                 <div class="section-card">
                     <div class="section-header">
@@ -224,10 +240,10 @@
                             <i class="fas fa-users"></i>
                             Участники
                             <span class="member-count" th:text="'(' + ${group.memberCount} + ')'">
-                                    (0)
-                                </span>
+                                (0)
+                            </span>
                         </h3>
-                        <a th:if="${group.isMember}"
+                        <a th:if="${group.isMember != null and group.isMember}"
                            th:href="@{/groups/{id}/members(id=${group.id})}"
                            class="btn btn-outline btn-sm">
                             <i class="fas fa-eye"></i>
@@ -260,7 +276,7 @@
                             Посты группы
                         </h3>
                         <div class="posts-filter">
-                            <select class="filter-select">
+                            <select class="filter-select" onchange="changePostsFilter(this.value)">
                                 <option value="recent">Новые</option>
                                 <option value="popular">Популярные</option>
                                 <option value="discussed">Обсуждаемые</option>
@@ -269,19 +285,81 @@
                     </div>
 
                     <div class="posts-content">
-                        <div class="posts-placeholder">
-                            <div class="placeholder-icon">
-                                <i class="fas fa-newspaper"></i>
+                        <div id="postsContainer">
+                            <!-- Existing posts from server -->
+                            <th:block th:if="${posts != null and posts.posts != null and not #lists.isEmpty(posts.posts)}">
+                                <div th:each="post : ${posts.posts}" class="post-card" th:attr="data-post-id=${post.id}">
+                                    <div class="post-header">
+                                        <div class="post-author">
+                                            <img th:src="${post.authorImageUrl != null ? post.authorImageUrl : '/images/default-avatar.png'}"
+                                                 th:alt="${post.authorName}" class="author-avatar">
+                                            <div class="author-info">
+                                                <h6 class="author-name" th:text="${post.authorName}">Автор</h6>
+                                                <small class="post-time" th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy HH:mm')}">время</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Delete button for post author or group owner/admin -->
+                                        <div th:if="${post.authorId != null and currentUserId != null and (post.authorId == currentUserId or group.currentUserRole?.name() == 'OWNER' or group.currentUserRole?.name() == 'ADMIN')}" class="post-actions-menu">
+                                            <button class="btn-menu" onclick="togglePostMenu(this)">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <div class="post-menu">
+                                                <button class="menu-item delete-post-btn" th:attr="data-post-id=${post.id}">
+                                                    <i class="fas fa-trash"></i> Удалить
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div th:if="${post.text != null and not #strings.isEmpty(post.text)}" class="post-text" th:text="${post.text}">Текст поста</div>
+
+                                    <div th:if="${post.hasImage != null and post.hasImage}" class="post-image">
+                                        <img th:src="${post.imageUrl}" alt="Post image">
+                                    </div>
+
+                                    <div class="post-stats">
+                                        <span class="stat-item">
+                                            <i class="fas fa-heart"></i>
+                                            <span th:text="${post.likeCount != null ? post.likeCount : 0}">0</span>
+                                        </span>
+                                        <span class="stat-item">
+                                            <i class="fas fa-comment"></i>
+                                            <span th:text="${post.commentCount != null ? post.commentCount : 0}">0</span>
+                                        </span>
+                                        <span class="stat-item">
+                                            <i class="fas fa-share"></i>
+                                            <span>Поделиться</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </th:block>
+
+                            <!-- Empty state -->
+                            <div th:if="${posts == null or posts.posts == null or #lists.isEmpty(posts.posts)}"
+                                 class="posts-placeholder" id="emptyState">
+                                <div class="placeholder-icon">
+                                    <i class="fas fa-newspaper"></i>
+                                </div>
+                                <h4 class="placeholder-title">Пока нет постов</h4>
+                                <p class="placeholder-text">
+                                    Станьте первым, кто поделится интересным контентом в этой группе!
+                                </p>
+                                <button th:if="${group.isMember != null and group.isMember}"
+                                        class="btn btn-primary"
+                                        onclick="focusPostCreation()">
+                                    <i class="fas fa-plus"></i>
+                                    Создать первый пост
+                                </button>
                             </div>
-                            <h4 class="placeholder-title">Пока нет постов</h4>
-                            <p class="placeholder-text">
-                                Станьте первым, кто поделится интересным контентом в этой группе!
-                            </p>
-                            <button th:if="${group.isMember}"
-                                    class="btn btn-primary"
-                                    onclick="focusPostCreation()">
+                        </div>
+
+                        <!-- Load More Button -->
+                        <div th:if="${posts != null and posts.hasNext != null and posts.hasNext}" class="load-more-section">
+                            <button id="loadMoreBtn" class="btn btn-outline load-more-btn"
+                                    th:attr="data-current-page=${posts != null ? posts.currentPage : 0}">
                                 <i class="fas fa-plus"></i>
-                                Создать первый пост
+                                Загрузить еще
                             </button>
                         </div>
                     </div>
@@ -363,6 +441,53 @@
     .content-wrapper {
         max-width: 1200px;
         margin: 0 auto;
+    }
+
+    /* ==================== ALERTS ==================== */
+    #alertContainer {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 400px;
+    }
+
+    .alert {
+        background: var(--surface-elevated);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        animation: slideInRight 0.3s ease-out;
+    }
+
+    .alert-success { border-left: 4px solid var(--accent-success); }
+    .alert-danger { border-left: 4px solid var(--accent-error); }
+    .alert-info { border-left: 4px solid var(--accent-primary); }
+
+    .alert-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: var(--radius-sm);
+    }
+
+    .alert-close:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
     }
 
     /* ==================== GROUP HEADER ==================== */
@@ -579,13 +704,19 @@
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
     .btn-primary {
         background: var(--gradient-primary);
         color: var(--text-white);
         box-shadow: var(--shadow-md);
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: var(--shadow-lg);
         color: var(--text-white);
@@ -598,7 +729,7 @@
         border: 1px solid var(--border-primary);
     }
 
-    .btn-secondary:hover {
+    .btn-secondary:hover:not(:disabled) {
         background: var(--bg-hover);
         color: var(--text-primary);
         text-decoration: none;
@@ -611,7 +742,7 @@
         box-shadow: var(--shadow-md);
     }
 
-    .btn-danger:hover {
+    .btn-danger:hover:not(:disabled) {
         background: #dc2626;
         transform: translateY(-2px);
         box-shadow: var(--shadow-lg);
@@ -625,7 +756,7 @@
         border: 1px solid var(--border-accent);
     }
 
-    .btn-outline:hover {
+    .btn-outline:hover:not(:disabled) {
         background: var(--bg-hover);
         color: var(--text-primary);
         text-decoration: none;
@@ -718,6 +849,37 @@
 
     .post-textarea::placeholder {
         color: var(--text-muted);
+    }
+
+    .image-upload-section {
+        margin-bottom: 1rem;
+    }
+
+    .image-preview-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .remove-image-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .remove-image-btn:hover {
+        background: rgba(0, 0, 0, 0.9);
+        transform: scale(1.1);
     }
 
     .post-actions {
@@ -815,8 +977,7 @@
         padding: 2rem;
     }
 
-    .members-placeholder,
-    .posts-placeholder {
+    .members-placeholder {
         text-align: center;
         padding: 3rem 2rem;
     }
@@ -826,13 +987,6 @@
         color: var(--text-muted);
         margin-bottom: 1rem;
         opacity: 0.6;
-    }
-
-    .placeholder-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 0.5rem;
     }
 
     .placeholder-text {
@@ -874,6 +1028,184 @@
         padding: 0;
     }
 
+    /* ==================== POST CARDS ==================== */
+    .post-card {
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-lg);
+        background: var(--surface-elevated);
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+    }
+
+    .post-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .post-author {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .author-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .author-info h6 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .author-name {
+        margin: 0;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .post-time {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    .post-actions-menu {
+        position: relative;
+    }
+
+    .btn-menu {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        padding: 0.5rem;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-menu:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+    }
+
+    .post-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: var(--surface-elevated);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        min-width: 120px;
+        z-index: 1000;
+        display: none;
+    }
+
+    .post-menu.show {
+        display: block;
+    }
+
+    .menu-item {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: none;
+        background: none;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+    }
+
+    .menu-item:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+    }
+
+    .menu-item.delete-post-btn {
+        color: var(--accent-error);
+    }
+
+    .menu-item.delete-post-btn:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .post-text {
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+
+    .post-image {
+        margin-bottom: 1rem;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+
+    .post-image img {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .post-stats {
+        display: flex;
+        gap: 1.5rem;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-secondary);
+    }
+
+    .post-stats .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .post-stats .stat-item:hover {
+        color: var(--accent-primary);
+    }
+
+    .load-more-section {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .load-more-btn {
+        padding: 1rem 2rem;
+    }
+
+    .posts-placeholder {
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+
+    .placeholder-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
     /* ==================== RESPONSIVE DESIGN ==================== */
     @media (max-width: 1024px) {
         .main-content {
@@ -891,6 +1223,13 @@
 
         .group-background {
             height: 200px;
+        }
+
+        .group-main-info {
+            flex-direction: column;
+            text-align: center;
+            margin-top: -60px;
+            padding: 1.5rem;
         }
 
         .group-avatar {
@@ -950,6 +1289,10 @@
             justify-content: center;
         }
 
+        .post-card {
+            padding: 1rem;
+        }
+
         .owner-card {
             flex-direction: column;
             text-align: center;
@@ -990,8 +1333,6 @@
         }
 
         .post-creation-form,
-        .owner-card,
-        .members-preview,
         .posts-content {
             padding: 1rem;
         }
@@ -1002,6 +1343,19 @@
 
         .placeholder-title {
             font-size: 1.125rem;
+        }
+
+        .post-stats {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .post-actions {
+            gap: 0.75rem;
+        }
+
+        .post-submit-btn {
+            padding: 0.75rem 1.5rem;
         }
     }
 
@@ -1017,28 +1371,47 @@
         }
     }
 
-    @keyframes slideUp {
+    @keyframes slideInRight {
         from {
+            transform: translateX(100%);
             opacity: 0;
-            transform: translateY(30px);
         }
         to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOut {
+        from {
             opacity: 1;
             transform: translateY(0);
         }
+        to {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
     }
 
     .section-card {
         animation: fadeIn 0.6s ease-out;
     }
 
-    .section-card:nth-child(1) { animation-delay: 0.1s; }
-    .section-card:nth-child(2) { animation-delay: 0.2s; }
-    .section-card:nth-child(3) { animation-delay: 0.3s; }
-    .section-card:nth-child(4) { animation-delay: 0.4s; }
+    .post-card {
+        animation: fadeIn 0.4s ease-out;
+    }
 
     .group-header-container {
-        animation: slideUp 0.8s ease-out;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .loading-pulse {
+        animation: pulse 1.5s infinite;
     }
 
     /* ==================== HOVER EFFECTS ==================== */
@@ -1063,6 +1436,8 @@
     .mb-1 { margin-bottom: 0.5rem; }
     .mb-2 { margin-bottom: 1rem; }
     .mt-2 { margin-top: 1rem; }
+    .d-none { display: none; }
+    .d-block { display: block; }
 
     /* ==================== CUSTOM SCROLLBAR ==================== */
     .post-textarea::-webkit-scrollbar {
@@ -1082,186 +1457,663 @@
     .post-textarea::-webkit-scrollbar-thumb:hover {
         background: var(--text-muted);
     }
+
+    /* ==================== LOADING STATES ==================== */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 50%;
+        margin-left: -8px;
+        margin-top: -8px;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* ==================== ERROR STATES ==================== */
+    .error-message {
+        color: var(--accent-error);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .success-message {
+        color: var(--accent-success);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* ==================== FOCUS STYLES ==================== */
+    .btn:focus-visible {
+        outline: 2px solid var(--accent-primary);
+        outline-offset: 2px;
+    }
+
+    .attachment-btn:focus-visible {
+        outline: 2px solid var(--accent-primary);
+        outline-offset: 2px;
+    }
+
+    /* ==================== PRINT STYLES ==================== */
+    @media print {
+        .group-actions,
+        .post-creation-section,
+        .attachment-btn,
+        .btn-menu,
+        #alertContainer {
+            display: none !important;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 1rem;
+        }
+
+        .group-background {
+            height: 200px;
+        }
+
+        .post-card {
+            break-inside: avoid;
+            box-shadow: none;
+            border: 1px solid #ccc;
+        }
+    }
 </style>
 
 <!-- JavaScript -->
 <script>
-    // ==================== GROUP DETAILS FUNCTIONALITY ====================
+    // Global variables - с несколькими способами получения groupId для надежности
+    let groupId = /*[[${group.id}]]*/ null;
 
-    /**
-     * Initialize group details page
-     */
-    function initializeGroupDetails() {
-        initializeJoinButton();
-        initializeLeaveButton();
-        initializePostCreation();
-        initializeAnimations();
+    // Резервные способы получения groupId
+    if (!groupId) {
+        const contentSections = document.querySelector('.content-sections');
+        groupId = contentSections ? contentSections.getAttribute('data-group-id') : null;
+    }
 
+    if (!groupId) {
+        // Получаем из URL: /groups/3 -> ID = 3
+        const pathParts = window.location.pathname.split('/');
+        const groupsIndex = pathParts.indexOf('groups');
+        if (groupsIndex !== -1 && pathParts[groupsIndex + 1]) {
+            groupId = parseInt(pathParts[groupsIndex + 1]);
+        }
+    }
+
+    if (!groupId) {
+        console.error('❌ Не удалось получить ID группы');
+        showAlert('Ошибка: не удалось определить ID группы', 'danger');
+    }
+
+    const currentUserId = /*[[${currentUserId}]]*/ 1;
+    let currentPage = /*[[${posts != null ? posts.currentPage : 0}]]*/ 0;
+    let isLoading = false;
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log(`🏛️ Инициализация страницы группы. Group ID: ${groupId}, User ID: ${currentUserId}`);
+
+        if (!groupId) {
+            console.error('❌ Критическая ошибка: groupId не определен');
+            showAlert('Ошибка: не удалось определить ID группы. Перезагрузите страницу.', 'danger');
+            return;
+        }
+
+        initializeGroupDetails();
         console.log('🏛️ Group details page initialized');
+    });
+
+    function initializeGroupDetails() {
+        initializePostCreation();
+        initializePostDeletion();
+        initializeLoadMore();
+        initializeImageUpload();
+        initializeJoinLeaveButtons();
+        initializeAnimations();
+        initializePostMenus();
+        initializeKeyboardShortcuts();
     }
 
-    /**
-     * Join button functionality
-     */
-    function initializeJoinButton() {
-        const joinBtn = document.querySelector('.join-btn');
-        if (!joinBtn) return;
-
-        joinBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            const groupId = this.getAttribute('data-group-id');
-            const buttonText = this.querySelector('span');
-            const buttonIcon = this.querySelector('i');
-
-            // Disable button and show loading
-            this.disabled = true;
-            buttonIcon.className = 'fas fa-spinner fa-spin';
-            buttonText.textContent = 'Отправка...';
-
-            // Simulate API call
-            setTimeout(() => {
-                // Success state
-                buttonIcon.className = 'fas fa-check';
-                buttonText.textContent = 'Заявка отправлена';
-
-                // Show success message
-                showNotification('Заявка на вступление отправлена!', 'success');
-
-                // Hide button after delay
-                setTimeout(() => {
-                    this.style.animation = 'fadeOut 0.3s ease-out';
-                    setTimeout(() => {
-                        this.style.display = 'none';
-                    }, 300);
-                }, 2000);
-
-            }, 1500);
-
-            console.log(`👥 Joining group ID: ${groupId}`);
-        });
-    }
-
-    /**
-     * Leave button functionality
-     */
-    function initializeLeaveButton() {
-        const leaveBtn = document.querySelector('.leave-btn');
-        if (!leaveBtn) return;
-
-        leaveBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            if (!confirm('Вы уверены, что хотите покинуть эту группу?')) {
-                return;
-            }
-
-            const groupId = this.getAttribute('data-group-id');
-            const buttonText = this.querySelector('span');
-            const buttonIcon = this.querySelector('i');
-
-            // Disable button and show loading
-            this.disabled = true;
-            buttonIcon.className = 'fas fa-spinner fa-spin';
-            buttonText.textContent = 'Выход...';
-
-            // Simulate API call
-            setTimeout(() => {
-                showNotification('Вы покинули группу', 'success');
-                // Redirect to groups list
-                setTimeout(() => {
-                    window.location.href = '/groups';
-                }, 1000);
-            }, 1500);
-
-            console.log(`👋 Leaving group ID: ${groupId}`);
-        });
-    }
-
-    /**
-     * Post creation functionality
-     */
+    // ==================== POST CREATION ====================
     function initializePostCreation() {
-        const textarea = document.querySelector('.post-textarea');
+        const form = document.getElementById('createPostForm');
+        const textarea = document.getElementById('postText');
         const submitBtn = document.querySelector('.post-submit-btn');
-        const attachmentBtns = document.querySelectorAll('.attachment-btn');
 
-        if (!textarea || !submitBtn) return;
+        if (!form || !textarea || !submitBtn) return;
 
         // Auto-resize textarea
         textarea.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.max(this.scrollHeight, 120) + 'px';
-
-            // Enable/disable submit button
-            const hasContent = this.value.trim().length > 0;
-            submitBtn.disabled = !hasContent;
-            submitBtn.style.opacity = hasContent ? '1' : '0.5';
+            updateSubmitButton();
         });
 
-        // Submit post
-        submitBtn.addEventListener('click', function(e) {
+        // Form submission
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
-
-            const content = textarea.value.trim();
-            if (!content) return;
-
-            const buttonText = this.querySelector('span');
-            const buttonIcon = this.querySelector('i');
-
-            // Disable and show loading
-            this.disabled = true;
-            buttonIcon.className = 'fas fa-spinner fa-spin';
-            buttonText.textContent = 'Публикация...';
-
-            // Simulate API call
-            setTimeout(() => {
-                // Success
-                textarea.value = '';
-                textarea.style.height = '120px';
-
-                buttonIcon.className = 'fas fa-paper-plane';
-                buttonText.textContent = 'Опубликовать';
-                this.disabled = false;
-                this.style.opacity = '0.5';
-
-                showNotification('Пост успешно опубликован!', 'success');
-
-                // Here you would typically reload posts or add the new post to the list
-
-            }, 2000);
-        });
-
-        // Attachment buttons
-        attachmentBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const icon = this.querySelector('i');
-                const type = icon.classList.contains('fa-camera') ? 'photo' :
-                    icon.classList.contains('fa-video') ? 'video' : 'file';
-
-                showNotification(`Функция добавления ${type === 'photo' ? 'фото' : type === 'video' ? 'видео' : 'файлов'} будет реализована позже`, 'info');
-            });
+            if (!isLoading) {
+                createPost();
+            }
         });
 
         // Initially disable submit button
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = '0.5';
+        updateSubmitButton();
     }
 
-    /**
-     * Focus post creation area
-     */
-    function focusPostCreation() {
-        const textarea = document.querySelector('.post-textarea');
-        if (textarea) {
-            textarea.focus();
-            textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    function updateSubmitButton() {
+        const textarea = document.getElementById('postText');
+        const imageInput = document.getElementById('imageInput');
+        const submitBtn = document.querySelector('.post-submit-btn');
+
+        if (!textarea || !imageInput || !submitBtn) return;
+
+        const hasText = textarea.value.trim().length > 0;
+        const hasImage = imageInput.files.length > 0;
+        const hasContent = hasText || hasImage;
+
+        submitBtn.disabled = !hasContent || isLoading;
+        submitBtn.style.opacity = hasContent && !isLoading ? '1' : '0.5';
+    }
+
+    function createPost() {
+        const form = document.getElementById('createPostForm');
+        const textarea = document.getElementById('postText');
+        const imageInput = document.getElementById('imageInput');
+        const submitBtn = document.querySelector('.post-submit-btn');
+
+        if (!form || !textarea || !submitBtn) return;
+
+        if (!groupId) {
+            showAlert('Ошибка: не удалось определить ID группы', 'danger');
+            return;
+        }
+
+        const text = textarea.value.trim();
+        const hasImage = imageInput.files.length > 0;
+
+        if (!text && !hasImage) {
+            showAlert('Пожалуйста, добавьте текст или изображение для вашего поста.', 'danger');
+            return;
+        }
+
+        isLoading = true;
+        const formData = new FormData(form);
+        const buttonText = submitBtn.querySelector('span');
+        const buttonIcon = submitBtn.querySelector('i');
+
+        // Show loading state
+        submitBtn.disabled = true;
+        buttonIcon.className = 'fas fa-spinner fa-spin';
+        buttonText.textContent = 'Публикация...';
+
+        console.log(`📝 Создание поста в группе ${groupId} пользователем ${currentUserId}`);
+
+        // Send AJAX request
+        fetch(`/groups/${groupId}/posts`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+
+                    // Clear form
+                    form.reset();
+                    removeImagePreview();
+
+                    // Reset textarea height
+                    textarea.style.height = '120px';
+
+                    // Add new post to list
+                    addNewPostToList(data.post);
+
+                    // Hide empty state if visible
+                    const emptyState = document.getElementById('emptyState');
+                    if (emptyState) {
+                        emptyState.style.display = 'none';
+                    }
+                } else {
+                    showAlert(data.error || 'Произошла ошибка при создании поста.', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error creating post:', error);
+                showAlert('Произошла ошибка при создании поста.', 'danger');
+            })
+            .finally(() => {
+                isLoading = false;
+                // Reset button
+                buttonIcon.className = 'fas fa-paper-plane';
+                buttonText.textContent = 'Опубликовать';
+                updateSubmitButton();
+            });
+    }
+
+    function addNewPostToList(post) {
+        const postsContainer = document.getElementById('postsContainer');
+
+        if (!postsContainer) return;
+
+        const postHtml = createPostHTML(post, true);
+
+        // Insert at the beginning
+        postsContainer.insertAdjacentHTML('afterbegin', postHtml);
+
+        // Animate in
+        const newPost = postsContainer.querySelector('.post-card');
+        if (newPost) {
+            newPost.style.opacity = '0';
+            newPost.style.transform = 'translateY(-20px)';
+
+            setTimeout(() => {
+                newPost.style.transition = 'all 0.3s ease';
+                newPost.style.opacity = '1';
+                newPost.style.transform = 'translateY(0)';
+            }, 10);
+
+            // Reinitialize event listeners for new post
+            initializePostDeletion();
+            initializePostMenus();
         }
     }
 
-    /**
-     * Initialize animations
-     */
+    // ==================== IMAGE UPLOAD ====================
+    function initializeImageUpload() {
+        const imageInput = document.getElementById('imageInput');
+
+        if (!imageInput) return;
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.startsWith('image/')) {
+                    showAlert('Пожалуйста, выберите изображение.', 'danger');
+                    this.value = '';
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    showAlert('Размер изображения не должен превышать 5MB.', 'danger');
+                    this.value = '';
+                    return;
+                }
+
+                showImagePreview(file);
+                updateSubmitButton();
+            }
+        });
+    }
+
+    function showImagePreview(file) {
+        const reader = new FileReader();
+        const previewSection = document.querySelector('.image-upload-section');
+        const previewImage = document.getElementById('imagePreview');
+
+        if (!reader || !previewSection || !previewImage) return;
+
+        reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            previewSection.style.display = 'block';
+        };
+
+        reader.onerror = function() {
+            showAlert('Ошибка при чтении файла.', 'danger');
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    function removeImagePreview() {
+        const previewSection = document.querySelector('.image-upload-section');
+        const imageInput = document.getElementById('imageInput');
+
+        if (previewSection) previewSection.style.display = 'none';
+        if (imageInput) imageInput.value = '';
+        updateSubmitButton();
+    }
+
+    // Make function globally available
+    window.removeImagePreview = removeImagePreview;
+
+    // ==================== POST DELETION ====================
+    function initializePostDeletion() {
+        const deleteButtons = document.querySelectorAll('.delete-post-btn');
+
+        deleteButtons.forEach(btn => {
+            btn.removeEventListener('click', handlePostDeletion); // Remove previous listeners
+            btn.addEventListener('click', handlePostDeletion);
+        });
+    }
+
+    function handlePostDeletion(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const postId = this.getAttribute('data-post-id');
+
+        if (!confirm('Вы уверены, что хотите удалить этот пост?')) {
+            return;
+        }
+
+        deletePost(postId);
+    }
+
+    function deletePost(postId) {
+        if (isLoading) return;
+
+        if (!groupId) {
+            showAlert('Ошибка: не удалось определить ID группы', 'danger');
+            return;
+        }
+
+        isLoading = true;
+
+        console.log(`🗑️ Удаление поста ${postId} из группы ${groupId}`);
+
+        fetch(`/groups/${groupId}/posts/${postId}/delete`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Remove post from DOM with animation
+                    const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+                    if (postElement) {
+                        postElement.style.transition = 'all 0.3s ease';
+                        postElement.style.opacity = '0';
+                        postElement.style.transform = 'translateX(-100%)';
+
+                        setTimeout(() => {
+                            postElement.remove();
+                            showAlert('Пост успешно удален!', 'success');
+
+                            // Show empty state if no posts left
+                            const remainingPosts = document.querySelectorAll('.post-card');
+                            if (remainingPosts.length === 0) {
+                                const emptyState = document.getElementById('emptyState');
+                                if (emptyState) {
+                                    emptyState.style.display = 'block';
+                                }
+                            }
+                        }, 300);
+                    }
+                } else {
+                    showAlert('Ошибка при удалении поста', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting post:', error);
+                showAlert('Произошла ошибка при удалении поста', 'danger');
+            })
+            .finally(() => {
+                isLoading = false;
+            });
+    }
+
+    // ==================== POST MENU MANAGEMENT ====================
+    function initializePostMenus() {
+        // Close menus when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.post-actions-menu')) {
+                document.querySelectorAll('.post-menu.show').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+    }
+
+    function togglePostMenu(button) {
+        const menu = button.nextElementSibling;
+        const isVisible = menu.classList.contains('show');
+
+        // Close all other menus
+        document.querySelectorAll('.post-menu.show').forEach(m => {
+            if (m !== menu) m.classList.remove('show');
+        });
+
+        // Toggle current menu
+        menu.classList.toggle('show', !isVisible);
+    }
+
+    // Make function globally available
+    window.togglePostMenu = togglePostMenu;
+
+    // ==================== LOAD MORE POSTS ====================
+    function initializeLoadMore() {
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+        if (!loadMoreBtn) return;
+
+        loadMoreBtn.addEventListener('click', function() {
+            if (isLoading) return;
+
+            const nextPage = parseInt(this.getAttribute('data-current-page')) + 1;
+            loadMorePosts(nextPage);
+        });
+    }
+
+    function loadMorePosts(page) {
+        if (isLoading) return;
+
+        if (!groupId) {
+            showAlert('Ошибка: не удалось определить ID группы', 'danger');
+            return;
+        }
+
+        isLoading = true;
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const originalText = loadMoreBtn.innerHTML;
+
+        // Show loading
+        loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...';
+        loadMoreBtn.disabled = true;
+
+        console.log(`📄 Загрузка дополнительных постов для группы ${groupId}, страница ${page}`);
+
+        fetch(`/groups/${groupId}/posts/load-more?page=${page}&size=10`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.posts && data.posts.length > 0) {
+                    // Add posts to container
+                    const postsContainer = document.getElementById('postsContainer');
+
+                    data.posts.forEach(post => {
+                        const postHtml = createPostHTML(post, false);
+                        postsContainer.insertAdjacentHTML('beforeend', postHtml);
+                    });
+
+                    // Update page number
+                    loadMoreBtn.setAttribute('data-current-page', page);
+
+                    // Hide button if no more posts
+                    if (!data.hasNext) {
+                        loadMoreBtn.style.display = 'none';
+                    }
+
+                    // Reinitialize event listeners
+                    initializePostDeletion();
+                    initializePostMenus();
+                } else {
+                    loadMoreBtn.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading more posts:', error);
+                showAlert('Ошибка при загрузке постов', 'danger');
+            })
+            .finally(() => {
+                isLoading = false;
+                loadMoreBtn.innerHTML = originalText;
+                loadMoreBtn.disabled = false;
+            });
+    }
+
+    function createPostHTML(post, isNew = false) {
+        const timeText = isNew ? 'только что' : formatDate(post.createdAt);
+        // Пользователь может удалить пост если он автор или имеет права администратора/владельца
+        const canDelete = post.authorId === currentUserId;
+
+        return `
+            <div class="post-card" data-post-id="${post.id}">
+                <div class="post-header">
+                    <div class="post-author">
+                        <img src="${post.authorImageUrl || '/images/default-avatar.png'}"
+                             alt="${post.authorName || 'Автор'}" class="author-avatar"
+                             onerror="this.src='/images/default-avatar.png'">
+                        <div class="author-info">
+                            <h6 class="author-name">${post.authorName || 'Неизвестный автор'}</h6>
+                            <small class="post-time">${timeText}</small>
+                        </div>
+                    </div>
+
+                    ${canDelete ? `
+                        <div class="post-actions-menu">
+                            <button class="btn-menu" onclick="togglePostMenu(this)" aria-label="Меню поста">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="post-menu">
+                                <button class="menu-item delete-post-btn" data-post-id="${post.id}">
+                                    <i class="fas fa-trash"></i> Удалить
+                                </button>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+
+                ${post.text ? `<div class="post-text">${escapeHtml(post.text)}</div>` : ''}
+
+                ${post.hasImage && post.imageUrl ? `
+                    <div class="post-image">
+                        <img src="${post.imageUrl}" alt="Post image" loading="lazy"
+                             onerror="this.style.display='none'">
+                    </div>
+                ` : ''}
+
+                <div class="post-stats">
+                    <span class="stat-item" onclick="likePost(${post.id})" role="button" tabindex="0">
+                        <i class="fas fa-heart"></i>
+                        <span>${post.likeCount || 0}</span>
+                    </span>
+                    <span class="stat-item" onclick="showComments(${post.id})" role="button" tabindex="0">
+                        <i class="fas fa-comment"></i>
+                        <span>${post.commentCount || 0}</span>
+                    </span>
+                    <span class="stat-item" onclick="sharePost(${post.id})" role="button" tabindex="0">
+                        <i class="fas fa-share"></i>
+                        <span>Поделиться</span>
+                    </span>
+                </div>
+            </div>
+        `;
+    }
+
+    // ==================== JOIN/LEAVE BUTTONS ====================
+    function initializeJoinLeaveButtons() {
+        const joinBtn = document.querySelector('.join-btn');
+        const leaveBtn = document.querySelector('.leave-btn');
+
+        if (joinBtn) {
+            joinBtn.addEventListener('click', handleJoinGroup);
+        }
+
+        if (leaveBtn) {
+            leaveBtn.addEventListener('click', handleLeaveGroup);
+        }
+    }
+
+    function handleJoinGroup(e) {
+        e.preventDefault();
+
+        if (isLoading) return;
+
+        const button = this;
+        const buttonText = button.querySelector('span');
+        const buttonIcon = button.querySelector('i');
+
+        isLoading = true;
+        // Show loading
+        button.disabled = true;
+        buttonIcon.className = 'fas fa-spinner fa-spin';
+        buttonText.textContent = 'Отправка...';
+
+        // Simulate API call (replace with actual endpoint)
+        setTimeout(() => {
+            buttonIcon.className = 'fas fa-check';
+            buttonText.textContent = 'Заявка отправлена';
+            showAlert('Заявка на вступление отправлена!', 'success');
+
+            setTimeout(() => {
+                button.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    button.style.display = 'none';
+                }, 300);
+            }, 2000);
+
+            isLoading = false;
+        }, 1500);
+    }
+
+    function handleLeaveGroup(e) {
+        e.preventDefault();
+
+        if (isLoading) return;
+
+        if (!confirm('Вы уверены, что хотите покинуть эту группу?')) {
+            return;
+        }
+
+        const button = this;
+        const buttonText = button.querySelector('span');
+        const buttonIcon = button.querySelector('i');
+
+        isLoading = true;
+        // Show loading
+        button.disabled = true;
+        buttonIcon.className = 'fas fa-spinner fa-spin';
+        buttonText.textContent = 'Выход...';
+
+        // Simulate API call (replace with actual endpoint)
+        setTimeout(() => {
+            showAlert('Вы покинули группу', 'success');
+            setTimeout(() => {
+                window.location.href = '/groups';
+            }, 1000);
+        }, 1500);
+    }
+
+    // ==================== ANIMATIONS ====================
     function initializeAnimations() {
         // Stagger animation for sections
         const sections = document.querySelectorAll('.section-card');
@@ -1269,17 +2121,7 @@
             section.style.animationDelay = `${(index + 1) * 0.1}s`;
         });
 
-        // Parallax effect for background
-        const background = document.querySelector('.group-background');
-        if (background) {
-            window.addEventListener('scroll', () => {
-                const scrolled = window.pageYOffset;
-                const rate = scrolled * -0.5;
-                background.style.transform = `translateY(${rate}px)`;
-            });
-        }
-
-        // Intersection observer for fade-in animations
+        // Intersection observer for posts
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '50px'
@@ -1293,130 +2135,218 @@
             });
         }, observerOptions);
 
-        sections.forEach(section => {
-            observer.observe(section);
+        document.querySelectorAll('.post-card').forEach(post => {
+            observer.observe(post);
         });
     }
 
-    /**
-     * Show notification
-     */
-    function showNotification(message, type = 'info') {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.innerHTML = `
-                <div class="notification-content">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
-                    <span>${message}</span>
+    // ==================== KEYBOARD SHORTCUTS ====================
+    function initializeKeyboardShortcuts() {
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + Enter to submit post
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                const textarea = document.getElementById('postText');
+                if (textarea && document.activeElement === textarea) {
+                    e.preventDefault();
+                    const form = document.getElementById('createPostForm');
+                    if (form && !isLoading) {
+                        createPost();
+                    }
+                }
+            }
+
+            // Escape to close menus
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.post-menu.show').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+    }
+
+    // ==================== POST INTERACTIONS ====================
+    function likePost(postId) {
+        // Simulate like functionality
+        showAlert('Функция лайков будет реализована позже', 'info');
+    }
+
+    function showComments(postId) {
+        // Simulate comments functionality
+        showAlert('Функция комментариев будет реализована позже', 'info');
+    }
+
+    function sharePost(postId) {
+        // Simulate share functionality
+        if (navigator.share) {
+            navigator.share({
+                title: 'Пост из группы',
+                url: window.location.href
+            }).catch(console.error);
+        } else {
+            // Fallback - copy to clipboard
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showAlert('Ссылка скопирована в буфер обмена', 'success');
+            }).catch(() => {
+                showAlert('Не удалось скопировать ссылку', 'danger');
+            });
+        }
+    }
+
+    // ==================== POSTS FILTER ====================
+    function changePostsFilter(filterType) {
+        showAlert(`Фильтр "${filterType}" будет реализован позже`, 'info');
+    }
+
+    // ==================== COMING SOON FEATURES ====================
+    function showComingSoon(feature) {
+        showAlert(`Функция добавления ${feature} будет реализована в следующих версиях`, 'info');
+    }
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function showAlert(message, type = 'info') {
+        const alertContainer = document.getElementById('alertContainer');
+
+        if (!alertContainer) return;
+
+        const alertId = `alert-${Date.now()}`;
+        const iconClass = type === 'success' ? 'check-circle' :
+            type === 'danger' ? 'exclamation-triangle' :
+                type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+
+        const alertHtml = `
+            <div id="${alertId}" class="alert alert-${type}">
+                <div class="alert-content">
+                    <i class="fas fa-${iconClass}"></i>
+                    <span>${escapeHtml(message)}</span>
                 </div>
-                <button class="notification-close" onclick="this.parentElement.remove()">
+                <button class="alert-close" onclick="removeAlert('${alertId}')" aria-label="Закрыть">
                     <i class="fas fa-times"></i>
                 </button>
-            `;
+            </div>
+        `;
 
-        // Add styles for notification
-        const notificationStyles = `
-                .notification {
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: var(--surface-elevated);
-                    border: 1px solid var(--border-primary);
-                    border-radius: var(--radius-md);
-                    padding: 1rem 1.5rem;
-                    box-shadow: var(--shadow-lg);
-                    z-index: 9999;
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                    max-width: 400px;
-                    animation: slideInRight 0.3s ease-out;
-                }
-
-                .notification-success { border-left: 4px solid var(--accent-success); }
-                .notification-error { border-left: 4px solid var(--accent-error); }
-                .notification-info { border-left: 4px solid var(--accent-primary); }
-
-                .notification-content {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.75rem;
-                    flex: 1;
-                }
-
-                .notification-content i {
-                    font-size: 1.25rem;
-                }
-
-                .notification-success i { color: var(--accent-success); }
-                .notification-error i { color: var(--accent-error); }
-                .notification-info i { color: var(--accent-primary); }
-
-                .notification-close {
-                    background: none;
-                    border: none;
-                    color: var(--text-muted);
-                    cursor: pointer;
-                    padding: 0.25rem;
-                    border-radius: var(--radius-sm);
-                }
-
-                .notification-close:hover {
-                    background: var(--bg-hover);
-                    color: var(--text-primary);
-                }
-
-                @keyframes slideInRight {
-                    from {
-                        transform: translateX(100%);
-                        opacity: 0;
-                    }
-                    to {
-                        transform: translateX(0);
-                        opacity: 1;
-                    }
-                }
-
-                @keyframes fadeOut {
-                    from { opacity: 1; }
-                    to { opacity: 0; }
-                }
-            `;
-
-        // Inject styles if not already present
-        if (!document.querySelector('#notification-styles')) {
-            const styleSheet = document.createElement('style');
-            styleSheet.id = 'notification-styles';
-            styleSheet.textContent = notificationStyles;
-            document.head.appendChild(styleSheet);
-        }
-
-        // Add to page
-        document.body.appendChild(notification);
+        alertContainer.insertAdjacentHTML('beforeend', alertHtml);
 
         // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (notification.parentElement) {
-                notification.style.animation = 'fadeOut 0.3s ease-out';
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
+        setTimeout(() => removeAlert(alertId), 5000);
+    }
+
+    function removeAlert(alertId) {
+        const alert = document.getElementById(alertId);
+        if (alert) {
+            alert.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => alert.remove(), 300);
+        }
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return 'неизвестно';
+
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'только что';
+            if (minutes < 60) return `${minutes} мин. назад`;
+            if (hours < 24) return `${hours} ч. назад`;
+            if (days < 7) return `${days} дн. назад`;
+
+            return date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            return 'неизвестно';
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function focusPostCreation() {
+        const textarea = document.getElementById('postText');
+        if (textarea) {
+            textarea.focus();
+            textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    // ==================== ERROR HANDLING ====================
+    window.addEventListener('error', function(e) {
+        console.error('JavaScript error:', e.error);
+        if (isLoading) {
+            isLoading = false;
+            showAlert('Произошла ошибка. Попробуйте обновить страницу.', 'danger');
+        }
+    });
+
+    // ==================== PERFORMANCE OPTIMIZATION ====================
+    // Debounce function for performance
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Throttle function for scroll events
+    function throttle(func, limit) {
+        let inThrottle;
+        return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
             }
-        }, 5000);
+        }
     }
 
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeGroupDetails);
-    } else {
-        initializeGroupDetails();
-    }
+    // ==================== ACCESSIBILITY ====================
+    // Add keyboard navigation for interactive elements
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            const target = e.target;
+            if (target.classList.contains('stat-item') || target.classList.contains('attachment-btn')) {
+                e.preventDefault();
+                target.click();
+            }
+        }
+    });
 
-    // Expose functions globally
+    // ==================== GLOBAL FUNCTIONS ====================
+    // Make functions globally available
     window.focusPostCreation = focusPostCreation;
+    window.removeAlert = removeAlert;
+    window.togglePostMenu = togglePostMenu;
+    window.removeImagePreview = removeImagePreview;
+    window.changePostsFilter = changePostsFilter;
+    window.showComingSoon = showComingSoon;
+    window.likePost = likePost;
+    window.showComments = showComments;
+    window.sharePost = sharePost;
 
-    console.log('🏛️ Cleopatra Group Details Page Script Loaded - Light Theme');
+    console.log('🏛️ Cleopatra Group Details with AJAX Posts - Loaded Successfully');
+    console.log('📊 Features: Post Creation, Deletion, Image Upload, Load More, Responsive Design');
 </script>
+
 </body>
 </html>
