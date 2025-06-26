@@ -6,6 +6,7 @@ import com.example.cleopatra.dto.GroupDto.GroupPostsSliceResponse;
 import com.example.cleopatra.dto.GroupDto.UpdateGroupPostRequest;
 import com.example.cleopatra.model.GroupPost;
 
+
 public interface GroupPostService {
     GroupPostResponse createPost(CreateGroupPostRequest request, Long authorId) ;
 

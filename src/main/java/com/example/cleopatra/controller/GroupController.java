@@ -91,7 +91,6 @@ public class GroupController {
                     .body(Map.of("error", "Необходимо войти в систему"));
         }
 
-        log.info("AJAX создание поста в группе {} пользователем {}", groupId, currentUserId);
 
         try {
             // Создаем DTO запроса
@@ -104,7 +103,6 @@ public class GroupController {
             // Создаем пост
             GroupPostResponse response = groupPostService.createPost(request, currentUserId);
 
-            log.info("Пост {} успешно создан в группе {} через AJAX", response.getId(), groupId);
 
             // Возвращаем успешный ответ с данными поста
             return ResponseEntity.ok(Map.of(
