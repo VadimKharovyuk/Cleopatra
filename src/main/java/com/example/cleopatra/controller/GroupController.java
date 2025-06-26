@@ -85,8 +85,6 @@ public class GroupController {
                     .body(Map.of("error", "Необходимо войти в систему"));
         }
 
-
-
         try {
             // Создаем DTO запроса
             CreateGroupPostRequest request = CreateGroupPostRequest.builder()
