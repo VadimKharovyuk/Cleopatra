@@ -36,9 +36,6 @@ public class GroupController {
     private final GroupPostService groupPostService;
 
 
-    /**
-     * Детальная страница группы с постами
-     */
     @GetMapping("/{groupId}")
     public String showGroupDetails(
             @PathVariable Long groupId,
@@ -48,16 +45,15 @@ public class GroupController {
             Model model) {
 
         Long currentUserId = getCurrentUserId(auth);
-        log.info("Отображение группы ID: {} для пользователя ID: {}", groupId, currentUserId);
 
         try {
-            // Получаем данные группы
+
             GroupResponseDTO group = groupService.getGroupById(groupId, currentUserId);
 
-            // Получаем посты группы
+
             GroupPostsSliceResponse posts = groupPostService.getGroupPosts(groupId, currentUserId, page, size);
 
-            // Добавляем атрибуты для шаблона
+
             model.addAttribute("group", group);
             model.addAttribute("groupId", groupId);
             model.addAttribute("posts", posts);
@@ -90,6 +86,7 @@ public class GroupController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Необходимо войти в систему"));
         }
+
 
 
         try {
@@ -129,9 +126,7 @@ public class GroupController {
         }
     }
 
-    /**
-     * Удаление поста
-     */
+
     @PostMapping("/{groupId}/posts/{postId}/delete")
     public String deletePost(
             @PathVariable Long groupId,
@@ -145,7 +140,7 @@ public class GroupController {
         try {
             groupPostService.deletePost(postId, currentUserId);
             redirectAttributes.addFlashAttribute("success", "Пост успешно удален!");
-            log.info("Пост {} успешно удален из группы {}", postId, groupId);
+
 
         } catch (RuntimeException e) {
             log.warn("Ошибка при удалении поста {}: {}", postId, e.getMessage());
