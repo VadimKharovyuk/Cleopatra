@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'Настройки группы ' + ${settings.groupName} + ' - Cleopatra'">Настройки группы - Cleopatra</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" th:href="@{/css/group-details.css}">
+  <link rel="stylesheet" th:href="@{/css/group-settings.css}">
+</head>
+<body>
+<!-- Include Sidebar -->
+<th:block th:replace="~{fragments/sidebar :: complete-sidebar('groups')}"></th:block>
+
+<!-- Main Content -->
+<main class="main-content">
+  <div class="content-wrapper">
+    <!-- Flash Messages Container -->
+    <div id="alertContainer"></div>
+
+    <!-- Header -->
+    <div class="settings-header">
+      <div class="header-content">
+        <div class="header-info">
+          <h1 class="settings-title">
+            <i class="fas fa-cog"></i>
+            Настройки группы
+          </h1>
+          <p class="group-name" th:text="${settings.groupName}">Название группы</p>
+        </div>
+
+        <div class="header-actions">
+          <a th:href="@{/groups/{id}(id=${settings.groupId})}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i>
+            Вернуться к группе
+          </a>
+
+          <div th:if="${settings.canDeleteGroup}" class="dropdown">
+            <button class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+              <i class="fas fa-trash"></i>
+              Управление группой
+            </button>
+            <div class="dropdown-menu">
+              <button class="dropdown-item text-danger" onclick="showDeleteGroupModal()">
+                <i class="fas fa-trash"></i>
+                Удалить группу
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon members">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" th:text="${settings.totalMembers}">0</div>
+            <div class="stat-label">Участников</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon pending">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" th:text="${settings.pendingRequests}">0</div>
+            <div class="stat-label">Заявок</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon banned">
+            <i class="fas fa-ban"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" th:text="${settings.bannedMembersCount}">0</div>
+            <div class="stat-label">Заблокировано</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="pending">
+        <i class="fas fa-clock"></i>
+        Заявки
+        <span class="badge" th:text="${settings.pendingRequests}" th:if="${settings.pendingRequests > 0}">0</span>
+      </button>
+      <button class="tab-btn" data-tab="members">
+        <i class="fas fa-users"></i>
+        Участники
+        <span class="badge" th:text="${settings.totalMembers}">0</span>
+      </button>
+      <button class="tab-btn" data-tab="banned" th:if="${settings.bannedMembersCount > 0}">
+        <i class="fas fa-ban"></i>
+        Заблокированные
+        <span class="badge" th:text="${settings.bannedMembersCount}">0</span>
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tabs-content">
+
+      <!-- Pending Requests Tab -->
+      <div id="pending-tab" class="tab-content active">
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">
+              <i class="fas fa-clock"></i>
+              Заявки на вступление
+            </h3>
+            <span class="member-count" th:text="${settings.pendingRequests} + ' заявок'">0 заявок</span>
+          </div>
+
+          <div class="members-list">
+            <!-- Pending Members -->
+            <div th:if="${#lists.isEmpty(settings.pendingMemberships)}" class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+              </div>
+              <h4>Нет новых заявок</h4>
+              <p>Все заявки на вступление в группу обработаны</p>
+            </div>
+
+            <div th:each="pending : ${settings.pendingMemberships}"
+                 class="member-card pending-member"
+                 th:attr="data-membership-id=${pending.membershipId}">
+
+              <div class="member-info">
+                <div class="member-avatar">
+                  <img th:if="${pending.imageUrl}"
+                       th:src="${pending.imageUrl}"
+                       th:alt="${pending.firstName}">
+                  <div th:unless="${pending.imageUrl}" class="no-avatar">
+                    <i class="fas fa-user"></i>
+                  </div>
+                </div>
+
+                <div class="member-details">
+                  <h4 class="member-name"
+                      th:text="${pending.firstName} + ' ' + ${pending.lastName}">
+                    Имя пользователя
+                  </h4>
+                  <p class="member-email" th:text="${pending.email}">email@example.com</p>
+
+                  <div class="member-meta">
+                                        <span class="requested-date">
+                                            <i class="fas fa-calendar"></i>
+                                            Подал заявку: <span th:text="${#temporals.format(pending.requestedAt, 'dd.MM.yyyy HH:mm')}">дата</span>
+                                        </span>
+                  </div>
+
+                  <div th:if="${pending.bio}" class="member-bio" th:text="${pending.bio}">
+                    Биография пользователя
+                  </div>
+                </div>
+              </div>
+
+              <div class="member-actions">
+                <button class="btn btn-success btn-sm approve-btn"
+                        th:attr="data-membership-id=${pending.membershipId}">
+                  <i class="fas fa-check"></i>
+                  Принять
+                </button>
+                <button class="btn btn-danger btn-sm reject-btn"
+                        th:attr="data-membership-id=${pending.membershipId}">
+                  <i class="fas fa-times"></i>
+                  Отклонить
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Members Tab -->
+      <div id="members-tab" class="tab-content">
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">
+              <i class="fas fa-users"></i>
+              Участники группы
+            </h3>
+            <span class="member-count" th:text="${settings.totalMembers} + ' участников'">0 участников</span>
+          </div>
+
+          <div class="members-list">
+            <div th:each="member : ${settings.members}"
+                 class="member-card"
+                 th:attr="data-membership-id=${member.id}">
+
+              <div class="member-info">
+                <div class="member-avatar">
+                  <img th:if="${member.userImageUrl}"
+                       th:src="${member.userImageUrl}"
+                       th:alt="${member.userFirstName}">
+                  <div th:unless="${member.userImageUrl}" class="no-avatar">
+                    <i class="fas fa-user"></i>
+                  </div>
+                </div>
+
+                <div class="member-details">
+                  <div class="member-name-section">
+                    <h4 class="member-name"
+                        th:text="${member.userFirstName} + ' ' + ${member.userLastName}">
+                      Имя пользователя
+                    </h4>
+                    <span class="role-badge"
+                          th:class="'role-badge role-' + ${#strings.toLowerCase(member.role)}"
+                          th:text="${member.role.displayName}">
+                                            Роль
+                                        </span>
+                  </div>
+
+                  <p class="member-email" th:text="${member.userEmail}">email@example.com</p>
+
+                  <div class="member-meta">
+                                        <span class="join-date">
+                                            <i class="fas fa-calendar"></i>
+                                            Присоединился: <span th:text="${#temporals.format(member.joinedAt, 'dd.MM.yyyy')}">дата</span>
+                                        </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="member-actions" th:if="${member.role.name() != 'OWNER'}">
+                <div class="dropdown">
+                  <button class="btn btn-outline btn-sm dropdown-toggle" data-toggle="dropdown">
+                    <i class="fas fa-ellipsis-h"></i>
+                    Действия
+                  </button>
+                  <div class="dropdown-menu">
+                    <!-- Role Management -->
+                    <div th:if="${member.canPromote}" class="dropdown-header">Роли</div>
+                    <button th:if="${member.canPromote and member.role.name() == 'MEMBER'}"
+                            class="dropdown-item promote-btn"
+                            th:attr="data-membership-id=${member.id}, data-new-role='MODERATOR'">
+                      <i class="fas fa-arrow-up"></i>
+                      Назначить модератором
+                    </button>
+                    <button th:if="${member.canPromote and member.role.name() == 'MODERATOR'}"
+                            class="dropdown-item promote-btn"
+                            th:attr="data-membership-id=${member.id}, data-new-role='ADMIN'">
+                      <i class="fas fa-crown"></i>
+                      Назначить администратором
+                    </button>
+                    <button th:if="${member.canDemote and member.role.name() != 'MEMBER'}"
+                            class="dropdown-item demote-btn"
+                            th:attr="data-membership-id=${member.id}">
+                      <i class="fas fa-arrow-down"></i>
+                      Понизить до участника
+                    </button>
+
+                    <div th:if="${member.canBan or member.canRemove}" class="dropdown-divider"></div>
+
+                    <!-- Moderation Actions -->
+                    <button th:if="${member.canBan}"
+                            class="dropdown-item text-warning ban-btn"
+                            th:attr="data-membership-id=${member.id}">
+                      <i class="fas fa-ban"></i>
+                      Заблокировать
+                    </button>
+                    <button th:if="${member.canRemove}"
+                            class="dropdown-item text-danger remove-btn"
+                            th:attr="data-membership-id=${member.id}">
+                      <i class="fas fa-user-times"></i>
+                      Исключить
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Banned Members Tab -->
+      <div id="banned-tab" class="tab-content" th:if="${settings.bannedMembersCount > 0}">
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">
+              <i class="fas fa-ban"></i>
+              Заблокированные участники
+            </h3>
+            <span class="member-count" th:text="${settings.bannedMembersCount} + ' заблокированных'">0 заблокированных</span>
+          </div>
+
+          <div class="members-list">
+            <div th:each="banned : ${settings.bannedMembersList}"
+                 class="member-card banned-member"
+                 th:attr="data-membership-id=${banned.id}">
+
+              <div class="member-info">
+                <div class="member-avatar banned">
+                  <img th:if="${banned.userImageUrl}"
+                       th:src="${banned.userImageUrl}"
+                       th:alt="${banned.userFirstName}">
+                  <div th:unless="${banned.userImageUrl}" class="no-avatar">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <div class="ban-overlay">
+                    <i class="fas fa-ban"></i>
+                  </div>
+                </div>
+
+                <div class="member-details">
+                  <h4 class="member-name"
+                      th:text="${banned.userFirstName} + ' ' + ${banned.userLastName}">
+                    Имя пользователя
+                  </h4>
+                  <p class="member-email" th:text="${banned.userEmail}">email@example.com</p>
+
+                  <div class="ban-info">
+                    <div class="ban-date">
+                      <i class="fas fa-ban"></i>
+                      Заблокирован: <span th:text="${#temporals.format(banned.bannedAt, 'dd.MM.yyyy HH:mm')}">дата</span>
+                    </div>
+                    <div th:if="${banned.banReason}" class="ban-reason">
+                      <i class="fas fa-info-circle"></i>
+                      Причина: <span th:text="${banned.banReason}">причина</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="member-actions" th:if="${banned.canUnban}">
+                <button class="btn btn-success btn-sm unban-btn"
+                        th:attr="data-membership-id=${banned.id}">
+                  <i class="fas fa-unlock"></i>
+                  Разблокировать
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modals -->
+<!-- Reject Reason Modal -->
+<div id="rejectModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Отклонить заявку</h3>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Укажите причину отклонения заявки (необязательно):</p>
+      <textarea id="rejectReason" placeholder="Причина отклонения..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('rejectModal')">Отменить</button>
+      <button class="btn btn-danger" onclick="confirmReject()">Отклонить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ban Reason Modal -->
+<div id="banModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Заблокировать участника</h3>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Укажите причину блокировки:</p>
+      <textarea id="banReason" placeholder="Причина блокировки..." required></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('banModal')">Отменить</button>
+      <button class="btn btn-danger" onclick="confirmBan()">Заблокировать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove Reason Modal -->
+<div id="removeModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Исключить участника</h3>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Укажите причину исключения (необязательно):</p>
+      <textarea id="removeReason" placeholder="Причина исключения..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('removeModal')">Отменить</button>
+      <button class="btn btn-danger" onclick="confirmRemove()">Исключить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Initialize JavaScript variables -->
+<script th:inline="javascript">
+  window.groupId = /*[[${settings.groupId}]]*/ null;
+  window.currentUserId = /*[[${currentUserId}]]*/ null;
+</script>
+
+<!-- JavaScript -->
+<script th:src="@{/js/group-settings.js}"></script>
+
+</body>
+</html>

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'Участники группы ' + ${members.groupName} + ' - Cleopatra'">Участники группы - Cleopatra</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/members-list.css}">
+</head>
+<body>
+<!-- Include Sidebar -->
+<th:block th:replace="~{fragments/sidebar :: complete-sidebar('groups')}"></th:block>
+
+<div class="container-fluid" style="margin-left: 280px; padding: 20px;">
+
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h1><i class="fas fa-users"></i> Участники группы</h1>
+      <p class="text-muted" th:text="${members.groupName}">Название группы</p>
+      <span class="badge bg-primary" th:text="${members.totalMembers} + ' участников'">0 участников</span>
+    </div>
+    <div class="col-md-4 text-end">
+      <a th:href="@{/groups/{id}(id=${groupId})}" class="btn btn-outline-secondary me-2">
+        <i class="fas fa-arrow-left"></i> К группе
+      </a>
+      <a th:href="@{/groups/{id}/settings(id=${groupId})}" class="btn btn-secondary">
+        <i class="fas fa-cog"></i> Настройки
+      </a>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-search"></i></span>
+        <input type="text" class="form-control" id="searchInput"
+               placeholder="Поиск участников по имени или email...">
+        <button class="btn btn-primary" type="button" onclick="performSearch()">
+          Найти
+        </button>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="row">
+        <div class="col-md-3">
+          <select class="form-select" id="roleFilter" onchange="applyFilters()">
+            <option value="ALL" th:selected="${roleFilter == null or roleFilter == 'ALL'}">Все роли</option>
+            <option value="OWNER" th:selected="${roleFilter == 'OWNER'}">Владелец</option>
+            <option value="ADMIN" th:selected="${roleFilter == 'ADMIN'}">Администратор</option>
+            <option value="MODERATOR" th:selected="${roleFilter == 'MODERATOR'}">Модератор</option>
+            <option value="MEMBER" th:selected="${roleFilter == 'MEMBER'}">Участник</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="sortBy" onchange="applyFilters()">
+            <option value="joinDate" th:selected="${sortBy == null or sortBy == 'joinDate'}">Дата вступления</option>
+            <option value="name" th:selected="${sortBy == 'name'}">Имя</option>
+            <option value="role" th:selected="${sortBy == 'role'}">Роль</option>
+            <option value="email" th:selected="${sortBy == 'email'}">Email</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="sortOrder" onchange="applyFilters()">
+            <option value="desc" th:selected="${sortOrder == null or sortOrder == 'desc'}">По убыванию</option>
+            <option value="asc" th:selected="${sortOrder == 'asc'}">По возрастанию</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+            <i class="fas fa-undo"></i> Сбросить
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Members List -->
+  <div class="row" id="membersContainer">
+    <th:block th:each="member : ${members.members}">
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <div class="me-3">
+                <img th:if="${member.userImageUrl}"
+                     th:src="${member.userImageUrl}"
+                     th:alt="${member.userFirstName}"
+                     class="rounded-circle"
+                     style="width: 50px; height: 50px; object-fit: cover;">
+                <div th:unless="${member.userImageUrl}"
+                     class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+                     style="width: 50px; height: 50px;">
+                  <i class="fas fa-user text-white"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="card-title mb-1"
+                    th:text="${member.userFirstName} + ' ' + ${member.userLastName}">
+                  Имя участника
+                </h6>
+                <small class="text-muted" th:text="${member.userEmail}">email@example.com</small>
+              </div>
+              <div>
+                                    <span th:if="${member.role.name() == 'OWNER'}" class="badge bg-warning text-dark">
+                                        <i class="fas fa-crown"></i> Владелец
+                                    </span>
+                <span th:if="${member.role.name() == 'ADMIN'}" class="badge bg-danger">
+                                        <i class="fas fa-shield-alt"></i> Админ
+                                    </span>
+                <span th:if="${member.role.name() == 'MODERATOR'}" class="badge bg-info">
+                                        <i class="fas fa-star"></i> Модератор
+                                    </span>
+                <span th:if="${member.role.name() == 'MEMBER'}" class="badge bg-success">
+                                        <i class="fas fa-user"></i> Участник
+                                    </span>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <small class="text-muted">
+                <i class="fas fa-calendar"></i>
+                Вступил: <span th:text="${#temporals.format(member.joinedAt, 'dd.MM.yyyy')}">дата</span>
+              </small>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <a th:href="@{/profile/{id}(id=${member.userId})}" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-user"></i> Профиль
+              </a>
+
+              <!-- Admin Actions -->
+              <div th:if="${member.canBan or member.canPromote or member.canDemote or member.canRemove}"
+                   class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                        type="button" data-bs-toggle="dropdown">
+                  <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <ul class="dropdown-menu">
+                  <li th:if="${member.canPromote and member.role.name() == 'MEMBER'}">
+                    <a class="dropdown-item promote-member" href="#"
+                       th:attr="data-membership-id=${member.id}, data-new-role='MODERATOR'">
+                      <i class="fas fa-arrow-up"></i> Назначить модератором
+                    </a>
+                  </li>
+                  <li th:if="${member.canPromote and member.role.name() == 'MODERATOR'}">
+                    <a class="dropdown-item promote-member" href="#"
+                       th:attr="data-membership-id=${member.id}, data-new-role='ADMIN'">
+                      <i class="fas fa-crown"></i> Назначить администратором
+                    </a>
+                  </li>
+                  <li th:if="${member.canDemote and member.role.name() != 'MEMBER'}">
+                    <a class="dropdown-item demote-member" href="#"
+                       th:attr="data-membership-id=${member.id}">
+                      <i class="fas fa-arrow-down"></i> Понизить до участника
+                    </a>
+                  </li>
+                  <li th:if="${member.canBan or member.canRemove}"><hr class="dropdown-divider"></li>
+                  <li th:if="${member.canBan}">
+                    <a class="dropdown-item text-warning ban-member" href="#"
+                       th:attr="data-membership-id=${member.id}">
+                      <i class="fas fa-ban"></i> Заблокировать
+                    </a>
+                  </li>
+                  <li th:if="${member.canRemove}">
+                    <a class="dropdown-item text-danger remove-member" href="#"
+                       th:attr="data-membership-id=${member.id}">
+                      <i class="fas fa-user-times"></i> Исключить
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </th:block>
+  </div>
+
+  <!-- Loading indicator -->
+  <div id="loadingIndicator" class="text-center my-4" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Загрузка...</span>
+    </div>
+    <p class="mt-2">Загрузка участников...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div id="emptyState" class="text-center my-5" style="display: none;">
+    <div style="font-size: 4rem; color: #dee2e6;">
+      <i class="fas fa-users-slash"></i>
+    </div>
+    <h3 class="mt-3">Участники не найдены</h3>
+    <p class="text-muted">Попробуйте изменить параметры поиска или фильтры</p>
+  </div>
+
+  <!-- Pagination -->
+  <div th:if="${members.totalMembers > members.size}" class="row mt-4">
+    <div class="col-md-6">
+      <p class="text-muted">
+        Показано <span th:text="${members.members.size()}">0</span>
+        из <span th:text="${members.totalMembers}">0</span> участников
+      </p>
+    </div>
+    <div class="col-md-6">
+      <nav>
+        <ul class="pagination justify-content-end">
+          <li class="page-item" th:classappend="${!members.hasPrevious} ? 'disabled'">
+            <a class="page-link" href="#" th:onclick="'goToPage(' + (${members.page} - 1) + ')'">
+              <i class="fas fa-chevron-left"></i> Предыдущая
+            </a>
+          </li>
+          <li class="page-item active">
+            <span class="page-link" th:text="'Страница ' + (${members.page} + 1)">Страница 1</span>
+          </li>
+          <li class="page-item" th:classappend="${!members.hasNext} ? 'disabled'">
+            <a class="page-link" href="#" th:onclick="'goToPage(' + (${members.page} + 1) + ')'">
+              Следующая <i class="fas fa-chevron-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Modals -->
+
+<!-- Ban Member Modal -->
+<div class="modal fade" id="banModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Заблокировать участника</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="banReason" class="form-label">Причина блокировки:</label>
+          <textarea class="form-control" id="banReason" rows="3"
+                    placeholder="Укажите причину блокировки..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отменить</button>
+        <button type="button" class="btn btn-danger" onclick="confirmBan()">Заблокировать</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Remove Member Modal -->
+<div class="modal fade" id="removeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Исключить участника</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Вы уверены, что хотите исключить этого участника из группы?</p>
+        <div class="mb-3">
+          <label for="removeReason" class="form-label">Причина исключения (необязательно):</label>
+          <textarea class="form-control" id="removeReason" rows="2"
+                    placeholder="Укажите причину исключения..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отменить</button>
+        <button type="button" class="btn btn-danger" onclick="confirmRemove()">Исключить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Alert Template -->
+<div id="alertTemplate" class="alert alert-dismissible fade" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;">
+  <span id="alertMessage"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Initialize JavaScript variables -->
+<script th:inline="javascript">
+  window.groupId = /*[[${groupId}]]*/ null;
+  window.currentUserId = /*[[${currentUserId}]]*/ null;
+  window.currentPage = /*[[${members.page}]]*/ 0;
+  window.currentFilters = {
+    roleFilter: /*[[${roleFilter}]]*/ 'ALL',
+    sortBy: /*[[${sortBy}]]*/ 'joinDate',
+    sortOrder: /*[[${sortOrder}]]*/ 'desc'
+  };
+
+  let currentMembershipId = null;
+  let isLoading = false;
+
+  // Event listeners
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeEventListeners();
+  });
+
+  function initializeEventListeners() {
+    // Promote/Demote buttons
+    document.querySelectorAll('.promote-member').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const membershipId = this.getAttribute('data-membership-id');
+        const newRole = this.getAttribute('data-new-role');
+        changeRole(membershipId, newRole);
+      });
+    });
+
+    document.querySelectorAll('.demote-member').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const membershipId = this.getAttribute('data-membership-id');
+        changeRole(membershipId, 'MEMBER');
+      });
+    });
+
+    // Ban buttons
+    document.querySelectorAll('.ban-member').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        currentMembershipId = this.getAttribute('data-membership-id');
+        new bootstrap.Modal(document.getElementById('banModal')).show();
+      });
+    });
+
+    // Remove buttons
+    document.querySelectorAll('.remove-member').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        currentMembershipId = this.getAttribute('data-membership-id');
+        new bootstrap.Modal(document.getElementById('removeModal')).show();
+      });
+    });
+  }
+
+  function performSearch() {
+    const query = document.getElementById('searchInput').value.trim();
+
+    if (query.length < 2 && query.length > 0) {
+      showAlert('Введите минимум 2 символа для поиска', 'warning');
+      return;
+    }
+
+    const searchRequest = {
+      query: query || null,
+      role: currentFilters.roleFilter !== 'ALL' ? currentFilters.roleFilter : null,
+      sortBy: currentFilters.sortBy,
+      sortOrder: currentFilters.sortOrder,
+      page: 0,
+      size: 20
+    };
+
+    searchMembers(searchRequest);
+  }
+
+  function searchMembers(request) {
+    if (isLoading) return;
+
+    isLoading = true;
+    showLoading(true);
+
+    fetch(`/groups/${groupId}/members/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(request)
+    })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Ошибка при поиске участников');
+              }
+              return response.json();
+            })
+            .then(data => {
+              updateMembersList(data);
+              if (data.totalMembers === 0) {
+                showEmptyState(true);
+              } else {
+                showEmptyState(false);
+              }
+            })
+            .catch(error => {
+              console.error('Ошибка поиска:', error);
+              showAlert('Ошибка при поиске участников', 'danger');
+            })
+            .finally(() => {
+              isLoading = false;
+              showLoading(false);
+            });
+  }
+
+  function applyFilters() {
+    currentFilters.roleFilter = document.getElementById('roleFilter').value;
+    currentFilters.sortBy = document.getElementById('sortBy').value;
+    currentFilters.sortOrder = document.getElementById('sortOrder').value;
+
+    // Reload page with new filters
+    const params = new URLSearchParams();
+    if (currentFilters.roleFilter !== 'ALL') {
+      params.append('roleFilter', currentFilters.roleFilter);
+    }
+    params.append('sortBy', currentFilters.sortBy);
+    params.append('sortOrder', currentFilters.sortOrder);
+
+    window.location.href = `/groups/${groupId}/members?${params.toString()}`;
+  }
+
+  function resetFilters() {
+    window.location.href = `/groups/${groupId}/members`;
+  }
+
+  function goToPage(page) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', page);
+    window.location.href = `/groups/${groupId}/members?${params.toString()}`;
+  }
+
+  function changeRole(membershipId, newRole) {
+    if (isLoading) return;
+
+    if (!confirm(`Вы уверены, что хотите изменить роль участника на "${getRoleDisplayName(newRole)}"?`)) {
+      return;
+    }
+
+    isLoading = true;
+
+    const request = {
+      membershipId: membershipId,
+      newRole: newRole,
+      reason: `Изменение роли на ${getRoleDisplayName(newRole)}`
+    };
+
+    fetch(`/groups/${groupId}/settings/memberships/${membershipId}/change-role`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(request)
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showAlert(data.message, 'success');
+                setTimeout(() => location.reload(), 1000);
+              } else {
+                showAlert(data.message || 'Ошибка при изменении роли', 'danger');
+              }
+            })
+            .catch(error => {
+              console.error('Ошибка:', error);
+              showAlert('Ошибка при изменении роли участника', 'danger');
+            })
+            .finally(() => {
+              isLoading = false;
+            });
+  }
+
+  function confirmBan() {
+    const reason = document.getElementById('banReason').value.trim();
+
+    if (!reason) {
+      showAlert('Укажите причину блокировки', 'warning');
+      return;
+    }
+
+    if (isLoading) return;
+    isLoading = true;
+
+    const request = {
+      membershipId: currentMembershipId,
+      reason: reason,
+      permanent: true
+    };
+
+    fetch(`/groups/${groupId}/settings/memberships/${currentMembershipId}/ban`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(request)
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showAlert(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('banModal')).hide();
+                setTimeout(() => location.reload(), 1000);
+              } else {
+                showAlert(data.message || 'Ошибка при блокировке участника', 'danger');
+              }
+            })
+            .catch(error => {
+              console.error('Ошибка:', error);
+              showAlert('Ошибка при блокировке участника', 'danger');
+            })
+            .finally(() => {
+              isLoading = false;
+            });
+  }
+
+  function confirmRemove() {
+    const reason = document.getElementById('removeReason').value.trim();
+
+    if (isLoading) return;
+    isLoading = true;
+
+    const params = new URLSearchParams();
+    if (reason) {
+      params.append('reason', reason);
+    }
+
+    fetch(`/groups/${groupId}/settings/memberships/${currentMembershipId}/remove?${params.toString()}`, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showAlert(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('removeModal')).hide();
+                setTimeout(() => location.reload(), 1000);
+              } else {
+                showAlert(data.message || 'Ошибка при исключении участника', 'danger');
+              }
+            })
+            .catch(error => {
+              console.error('Ошибка:', error);
+              showAlert('Ошибка при исключении участника', 'danger');
+            })
+            .finally(() => {
+              isLoading = false;
+            });
+  }
+
+  function updateMembersList(data) {
+    const container = document.getElementById('membersContainer');
+    container.innerHTML = '';
+
+    if (data.members && data.members.length > 0) {
+      data.members.forEach(member => {
+        const memberHtml = createMemberCard(member);
+        container.insertAdjacentHTML('beforeend', memberHtml);
+      });
+
+      // Reinitialize event listeners
+      initializeEventListeners();
+    }
+  }
+
+  function createMemberCard(member) {
+    const roleInfo = getRoleInfo(member.role);
+    const avatarHtml = member.userImageUrl
+            ? `<img src="${member.userImageUrl}" alt="${member.userFirstName}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">`
+            : `<div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="fas fa-user text-white"></i></div>`;
+
+    return `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">${avatarHtml}</div>
+                                <div class="flex-grow-1">
+                                    <h6 class="card-title mb-1">${member.userFirstName} ${member.userLastName}</h6>
+                                    <small class="text-muted">${member.userEmail}</small>
+                                </div>
+                                <div>
+                                    <span class="badge ${roleInfo.class}">
+                                        <i class="${roleInfo.icon}"></i> ${roleInfo.name}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i>
+                                    Вступил: ${formatDate(member.joinedAt)}
+                                </small>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a href="/profile/${member.userId}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-user"></i> Профиль
+                                </a>
+                                ${createActionButtons(member)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+  }
+
+  function createActionButtons(member) {
+    if (!member.canBan && !member.canPromote && !member.canDemote && !member.canRemove) {
+      return '';
+    }
+
+    let actions = '';
+
+    if (member.canPromote && member.role === 'MEMBER') {
+      actions += `<a class="dropdown-item promote-member" href="#" data-membership-id="${member.id}" data-new-role="MODERATOR"><i class="fas fa-arrow-up"></i> Назначить модератором</a>`;
+    }
+    if (member.canPromote && member.role === 'MODERATOR') {
+      actions += `<a class="dropdown-item promote-member" href="#" data-membership-id="${member.id}" data-new-role="ADMIN"><i class="fas fa-crown"></i> Назначить администратором</a>`;
+    }
+    if (member.canDemote && member.role !== 'MEMBER') {
+      actions += `<a class="dropdown-item demote-member" href="#" data-membership-id="${member.id}"><i class="fas fa-arrow-down"></i> Понизить до участника</a>`;
+    }
+
+    if ((member.canBan || member.canRemove) && actions) {
+      actions += '<li><hr class="dropdown-divider"></li>';
+    }
+
+    if (member.canBan) {
+      actions += `<a class="dropdown-item text-warning ban-member" href="#" data-membership-id="${member.id}"><i class="fas fa-ban"></i> Заблокировать</a>`;
+    }
+    if (member.canRemove) {
+      actions += `<a class="dropdown-item text-danger remove-member" href="#" data-membership-id="${member.id}"><i class="fas fa-user-times"></i> Исключить</a>`;
+    }
+
+    return `
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <ul class="dropdown-menu">${actions}</ul>
+                </div>
+            `;
+  }
+
+  function getRoleInfo(role) {
+    switch(role) {
+      case 'OWNER':
+        return { name: 'Владелец', class: 'bg-warning text-dark', icon: 'fas fa-crown' };
+      case 'ADMIN':
+        return { name: 'Админ', class: 'bg-danger', icon: 'fas fa-shield-alt' };
+      case 'MODERATOR':
+        return { name: 'Модератор', class: 'bg-info', icon: 'fas fa-star' };
+      default:
+        return { name: 'Участник', class: 'bg-success', icon: 'fas fa-user' };
+    }
+  }
+
+  function getRoleDisplayName(role) {
+    switch(role) {
+      case 'OWNER': return 'Владелец';
+      case 'ADMIN': return 'Администратор';
+      case 'MODERATOR': return 'Модератор';
+      case 'MEMBER': return 'Участник';
+      default: return role;
+    }
+  }
+
+  function formatDate(dateString) {
+    if (!dateString) return 'неизвестно';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU');
+  }
+
+  function showLoading(show) {
+    const loading = document.getElementById('loadingIndicator');
+    loading.style.display = show ? 'block' : 'none';
+  }
+
+  function showEmptyState(show) {
+    const empty = document.getElementById('emptyState');
+    const container = document.getElementById('membersContainer');
+    empty.style.display = show ? 'block' : 'none';
+    container.style.display = show ? 'none' : 'flex';
+  }
+
+  function showAlert(message, type = 'info') {
+    const alertTemplate = document.getElementById('alertTemplate');
+    const alertMessage = document.getElementById('alertMessage');
+
+    // Clone the template
+    const alert = alertTemplate.cloneNode(true);
+    alert.id = 'alert-' + Date.now();
+    alert.style.display = 'block';
+
+    // Set the message and type
+    const messageSpan = alert.querySelector('#alertMessage');
+    messageSpan.textContent = message;
+    messageSpan.id = 'alertMessage-' + Date.now();
+
+    // Set alert type
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+
+    // Add to page
+    document.body.appendChild(alert);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      if (alert.parentNode) {
+        alert.remove();
+      }
+    }, 5000);
+  }
+</script>
+
+</body>
+</html>
+
+

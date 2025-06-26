@@ -67,6 +67,7 @@ public class GroupController {
             return "error/404";
         }
     }
+
     /**
      * AJAX: Создание поста в группе (для fetch запросов)
      */

@@ -1,20 +1,34 @@
 package com.example.cleopatra.service;
 
+import com.example.cleopatra.dto.GroupDto.*;
+
+import java.util.List;
+
+
 public interface GroupMembershipService {
 
+    GroupSettingsDto getGroupSettings(Long groupId, Long currentUserId);
+    MembershipActionResponse rejectMembership(Long membershipId, Long currentUserId, String reason);
+    MembershipActionResponse approveMembership(Long membershipId, Long currentUserId);
+    MembershipActionResponse banMember(BanMemberRequest request, Long currentUserId);
+    MembershipActionResponse unbanMember(Long membershipId, Long currentUserId);
+    MembershipActionResponse changeRole(ChangeRoleRequest request, Long currentUserId);
+    MembershipActionResponse removeMember(Long membershipId, Long currentUserId, String reason);
 
-//    // Управление участниками
-//    void joinGroup(Long groupId, Long userId);
-//    void leaveGroup(Long groupId, Long userId);
-//    void approveJoinRequest(Long groupId, Long membershipId, Long adminId);
-//    void rejectJoinRequest(Long groupId, Long membershipId, Long adminId);
-//
-//    // Модерация
-//    void banMember(Long groupId, Long userId, String reason, Long adminId);
-//    void unbanMember(Long groupId, Long userId, Long adminId);
-//    void changeMemberRole(Long groupId, Long userId, GroupRole newRole, Long adminId);
-//
-//    // Получение участников
-//    GroupMemberPageResponse getGroupMembers(Long groupId, Pageable pageable, Long currentUserId);
-//    GroupMemberPageResponse getPendingRequests(Long groupId, Pageable pageable, Long adminId);
+    GroupMembersListDto getAllGroupMembers(Long groupId, Long currentUserId);
+
+    GroupMembersListDto getAllGroupMembers(Long groupId, Long currentUserId,
+                                           String roleFilter, String sortBy, String sortOrder,
+                                           Integer page, Integer size);
+
+    GroupMembersListDto searchGroupMembers(Long groupId, Long currentUserId, MemberSearchRequest request);
+
+    List<GroupMemberSummaryDto> getGroupMembersSummary(Long groupId, Long currentUserId);
+
+
+
+
+
+
+
 }
