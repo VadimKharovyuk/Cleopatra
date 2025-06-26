@@ -244,13 +244,7 @@
                             <i class="fas fa-newspaper"></i>
                             Посты группы
                         </h3>
-                        <div class="posts-filter">
-                            <select class="filter-select" onchange="changePostsFilter(this.value)">
-                                <option value="recent">Новые</option>
-                                <option value="popular">Популярные</option>
-                                <option value="discussed">Обсуждаемые</option>
-                            </select>
-                        </div>
+
                     </div>
 
                     <div class="posts-content">
@@ -2218,43 +2212,7 @@
         });
     }
 
-    // ==================== POST INTERACTIONS ====================
-    function likePost(postId) {
-        // Simulate like functionality
-        showAlert('Функция лайков будет реализована позже', 'info');
-    }
 
-    function showComments(postId) {
-        // Simulate comments functionality
-        showAlert('Функция комментариев будет реализована позже', 'info');
-    }
-
-    function sharePost(postId) {
-        // Simulate share functionality
-        if (navigator.share) {
-            navigator.share({
-                title: 'Пост из группы',
-                url: window.location.href
-            }).catch(console.error);
-        } else {
-            // Fallback - copy to clipboard
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                showAlert('Ссылка скопирована в буфер обмена', 'success');
-            }).catch(() => {
-                showAlert('Не удалось скопировать ссылку', 'danger');
-            });
-        }
-    }
-
-    // ==================== POSTS FILTER ====================
-    function changePostsFilter(filterType) {
-        showAlert(`Фильтр "${filterType}" будет реализован позже`, 'info');
-    }
-
-    // ==================== COMING SOON FEATURES ====================
-    function showComingSoon(feature) {
-        showAlert(`Функция добавления ${feature} будет реализована в следующих версиях`, 'info');
-    }
 
     // ==================== UTILITY FUNCTIONS ====================
     function showAlert(message, type = 'info') {

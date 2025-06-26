@@ -306,32 +306,32 @@ public class CacheConfig {
 
 
 
-
-    /**
-     * Планировщик для логирования статистики кеша
-     */
-    @Scheduled(fixedRate = 300000) // Каждые 5 минут
-    public void logCacheStatistics() {
-        if (log.isInfoEnabled()) {
-            CacheManager cm = cacheManager();
-            cm.getCacheNames().forEach(cacheName -> {
-                Cache cache = cm.getCache(cacheName);
-                if (cache != null && cache.getNativeCache() instanceof com.github.benmanes.caffeine.cache.Cache) {
-                    com.github.benmanes.caffeine.cache.Cache<Object, Object> caffeineCache =
-                            (com.github.benmanes.caffeine.cache.Cache<Object, Object>) cache.getNativeCache();
-
-                    var stats = caffeineCache.stats();
-                    log.info("📊 Статистика кеша '{}': Размер={}, Попадания={}, Промахи={}, Hit Rate={:.2f}%",
-                            cacheName,
-                            caffeineCache.estimatedSize(),
-                            stats.hitCount(),
-                            stats.missCount(),
-                            stats.hitRate() * 100
-                    );
-                }
-            });
-        }
-    }
+//
+//    /**
+//     * Планировщик для логирования статистики кеша
+//     */
+//    @Scheduled(fixedRate = 300000) // Каждые 5 минут
+//    public void logCacheStatistics() {
+//        if (log.isInfoEnabled()) {
+//            CacheManager cm = cacheManager();
+//            cm.getCacheNames().forEach(cacheName -> {
+//                Cache cache = cm.getCache(cacheName);
+//                if (cache != null && cache.getNativeCache() instanceof com.github.benmanes.caffeine.cache.Cache) {
+//                    com.github.benmanes.caffeine.cache.Cache<Object, Object> caffeineCache =
+//                            (com.github.benmanes.caffeine.cache.Cache<Object, Object>) cache.getNativeCache();
+//
+//                    var stats = caffeineCache.stats();
+//                    log.info("📊 Статистика кеша '{}': Размер={}, Попадания={}, Промахи={}, Hit Rate={:.2f}%",
+//                            cacheName,
+//                            caffeineCache.estimatedSize(),
+//                            stats.hitCount(),
+//                            stats.missCount(),
+//                            stats.hitRate() * 100
+//                    );
+//                }
+//            });
+//        }
+//    }
 
     /**
      * Планировщик для периодической очистки просроченных элементов кеша

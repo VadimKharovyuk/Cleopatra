@@ -36,6 +36,7 @@ public class GroupController {
     private final GroupPostService groupPostService;
 
 
+
     @GetMapping("/{groupId}")
     public String showGroupDetails(
             @PathVariable Long groupId,
@@ -49,10 +50,7 @@ public class GroupController {
         try {
 
             GroupResponseDTO group = groupService.getGroupById(groupId, currentUserId);
-
-
             GroupPostsSliceResponse posts = groupPostService.getGroupPosts(groupId, currentUserId, page, size);
-
 
             model.addAttribute("group", group);
             model.addAttribute("groupId", groupId);
@@ -97,11 +95,8 @@ public class GroupController {
                     .imageUrl(image)
                     .build();
 
-            // Создаем пост
             GroupPostResponse response = groupPostService.createPost(request, currentUserId);
 
-
-            // Возвращаем успешный ответ с данными поста
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Пост успешно создан!",
@@ -184,7 +179,6 @@ public class GroupController {
             @RequestParam(defaultValue = "10") int size,
             Model model) {
 
-        log.info("Отображение публичных групп, страница: {}, размер: {}", page, size);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         GroupPageResponse groupPage = groupService.getAllPublicGroups(pageable);
@@ -204,7 +198,6 @@ public class GroupController {
             Model model) {
 
         Long currentUserId = getCurrentUserId(auth);
-        log.info("Отображение групп пользователя ID: {}, страница: {}", currentUserId, page);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         GroupPageResponse groupPage = groupService.getAllAvailableGroups(pageable, currentUserId);
@@ -309,9 +302,7 @@ public class GroupController {
         }
     }
 
-    /**
-     * Получение ID текущего пользователя из Authentication
-     */
+
     private Long getCurrentUserId(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return null;
